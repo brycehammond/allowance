@@ -1,0 +1,33 @@
+# Test projects
+src/AllowanceTracker.Tests/
+
+# Build artifacts
+**/bin/
+**/obj/
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+
+# Documentation
+*.md
+specs/
+DOCKER.md
+
+# Docker files (not needed on Railway)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.local
+
+# CI/CD
+.github/
+azure-pipelines.yml
