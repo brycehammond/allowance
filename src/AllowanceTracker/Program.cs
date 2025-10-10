@@ -58,6 +58,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddSignalR();
 
 // Register application services
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ITransactionAnalyticsService, TransactionAnalyticsService>();
@@ -66,6 +67,8 @@ builder.Services.AddScoped<IFamilyService, FamilyService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IChildManagementService, ChildManagementService>();
 builder.Services.AddScoped<IWishListService, WishListService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();
 
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();

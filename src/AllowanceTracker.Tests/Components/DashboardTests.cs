@@ -79,7 +79,7 @@ public class DashboardTests
         // Assert
         component.Markup.Should().Contain("Alice Johnson");
         component.Markup.Should().Contain("Bob Johnson");
-        component.FindAll(".col-md-4").Should().HaveCount(2);
+        component.FindAll(".card-hover").Should().HaveCount(2);
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public class DashboardTests
         component.WaitForState(() => !component.Markup.Contains("Loading"));
 
         // Assert
-        component.Markup.Should().Contain("No children found");
+        component.Markup.Should().Contain("No children yet");
     }
 
     [Fact]
@@ -219,7 +219,7 @@ public class DashboardTests
         component.WaitForState(() => !component.Markup.Contains("Loading"));
 
         // Assert
-        component.FindAll(".col-md-4").Should().HaveCount(5);
+        component.FindAll(".card-hover").Should().HaveCount(5);
         for (int i = 0; i < 5; i++)
         {
             component.Markup.Should().Contain($"Child{i} Test");

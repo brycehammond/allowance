@@ -13,13 +13,23 @@ namespace AllowanceTracker.Tests.Components;
 
 public class TransactionFormTests
 {
+    private Mock<ICategoryService> CreateMockCategoryService()
+    {
+        var mock = new Mock<ICategoryService>();
+        mock.Setup(x => x.GetCategoriesForType(It.IsAny<TransactionType>()))
+            .Returns(new List<TransactionCategory> { TransactionCategory.Allowance, TransactionCategory.Toys });
+        return mock;
+    }
+
     [Fact]
     public void TransactionForm_RendersWithRequiredFields()
     {
         // Arrange
         var mockTransactionService = new Mock<ITransactionService>();
+        var mockCategoryService = CreateMockCategoryService();
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         // Act
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
@@ -37,8 +47,10 @@ public class TransactionFormTests
     {
         // Arrange
         var mockTransactionService = new Mock<ITransactionService>();
+        var mockCategoryService = CreateMockCategoryService();
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         // Act
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
@@ -46,8 +58,8 @@ public class TransactionFormTests
 
         // Assert
         var select = component.Find("select[name='type']");
-        component.Markup.Should().Contain("Add Money (Credit)");
-        component.Markup.Should().Contain("Spend Money (Debit)");
+        component.Markup.Should().Contain("Add Money (Income/Credit)");
+        component.Markup.Should().Contain("Spend Money (Expense/Debit)");
     }
 
     [Fact]
@@ -55,8 +67,10 @@ public class TransactionFormTests
     {
         // Arrange
         var mockTransactionService = new Mock<ITransactionService>();
+        var mockCategoryService = CreateMockCategoryService();
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         // Act
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
@@ -72,8 +86,10 @@ public class TransactionFormTests
     {
         // Arrange
         var mockTransactionService = new Mock<ITransactionService>();
+        var mockCategoryService = CreateMockCategoryService();
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         // Act
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
@@ -105,9 +121,11 @@ public class TransactionFormTests
             });
 
         var onSavedCalled = false;
+        var mockCategoryService = CreateMockCategoryService();
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
             .Add(p => p.ChildId, childId)
@@ -138,10 +156,12 @@ public class TransactionFormTests
     {
         // Arrange
         var mockTransactionService = new Mock<ITransactionService>();
+        var mockCategoryService = CreateMockCategoryService();
         var onCancelledCalled = false;
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
             .Add(p => p.ChildId, Guid.NewGuid())
@@ -171,8 +191,11 @@ public class TransactionFormTests
             .Setup(x => x.CreateTransactionAsync(It.IsAny<CreateTransactionDto>()))
             .Returns(tcs.Task);
 
+        var mockCategoryService = CreateMockCategoryService();
+
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
             .Add(p => p.ChildId, childId));
@@ -198,8 +221,10 @@ public class TransactionFormTests
     {
         // Arrange
         var mockTransactionService = new Mock<ITransactionService>();
+        var mockCategoryService = CreateMockCategoryService();
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
             .Add(p => p.ChildId, Guid.NewGuid()));
@@ -218,8 +243,10 @@ public class TransactionFormTests
     {
         // Arrange
         var mockTransactionService = new Mock<ITransactionService>();
+        var mockCategoryService = CreateMockCategoryService();
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
             .Add(p => p.ChildId, Guid.NewGuid()));
@@ -238,8 +265,10 @@ public class TransactionFormTests
     {
         // Arrange
         var mockTransactionService = new Mock<ITransactionService>();
+        var mockCategoryService = CreateMockCategoryService();
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
             .Add(p => p.ChildId, Guid.NewGuid()));

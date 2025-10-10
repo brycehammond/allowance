@@ -13,7 +13,15 @@
       "Bash(xcodebuild:*)",
       "Bash(brew install:*)",
       "Bash(xcodegen generate:*)",
-      "Bash(xcrun simctl:*)"
+      "Bash(xcrun simctl:*)",
+      "Bash(npm install)",
+      "Bash(npm run build:css:*)",
+      "Bash(git add specs/09-design-system.md)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nImplement comprehensive design system with muted green theme\n\nAdd complete design system specification and implementation for both\nBlazor web app and iOS native app with consistent muted green palette.\n\nBlazor Changes:\n- Setup Tailwind CSS 3.4 with custom configuration\n- Create design tokens and component classes in Styles/app.css\n- Update MainLayout with modern sidebar navigation and mobile menu\n- Redesign Dashboard with responsive grid layout\n- Update ChildCard component with gradient backgrounds and improved UX\n- Enhance TransactionForm with better validation display and icons\n- Replace Bootstrap with Tailwind CSS utility classes\n\niOS Changes:\n- Create DesignSystem.swift with complete color palette\n- Add typography system (display, headline, title, body, label fonts)\n- Implement button styles (Primary, Secondary, Outline, Danger, Ghost)\n- Add card modifiers and spacing constants\n- Include currency formatting helpers and SwiftUI preview\n\nDesign System:\n- Primary color: Muted green (#2da370) for stability and growth\n- Secondary color: Amber/gold (#f59e0b) for achievements and savings\n- Professional gray scale with WCAG AA compliant contrast\n- 8-color chart palette for data visualization\n- Monospace fonts for all monetary values\n- 8px spacing grid system\n- Dark mode support for both platforms\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet ef migrations:*)"
     ],
     "deny": [],
     "ask": []

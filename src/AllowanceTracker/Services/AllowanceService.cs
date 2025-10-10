@@ -46,6 +46,7 @@ public class AllowanceService : IAllowanceService
             childId,
             child.WeeklyAllowance,
             TransactionType.Credit,
+            TransactionCategory.Allowance,
             $"Weekly Allowance - {DateTime.UtcNow:yyyy-MM-dd}");
 
         await _transactionService.CreateTransactionAsync(dto);

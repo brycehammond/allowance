@@ -43,6 +43,7 @@ public class TransactionServiceTests : IDisposable
             child.Id,
             25.00m,
             TransactionType.Credit,
+            TransactionCategory.Allowance,
             "Test credit");
 
         // Act
@@ -66,6 +67,7 @@ public class TransactionServiceTests : IDisposable
             child.Id,
             20.00m,
             TransactionType.Debit,
+            TransactionCategory.OtherSpending,
             "Test debit");
 
         // Act
@@ -89,6 +91,7 @@ public class TransactionServiceTests : IDisposable
             child.Id,
             25.00m,
             TransactionType.Debit,
+            TransactionCategory.OtherSpending,
             "Test debit");
 
         // Act
@@ -111,6 +114,7 @@ public class TransactionServiceTests : IDisposable
             Guid.NewGuid(),
             25.00m,
             TransactionType.Credit,
+            TransactionCategory.Allowance,
             "Test credit");
 
         // Act
@@ -130,6 +134,7 @@ public class TransactionServiceTests : IDisposable
             child.Id,
             25.00m,
             TransactionType.Credit,
+            TransactionCategory.Allowance,
             "Test credit");
 
         // Act
@@ -148,6 +153,7 @@ public class TransactionServiceTests : IDisposable
             child.Id,
             25.00m,
             TransactionType.Credit,
+            TransactionCategory.Allowance,
             "Weekly allowance");
 
         // Act
@@ -167,6 +173,7 @@ public class TransactionServiceTests : IDisposable
             child.Id,
             25.00m,
             TransactionType.Credit,
+            TransactionCategory.Allowance,
             "Test credit");
 
         // Act
@@ -185,17 +192,17 @@ public class TransactionServiceTests : IDisposable
         var child = await CreateTestChild(balance: 100.00m);
 
         await _transactionService.CreateTransactionAsync(new CreateTransactionDto(
-            child.Id, 10.00m, TransactionType.Credit, "First"));
+            child.Id, 10.00m, TransactionType.Credit, TransactionCategory.Allowance, "First"));
 
         await Task.Delay(10); // Ensure different timestamps
 
         await _transactionService.CreateTransactionAsync(new CreateTransactionDto(
-            child.Id, 5.00m, TransactionType.Debit, "Second"));
+            child.Id, 5.00m, TransactionType.Debit, TransactionCategory.OtherSpending, "Second"));
 
         await Task.Delay(10);
 
         await _transactionService.CreateTransactionAsync(new CreateTransactionDto(
-            child.Id, 20.00m, TransactionType.Credit, "Third"));
+            child.Id, 20.00m, TransactionType.Credit, TransactionCategory.Allowance, "Third"));
 
         // Act
         var transactions = await _transactionService.GetChildTransactionsAsync(child.Id);
@@ -216,7 +223,7 @@ public class TransactionServiceTests : IDisposable
         for (int i = 0; i < 25; i++)
         {
             await _transactionService.CreateTransactionAsync(new CreateTransactionDto(
-                child.Id, 1.00m, TransactionType.Credit, $"Transaction {i}"));
+                child.Id, 1.00m, TransactionType.Credit, TransactionCategory.Allowance, $"Transaction {i}"));
         }
 
         // Act
@@ -248,6 +255,7 @@ public class TransactionServiceTests : IDisposable
             child.Id,
             25.00m,
             TransactionType.Credit,
+            TransactionCategory.Allowance,
             "Test credit");
 
         // Act

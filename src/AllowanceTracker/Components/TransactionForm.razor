@@ -3,6 +3,7 @@
 @using AllowanceTracker.Services
 @using System.ComponentModel.DataAnnotations
 @inject ITransactionService TransactionService
+@inject ICategoryService CategoryService
 
 <EditForm Model="@Model" OnValidSubmit="@HandleSubmit" class="space-y-4">
     <DataAnnotationsValidator />
@@ -25,7 +26,7 @@
     <!-- Type Field -->
     <div>
         <label class="form-label">Transaction Type</label>
-        <InputSelect class="form-input" @bind-Value="Model.Type" name="type">
+        <InputSelect class="form-input" @bind-Value="Model.Type" name="type" @bind-Value:after="OnTypeChanged">
             <option value="@TransactionType.Credit">
                 💰 Add Money (Income/Credit)
             </option>
@@ -34,6 +35,18 @@
             </option>
         </InputSelect>
         <p class="form-helper">Select whether this transaction adds or removes money</p>
+    </div>
+
+    <!-- Category Field -->
+    <div>
+        <label class="form-label">Category</label>
+        <InputSelect class="form-input" @bind-Value="Model.Category" name="category">
+            @foreach (var category in GetAvailableCategories())
+            {
+                <option value="@category">@GetCategoryDisplayName(category)</option>
+            }
+        </InputSelect>
+        <p class="form-helper">Choose the category that best describes this transaction</p>
     </div>
 
     <!-- Description Field -->
@@ -92,6 +105,7 @@
                 ChildId,
                 Model.Amount,
                 Model.Type,
+                Model.Category,
                 Model.Description);
 
             await TransactionService.CreateTransactionAsync(dto);
@@ -108,6 +122,27 @@
         await OnCancelled.InvokeAsync();
     }
 
+    private void OnTypeChanged()
+    {
+        // Update category to appropriate default when type changes
+        var categories = CategoryService.GetCategoriesForType(Model.Type);
+        if (categories.Any())
+        {
+            Model.Category = categories.First();
+        }
+    }
+
+    private List<TransactionCategory> GetAvailableCategories()
+    {
+        return CategoryService.GetCategoriesForType(Model.Type);
+    }
+
+    private string GetCategoryDisplayName(TransactionCategory category)
+    {
+        // Convert enum name to friendly display name (e.g., OtherIncome -> Other Income)
+        return System.Text.RegularExpressions.Regex.Replace(category.ToString(), "([a-z])([A-Z])", "$1 $2");
+    }
+
     public class TransactionFormModel
     {
         [Required]
@@ -115,6 +150,9 @@
         public decimal Amount { get; set; }
 
         public TransactionType Type { get; set; } = TransactionType.Credit;
+
+        [Required]
+        public TransactionCategory Category { get; set; } = TransactionCategory.Allowance;
 
         [Required]
         [StringLength(500, MinimumLength = 3, ErrorMessage = "Description must be between 3 and 500 characters")]

@@ -1,5 +1,6 @@
 using AllowanceTracker.Components;
 using AllowanceTracker.DTOs;
+using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using Bunit;
 using FluentAssertions;
@@ -30,7 +31,7 @@ public class ChildCardTests
             .Add(p => p.Child, child));
 
         // Assert
-        component.Find("h5").TextContent.Should().Contain("Jane Doe");
+        component.Find("h3").TextContent.Should().Contain("Jane Doe");
         component.Markup.Should().Contain("$25.50");
         component.Markup.Should().Contain("$10.00");
     }
@@ -56,7 +57,7 @@ public class ChildCardTests
 
         // Assert
         component.Markup.Should().Contain("Last Paid:");
-        component.Markup.Should().Contain("2025-10-01");
+        component.Markup.Should().Contain("Oct 01, 2025");
     }
 
     [Fact]
@@ -141,8 +142,14 @@ public class ChildCardTests
             LastAllowanceDate: null);
 
         var mockTransactionService = new Mock<ITransactionService>();
+        var mockCategoryService = new Mock<ICategoryService>();
+        mockCategoryService
+            .Setup(x => x.GetCategoriesForType(It.IsAny<TransactionType>()))
+            .Returns(new List<TransactionCategory> { TransactionCategory.Allowance });
+
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockTransactionService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
 
         var component = ctx.RenderComponent<ChildCard>(parameters => parameters
             .Add(p => p.Child, child));
@@ -151,13 +158,15 @@ public class ChildCardTests
         var button = component.Find("button:contains('Add Transaction')");
         button.Click();
 
-        // Assert - Form should be visible
-        component.FindAll(".transaction-form").Should().HaveCount(1);
+        // Assert - Form should be visible (look for EditForm or Save Transaction button)
+        component.FindAll("form").Should().HaveCount(1);
+        component.Markup.Should().Contain("Save Transaction");
 
-        // Act - Click again to hide form
-        button.Click();
+        // Act - Click Cancel button to hide form
+        var cancelButton = component.Find("button:contains('Cancel')");
+        cancelButton.Click();
 
         // Assert - Form should be hidden
-        component.FindAll(".transaction-form").Should().BeEmpty();
+        component.FindAll("form").Should().BeEmpty();
     }
 }

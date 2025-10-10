@@ -12,15 +12,18 @@ public class TransactionService : ITransactionService
     private readonly AllowanceContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly IHubContext<FamilyHub>? _hubContext;
+    private readonly ICategoryService? _categoryService;
 
     public TransactionService(
         AllowanceContext context,
         ICurrentUserService currentUser,
-        IHubContext<FamilyHub>? hubContext = null)
+        IHubContext<FamilyHub>? hubContext = null,
+        ICategoryService? categoryService = null)
     {
         _context = context;
         _currentUser = currentUser;
         _hubContext = hubContext;
+        _categoryService = categoryService;
     }
 
     public async Task<Transaction> CreateTransactionAsync(CreateTransactionDto dto)
@@ -37,6 +40,16 @@ public class TransactionService : ITransactionService
             if (dto.Type == TransactionType.Debit && child.CurrentBalance < dto.Amount)
                 throw new InvalidOperationException("Insufficient funds");
 
+            // Check budget limits for debits (if CategoryService is available)
+            if (dto.Type == TransactionType.Debit && _categoryService != null)
+            {
+                var budgetCheck = await _categoryService.CheckBudgetAsync(dto.ChildId, dto.Category, dto.Amount);
+                if (!budgetCheck.Allowed)
+                {
+                    throw new InvalidOperationException(budgetCheck.Message);
+                }
+            }
+
             // Update balance
             if (dto.Type == TransactionType.Credit)
                 child.CurrentBalance += dto.Amount;
@@ -49,6 +62,7 @@ public class TransactionService : ITransactionService
                 ChildId = dto.ChildId,
                 Amount = dto.Amount,
                 Type = dto.Type,
+                Category = dto.Category,
                 Description = dto.Description,
                 BalanceAfter = child.CurrentBalance,
                 CreatedById = _currentUser.UserId,

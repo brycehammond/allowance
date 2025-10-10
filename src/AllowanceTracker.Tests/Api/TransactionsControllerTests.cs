@@ -69,7 +69,7 @@ public class TransactionsControllerTests
     {
         // Arrange
         var childId = Guid.NewGuid();
-        var dto = new CreateTransactionDto(childId, 25m, TransactionType.Credit, "Allowance");
+        var dto = new CreateTransactionDto(childId, 25m, TransactionType.Credit, TransactionCategory.Allowance, "Allowance");
         var createdTransaction = new Transaction
         {
             Id = Guid.NewGuid(),
@@ -129,7 +129,7 @@ public class TransactionsControllerTests
     {
         // Arrange
         var childId = Guid.NewGuid();
-        var dto = new CreateTransactionDto(childId, 10m, TransactionType.Debit, "Spent on toys");
+        var dto = new CreateTransactionDto(childId, 10m, TransactionType.Debit, TransactionCategory.Toys, "Spent on toys");
         var transaction = new Transaction
         {
             Id = Guid.NewGuid(),
