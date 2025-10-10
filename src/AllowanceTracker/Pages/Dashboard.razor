@@ -1,4 +1,5 @@
 @page "/dashboard"
+@using AllowanceTracker.Components
 @using AllowanceTracker.DTOs
 @using AllowanceTracker.Services
 @inject IFamilyService FamilyService
@@ -17,19 +18,7 @@ else if (Children.Any())
         @foreach (var child in Children)
         {
             <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">@child.FirstName @child.LastName</h5>
-                        <p class="card-text">
-                            <strong>Balance:</strong> @child.CurrentBalance.ToString("C")<br />
-                            <strong>Weekly Allowance:</strong> @child.WeeklyAllowance.ToString("C")<br />
-                            @if (child.LastAllowanceDate.HasValue)
-                            {
-                                <strong>Last Paid:</strong> @child.LastAllowanceDate.Value.ToString("yyyy-MM-dd")
-                            }
-                        </p>
-                    </div>
-                </div>
+                <ChildCard Child="@child" OnTransactionAdded="@RefreshData" />
             </div>
         }
     </div>
@@ -45,6 +34,12 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await RefreshData();
+    }
+
+    private async Task RefreshData()
+    {
+        Loading = true;
         Children = await FamilyService.GetChildrenAsync();
         Loading = false;
     }

@@ -1,0 +1,75 @@
+@using AllowanceTracker.DTOs
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">@Child.FirstName @Child.LastName</h5>
+
+        <div class="balance-display">
+            <strong>Balance:</strong>
+            <span class="balance-amount">@Child.CurrentBalance.ToString("C")</span>
+        </div>
+
+        <div class="text-muted mt-2">
+            <small>
+                <strong>Weekly Allowance:</strong> @Child.WeeklyAllowance.ToString("C")<br />
+                @if (Child.LastAllowanceDate.HasValue)
+                {
+                    <strong>Last Paid:</strong> @Child.LastAllowanceDate.Value.ToString("yyyy-MM-dd")<br />
+                    <strong>Next Payment:</strong> @GetNextAllowanceDate()
+                }
+                else
+                {
+                    <em>First allowance pending</em>
+                }
+            </small>
+        </div>
+
+        <div class="mt-3">
+            <button class="btn btn-primary btn-sm" @onclick="ToggleTransactionForm">
+                Add Transaction
+            </button>
+            <a href="/children/@Child.Id" class="btn btn-outline-secondary btn-sm">
+                Details
+            </a>
+        </div>
+
+        @if (ShowTransactionForm)
+        {
+            <div class="transaction-form mt-3">
+                <TransactionForm ChildId="@Child.Id"
+                               OnSaved="@HandleTransactionSaved"
+                               OnCancelled="@(() => ShowTransactionForm = false)" />
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ChildDto Child { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback OnTransactionAdded { get; set; }
+
+    private bool ShowTransactionForm = false;
+
+    private void ToggleTransactionForm()
+    {
+        ShowTransactionForm = !ShowTransactionForm;
+    }
+
+    private async Task HandleTransactionSaved()
+    {
+        ShowTransactionForm = false;
+        await OnTransactionAdded.InvokeAsync();
+    }
+
+    private string GetNextAllowanceDate()
+    {
+        if (!Child.LastAllowanceDate.HasValue)
+            return "Pending";
+
+        var nextDate = Child.LastAllowanceDate.Value.AddDays(7);
+        return nextDate.ToString("yyyy-MM-dd");
+    }
+}

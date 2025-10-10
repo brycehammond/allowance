@@ -1,0 +1,91 @@
+@using AllowanceTracker.DTOs
+@using AllowanceTracker.Models
+@using AllowanceTracker.Services
+@using System.ComponentModel.DataAnnotations
+@inject ITransactionService TransactionService
+
+<EditForm Model="@Model" OnValidSubmit="@HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Amount</label>
+        <InputNumber class="form-control" @bind-Value="Model.Amount" name="amount" />
+        <ValidationMessage For="@(() => Model.Amount)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Type</label>
+        <InputSelect class="form-select" @bind-Value="Model.Type" name="type">
+            <option value="@TransactionType.Credit">Add Money (Credit)</option>
+            <option value="@TransactionType.Debit">Spend Money (Debit)</option>
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <InputText class="form-control" @bind-Value="Model.Description" name="description" />
+        <ValidationMessage For="@(() => Model.Description)" />
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+            @(IsSaving ? "Saving..." : "Save")
+        </button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">
+            Cancel
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid ChildId { get; set; }
+
+    [Parameter]
+    public EventCallback OnSaved { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancelled { get; set; }
+
+    private TransactionFormModel Model = new();
+    private bool IsSaving = false;
+
+    private async Task HandleSubmit()
+    {
+        IsSaving = true;
+        try
+        {
+            var dto = new CreateTransactionDto(
+                ChildId,
+                Model.Amount,
+                Model.Type,
+                Model.Description);
+
+            await TransactionService.CreateTransactionAsync(dto);
+            await OnSaved.InvokeAsync();
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancelled.InvokeAsync();
+    }
+
+    public class TransactionFormModel
+    {
+        [Required]
+        [Range(0.01, 10000, ErrorMessage = "Amount must be between $0.01 and $10,000")]
+        public decimal Amount { get; set; }
+
+        public TransactionType Type { get; set; } = TransactionType.Credit;
+
+        [Required]
+        [StringLength(500, MinimumLength = 3, ErrorMessage = "Description must be between 3 and 500 characters")]
+        public string Description { get; set; } = string.Empty;
+    }
+}
