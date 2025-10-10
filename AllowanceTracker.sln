@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{66CDE294-23A2-4C13-B6CB-B63FE98BB86B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllowanceTracker", "src\AllowanceTracker\AllowanceTracker.csproj", "{CAC1446A-F586-44EE-9CF9-58FDD9CBE1DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllowanceTracker.Tests", "src\AllowanceTracker.Tests\AllowanceTracker.Tests.csproj", "{FE435CDE-9FAC-4301-B3C1-C0B650ECF428}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CAC1446A-F586-44EE-9CF9-58FDD9CBE1DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAC1446A-F586-44EE-9CF9-58FDD9CBE1DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAC1446A-F586-44EE-9CF9-58FDD9CBE1DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAC1446A-F586-44EE-9CF9-58FDD9CBE1DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE435CDE-9FAC-4301-B3C1-C0B650ECF428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE435CDE-9FAC-4301-B3C1-C0B650ECF428}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE435CDE-9FAC-4301-B3C1-C0B650ECF428}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE435CDE-9FAC-4301-B3C1-C0B650ECF428}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CAC1446A-F586-44EE-9CF9-58FDD9CBE1DA} = {66CDE294-23A2-4C13-B6CB-B63FE98BB86B}
+		{FE435CDE-9FAC-4301-B3C1-C0B650ECF428} = {66CDE294-23A2-4C13-B6CB-B63FE98BB86B}
+	EndGlobalSection
+EndGlobal
