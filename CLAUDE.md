@@ -403,19 +403,30 @@ az webapp deployment source config-zip --src publish.zip
 - [x] **Total: 35 tests passing** (24 from Phase 1 + 11 new)
 
 ### Phase 3: Blazor UI (Week 3)
-- [ ] Setup Blazor Server
-- [ ] Create MainLayout
+- [ ] Setup Blazor Server (already done in Phase 1)
+- [ ] Create MainLayout (already done in Phase 1)
 - [ ] **Write Dashboard component tests**
 - [ ] Implement Dashboard
 - [ ] Add real-time updates
 - [ ] Create transaction forms
 
-### Phase 4: API & Background Jobs (Week 4)
+### Phase 4: Allowance Management & Background Jobs (Week 2-3) ✅ COMPLETE
+- [x] **Write AllowanceService tests FIRST** (10 tests)
+- [x] Implement AllowanceService with TDD
+- [x] Pay weekly allowance functionality
+- [x] Prevent double-payment same week
+- [x] Process all pending allowances
+- [x] Error handling and logging
+- [x] Setup IHostedService background job
+- [x] WeeklyAllowanceJob with 24-hour interval
+- [x] **Total: 45 tests passing** (24 from Phase 1 + 11 from Phase 2 + 10 new)
+
+### Phase 5: API & Authentication (Pending)
 - [ ] **Write JWT auth tests**
 - [ ] Implement JWT authentication
 - [ ] Create API controllers
-- [ ] Setup IHostedService
-- [ ] Implement weekly allowance job
+- [ ] Transaction API endpoints
+- [ ] Child API endpoints
 
 ## 🐛 Common Issues & Solutions
 
