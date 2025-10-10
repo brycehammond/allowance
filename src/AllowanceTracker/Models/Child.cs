@@ -17,4 +17,5 @@ public class Child : IHasCreatedAt
     public virtual Family Family { get; set; } = null!;
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     public virtual ICollection<WishListItem> WishListItems { get; set; } = new List<WishListItem>();
+    public virtual ICollection<CategoryBudget> CategoryBudgets { get; set; } = new List<CategoryBudget>();
 }

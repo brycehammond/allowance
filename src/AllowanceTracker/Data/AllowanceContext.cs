@@ -16,6 +16,7 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<Child> Children { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<WishListItem> WishListItems { get; set; }
+    public DbSet<CategoryBudget> CategoryBudgets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -81,6 +82,27 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
 
             entity.HasIndex(e => e.ChildId);
             entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.Category);
+        });
+
+        // CategoryBudget configuration
+        builder.Entity<CategoryBudget>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Limit).HasPrecision(10, 2);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.CategoryBudgets)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.CreatedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.CreatedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            // Unique index: one budget per category per child
+            entity.HasIndex(e => new { e.ChildId, e.Category }).IsUnique();
         });
 
         // WishListItem configuration

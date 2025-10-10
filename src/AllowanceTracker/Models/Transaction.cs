@@ -8,6 +8,7 @@ public class Transaction : IHasCreatedAt
     public Guid ChildId { get; set; }
     public decimal Amount { get; set; }
     public TransactionType Type { get; set; }
+    public TransactionCategory Category { get; set; }
     public string Description { get; set; } = string.Empty;
     public decimal BalanceAfter { get; set; }
     public Guid CreatedById { get; set; }
