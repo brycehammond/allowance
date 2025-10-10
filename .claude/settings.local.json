@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(swift:*)",
+      "Bash(docker:*)",
+      "WebSearch",
+      "Bash(cat:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet nuget list:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(xargs:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(brew install:*)",
+      "Bash(xcodegen generate:*)",
+      "Bash(xcrun simctl:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

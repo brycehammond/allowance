@@ -1,0 +1,286 @@
+@page "/analytics"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using AllowanceTracker.DTOs
+@using AllowanceTracker.Services
+@inject ITransactionAnalyticsService AnalyticsService
+@inject IFamilyService FamilyService
+@inject NavigationManager Navigation
+
+<PageTitle>Analytics Dashboard</PageTitle>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Analytics Dashboard</h1>
+        <a href="/dashboard" class="btn btn-secondary">
+            <span class="oi oi-arrow-left"></span> Back to Dashboard
+        </a>
+    </div>
+
+    @if (Loading)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else if (!Children.Any())
+    {
+        <p>No children found. Add a child to get started.</p>
+    }
+    else
+    {
+        <!-- Child Selector -->
+        <div class="mb-4">
+            <label for="childSelect" class="form-label">Select Child:</label>
+            <select id="childSelect" class="form-select" @onchange="OnChildSelected">
+                <option value="">-- Select a child --</option>
+                @foreach (var child in Children)
+                {
+                    <option value="@child.Id">@child.FirstName @child.LastName</option>
+                }
+            </select>
+        </div>
+
+        @if (SelectedChildId != Guid.Empty)
+        {
+            <div class="row">
+                <!-- Balance History -->
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Balance History</h3>
+                        </div>
+                        <div class="card-body">
+                            @if (BalanceHistory != null && BalanceHistory.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Balance</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var point in BalanceHistory.Take(10))
+                                            {
+                                                <tr>
+                                                    <td>@point.Date.ToString("MM/dd/yyyy")</td>
+                                                    <td>$@point.Balance.ToString("F2")</td>
+                                                    <td>@point.TransactionDescription</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p>No balance history available.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Income vs Spending -->
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Income vs Spending</h3>
+                        </div>
+                        <div class="card-body">
+                            @if (IncomeVsSpending != null)
+                            {
+                                <div class="mb-3">
+                                    <strong>Total Income:</strong> $@IncomeVsSpending.TotalIncome.ToString("F2")
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Total Spending:</strong> $@IncomeVsSpending.TotalSpending.ToString("F2")
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Net Savings:</strong> $@IncomeVsSpending.NetSavings.ToString("F2")
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Savings Rate:</strong> @IncomeVsSpending.SavingsRate.ToString("F1")%
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Income Transactions:</strong> @IncomeVsSpending.IncomeTransactionCount
+                                </div>
+                                <div>
+                                    <strong>Spending Transactions:</strong> @IncomeVsSpending.SpendingTransactionCount
+                                </div>
+                            }
+                            else
+                            {
+                                <p>Loading income vs spending data...</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spending Breakdown -->
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Spending Breakdown</h3>
+                        </div>
+                        <div class="card-body">
+                            @if (SpendingBreakdown != null && SpendingBreakdown.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Category</th>
+                                                <th>Amount</th>
+                                                <th>Count</th>
+                                                <th>%</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var category in SpendingBreakdown.Take(10))
+                                            {
+                                                <tr>
+                                                    <td>@category.Category</td>
+                                                    <td>$@category.Amount.ToString("F2")</td>
+                                                    <td>@category.TransactionCount</td>
+                                                    <td>@category.Percentage.ToString("F1")%</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p>No spending data available.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Comparison -->
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Monthly Comparison</h3>
+                        </div>
+                        <div class="card-body">
+                            @if (MonthlyComparison != null && MonthlyComparison.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Month</th>
+                                                <th>Income</th>
+                                                <th>Spending</th>
+                                                <th>Savings</th>
+                                                <th>Ending Balance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var month in MonthlyComparison)
+                                            {
+                                                <tr>
+                                                    <td>@month.MonthName @month.Year</td>
+                                                    <td>$@month.Income.ToString("F2")</td>
+                                                    <td>$@month.Spending.ToString("F2")</td>
+                                                    <td>$@month.NetSavings.ToString("F2")</td>
+                                                    <td>$@month.EndingBalance.ToString("F2")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p>No monthly comparison data available.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private bool Loading = true;
+    private List<ChildDto> Children = new();
+    private Guid SelectedChildId = Guid.Empty;
+
+    // Analytics Data
+    private List<BalancePoint>? BalanceHistory;
+    private IncomeSpendingSummary? IncomeVsSpending;
+    private List<CategoryBreakdown>? SpendingBreakdown;
+    private List<MonthlyComparison>? MonthlyComparison;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadChildren();
+    }
+
+    private async Task LoadChildren()
+    {
+        Loading = true;
+        Children = await FamilyService.GetChildrenAsync();
+        Loading = false;
+
+        // Auto-select first child if only one exists
+        if (Children.Count == 1)
+        {
+            SelectedChildId = Children[0].Id;
+            await LoadAnalyticsData();
+        }
+    }
+
+    private async Task OnChildSelected(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var childId))
+        {
+            SelectedChildId = childId;
+            await LoadAnalyticsData();
+        }
+        else
+        {
+            SelectedChildId = Guid.Empty;
+            ClearAnalyticsData();
+        }
+    }
+
+    private async Task LoadAnalyticsData()
+    {
+        if (SelectedChildId == Guid.Empty) return;
+
+        try
+        {
+            // Load all analytics data in parallel
+            var balanceTask = AnalyticsService.GetBalanceHistoryAsync(SelectedChildId, 30);
+            var incomeTask = AnalyticsService.GetIncomeVsSpendingAsync(SelectedChildId, null, null);
+            var breakdownTask = AnalyticsService.GetSpendingBreakdownAsync(SelectedChildId, null, null);
+            var monthlyTask = AnalyticsService.GetMonthlyComparisonAsync(SelectedChildId, 6);
+
+            await Task.WhenAll(balanceTask, incomeTask, breakdownTask, monthlyTask);
+
+            BalanceHistory = await balanceTask;
+            IncomeVsSpending = await incomeTask;
+            SpendingBreakdown = await breakdownTask;
+            MonthlyComparison = await monthlyTask;
+
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+            // Handle errors gracefully
+            ClearAnalyticsData();
+        }
+    }
+
+    private void ClearAnalyticsData()
+    {
+        BalanceHistory = null;
+        IncomeVsSpending = null;
+        SpendingBreakdown = null;
+        MonthlyComparison = null;
+    }
+}

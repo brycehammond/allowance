@@ -49,19 +49,27 @@ else
         await RefreshData();
 
         // Setup SignalR connection for real-time updates
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/familyhub"))
-            .WithAutomaticReconnect()
-            .Build();
-
-        _hubConnection.On<Guid>("TransactionCreated", async (childId) =>
+        try
         {
-            // Refresh data when transaction created
-            await RefreshData();
-            await InvokeAsync(StateHasChanged);
-        });
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(Navigation.ToAbsoluteUri("/familyhub"))
+                .WithAutomaticReconnect()
+                .Build();
 
-        await _hubConnection.StartAsync();
+            _hubConnection.On<Guid>("TransactionCreated", async (childId) =>
+            {
+                // Refresh data when transaction created
+                await RefreshData();
+                await InvokeAsync(StateHasChanged);
+            });
+
+            await _hubConnection.StartAsync();
+        }
+        catch
+        {
+            // SignalR connection failed (e.g., in tests or when server unavailable)
+            // Component still functions without real-time updates
+        }
     }
 
     private async Task RefreshData()

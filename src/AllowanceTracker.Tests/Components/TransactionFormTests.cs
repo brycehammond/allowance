@@ -192,4 +192,63 @@ public class TransactionFormTests
         // Complete the save
         tcs.SetResult(new Transaction());
     }
+
+    [Fact]
+    public void TransactionForm_ValidatesAmountRange()
+    {
+        // Arrange
+        var mockTransactionService = new Mock<ITransactionService>();
+        using var ctx = new TestContext();
+        ctx.Services.AddSingleton(mockTransactionService.Object);
+
+        var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
+            .Add(p => p.ChildId, Guid.NewGuid()));
+
+        // Act - Try to submit with invalid amount (0)
+        component.Find("input[name='amount']").Change("0");
+        component.Find("input[name='description']").Change("Test");
+        component.Find("form").Submit();
+
+        // Assert - Validation should prevent submission
+        component.Markup.Should().Contain("Amount must be between");
+    }
+
+    [Fact]
+    public void TransactionForm_ValidatesDescriptionLength()
+    {
+        // Arrange
+        var mockTransactionService = new Mock<ITransactionService>();
+        using var ctx = new TestContext();
+        ctx.Services.AddSingleton(mockTransactionService.Object);
+
+        var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
+            .Add(p => p.ChildId, Guid.NewGuid()));
+
+        // Act - Try to submit with too short description
+        component.Find("input[name='amount']").Change("10");
+        component.Find("input[name='description']").Change("AB");
+        component.Find("form").Submit();
+
+        // Assert - Validation should show error
+        component.Markup.Should().Contain("Description must be between");
+    }
+
+    [Fact]
+    public void TransactionForm_RequiresDescription()
+    {
+        // Arrange
+        var mockTransactionService = new Mock<ITransactionService>();
+        using var ctx = new TestContext();
+        ctx.Services.AddSingleton(mockTransactionService.Object);
+
+        var component = ctx.RenderComponent<TransactionForm>(parameters => parameters
+            .Add(p => p.ChildId, Guid.NewGuid()));
+
+        // Act - Try to submit without description
+        component.Find("input[name='amount']").Change("10");
+        component.Find("form").Submit();
+
+        // Assert - Required validation should trigger
+        component.Markup.Should().Contain("Description");
+    }
 }
