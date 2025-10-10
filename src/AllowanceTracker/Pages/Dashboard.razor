@@ -1,0 +1,51 @@
+@page "/dashboard"
+@using AllowanceTracker.DTOs
+@using AllowanceTracker.Services
+@inject IFamilyService FamilyService
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Family Dashboard</h1>
+
+@if (Loading)
+{
+    <p><em>Loading...</em></p>
+}
+else if (Children.Any())
+{
+    <div class="row">
+        @foreach (var child in Children)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@child.FirstName @child.LastName</h5>
+                        <p class="card-text">
+                            <strong>Balance:</strong> @child.CurrentBalance.ToString("C")<br />
+                            <strong>Weekly Allowance:</strong> @child.WeeklyAllowance.ToString("C")<br />
+                            @if (child.LastAllowanceDate.HasValue)
+                            {
+                                <strong>Last Paid:</strong> @child.LastAllowanceDate.Value.ToString("yyyy-MM-dd")
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No children found. Add a child to get started.</p>
+}
+
+@code {
+    private bool Loading = true;
+    private List<ChildDto> Children = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Children = await FamilyService.GetChildrenAsync();
+        Loading = false;
+    }
+}
