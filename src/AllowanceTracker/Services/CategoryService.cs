@@ -205,6 +205,20 @@ public class CategoryService : ICategoryService
         }
     }
 
+    public List<TransactionCategory> GetAllCategories()
+    {
+        return Enum.GetValues<TransactionCategory>().ToList();
+    }
+
+    public string GetCategoryDisplayName(TransactionCategory category)
+    {
+        // Convert enum name to friendly display name (e.g., OtherIncome -> Other Income)
+        return System.Text.RegularExpressions.Regex.Replace(
+            category.ToString(),
+            "([a-z])([A-Z])",
+            "$1 $2");
+    }
+
     private DateTime GetPeriodStartDate(BudgetPeriod period)
     {
         var now = DateTime.UtcNow;

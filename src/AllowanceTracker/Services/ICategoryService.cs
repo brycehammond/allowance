@@ -37,4 +37,14 @@ public interface ICategoryService
     /// Get all categories appropriate for transaction type
     /// </summary>
     List<TransactionCategory> GetCategoriesForType(TransactionType type);
+
+    /// <summary>
+    /// Get all available categories
+    /// </summary>
+    List<TransactionCategory> GetAllCategories();
+
+    /// <summary>
+    /// Get friendly display name for a category
+    /// </summary>
+    string GetCategoryDisplayName(TransactionCategory category);
 }
