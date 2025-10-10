@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using AllowanceTracker.Data;
+using AllowanceTracker.Hubs;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using System.Text;
@@ -52,6 +53,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Add SignalR
+builder.Services.AddSignalR();
+
 // Register application services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
@@ -78,6 +82,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<FamilyHub>("/familyhub");
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
