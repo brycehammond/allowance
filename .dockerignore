@@ -1,0 +1,52 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# User-specific files
+**/*.user
+**/*.userosscache
+**/*.suo
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test results
+TestResults/
+*.trx
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Documentation
+*.md
+LICENSE
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Specs and docs
+specs/
