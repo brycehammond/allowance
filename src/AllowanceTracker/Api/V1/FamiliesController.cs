@@ -1,8 +1,6 @@
-using AllowanceTracker.Data;
 using AllowanceTracker.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AllowanceTracker.Api.V1;
 
@@ -11,12 +9,12 @@ namespace AllowanceTracker.Api.V1;
 [Authorize]
 public class FamiliesController : ControllerBase
 {
-    private readonly AllowanceContext _context;
+    private readonly IFamilyService _familyService;
     private readonly IAccountService _accountService;
 
-    public FamiliesController(AllowanceContext context, IAccountService accountService)
+    public FamiliesController(IFamilyService familyService, IAccountService accountService)
     {
-        _context = context;
+        _familyService = familyService;
         _accountService = accountService;
     }
 
@@ -27,7 +25,13 @@ public class FamiliesController : ControllerBase
     public async Task<ActionResult<object>> GetCurrentFamily()
     {
         var currentUser = await _accountService.GetCurrentUserAsync();
-        if (currentUser?.FamilyId == null)
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var familyInfo = await _familyService.GetFamilyInfoAsync(currentUser.Id);
+        if (familyInfo == null)
         {
             return BadRequest(new
             {
@@ -39,18 +43,13 @@ public class FamiliesController : ControllerBase
             });
         }
 
-        var family = await _context.Families
-            .Include(f => f.Members)
-            .Include(f => f.Children)
-            .FirstAsync(f => f.Id == currentUser.FamilyId);
-
         return Ok(new
         {
-            id = family.Id,
-            name = family.Name,
-            createdAt = family.CreatedAt,
-            memberCount = family.Members.Count,
-            childrenCount = family.Children.Count
+            id = familyInfo.Id,
+            name = familyInfo.Name,
+            createdAt = familyInfo.CreatedAt,
+            memberCount = familyInfo.MemberCount,
+            childrenCount = familyInfo.ChildrenCount
         });
     }
 
@@ -61,7 +60,13 @@ public class FamiliesController : ControllerBase
     public async Task<ActionResult<object>> GetFamilyMembers()
     {
         var currentUser = await _accountService.GetCurrentUserAsync();
-        if (currentUser?.FamilyId == null)
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var familyMembers = await _familyService.GetFamilyMembersAsync(currentUser.Id);
+        if (familyMembers == null)
         {
             return BadRequest(new
             {
@@ -73,24 +78,18 @@ public class FamiliesController : ControllerBase
             });
         }
 
-        var family = await _context.Families
-            .Include(f => f.Members)
-            .FirstAsync(f => f.Id == currentUser.FamilyId);
-
-        var members = family.Members.Select(m => new
-        {
-            userId = m.Id,
-            email = m.Email,
-            firstName = m.FirstName,
-            lastName = m.LastName,
-            role = m.Role.ToString()
-        });
-
         return Ok(new
         {
-            familyId = family.Id,
-            familyName = family.Name,
-            members = members
+            familyId = familyMembers.FamilyId,
+            familyName = familyMembers.FamilyName,
+            members = familyMembers.Members.Select(m => new
+            {
+                userId = m.UserId,
+                email = m.Email,
+                firstName = m.FirstName,
+                lastName = m.LastName,
+                role = m.Role
+            })
         });
     }
 
@@ -101,7 +100,13 @@ public class FamiliesController : ControllerBase
     public async Task<ActionResult<object>> GetFamilyChildren()
     {
         var currentUser = await _accountService.GetCurrentUserAsync();
-        if (currentUser?.FamilyId == null)
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var familyChildren = await _familyService.GetFamilyChildrenAsync(currentUser.Id);
+        if (familyChildren == null)
         {
             return BadRequest(new
             {
@@ -113,29 +118,22 @@ public class FamiliesController : ControllerBase
             });
         }
 
-        var family = await _context.Families
-            .Include(f => f.Children)
-                .ThenInclude(c => c.User)
-            .FirstAsync(f => f.Id == currentUser.FamilyId);
-
-        var children = family.Children.Select(c => new
-        {
-            childId = c.Id,
-            userId = c.UserId,
-            firstName = c.User.FirstName,
-            lastName = c.User.LastName,
-            email = c.User.Email,
-            currentBalance = c.CurrentBalance,
-            weeklyAllowance = c.WeeklyAllowance,
-            lastAllowanceDate = c.LastAllowanceDate,
-            nextAllowanceDate = c.LastAllowanceDate?.AddDays(7)
-        });
-
         return Ok(new
         {
-            familyId = family.Id,
-            familyName = family.Name,
-            children = children
+            familyId = familyChildren.FamilyId,
+            familyName = familyChildren.FamilyName,
+            children = familyChildren.Children.Select(c => new
+            {
+                childId = c.ChildId,
+                userId = c.UserId,
+                firstName = c.FirstName,
+                lastName = c.LastName,
+                email = c.Email,
+                currentBalance = c.CurrentBalance,
+                weeklyAllowance = c.WeeklyAllowance,
+                lastAllowanceDate = c.LastAllowanceDate,
+                nextAllowanceDate = c.NextAllowanceDate
+            })
         });
     }
 }

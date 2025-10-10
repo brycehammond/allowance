@@ -1,10 +1,7 @@
-using AllowanceTracker.Data;
 using AllowanceTracker.DTOs;
-using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AllowanceTracker.Api.V1;
 
@@ -13,12 +10,12 @@ namespace AllowanceTracker.Api.V1;
 [Authorize]
 public class ChildrenController : ControllerBase
 {
-    private readonly AllowanceContext _context;
+    private readonly IChildManagementService _childManagementService;
     private readonly IAccountService _accountService;
 
-    public ChildrenController(AllowanceContext context, IAccountService accountService)
+    public ChildrenController(IChildManagementService childManagementService, IAccountService accountService)
     {
-        _context = context;
+        _childManagementService = childManagementService;
         _accountService = accountService;
     }
 
@@ -34,9 +31,7 @@ public class ChildrenController : ControllerBase
             return Unauthorized();
         }
 
-        var child = await _context.Children
-            .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.Id == childId);
+        var child = await _childManagementService.GetChildAsync(childId, currentUser.Id);
 
         if (child == null)
         {
@@ -45,25 +40,9 @@ public class ChildrenController : ControllerBase
                 error = new
                 {
                     code = "NOT_FOUND",
-                    message = "Child not found"
+                    message = "Child not found or access denied"
                 }
             });
-        }
-
-        // Check authorization: parent in same family or the child themselves
-        if (currentUser.Role == UserRole.Parent)
-        {
-            if (child.FamilyId != currentUser.FamilyId)
-            {
-                return Forbid();
-            }
-        }
-        else if (currentUser.Role == UserRole.Child)
-        {
-            if (child.UserId != currentUser.Id)
-            {
-                return Forbid();
-            }
         }
 
         var nextAllowanceDate = child.LastAllowanceDate?.AddDays(7);
@@ -91,19 +70,12 @@ public class ChildrenController : ControllerBase
     public async Task<ActionResult<object>> UpdateAllowance(Guid childId, [FromBody] UpdateAllowanceDto dto)
     {
         var currentUser = await _accountService.GetCurrentUserAsync();
-        if (currentUser?.FamilyId == null)
+        if (currentUser == null)
         {
-            return BadRequest(new
-            {
-                error = new
-                {
-                    code = "NO_FAMILY",
-                    message = "Current user has no associated family"
-                }
-            });
+            return Unauthorized();
         }
 
-        var child = await _context.Children.FindAsync(childId);
+        var child = await _childManagementService.UpdateChildAllowanceAsync(childId, dto.WeeklyAllowance, currentUser.Id);
 
         if (child == null)
         {
@@ -112,19 +84,10 @@ public class ChildrenController : ControllerBase
                 error = new
                 {
                     code = "NOT_FOUND",
-                    message = "Child not found"
+                    message = "Child not found or access denied"
                 }
             });
         }
-
-        // Check same family
-        if (child.FamilyId != currentUser.FamilyId)
-        {
-            return Forbid();
-        }
-
-        child.WeeklyAllowance = dto.WeeklyAllowance;
-        await _context.SaveChangesAsync();
 
         return Ok(new
         {
@@ -142,44 +105,24 @@ public class ChildrenController : ControllerBase
     public async Task<ActionResult> DeleteChild(Guid childId)
     {
         var currentUser = await _accountService.GetCurrentUserAsync();
-        if (currentUser?.FamilyId == null)
+        if (currentUser == null)
         {
-            return BadRequest(new
-            {
-                error = new
-                {
-                    code = "NO_FAMILY",
-                    message = "Current user has no associated family"
-                }
-            });
+            return Unauthorized();
         }
 
-        var child = await _context.Children
-            .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.Id == childId);
+        var deleted = await _childManagementService.DeleteChildAsync(childId, currentUser.Id);
 
-        if (child == null)
+        if (!deleted)
         {
             return NotFound(new
             {
                 error = new
                 {
                     code = "NOT_FOUND",
-                    message = "Child not found"
+                    message = "Child not found or access denied"
                 }
             });
         }
-
-        // Check same family
-        if (child.FamilyId != currentUser.FamilyId)
-        {
-            return Forbid();
-        }
-
-        // Remove child profile and user
-        _context.Children.Remove(child);
-        _context.Users.Remove(child.User);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

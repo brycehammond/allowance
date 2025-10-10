@@ -41,4 +41,92 @@ public class FamilyService : IFamilyService
 
         return child != null ? ChildDto.FromChild(child, child.User) : null;
     }
+
+    public async Task<FamilyInfoDto?> GetFamilyInfoAsync(Guid userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user?.FamilyId == null)
+        {
+            return null;
+        }
+
+        var family = await _context.Families
+            .AsNoTracking()
+            .Include(f => f.Members)
+            .Include(f => f.Children)
+            .FirstOrDefaultAsync(f => f.Id == user.FamilyId);
+
+        if (family == null)
+        {
+            return null;
+        }
+
+        return new FamilyInfoDto(
+            family.Id,
+            family.Name,
+            family.CreatedAt,
+            family.Members.Count,
+            family.Children.Count);
+    }
+
+    public async Task<FamilyMembersDto?> GetFamilyMembersAsync(Guid userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user?.FamilyId == null)
+        {
+            return null;
+        }
+
+        var family = await _context.Families
+            .AsNoTracking()
+            .Include(f => f.Members)
+            .FirstOrDefaultAsync(f => f.Id == user.FamilyId);
+
+        if (family == null)
+        {
+            return null;
+        }
+
+        var members = family.Members.Select(m => new FamilyMemberDto(
+            m.Id,
+            m.Email!,
+            m.FirstName,
+            m.LastName,
+            m.Role.ToString())).ToList();
+
+        return new FamilyMembersDto(family.Id, family.Name, members);
+    }
+
+    public async Task<FamilyChildrenDto?> GetFamilyChildrenAsync(Guid userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user?.FamilyId == null)
+        {
+            return null;
+        }
+
+        var family = await _context.Families
+            .AsNoTracking()
+            .Include(f => f.Children)
+                .ThenInclude(c => c.User)
+            .FirstOrDefaultAsync(f => f.Id == user.FamilyId);
+
+        if (family == null)
+        {
+            return null;
+        }
+
+        var children = family.Children.Select(c => new ChildDetailDto(
+            c.Id,
+            c.UserId,
+            c.User.FirstName,
+            c.User.LastName,
+            c.User.Email!,
+            c.CurrentBalance,
+            c.WeeklyAllowance,
+            c.LastAllowanceDate,
+            c.LastAllowanceDate?.AddDays(7))).ToList();
+
+        return new FamilyChildrenDto(family.Id, family.Name, children);
+    }
 }
