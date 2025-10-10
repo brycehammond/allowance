@@ -10,33 +10,54 @@
 
 <PageTitle>Dashboard</PageTitle>
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Family Dashboard</h1>
-        <a href="/children/create" class="btn btn-primary">
-            <span class="oi oi-plus"></span> Add Child
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Family Dashboard</h1>
+            <p class="mt-2 text-sm text-gray-600">Manage your children's allowances and track their progress</p>
+        </div>
+        <a href="/children/create" class="btn-primary inline-flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Add Child</span>
         </a>
     </div>
 </div>
 
 @if (Loading)
 {
-    <p><em>Loading...</em></p>
+    <div class="flex items-center justify-center py-12">
+        <div class="text-center">
+            <div class="inline-block spinner h-8 w-8 text-green-600 mb-4"></div>
+            <p class="text-gray-500">Loading dashboard...</p>
+        </div>
+    </div>
 }
 else if (Children.Any())
 {
-    <div class="row">
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-fadeIn">
         @foreach (var child in Children)
         {
-            <div class="col-md-4 mb-3">
-                <ChildCard Child="@child" OnTransactionAdded="@RefreshData" />
-            </div>
+            <ChildCard Child="@child" OnTransactionAdded="@RefreshData" />
         }
     </div>
 }
 else
 {
-    <p>No children found. Add a child to get started.</p>
+    <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900">No children yet</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by adding your first child.</p>
+        <div class="mt-6">
+            <a href="/children/create" class="btn-primary">
+                Add Child
+            </a>
+        </div>
+    </div>
 }
 
 @code {

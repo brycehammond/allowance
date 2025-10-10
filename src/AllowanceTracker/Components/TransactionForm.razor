@@ -4,35 +4,67 @@
 @using System.ComponentModel.DataAnnotations
 @inject ITransactionService TransactionService
 
-<EditForm Model="@Model" OnValidSubmit="@HandleSubmit">
+<EditForm Model="@Model" OnValidSubmit="@HandleSubmit" class="space-y-4">
     <DataAnnotationsValidator />
-    <ValidationSummary />
 
-    <div class="mb-3">
+    <!-- Validation Summary -->
+    <ValidationSummary class="rounded-md bg-error-light border border-error p-3 text-sm text-error" />
+
+    <!-- Amount Field -->
+    <div>
         <label class="form-label">Amount</label>
-        <InputNumber class="form-control" @bind-Value="Model.Amount" name="amount" />
-        <ValidationMessage For="@(() => Model.Amount)" />
+        <div class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <span class="text-gray-500 text-sm">$</span>
+            </div>
+            <InputNumber class="form-input pl-7 font-mono" @bind-Value="Model.Amount" name="amount" placeholder="0.00" />
+        </div>
+        <ValidationMessage For="@(() => Model.Amount)" class="form-error" />
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Type</label>
-        <InputSelect class="form-select" @bind-Value="Model.Type" name="type">
-            <option value="@TransactionType.Credit">Add Money (Credit)</option>
-            <option value="@TransactionType.Debit">Spend Money (Debit)</option>
+    <!-- Type Field -->
+    <div>
+        <label class="form-label">Transaction Type</label>
+        <InputSelect class="form-input" @bind-Value="Model.Type" name="type">
+            <option value="@TransactionType.Credit">
+                💰 Add Money (Income/Credit)
+            </option>
+            <option value="@TransactionType.Debit">
+                💸 Spend Money (Expense/Debit)
+            </option>
         </InputSelect>
+        <p class="form-helper">Select whether this transaction adds or removes money</p>
     </div>
 
-    <div class="mb-3">
+    <!-- Description Field -->
+    <div>
         <label class="form-label">Description</label>
-        <InputText class="form-control" @bind-Value="Model.Description" name="description" />
-        <ValidationMessage For="@(() => Model.Description)" />
+        <InputText class="form-input" @bind-Value="Model.Description" name="description" placeholder="e.g., Weekly allowance, Toy purchase" />
+        <ValidationMessage For="@(() => Model.Description)" class="form-error" />
+        <p class="form-helper">Describe what this transaction is for</p>
     </div>
 
-    <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary" disabled="@IsSaving">
-            @(IsSaving ? "Saving..." : "Save")
+    <!-- Action Buttons -->
+    <div class="flex gap-2 pt-2">
+        <button type="submit" class="btn-primary flex-1 justify-center" disabled="@IsSaving">
+            @if (IsSaving)
+            {
+                <div class="inline-flex items-center gap-2">
+                    <div class="spinner h-4 w-4"></div>
+                    <span>Saving...</span>
+                </div>
+            }
+            else
+            {
+                <div class="inline-flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Save Transaction</span>
+                </div>
+            }
         </button>
-        <button type="button" class="btn btn-secondary" @onclick="Cancel">
+        <button type="button" class="btn-ghost" @onclick="Cancel">
             Cancel
         </button>
     </div>

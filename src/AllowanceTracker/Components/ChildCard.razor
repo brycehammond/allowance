@@ -1,47 +1,84 @@
 @using AllowanceTracker.DTOs
 
-<div class="card mb-3">
-    <div class="card-body">
-        <h5 class="card-title">@Child.FirstName @Child.LastName</h5>
-
-        <div class="balance-display">
-            <strong>Balance:</strong>
-            <span class="balance-amount">@Child.CurrentBalance.ToString("C")</span>
+<div class="card-hover">
+    <!-- Card Header with Child Info -->
+    <div class="flex items-start justify-between mb-4">
+        <div class="flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">@Child.FirstName @Child.LastName</h3>
+                <p class="text-sm text-gray-500">Child Account</p>
+            </div>
         </div>
+    </div>
 
-        <div class="text-muted mt-2">
-            <small>
-                <strong>Weekly Allowance:</strong> @Child.WeeklyAllowance.ToString("C")<br />
-                @if (Child.LastAllowanceDate.HasValue)
-                {
-                    <strong>Last Paid:</strong> @Child.LastAllowanceDate.Value.ToString("yyyy-MM-dd")<br />
-                    <strong>Next Payment:</strong> @GetNextAllowanceDate()
-                }
-                else
-                {
-                    <em>First allowance pending</em>
-                }
-            </small>
+    <!-- Balance Display -->
+    <div class="mb-4 rounded-lg bg-gradient-to-br from-green-50 to-green-100 p-4">
+        <p class="text-sm font-medium text-gray-600 mb-1">Current Balance</p>
+        <p class="balance-display">@Child.CurrentBalance.ToString("C")</p>
+    </div>
+
+    <!-- Allowance Info -->
+    <div class="mb-4 space-y-2 text-sm">
+        <div class="flex justify-between">
+            <span class="text-gray-500">Weekly Allowance:</span>
+            <span class="font-mono font-semibold text-gray-900">@Child.WeeklyAllowance.ToString("C")</span>
         </div>
-
-        <div class="mt-3">
-            <button class="btn btn-primary btn-sm" @onclick="ToggleTransactionForm">
-                Add Transaction
-            </button>
-            <a href="/children/@Child.Id" class="btn btn-outline-secondary btn-sm">
-                Details
-            </a>
-        </div>
-
-        @if (ShowTransactionForm)
+        @if (Child.LastAllowanceDate.HasValue)
         {
-            <div class="transaction-form mt-3">
-                <TransactionForm ChildId="@Child.Id"
-                               OnSaved="@HandleTransactionSaved"
-                               OnCancelled="@(() => ShowTransactionForm = false)" />
+            <div class="flex justify-between">
+                <span class="text-gray-500">Last Paid:</span>
+                <span class="font-medium text-gray-700">@Child.LastAllowanceDate.Value.ToString("MMM dd, yyyy")</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Next Payment:</span>
+                <span class="font-medium text-green-600">@GetNextAllowanceDate()</span>
+            </div>
+        }
+        else
+        {
+            <div class="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2">
+                <svg class="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-sm text-amber-700">First allowance pending</span>
             </div>
         }
     </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-2 pt-4 border-t border-gray-100">
+        <button class="btn-primary btn-sm flex-1" @onclick="ToggleTransactionForm">
+            @if (ShowTransactionForm)
+            {
+                <span>Cancel</span>
+            }
+            else
+            {
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add Transaction</span>
+            }
+        </button>
+        <a href="/children/@Child.Id" class="btn-outline btn-sm">
+            Details
+        </a>
+    </div>
+
+    <!-- Transaction Form (Collapsible) -->
+    @if (ShowTransactionForm)
+    {
+        <div class="mt-4 p-4 rounded-lg bg-gray-50 border border-gray-200 animate-fadeIn">
+            <TransactionForm ChildId="@Child.Id"
+                           OnSaved="@HandleTransactionSaved"
+                           OnCancelled="@(() => ShowTransactionForm = false)" />
+        </div>
+    }
 </div>
 
 @code {
