@@ -1,0 +1,123 @@
+@using AllowanceTracker.DTOs
+@using AllowanceTracker.Services
+@inject ITransactionAnalyticsService AnalyticsService
+
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h4 class="text-lg font-semibold text-gray-900">Balance History</h4>
+        @if (ShowControls)
+        {
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+                <button type="button"
+                        class="@GetButtonClass(7)"
+                        @onclick="() => LoadData(7)">
+                    7D
+                </button>
+                <button type="button"
+                        class="@GetButtonClass(30)"
+                        @onclick="() => LoadData(30)">
+                    30D
+                </button>
+                <button type="button"
+                        class="@GetButtonClass(90)"
+                        @onclick="() => LoadData(90)">
+                    90D
+                </button>
+                <button type="button"
+                        class="@GetButtonClass(365)"
+                        @onclick="() => LoadData(365)">
+                    1Y
+                </button>
+            </div>
+        }
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="flex items-center justify-center py-12">
+            <div class="spinner h-8 w-8"></div>
+        </div>
+    }
+    else if (Data.Any())
+    {
+        <div class="chart-data">
+            <!-- Balance trend visualization -->
+            <div class="space-y-3">
+                @foreach (var point in Data.TakeLast(10))
+                {
+                    <div class="flex items-center justify-between text-sm py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <span class="text-gray-600 font-medium">@point.Date.ToString("MMM dd")</span>
+                        <span class="balance-display text-green-600">@point.Balance.ToString("C")</span>
+                        @if (!string.IsNullOrEmpty(point.TransactionDescription))
+                        {
+                            <span class="text-gray-500 text-xs truncate ml-2 max-w-xs">@point.TransactionDescription</span>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="mt-4 text-center border-t pt-4">
+                <small class="text-gray-500">Showing last 10 of @Data.Count data points</small>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <p class="mt-2 text-gray-600">No transaction history yet.</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ChildId { get; set; }
+    [Parameter] public int DefaultDays { get; set; } = 30;
+    [Parameter] public bool ShowControls { get; set; } = true;
+
+    private List<BalancePoint> Data { get; set; } = new();
+    private bool IsLoading { get; set; } = true;
+    private int currentDays;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentDays = DefaultDays;
+        await LoadData(currentDays);
+    }
+
+    private async Task LoadData(int days)
+    {
+        IsLoading = true;
+        currentDays = days;
+        StateHasChanged();
+
+        try
+        {
+            Data = await AnalyticsService.GetBalanceHistoryAsync(ChildId, days);
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GetButtonClass(int days)
+    {
+        var baseClasses = "px-4 py-2 text-sm font-medium border transition-colors";
+        var isFirst = days == 7;
+        var isLast = days == 365;
+        var roundingClasses = isFirst ? "rounded-l-md" : isLast ? "rounded-r-md" : "";
+        var activeClasses = currentDays == days
+            ? "bg-green-600 text-white border-green-600 z-10"
+            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50";
+
+        return $"{baseClasses} {roundingClasses} {activeClasses}";
+    }
+
+    public async Task RefreshDataAsync()
+    {
+        await LoadData(currentDays);
+    }
+}

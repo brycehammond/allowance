@@ -2,206 +2,148 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using AllowanceTracker.DTOs
 @using AllowanceTracker.Services
+@using AllowanceTracker.Components
 @inject ITransactionAnalyticsService AnalyticsService
 @inject IFamilyService FamilyService
 @inject NavigationManager Navigation
 
 <PageTitle>Analytics Dashboard</PageTitle>
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Analytics Dashboard</h1>
-        <a href="/dashboard" class="btn btn-secondary">
-            <span class="oi oi-arrow-left"></span> Back to Dashboard
-        </a>
-    </div>
-
-    @if (Loading)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else if (!Children.Any())
-    {
-        <p>No children found. Add a child to get started.</p>
-    }
-    else
-    {
-        <!-- Child Selector -->
-        <div class="mb-4">
-            <label for="childSelect" class="form-label">Select Child:</label>
-            <select id="childSelect" class="form-select" @onchange="OnChildSelected">
-                <option value="">-- Select a child --</option>
-                @foreach (var child in Children)
-                {
-                    <option value="@child.Id">@child.FirstName @child.LastName</option>
-                }
-            </select>
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+                <p class="mt-1 text-sm text-gray-600">Track financial progress and trends</p>
+            </div>
+            <a href="/dashboard" class="btn-ghost">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Dashboard
+            </a>
         </div>
 
-        @if (SelectedChildId != Guid.Empty)
+        @if (Loading)
         {
-            <div class="row">
-                <!-- Balance History -->
-                <div class="col-md-12 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Balance History</h3>
-                        </div>
-                        <div class="card-body">
-                            @if (BalanceHistory != null && BalanceHistory.Any())
-                            {
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Balance</th>
-                                                <th>Description</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var point in BalanceHistory.Take(10))
-                                            {
-                                                <tr>
-                                                    <td>@point.Date.ToString("MM/dd/yyyy")</td>
-                                                    <td>$@point.Balance.ToString("F2")</td>
-                                                    <td>@point.TransactionDescription</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <p>No balance history available.</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Income vs Spending -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Income vs Spending</h3>
-                        </div>
-                        <div class="card-body">
-                            @if (IncomeVsSpending != null)
-                            {
-                                <div class="mb-3">
-                                    <strong>Total Income:</strong> $@IncomeVsSpending.TotalIncome.ToString("F2")
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Total Spending:</strong> $@IncomeVsSpending.TotalSpending.ToString("F2")
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Net Savings:</strong> $@IncomeVsSpending.NetSavings.ToString("F2")
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Savings Rate:</strong> @IncomeVsSpending.SavingsRate.ToString("F1")%
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Income Transactions:</strong> @IncomeVsSpending.IncomeTransactionCount
-                                </div>
-                                <div>
-                                    <strong>Spending Transactions:</strong> @IncomeVsSpending.SpendingTransactionCount
-                                </div>
-                            }
-                            else
-                            {
-                                <p>Loading income vs spending data...</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Spending Breakdown -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Spending Breakdown</h3>
-                        </div>
-                        <div class="card-body">
-                            @if (SpendingBreakdown != null && SpendingBreakdown.Any())
-                            {
-                                <div class="table-responsive">
-                                    <table class="table table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Category</th>
-                                                <th>Amount</th>
-                                                <th>Count</th>
-                                                <th>%</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var category in SpendingBreakdown.Take(10))
-                                            {
-                                                <tr>
-                                                    <td>@category.Category</td>
-                                                    <td>$@category.Amount.ToString("F2")</td>
-                                                    <td>@category.TransactionCount</td>
-                                                    <td>@category.Percentage.ToString("F1")%</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <p>No spending data available.</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Monthly Comparison -->
-                <div class="col-md-12 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Monthly Comparison</h3>
-                        </div>
-                        <div class="card-body">
-                            @if (MonthlyComparison != null && MonthlyComparison.Any())
-                            {
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Month</th>
-                                                <th>Income</th>
-                                                <th>Spending</th>
-                                                <th>Savings</th>
-                                                <th>Ending Balance</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var month in MonthlyComparison)
-                                            {
-                                                <tr>
-                                                    <td>@month.MonthName @month.Year</td>
-                                                    <td>$@month.Income.ToString("F2")</td>
-                                                    <td>$@month.Spending.ToString("F2")</td>
-                                                    <td>$@month.NetSavings.ToString("F2")</td>
-                                                    <td>$@month.EndingBalance.ToString("F2")</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <p>No monthly comparison data available.</p>
-                            }
-                        </div>
-                    </div>
-                </div>
+            <div class="flex items-center justify-center py-12">
+                <div class="spinner h-12 w-12"></div>
             </div>
         }
-    }
+        else if (!Children.Any())
+        {
+            <div class="bg-white rounded-xl shadow-sm p-12 text-center">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <p class="mt-4 text-lg text-gray-600">No children found. Add a child to get started.</p>
+            </div>
+        }
+        else
+        {
+            <!-- Child Selector -->
+            <div class="mb-6 bg-white rounded-xl shadow-sm p-4">
+                <label for="childSelect" class="form-label">Select Child</label>
+                <select id="childSelect" class="form-input" @onchange="OnChildSelected">
+                    <option value="">-- Select a child --</option>
+                    @foreach (var child in Children)
+                    {
+                        <option value="@child.Id" selected="@(child.Id == SelectedChildId)">@child.FirstName @child.LastName</option>
+                    }
+                </select>
+            </div>
+
+            @if (SelectedChildId != Guid.Empty)
+            {
+                <div class="space-y-6">
+                    <!-- Balance History Chart -->
+                    <BalanceHistoryChart ChildId="@SelectedChildId" />
+
+                    <!-- Two Column Layout for Stats and Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Income vs Spending Summary Card -->
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Income vs Spending Summary</h3>
+                            @if (IncomeVsSpending != null)
+                            {
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center pb-3 border-b">
+                                        <span class="text-sm text-gray-600">Total Income</span>
+                                        <span class="balance-display text-green-600">@IncomeVsSpending.TotalIncome.ToString("C")</span>
+                                    </div>
+                                    <div class="flex justify-between items-center pb-3 border-b">
+                                        <span class="text-sm text-gray-600">Total Spending</span>
+                                        <span class="balance-display text-red-600">@IncomeVsSpending.TotalSpending.ToString("C")</span>
+                                    </div>
+                                    <div class="flex justify-between items-center pb-3 border-b">
+                                        <span class="text-sm text-gray-600">Net Savings</span>
+                                        <span class="balance-display @(IncomeVsSpending.NetSavings >= 0 ? "text-blue-600" : "text-red-600")">@IncomeVsSpending.NetSavings.ToString("C")</span>
+                                    </div>
+                                    <div class="flex justify-between items-center pb-3 border-b bg-green-50 -mx-6 px-6 py-3 rounded-lg">
+                                        <span class="text-sm font-semibold text-gray-900">Savings Rate</span>
+                                        <span class="text-lg font-bold font-mono text-green-600">@IncomeVsSpending.SavingsRate.ToString("F1")%</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4 pt-2">
+                                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-gray-900">@IncomeVsSpending.IncomeTransactionCount</div>
+                                            <div class="text-xs text-gray-600">Income Transactions</div>
+                                        </div>
+                                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                            <div class="text-2xl font-bold text-gray-900">@IncomeVsSpending.SpendingTransactionCount</div>
+                                            <div class="text-xs text-gray-600">Spending Transactions</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="flex items-center justify-center py-8">
+                                    <div class="spinner h-8 w-8"></div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Spending Breakdown Card -->
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Spending Breakdown</h3>
+                            @if (SpendingBreakdown != null && SpendingBreakdown.Any())
+                            {
+                                <div class="space-y-2">
+                                    @foreach (var category in SpendingBreakdown.Take(8))
+                                    {
+                                        <div class="space-y-1">
+                                            <div class="flex justify-between items-center text-sm">
+                                                <span class="text-gray-900 font-medium">@category.Category</span>
+                                                <span class="balance-display text-gray-700">@category.Amount.ToString("C")</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                                    <div class="bg-green-500 h-2 rounded-full transition-all"
+                                                         style="width: @category.Percentage.ToString("F1")%"></div>
+                                                </div>
+                                                <span class="text-xs text-gray-600 w-12 text-right">@category.Percentage.ToString("F1")%</span>
+                                            </div>
+                                            <div class="text-xs text-gray-500">@category.TransactionCount transaction@(category.TransactionCount != 1 ? "s" : "")</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-8">
+                                    <p class="text-gray-600">No spending data available.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Income vs Spending Chart -->
+                    <IncomeSpendingChart ChildId="@SelectedChildId" ShowExportButton="true" />
+                </div>
+            }
+        }
+    </div>
 </div>
 
 @code {
