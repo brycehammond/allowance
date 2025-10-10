@@ -8,6 +8,7 @@ using AllowanceTracker.Data;
 using AllowanceTracker.Hubs;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
+using AllowanceTracker.BackgroundServices;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +62,13 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IAllowanceService, AllowanceService>();
 builder.Services.AddScoped<IFamilyService, FamilyService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+
+// Add HttpContextAccessor for accessing HTTP context in services
+builder.Services.AddHttpContextAccessor();
+
+// Add Weekly Allowance Background Job
+builder.Services.AddHostedService<WeeklyAllowanceJob>();
 
 var app = builder.Build();
 

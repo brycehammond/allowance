@@ -1,0 +1,36 @@
+@using AllowanceTracker.Services
+@using AllowanceTracker.Models
+@inject IAccountService AccountService
+@inject NavigationManager Navigation
+
+@if (CurrentUser != null)
+{
+    <div class="d-flex align-items-center">
+        <span class="me-3">Hello, @CurrentUser.FirstName!</span>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="HandleLogout">
+            Logout
+        </button>
+    </div>
+}
+else
+{
+    <div>
+        <a href="/login" class="btn btn-sm btn-primary me-2">Login</a>
+        <a href="/register" class="btn btn-sm btn-outline-primary">Register</a>
+    </div>
+}
+
+@code {
+    private ApplicationUser? CurrentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = await AccountService.GetCurrentUserAsync();
+    }
+
+    private async Task HandleLogout()
+    {
+        await AccountService.LogoutAsync();
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+}
