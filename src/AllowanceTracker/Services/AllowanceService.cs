@@ -11,17 +11,20 @@ public class AllowanceService : IAllowanceService
     private readonly AllowanceContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly ITransactionService _transactionService;
+    private readonly ISavingsAccountService? _savingsAccountService;
     private readonly ILogger<AllowanceService>? _logger;
 
     public AllowanceService(
         AllowanceContext context,
         ICurrentUserService currentUser,
         ITransactionService transactionService,
+        ISavingsAccountService? savingsAccountService = null,
         ILogger<AllowanceService>? logger = null)
     {
         _context = context;
         _currentUser = currentUser;
         _transactionService = transactionService;
+        _savingsAccountService = savingsAccountService;
         _logger = logger;
     }
 
@@ -49,7 +52,28 @@ public class AllowanceService : IAllowanceService
             TransactionCategory.Allowance,
             $"Weekly Allowance - {DateTime.UtcNow:yyyy-MM-dd}");
 
-        await _transactionService.CreateTransactionAsync(dto);
+        var transaction = await _transactionService.CreateTransactionAsync(dto);
+
+        // Process automatic savings transfer if enabled
+        if (_savingsAccountService != null)
+        {
+            try
+            {
+                await _savingsAccountService.ProcessAutomaticTransferAsync(
+                    childId, transaction.Id, child.WeeklyAllowance);
+
+                _logger?.LogInformation(
+                    "Processed automatic savings transfer for child {ChildId}",
+                    childId);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex,
+                    "Failed to process automatic savings transfer for child {ChildId}. Allowance was paid successfully.",
+                    childId);
+                // Don't throw - allowance payment succeeded, savings transfer is optional
+            }
+        }
 
         // Update last allowance date
         child.LastAllowanceDate = DateTime.UtcNow;
