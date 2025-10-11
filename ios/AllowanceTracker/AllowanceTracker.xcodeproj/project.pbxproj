@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -71,6 +71,19 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		02B60E542E9AE14000142DC8 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				"TEMP_3CF7CA87-6C91-4CE5-B1FB-ECC8072DAD8D" /* AllowanceTracker.xcodeproj */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		02B60E552E9AE14100142DC8 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		130361A734BE4C22559C8DB4 /* ModelTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -144,6 +157,7 @@
 				82EF93D3E39C4015F68E6008 /* ViewModels */,
 				407023F9E2ECCA37E6FEB70C /* Views */,
 				34619E48D893B711CDB6C054 /* Products */,
+				02B60E542E9AE14000142DC8 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -238,20 +252,6 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		"TEMP_8D0C7969-8939-44C2-ABC2-9672833190B0" /* AllowanceTracker */ = {
-			isa = PBXGroup;
-			children = (
-				"TEMP_3CF7CA87-6C91-4CE5-B1FB-ECC8072DAD8D" /* AllowanceTracker.xcodeproj */,
-				82EF93D3E39C4015F68E6008 /* ViewModels */,
-				DBA727681DCAEBD4000F973F /* App */,
-				EF1720C3B9179CFCB0481AE3 /* Models */,
-				840A784D3A663523ECB6196B /* Utilities */,
-				407023F9E2ECCA37E6FEB70C /* Views */,
-				3AFA4BCB420BC8EAE3362C3A /* Services */,
-			);
-			path = AllowanceTracker;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -316,8 +316,13 @@
 			);
 			mainGroup = 7C1DD20F7DA46F175719B9B7;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 02B60E552E9AE14100142DC8 /* Products */;
+					ProjectRef = "TEMP_3CF7CA87-6C91-4CE5-B1FB-ECC8072DAD8D" /* AllowanceTracker.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				210C8DE349F66D2F314168FF /* AllowanceTracker */,
