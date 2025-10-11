@@ -63,6 +63,7 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ITransactionAnalyticsService, TransactionAnalyticsService>();
 builder.Services.AddScoped<IAllowanceService, AllowanceService>();
+builder.Services.AddScoped<ISavingsAccountService, SavingsAccountService>();
 builder.Services.AddScoped<IFamilyService, FamilyService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IChildManagementService, ChildManagementService>();
