@@ -116,6 +116,24 @@ stages:
               package: '$(Pipeline.Workspace)/drop/publish/*.zip'
               runtimeStack: 'DOTNETCORE|8.0'
 
+          - task: AzureCLI@2
+            displayName: 'Run EF Core Migrations'
+            inputs:
+              azureSubscription: '$(AzureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Install dotnet-ef tool
+                dotnet tool install --global dotnet-ef --version 8.0.11
+
+                # Extract the published app
+                cd $(Pipeline.Workspace)/drop/publish
+                unzip -o *.zip -d app
+                cd app
+
+                # Run migrations
+                dotnet ef database update --connection "$(AzureSqlConnectionString)"
+
 - stage: CodeQuality
   displayName: 'Code Quality'
   dependsOn: []

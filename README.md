@@ -25,13 +25,13 @@ A modern, real-time allowance management system built with ASP.NET Core 8.0 and 
 - 🐳 **Docker Ready**: One-command deployment with docker-compose
 - 🚀 **CI/CD**: Automated testing and deployment via GitHub Actions
 - 🔒 **JWT Authentication**: Secure API access for mobile apps
-- 💾 **PostgreSQL**: Reliable data persistence with EF Core migrations
+- 💾 **Azure SQL Server**: Reliable data persistence with EF Core migrations
 
 ## 🏗️ Architecture
 
 ```
 ASP.NET Core 8.0 Blazor Server
-├── Data Layer (EF Core 8 + PostgreSQL)
+├── Data Layer (EF Core 8 + SQL Server)
 │   ├── ApplicationUser (Identity)
 │   ├── Family
 │   ├── Child
@@ -54,7 +54,7 @@ ASP.NET Core 8.0 Blazor Server
 
 ### Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [PostgreSQL 16+](https://www.postgresql.org/download/) or Docker
+- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) or Docker
 - Optional: [Docker Desktop](https://www.docker.com/products/docker-desktop) for containerized deployment
 
 ### Option 1: Docker (Recommended)
@@ -90,7 +90,7 @@ cd allowance-tracker
 dotnet restore
 
 # Update connection string in appsettings.Development.json
-# Set your PostgreSQL connection details
+# Set your SQL Server connection details
 
 # Apply database migrations
 cd src/AllowanceTracker
@@ -251,7 +251,7 @@ allowance/
 |----------|-----------|
 | **Framework** | ASP.NET Core 8.0 |
 | **UI** | Blazor Server (real-time, no JavaScript) |
-| **Database** | PostgreSQL 16 |
+| **Database** | Azure SQL Server / SQL Server 2022 |
 | **ORM** | Entity Framework Core 8 |
 | **Auth** | ASP.NET Core Identity + JWT Bearer |
 | **Real-Time** | SignalR (built into Blazor) |
@@ -423,7 +423,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet)
 - UI powered by [Blazor](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor)
-- Database by [PostgreSQL](https://www.postgresql.org/)
+- Database by [Microsoft SQL Server](https://www.microsoft.com/sql-server)
 - Testing with [xUnit](https://xunit.net/), [FluentAssertions](https://fluentassertions.com/), and [bUnit](https://bunit.dev/)
 - Deployed on [Railway](https://railway.app/) or [Azure](https://azure.microsoft.com/)
 - Developed with ❤️ using Test-Driven Development
