@@ -11,11 +11,20 @@ namespace AllowanceTracker.Tests.Components;
 
 public class AnalyticsTests
 {
+    private static Mock<ICategoryService> CreateMockCategoryService()
+    {
+        var mock = new Mock<ICategoryService>();
+        mock.Setup(x => x.GetCategorySpendingAsync(It.IsAny<Guid>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+            .ReturnsAsync(new List<CategorySpendingDto>());
+        return mock;
+    }
+
     [Fact]
     public void Analytics_ShowsLoadingMessage_Initially()
     {
         // Arrange
         var mockAnalyticsService = new Mock<ITransactionAnalyticsService>();
+        var mockCategoryService = CreateMockCategoryService();
         var mockFamilyService = new Mock<IFamilyService>();
         mockFamilyService
             .Setup(x => x.GetChildrenAsync())
@@ -23,6 +32,7 @@ public class AnalyticsTests
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockAnalyticsService.Object);
+        ctx.Services.AddSingleton(mockCategoryService.Object);
         ctx.Services.AddSingleton(mockFamilyService.Object);
         ctx.Services.AddAuthorizationCore();
 
@@ -45,6 +55,7 @@ public class AnalyticsTests
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockAnalyticsService.Object);
+        ctx.Services.AddSingleton(CreateMockCategoryService().Object);
         ctx.Services.AddSingleton(mockFamilyService.Object);
         ctx.Services.AddAuthorizationCore();
 
@@ -85,6 +96,7 @@ public class AnalyticsTests
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockAnalyticsService.Object);
+        ctx.Services.AddSingleton(CreateMockCategoryService().Object);
         ctx.Services.AddSingleton(mockFamilyService.Object);
         ctx.Services.AddAuthorizationCore();
 
@@ -111,6 +123,7 @@ public class AnalyticsTests
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockAnalyticsService.Object);
+        ctx.Services.AddSingleton(CreateMockCategoryService().Object);
         ctx.Services.AddSingleton(mockFamilyService.Object);
         ctx.Services.AddAuthorizationCore();
 
@@ -168,6 +181,7 @@ public class AnalyticsTests
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockAnalyticsService.Object);
+        ctx.Services.AddSingleton(CreateMockCategoryService().Object);
         ctx.Services.AddSingleton(mockFamilyService.Object);
         ctx.Services.AddAuthorizationCore();
 
@@ -217,6 +231,7 @@ public class AnalyticsTests
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockAnalyticsService.Object);
+        ctx.Services.AddSingleton(CreateMockCategoryService().Object);
         ctx.Services.AddSingleton(mockFamilyService.Object);
         ctx.Services.AddAuthorizationCore();
 
@@ -267,6 +282,7 @@ public class AnalyticsTests
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockAnalyticsService.Object);
+        ctx.Services.AddSingleton(CreateMockCategoryService().Object);
         ctx.Services.AddSingleton(mockFamilyService.Object);
         ctx.Services.AddAuthorizationCore();
 
@@ -324,6 +340,7 @@ public class AnalyticsTests
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockAnalyticsService.Object);
+        ctx.Services.AddSingleton(CreateMockCategoryService().Object);
         ctx.Services.AddSingleton(mockFamilyService.Object);
         ctx.Services.AddAuthorizationCore();
 
@@ -380,6 +397,7 @@ public class AnalyticsTests
 
         using var ctx = new TestContext();
         ctx.Services.AddSingleton(mockAnalyticsService.Object);
+        ctx.Services.AddSingleton(CreateMockCategoryService().Object);
         ctx.Services.AddSingleton(mockFamilyService.Object);
         ctx.Services.AddAuthorizationCore();
 

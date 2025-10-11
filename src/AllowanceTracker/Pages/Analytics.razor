@@ -4,6 +4,7 @@
 @using AllowanceTracker.Services
 @using AllowanceTracker.Components
 @inject ITransactionAnalyticsService AnalyticsService
+@inject ICategoryService CategoryService
 @inject IFamilyService FamilyService
 @inject NavigationManager Navigation
 
@@ -114,8 +115,8 @@
                                     {
                                         <div class="space-y-1">
                                             <div class="flex justify-between items-center text-sm">
-                                                <span class="text-gray-900 font-medium">@category.Category</span>
-                                                <span class="balance-display text-gray-700">@category.Amount.ToString("C")</span>
+                                                <span class="text-gray-900 font-medium">@category.CategoryName</span>
+                                                <span class="balance-display text-gray-700">@category.TotalAmount.ToString("C")</span>
                                             </div>
                                             <div class="flex items-center gap-2">
                                                 <div class="flex-1 bg-gray-200 rounded-full h-2">
@@ -154,7 +155,7 @@
     // Analytics Data
     private List<BalancePoint>? BalanceHistory;
     private IncomeSpendingSummary? IncomeVsSpending;
-    private List<CategoryBreakdown>? SpendingBreakdown;
+    private List<CategorySpendingDto>? SpendingBreakdown;
     private List<MonthlyComparison>? MonthlyComparison;
 
     protected override async Task OnInitializedAsync()
@@ -199,14 +200,14 @@
             // Load all analytics data in parallel
             var balanceTask = AnalyticsService.GetBalanceHistoryAsync(SelectedChildId, 30);
             var incomeTask = AnalyticsService.GetIncomeVsSpendingAsync(SelectedChildId, null, null);
-            var breakdownTask = AnalyticsService.GetSpendingBreakdownAsync(SelectedChildId, null, null);
+            var categoryTask = CategoryService.GetCategorySpendingAsync(SelectedChildId, null, null);
             var monthlyTask = AnalyticsService.GetMonthlyComparisonAsync(SelectedChildId, 6);
 
-            await Task.WhenAll(balanceTask, incomeTask, breakdownTask, monthlyTask);
+            await Task.WhenAll(balanceTask, incomeTask, categoryTask, monthlyTask);
 
             BalanceHistory = await balanceTask;
             IncomeVsSpending = await incomeTask;
-            SpendingBreakdown = await breakdownTask;
+            SpendingBreakdown = await categoryTask;
             MonthlyComparison = await monthlyTask;
 
             StateHasChanged();
