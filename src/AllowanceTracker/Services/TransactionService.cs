@@ -98,6 +98,7 @@ public class TransactionService : ITransactionService
     {
         return await _context.Transactions
             .AsNoTracking()
+            .Include(t => t.CreatedBy)
             .Where(t => t.ChildId == childId)
             .OrderByDescending(t => t.CreatedAt)
             .Take(limit)

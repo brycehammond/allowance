@@ -12,7 +12,7 @@ struct ContentView: View {
         Group {
             if authViewModel.isAuthenticated {
                 // Authenticated - show main app
-                DashboardPlaceholderView()
+                DashboardView()
             } else {
                 // Not authenticated - show login
                 LoginView()

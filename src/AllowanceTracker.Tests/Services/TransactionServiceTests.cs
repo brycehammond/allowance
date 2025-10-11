@@ -31,6 +31,19 @@ public class TransactionServiceTests : IDisposable
         _mockCurrentUser = new Mock<ICurrentUserService>();
         _mockCurrentUser.Setup(x => x.UserId).Returns(_currentUserId);
 
+        // Add current user to database for CreatedBy navigation
+        var currentUser = new ApplicationUser
+        {
+            Id = _currentUserId,
+            UserName = "currentuser@test.com",
+            Email = "currentuser@test.com",
+            FirstName = "Current",
+            LastName = "User",
+            Role = UserRole.Parent
+        };
+        _context.Users.Add(currentUser);
+        _context.SaveChanges();
+
         _transactionService = new TransactionService(_context, _mockCurrentUser.Object);
     }
 

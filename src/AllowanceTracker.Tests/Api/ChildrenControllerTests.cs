@@ -13,13 +13,21 @@ public class ChildrenControllerTests
 {
     private readonly Mock<IChildManagementService> _mockChildManagementService;
     private readonly Mock<IAccountService> _mockAccountService;
+    private readonly Mock<IFamilyService> _mockFamilyService;
+    private readonly Mock<ITransactionService> _mockTransactionService;
     private readonly ChildrenController _controller;
 
     public ChildrenControllerTests()
     {
         _mockChildManagementService = new Mock<IChildManagementService>();
         _mockAccountService = new Mock<IAccountService>();
-        _controller = new ChildrenController(_mockChildManagementService.Object, _mockAccountService.Object);
+        _mockFamilyService = new Mock<IFamilyService>();
+        _mockTransactionService = new Mock<ITransactionService>();
+        _controller = new ChildrenController(
+            _mockChildManagementService.Object,
+            _mockAccountService.Object,
+            _mockFamilyService.Object,
+            _mockTransactionService.Object);
     }
 
     [Fact]
@@ -247,5 +255,158 @@ public class ChildrenControllerTests
         _mockChildManagementService.Verify(
             x => x.GetChildAsync(childId, userId),
             Times.Once);
+    }
+
+    // iOS Parity Tests
+
+    [Fact]
+    public async Task GetChildren_WithAuthenticatedUser_ReturnsListOfChildren()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var familyId = Guid.NewGuid();
+        var currentUser = new ApplicationUser
+        {
+            Id = userId,
+            Email = "parent@test.com",
+            Role = UserRole.Parent,
+            FamilyId = familyId
+        };
+
+        var familyChildren = new FamilyChildrenDto(
+            familyId,
+            "Test Family",
+            new List<ChildDetailDto>
+            {
+                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Alice", "Smith", "alice@test.com", 100m, 10m, null, null),
+                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Bob", "Smith", "bob@test.com", 150m, 15m, DateTime.UtcNow.AddDays(-3), DateTime.UtcNow.AddDays(4))
+            });
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);
+        _mockFamilyService.Setup(x => x.GetFamilyChildrenAsync(userId)).ReturnsAsync(familyChildren);
+
+        // Act
+        var result = await _controller.GetChildren();
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var children = okResult.Value.Should().BeAssignableTo<List<ChildDto>>().Subject;
+        children.Should().HaveCount(2);
+        children[0].FirstName.Should().Be("Alice");
+        children[1].FirstName.Should().Be("Bob");
+    }
+
+    [Fact]
+    public async Task GetChildren_WhenUserNotAuthenticated_ReturnsUnauthorized()
+    {
+        // Arrange
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync((ApplicationUser?)null);
+
+        // Act
+        var result = await _controller.GetChildren();
+
+        // Assert
+        result.Result.Should().BeOfType<UnauthorizedResult>();
+    }
+
+    [Fact]
+    public async Task GetChildren_WhenUserHasNoFamily_ReturnsBadRequest()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var currentUser = new ApplicationUser { Id = userId };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);
+        _mockFamilyService.Setup(x => x.GetFamilyChildrenAsync(userId)).ReturnsAsync((FamilyChildrenDto?)null);
+
+        // Act
+        var result = await _controller.GetChildren();
+
+        // Assert
+        var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetChildTransactions_WithValidChildId_ReturnsTransactions()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var childId = Guid.NewGuid();
+        var currentUser = new ApplicationUser
+        {
+            Id = userId,
+            Email = "parent@test.com",
+            Role = UserRole.Parent
+        };
+
+        var child = new Child
+        {
+            Id = childId,
+            User = new ApplicationUser { FirstName = "Alice", LastName = "Smith", Email = "alice@test.com" }
+        };
+
+        var transactions = new List<Transaction>
+        {
+            new Transaction
+            {
+                Id = Guid.NewGuid(),
+                ChildId = childId,
+                Amount = 10m,
+                Type = TransactionType.Credit,
+                Category = TransactionCategory.Allowance,
+                Description = "Weekly allowance",
+                BalanceAfter = 100m,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = new ApplicationUser { FirstName = "Parent", LastName = "User" }
+            }
+        };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);
+        _mockChildManagementService.Setup(x => x.GetChildAsync(childId, userId)).ReturnsAsync(child);
+        _mockTransactionService.Setup(x => x.GetChildTransactionsAsync(childId, 20)).ReturnsAsync(transactions);
+
+        // Act
+        var result = await _controller.GetChildTransactions(childId, 20);
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var transactionDtos = okResult.Value.Should().BeAssignableTo<List<TransactionDto>>().Subject;
+        transactionDtos.Should().HaveCount(1);
+        transactionDtos[0].Description.Should().Be("Weekly allowance");
+        transactionDtos[0].CreatedByName.Should().Be("Parent User");
+    }
+
+    [Fact]
+    public async Task GetChildTransactions_WhenUserNotAuthenticated_ReturnsUnauthorized()
+    {
+        // Arrange
+        var childId = Guid.NewGuid();
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync((ApplicationUser?)null);
+
+        // Act
+        var result = await _controller.GetChildTransactions(childId, 20);
+
+        // Assert
+        result.Result.Should().BeOfType<UnauthorizedResult>();
+    }
+
+    [Fact]
+    public async Task GetChildTransactions_WhenChildNotFound_ReturnsNotFound()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var childId = Guid.NewGuid();
+        var currentUser = new ApplicationUser { Id = userId, Role = UserRole.Parent };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);
+        _mockChildManagementService.Setup(x => x.GetChildAsync(childId, userId)).ReturnsAsync((Child?)null);
+
+        // Act
+        var result = await _controller.GetChildTransactions(childId, 20);
+
+        // Assert
+        var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
+        notFoundResult.Value.Should().NotBeNull();
     }
 }

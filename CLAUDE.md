@@ -139,11 +139,57 @@ public virtual ICollection<Transaction> Transactions { get; set; }
 ### ⚠️ IMPORTANT: We Follow Strict TDD
 **No production code without a failing test first!**
 
-### TDD Cycle: Red → Green → Refactor
+### TDD Cycle: Red → Green → Refactor → Commit
 1. **RED**: Write a failing test that describes what you want
 2. **GREEN**: Write minimum code to make test pass
 3. **REFACTOR**: Improve code while keeping tests green
-4. **REPEAT**: Move to next test
+4. **COMMIT**: Commit after each major feature is complete
+5. **REPEAT**: Move to next test
+
+### ⚠️ IMPORTANT: Commit After Each Major Feature
+**Commit frequently to preserve progress and enable easy rollback!**
+
+**When to Commit**:
+- ✅ After completing a full TDD cycle (Red → Green → Refactor)
+- ✅ After implementing a new API endpoint with tests
+- ✅ After adding a new service with full test coverage
+- ✅ After creating a new Blazor component with tests
+- ✅ After completing a phase milestone
+- ✅ After fixing a bug with regression tests
+- ✅ After successful refactoring with all tests passing
+
+**Commit Message Format**:
+```bash
+# Feature commits
+git commit -m "Add [Feature]: [Brief description]"
+# Example: "Add TransactionService: Create transaction with balance validation"
+
+# Test commits (if committing tests separately)
+git commit -m "Test [Feature]: [Test coverage description]"
+# Example: "Test TransactionService: Validate balance calculations"
+
+# Refactor commits
+git commit -m "Refactor [Component]: [Improvement description]"
+# Example: "Refactor ChildCard: Extract balance display logic"
+```
+
+**Before Committing - Checklist**:
+```bash
+# 1. Ensure all tests pass
+dotnet test
+# ✅ Expected: All tests GREEN
+
+# 2. Check for compilation warnings
+dotnet build
+# ⚠️ Fix any warnings before committing
+
+# 3. Stage and commit
+git add .
+git commit -m "Add [Feature]: [Description]"
+
+# 4. Verify commit includes intended changes
+git show HEAD
+```
 
 ### Adding a New API Endpoint (TDD Way)
 ```csharp
@@ -553,7 +599,8 @@ When working on this project:
 3. **Check current phase**: See Implementation Status
 4. **Run tests**: Ensure nothing broken before starting
 5. **Use patterns**: Follow established code patterns
-6. **Update this file**: Keep current with progress
+6. **Commit after major features**: Save progress frequently (see TDD Workflow section)
+7. **Update this file**: Keep current with progress
 
 ### Quick Commands
 ```bash

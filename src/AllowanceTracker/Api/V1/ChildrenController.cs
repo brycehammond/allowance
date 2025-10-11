@@ -12,11 +12,55 @@ public class ChildrenController : ControllerBase
 {
     private readonly IChildManagementService _childManagementService;
     private readonly IAccountService _accountService;
+    private readonly IFamilyService _familyService;
+    private readonly ITransactionService _transactionService;
 
-    public ChildrenController(IChildManagementService childManagementService, IAccountService accountService)
+    public ChildrenController(
+        IChildManagementService childManagementService,
+        IAccountService accountService,
+        IFamilyService familyService,
+        ITransactionService transactionService)
     {
         _childManagementService = childManagementService;
         _accountService = accountService;
+        _familyService = familyService;
+        _transactionService = transactionService;
+    }
+
+    /// <summary>
+    /// Get all children in current user's family (iOS parity)
+    /// </summary>
+    [HttpGet]
+    public async Task<ActionResult<List<ChildDto>>> GetChildren()
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var familyChildren = await _familyService.GetFamilyChildrenAsync(currentUser.Id);
+        if (familyChildren == null)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "NO_FAMILY",
+                    message = "Current user has no associated family"
+                }
+            });
+        }
+
+        var children = familyChildren.Children.Select(c => new ChildDto(
+            c.ChildId,
+            c.FirstName,
+            c.LastName,
+            c.WeeklyAllowance,
+            c.CurrentBalance,
+            c.LastAllowanceDate)).ToList();
+
+        return Ok(children);
     }
 
     /// <summary>
@@ -60,6 +104,40 @@ public class ChildrenController : ControllerBase
             nextAllowanceDate = nextAllowanceDate,
             createdAt = child.CreatedAt
         });
+    }
+
+    /// <summary>
+    /// Get transactions for a child (iOS parity)
+    /// </summary>
+    [HttpGet("{childId}/transactions")]
+    public async Task<ActionResult<List<TransactionDto>>> GetChildTransactions(
+        Guid childId,
+        [FromQuery] int limit = 20)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        // Verify user has access to this child
+        var child = await _childManagementService.GetChildAsync(childId, currentUser.Id);
+        if (child == null)
+        {
+            return NotFound(new
+            {
+                error = new
+                {
+                    code = "NOT_FOUND",
+                    message = "Child not found or access denied"
+                }
+            });
+        }
+
+        var transactions = await _transactionService.GetChildTransactionsAsync(childId, limit);
+        var transactionDtos = transactions.Select(TransactionDto.FromTransaction).ToList();
+
+        return Ok(transactionDtos);
     }
 
     /// <summary>
