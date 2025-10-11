@@ -17,6 +17,7 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<WishListItem> WishListItems { get; set; }
     public DbSet<CategoryBudget> CategoryBudgets { get; set; }
+    public DbSet<SavingsTransaction> SavingsTransactions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -47,6 +48,13 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.HasKey(e => e.Id);
             entity.Property(e => e.WeeklyAllowance).HasPrecision(10, 2);
             entity.Property(e => e.CurrentBalance).HasPrecision(10, 2);
+
+            // Savings account properties
+            entity.Property(e => e.SavingsBalance).HasPrecision(10, 2).HasDefaultValue(0m);
+            entity.Property(e => e.SavingsTransferAmount).HasPrecision(10, 2).HasDefaultValue(0m);
+            entity.Property(e => e.SavingsAccountEnabled).HasDefaultValue(false);
+            entity.Property(e => e.SavingsTransferType).HasDefaultValue(SavingsTransferType.None);
+            entity.Property(e => e.SavingsTransferPercentage).HasDefaultValue(0);
 
             entity.HasOne(e => e.User)
                   .WithOne(u => u.ChildProfile)
@@ -119,6 +127,29 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(e => e.ChildId);
+        });
+
+        // SavingsTransaction configuration
+        builder.Entity<SavingsTransaction>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Amount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.BalanceAfter).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.SavingsTransactions)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.CreatedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.CreatedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.ChildId);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.Type);
         });
     }
 
