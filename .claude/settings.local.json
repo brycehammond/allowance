@@ -24,7 +24,11 @@
       "Bash(dotnet ef migrations:*)",
       "Bash(dotnet ef database update:*)",
       "Bash(find:*)",
-      "Bash(mcr.microsoft.com/azure-sql-edge:latest)"
+      "Bash(mcr.microsoft.com/azure-sql-edge:latest)",
+      "Bash(dotnet run)",
+      "Bash(pkill:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,8 +1,6 @@
 using AllowanceTracker.Data;
 using AllowanceTracker.DTOs;
-using AllowanceTracker.Hubs;
 using AllowanceTracker.Models;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace AllowanceTracker.Services;
@@ -11,18 +9,15 @@ public class TransactionService : ITransactionService
 {
     private readonly AllowanceContext _context;
     private readonly ICurrentUserService _currentUser;
-    private readonly IHubContext<FamilyHub>? _hubContext;
     private readonly ICategoryService? _categoryService;
 
     public TransactionService(
         AllowanceContext context,
         ICurrentUserService currentUser,
-        IHubContext<FamilyHub>? hubContext = null,
         ICategoryService? categoryService = null)
     {
         _context = context;
         _currentUser = currentUser;
-        _hubContext = hubContext;
         _categoryService = categoryService;
     }
 
@@ -72,18 +67,6 @@ public class TransactionService : ITransactionService
             _context.Transactions.Add(transaction);
             await _context.SaveChangesAsync();
             await dbTransaction.CommitAsync();
-
-            // Broadcast to family members via SignalR
-            if (_hubContext != null)
-            {
-                var childWithFamily = await _context.Children
-                    .Include(c => c.Family)
-                    .FirstAsync(c => c.Id == dto.ChildId);
-
-                await _hubContext.Clients
-                    .Group($"family-{childWithFamily.FamilyId}")
-                    .SendAsync("TransactionCreated", dto.ChildId);
-            }
 
             return transaction;
         }

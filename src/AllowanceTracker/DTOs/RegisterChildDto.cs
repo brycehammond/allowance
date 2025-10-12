@@ -1,3 +1,5 @@
+using AllowanceTracker.Models;
+
 namespace AllowanceTracker.DTOs;
 
 public record RegisterChildDto(
@@ -5,4 +7,8 @@ public record RegisterChildDto(
     string Password,
     string FirstName,
     string LastName,
-    decimal WeeklyAllowance);
+    decimal WeeklyAllowance,
+    bool SavingsAccountEnabled = false,
+    SavingsTransferType SavingsTransferType = SavingsTransferType.Percentage,
+    decimal? SavingsTransferPercentage = null,
+    decimal? SavingsTransferAmount = null);

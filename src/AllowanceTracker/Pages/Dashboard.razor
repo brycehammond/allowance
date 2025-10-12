@@ -3,10 +3,8 @@
 @using AllowanceTracker.Components
 @using AllowanceTracker.DTOs
 @using AllowanceTracker.Services
-@using Microsoft.AspNetCore.SignalR.Client
 @inject IFamilyService FamilyService
 @inject NavigationManager Navigation
-@implements IAsyncDisposable
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -71,34 +69,10 @@ else
 @code {
     private bool Loading = true;
     private List<ChildDto> Children = new();
-    private HubConnection? _hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
         await RefreshData();
-
-        // Setup SignalR connection for real-time updates
-        try
-        {
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(Navigation.ToAbsoluteUri("/familyhub"))
-                .WithAutomaticReconnect()
-                .Build();
-
-            _hubConnection.On<Guid>("TransactionCreated", async (childId) =>
-            {
-                // Refresh data when transaction created
-                await RefreshData();
-                await InvokeAsync(StateHasChanged);
-            });
-
-            await _hubConnection.StartAsync();
-        }
-        catch
-        {
-            // SignalR connection failed (e.g., in tests or when server unavailable)
-            // Component still functions without real-time updates
-        }
     }
 
     private async Task RefreshData()
@@ -106,13 +80,5 @@ else
         Loading = true;
         Children = await FamilyService.GetChildrenAsync();
         Loading = false;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_hubConnection != null)
-        {
-            await _hubConnection.DisposeAsync();
-        }
     }
 }
