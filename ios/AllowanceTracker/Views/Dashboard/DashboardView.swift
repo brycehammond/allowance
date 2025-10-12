@@ -147,6 +147,12 @@ struct ChildDetailView: View {
                     Label("Transactions", systemImage: "list.bullet")
                 }
 
+            // Savings tab
+            SavingsAccountView(childId: child.id)
+                .tabItem {
+                    Label("Savings", systemImage: "banknote")
+                }
+
             // Wish List tab
             WishListView(childId: child.id)
                 .tabItem {

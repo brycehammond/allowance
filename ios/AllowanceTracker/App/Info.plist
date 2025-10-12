@@ -70,5 +70,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 	</dict>
+	<key>API_BASE_URL</key>
+	<string>https://api.allowancetracker.com</string>
 </dict>
 </plist>
