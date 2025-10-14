@@ -1,6 +1,6 @@
 # Allowance Tracker
 
-A modern, real-time allowance management system built with ASP.NET Core 8.0 and Blazor Server. Helps parents manage children's allowances, track spending, and teach financial responsibility through an intuitive web interface and REST API for mobile apps.
+A modern allowance management system built with **React** + **ASP.NET Core 8.0**. Helps parents manage children's allowances, track spending, and teach financial responsibility through an intuitive web interface and REST API.
 
 [![Build & Test](https://github.com/yourusername/allowance-tracker/workflows/CI%2FCD/badge.svg)](https://github.com/yourusername/allowance-tracker/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -11,105 +11,120 @@ A modern, real-time allowance management system built with ASP.NET Core 8.0 and 
 - 👨‍👩‍👧‍👦 **Family Management**: Manage multiple children in one family account
 - 💰 **Transaction Control**: Add money (chores, gifts) or deduct spending
 - 📅 **Automated Allowances**: Set weekly allowances that pay automatically
-- 📊 **Real-Time Updates**: See balance changes instantly across all devices
+- 📊 **Analytics Dashboard**: View spending trends, income vs expenses, and category breakdowns
+- 💾 **Savings Accounts**: Automatic savings transfers with deposits and withdrawals
+- 🎯 **Wish Lists**: Help children save for goals
 - 🔐 **Secure Authentication**: ASP.NET Core Identity with role-based access
 
 ### For Children
 - 💵 **Track Balance**: See current balance and transaction history
-- 🎯 **Wish List**: Save for things they want (coming soon)
-- 📱 **Mobile Access**: REST API ready for mobile app integration
+- 🎯 **Wish List**: Save for things they want with progress tracking
+- 💰 **Savings Account**: Build savings with parent oversight
+- 📱 **Mobile Ready**: iOS native app coming soon
 
 ### Technical Highlights
-- ⚡ **Real-Time**: SignalR integration for instant updates
-- 🧪 **Test-Driven**: 73 comprehensive tests with >90% coverage
-- 🐳 **Docker Ready**: One-command deployment with docker-compose
+- ⚛️ **Modern Frontend**: React 19 + TypeScript + Tailwind CSS v4
+- 🎨 **Rich Visualizations**: Recharts for analytics (line, bar, pie charts)
+- 🧪 **Test-Driven**: 213 comprehensive tests with >90% coverage
+- 🐳 **Docker Ready**: Containerized deployment
 - 🚀 **CI/CD**: Automated testing and deployment via GitHub Actions
-- 🔒 **JWT Authentication**: Secure API access for mobile apps
+- 🔒 **JWT Authentication**: Secure API access
 - 💾 **Azure SQL Server**: Reliable data persistence with EF Core migrations
+- ☁️ **Azure Deployment**: API on App Service, Frontend on Storage Static Website
+- 📡 **Optional SignalR**: Add real-time updates if needed (see [ADDING_SIGNALR.md](ADDING_SIGNALR.md))
 
 ## 🏗️ Architecture
 
 ```
-ASP.NET Core 8.0 Blazor Server
-├── Data Layer (EF Core 8 + SQL Server)
-│   ├── ApplicationUser (Identity)
-│   ├── Family
-│   ├── Child
-│   └── Transaction (immutable with audit trail)
-├── Business Logic (Services)
-│   ├── FamilyService
-│   ├── TransactionService (atomic operations)
-│   └── AllowanceService (background job)
-├── UI Layer (Blazor Components)
-│   ├── Dashboard (real-time)
-│   ├── ChildCard (reusable)
-│   └── TransactionForm (validated)
-├── API Layer (REST + JWT)
-│   └── TransactionsController
-└── Real-Time (SignalR)
-    └── FamilyHub
+┌─────────────────────────────────────────┐
+│         React Frontend (SPA)            │
+│  React 19 + TypeScript + Vite          │
+│  Tailwind CSS v4 + Recharts            │
+│  Axios for API calls                    │
+└──────────────────┬──────────────────────┘
+                   │ HTTP/REST + JWT
+                   ▼
+┌─────────────────────────────────────────┐
+│      ASP.NET Core 8.0 Web API           │
+├─────────────────────────────────────────┤
+│  ├── Controllers (REST endpoints)       │
+│  ├── Services (Business Logic)         │
+│  │   ├── FamilyService                 │
+│  │   ├── TransactionService            │
+│  │   ├── AllowanceService              │
+│  │   ├── WishListService               │
+│  │   ├── SavingsAccountService         │
+│  │   └── TransactionAnalyticsService   │
+│  └── Authentication (JWT + Identity)   │
+└──────────────────┬──────────────────────┘
+                   │ Entity Framework Core 8
+                   ▼
+┌─────────────────────────────────────────┐
+│      Azure SQL Database                 │
+│  ├── Users (ApplicationUser)           │
+│  ├── Families                           │
+│  ├── Children                           │
+│  ├── Transactions                       │
+│  ├── WishListItems                      │
+│  └── SavingsTransactions                │
+└──────────────────┬──────────────────────┘
+                   ▲
+                   │
+┌──────────────────────────────────────────┐
+│   Azure Function (Timer Trigger)        │
+│   Processes Weekly Allowances            │
+│   Runs daily at 10:00 AM UTC             │
+└──────────────────────────────────────────┘
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Node.js 20.x](https://nodejs.org/) (LTS recommended)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) or Docker
-- Optional: [Docker Desktop](https://www.docker.com/products/docker-desktop) for containerized deployment
 
-### Option 1: Docker (Recommended)
+### Local Development
 
-The fastest way to get started:
+For detailed step-by-step instructions, see **[LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md)**
+
+**Quick version:**
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/yourusername/allowance-tracker.git
 cd allowance-tracker
 
-# Create environment file
-cp .env.example .env
-# Edit .env and set your DB_PASSWORD and JWT_SECRET_KEY
+# 2. Start SQL Server (using Docker)
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" \
+  -p 1433:1433 --name allowancetracker-sql \
+  -d mcr.microsoft.com/azure-sql-edge:latest
 
-# Start the application
-docker-compose up -d
-
-# Open browser
-open http://localhost:5000
-```
-
-That's it! The app and database are running in containers.
-
-### Option 2: Local Development
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/allowance-tracker.git
-cd allowance-tracker
-
-# Restore dependencies
-dotnet restore
-
-# Update connection string in appsettings.Development.json
-# Set your SQL Server connection details
-
-# Apply database migrations
+# 3. Setup and run the API
 cd src/AllowanceTracker
 dotnet ef database update
-
-# Run the application
 dotnet run
+# API runs on https://localhost:7071
 
-# Open browser
-open https://localhost:7001
+# 4. Setup and run the React app (in a new terminal)
+cd web
+npm install
+echo "VITE_API_URL=https://localhost:7071" > .env.development
+npm run dev
+# Frontend runs on http://localhost:5173
 ```
 
-### Option 3: Railway Deployment
+**Open your browser to http://localhost:5173**
 
-Click the button below to deploy to Railway:
+### Azure Deployment
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template)
+Deploy to Azure with GitHub Actions:
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+1. Set up Azure resources (SQL, App Service, Function App, Storage)
+2. Configure GitHub Secrets
+3. Push to `main` branch - automatic deployment!
+
+See **[GITHUB-ACTIONS-DEPLOYMENT.md](GITHUB-ACTIONS-DEPLOYMENT.md)** for complete instructions.
 
 ## 🧪 Running Tests
 
@@ -129,12 +144,11 @@ dotnet test --filter "Category=Unit"
 dotnet watch test
 ```
 
-### Test Coverage Breakdown
-- **Phase 1**: ApplicationUser (12 tests) + Family (11 tests) = 23 tests
-- **Phase 2**: TransactionService (11 tests) = 35 tests total
-- **Phase 4**: AllowanceService (10 tests) = 45 tests total
-- **Enhancement 1**: JwtService (10 tests) + API (5 tests) = 60 tests total
-- **Enhancement 2**: Blazor Components (13 tests) = 73 tests total
+### Test Coverage
+- **213 tests passing** (API and Services)
+- **>90% code coverage** on critical business logic
+- Includes: Models, Services, Controllers, Authentication
+- CI/CD runs all tests automatically on every commit
 
 ## 📖 Usage
 
@@ -160,11 +174,13 @@ POST /api/v1/children
 
 ### Record a Transaction
 
-**Via Blazor UI:**
+**Via React UI:**
 1. Go to Dashboard
-2. Click "Add Transaction" on a child card
-3. Enter amount, type (Credit/Debit), and description
-4. Click "Save"
+2. Click on a child's card to view details
+3. Go to "Transactions" tab
+4. Click "Add Transaction"
+5. Enter amount, type (Credit/Debit), category, and description
+6. Click "Save"
 
 **Via API:**
 ```bash
@@ -181,11 +197,17 @@ curl -X POST https://localhost:7001/api/v1/transactions \
 
 ### Weekly Allowance
 
-Allowances are processed automatically every 24 hours by a background job (`WeeklyAllowanceJob`):
-- Checks all children with configured weekly allowances
-- Pays if 7+ days since last payment
-- Skips children with $0 allowance
-- Prevents double-payment within same week
+Allowances are processed **automatically** by an Azure Function with timer trigger:
+- ✅ Runs daily at 10:00 AM UTC
+- ✅ Checks all children with configured weekly allowances
+- ✅ Pays if 7+ days since last payment (or never paid before)
+- ✅ Creates transaction with category "Allowance"
+- ✅ Processes automatic savings transfer (if enabled)
+- ✅ Prevents double-payment within same week
+- ✅ Logs all activity to Application Insights
+- ✅ Nearly free on consumption plan
+
+**See [WEEKLY_ALLOWANCE.md](WEEKLY_ALLOWANCE.md) for complete details and testing instructions.**
 
 ## 🔐 API Authentication
 
@@ -221,27 +243,39 @@ Tokens expire after 24 hours. Claims included: `UserId`, `Email`, `Role`, `Famil
 ```
 allowance/
 ├── src/
-│   ├── AllowanceTracker/           # Main Blazor Server app
+│   ├── AllowanceTracker/           # ASP.NET Core Web API
 │   │   ├── Data/                   # EF Core DbContext & Migrations
 │   │   ├── Models/                 # Domain entities
+│   │   ├── DTOs/                   # Data transfer objects
 │   │   ├── Services/               # Business logic
-│   │   ├── Pages/                  # Blazor pages
-│   │   ├── Shared/                 # Blazor components
 │   │   ├── Api/V1/                 # REST API controllers
-│   │   ├── Hubs/                   # SignalR hubs
 │   │   └── Program.cs              # App startup & DI
+│   ├── AllowanceTracker.Functions/ # Azure Functions
+│   │   ├── WeeklyAllowanceFunction.cs # Timer trigger
+│   │   ├── Program.cs              # Function startup & DI
+│   │   └── host.json               # Function configuration
 │   └── AllowanceTracker.Tests/     # xUnit test project
 │       ├── Models/                 # Model tests
 │       ├── Services/               # Service tests
-│       ├── Api/                    # API controller tests
-│       └── Components/             # Blazor component tests (bUnit)
+│       └── Api/                    # API controller tests
+├── web/                            # React Frontend
+│   ├── src/
+│   │   ├── components/             # React components
+│   │   │   ├── tabs/               # Tab components
+│   │   │   └── forms/              # Form components
+│   │   ├── pages/                  # Page components
+│   │   ├── services/               # API service layer
+│   │   ├── contexts/               # React contexts
+│   │   ├── types/                  # TypeScript types
+│   │   └── App.tsx                 # Main app component
+│   ├── package.json
+│   └── vite.config.ts
+├── ios/                            # iOS Native App (SwiftUI)
 ├── specs/                          # Detailed specifications
-├── .github/workflows/              # GitHub Actions CI/CD
-├── docker-compose.yml              # Docker orchestration
-├── Dockerfile                      # Container definition
+├── azure-pipelines.yml             # Azure DevOps CI/CD
+├── AZURE-DEPLOYMENT.md             # Azure deployment guide
+├── LOCAL_DEVELOPMENT.md            # Local dev setup guide
 ├── CLAUDE.md                       # Development guide for AI
-├── DEPLOYMENT.md                   # Deployment instructions
-├── DOCKER.md                       # Docker usage guide
 └── README.md                       # This file
 ```
 
@@ -249,17 +283,19 @@ allowance/
 
 | Category | Technology |
 |----------|-----------|
-| **Framework** | ASP.NET Core 8.0 |
-| **UI** | Blazor Server (real-time, no JavaScript) |
+| **Backend Framework** | ASP.NET Core 8.0 Web API |
+| **Frontend Framework** | React 19 + TypeScript |
+| **Build Tool** | Vite 7 |
+| **Styling** | Tailwind CSS v4 |
+| **Charts** | Recharts |
+| **HTTP Client** | Axios |
 | **Database** | Azure SQL Server / SQL Server 2022 |
 | **ORM** | Entity Framework Core 8 |
 | **Auth** | ASP.NET Core Identity + JWT Bearer |
-| **Real-Time** | SignalR (built into Blazor) |
-| **Background Jobs** | IHostedService (built-in) |
-| **Testing** | xUnit + FluentAssertions + Moq + bUnit |
-| **Containerization** | Docker + docker-compose |
-| **CI/CD** | GitHub Actions + Azure Pipelines |
-| **Deployment** | Railway / Azure App Service |
+| **Background Jobs** | Azure Functions (Timer Trigger) |
+| **Testing** | xUnit + FluentAssertions + Moq |
+| **CI/CD** | GitHub Actions |
+| **Deployment** | Azure App Service (API) + Azure Functions + Azure Storage (Frontend) |
 
 ## 🔒 Security
 
@@ -337,9 +373,11 @@ We follow strict Test-Driven Development (TDD):
 
 ## 📝 Documentation
 
-- [**CLAUDE.md**](CLAUDE.md) - Development guide for AI assistants (comprehensive)
-- [**DEPLOYMENT.md**](DEPLOYMENT.md) - Deployment instructions (Railway, Azure, Docker)
-- [**DOCKER.md**](DOCKER.md) - Docker usage guide
+- [**LOCAL_DEVELOPMENT.md**](LOCAL_DEVELOPMENT.md) - **START HERE** - Complete local setup guide
+- [**GITHUB-ACTIONS-DEPLOYMENT.md**](GITHUB-ACTIONS-DEPLOYMENT.md) - Deploy to Azure with GitHub Actions
+- [**WEEKLY_ALLOWANCE.md**](WEEKLY_ALLOWANCE.md) - Azure Function for automated allowances
+- [**ADDING_SIGNALR.md**](ADDING_SIGNALR.md) - Add real-time updates (optional)
+- [**CLAUDE.md**](CLAUDE.md) - Development guide for AI assistants
 - [**specs/**](specs/) - Detailed specifications:
   - `01-overview.md` - System overview
   - `02-database-schema.md` - EF Core models
@@ -347,29 +385,32 @@ We follow strict Test-Driven Development (TDD):
   - `04-implementation-phases.md` - TDD roadmap
   - `05-testing-strategy.md` - Testing approach
   - `06-tdd-best-practices.md` - TDD patterns
-  - `07-blazor-ui-specification.md` - UI components
-  - `08-remaining-enhancements.md` - Future features
+  - `08-ios-app-specification.md` - iOS native app (SwiftUI)
+  - `09-design-system.md` - Design system and UI patterns
 
 ## 🗺️ Roadmap
 
 ### Completed ✅
 - [x] Phase 1: Foundation with EF Core & Identity
 - [x] Phase 2: Transaction Management with Atomic Operations
-- [x] Phase 3: Blazor UI with Real-Time Updates
-- [x] Phase 4: Weekly Allowance Background Job
-- [x] Enhancement 1: JWT Authentication & REST API
-- [x] Enhancement 2: Advanced Blazor Components
-- [x] Enhancement 3: SignalR Real-Time Broadcasting
-- [x] Enhancement 4: Docker + CI/CD + Deployment
+- [x] Phase 3: React Frontend Migration (from Blazor)
+- [x] Phase 4: Weekly Allowance Azure Function
+- [x] Phase 5: JWT Authentication & REST API
+- [x] Phase 6: Wish List Management
+- [x] Phase 7: Analytics & Reports with Charts
+- [x] Phase 8: Savings Accounts with Auto-Transfer
+- [x] Phase 9: Azure Deployment Pipeline
+
+### In Progress 🚧
+- [ ] iOS Native App (SwiftUI)
+- [ ] PDF Export for Reports
 
 ### Future Enhancements 🚀
-- [ ] Wish List Management (save for goals)
-- [ ] Spending Categories & Reports
 - [ ] Chore Assignments with Rewards
-- [ ] Family Notifications
-- [ ] Mobile App (React Native + API)
+- [ ] Family Notifications (Email/Push)
 - [ ] Multi-Currency Support
-- [ ] CSV Export for Tax Records
+- [ ] Recurring Transactions
+- [ ] Budget Goals and Alerts
 
 ## 🐛 Troubleshooting
 
@@ -437,6 +478,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built with Test-Driven Development** 🧪
-**73 Tests Passing** ✅
+**213 Tests Passing** ✅
 **>90% Code Coverage** 📊
+**Modern Stack: React + .NET** ⚛️
 **Production Ready** 🚀

@@ -33,7 +33,8 @@
       "Bash(npm create:*)",
       "Bash(npm install:*)",
       "Bash(npx tailwindcss:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(dotnet new:*)"
     ],
     "deny": [],
     "ask": []

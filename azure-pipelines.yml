@@ -21,13 +21,17 @@ pool:
 variables:
   buildConfiguration: 'Release'
   dotnetSdkVersion: '8.0.x'
+  nodeVersion: '20.x'
 
 stages:
-- stage: Build
-  displayName: 'Build and Test'
+# ===========================
+# Stage 1: Build .NET API
+# ===========================
+- stage: BuildAPI
+  displayName: 'Build .NET API'
   jobs:
-  - job: Build
-    displayName: 'Build and Test'
+  - job: BuildAPI
+    displayName: 'Build and Test API'
     steps:
     - task: UseDotNet@2
       displayName: 'Install .NET SDK'
@@ -61,60 +65,170 @@ stages:
       inputs:
         summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
         codecoverageTool: 'Cobertura'
+      condition: succeededOrFailed()
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish application'
+      displayName: 'Publish API'
       inputs:
         command: 'publish'
         projects: 'src/AllowanceTracker/AllowanceTracker.csproj'
-        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish --no-build'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/api --no-build'
         zipAfterPublish: true
 
     - task: PublishBuildArtifacts@1
-      displayName: 'Publish build artifacts'
+      displayName: 'Publish API artifacts'
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/api'
+        ArtifactName: 'api'
         publishLocation: 'Container'
 
-- stage: Docker
-  displayName: 'Build Docker Image'
-  dependsOn: Build
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+# ===========================
+# Stage 2: Build Azure Function
+# ===========================
+- stage: BuildFunction
+  displayName: 'Build Azure Function'
+  dependsOn: []
   jobs:
-  - job: BuildDocker
-    displayName: 'Build and Push Docker Image'
+  - job: BuildFunction
+    displayName: 'Build Weekly Allowance Function'
     steps:
-    - task: Docker@2
-      displayName: 'Build Docker image'
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK'
+      inputs:
+        version: $(dotnetSdkVersion)
+        includePreviewVersions: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore NuGet packages'
+      inputs:
+        command: 'restore'
+        projects: 'src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Function'
       inputs:
         command: 'build'
-        repository: 'allowancetracker'
-        dockerfile: 'Dockerfile'
-        tags: |
-          $(Build.BuildId)
-          latest
+        projects: 'src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-restore'
 
-- stage: DeployAzure
-  displayName: 'Deploy to Azure'
-  dependsOn: Build
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Function'
+      inputs:
+        command: 'publish'
+        projects: 'src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/function --no-build'
+        zipAfterPublish: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Function artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/function'
+        ArtifactName: 'function'
+        publishLocation: 'Container'
+
+# ===========================
+# Stage 3: Build React App
+# ===========================
+- stage: BuildReact
+  displayName: 'Build React App'
+  dependsOn: []
+  jobs:
+  - job: BuildReact
+    displayName: 'Build React Frontend'
+    steps:
+    - task: NodeTool@0
+      displayName: 'Install Node.js'
+      inputs:
+        versionSpec: $(nodeVersion)
+
+    - script: |
+        cd web
+        npm ci
+      displayName: 'Install dependencies'
+
+    - script: |
+        cd web
+        npm run build
+      displayName: 'Build React app'
+      env:
+        VITE_API_URL: '$(ReactAppApiUrl)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish React artifacts'
+      inputs:
+        PathtoPublish: 'web/dist'
+        ArtifactName: 'react'
+        publishLocation: 'Container'
+
+# ===========================
+# Stage 3: Deploy API to App Service
+# ===========================
+- stage: DeployAPI
+  displayName: 'Deploy API to App Service'
+  dependsOn: BuildAPI
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
-  - deployment: DeployWebApp
-    displayName: 'Deploy to Azure App Service'
+  - deployment: DeployAPIToAppService
+    displayName: 'Deploy API to Azure App Service'
     environment: 'production'
     strategy:
       runOnce:
         deploy:
           steps:
           - task: AzureWebApp@1
-            displayName: 'Deploy to Azure Web App'
+            displayName: 'Deploy to Azure App Service'
             inputs:
               azureSubscription: '$(AzureSubscription)'
               appType: 'webAppLinux'
-              appName: '$(WebAppName)'
-              package: '$(Pipeline.Workspace)/drop/publish/*.zip'
+              appName: '$(ApiAppServiceName)'
+              package: '$(Pipeline.Workspace)/api/*.zip'
               runtimeStack: 'DOTNETCORE|8.0'
+              startUpCommand: 'dotnet AllowanceTracker.dll'
+
+          - task: AzureAppServiceSettings@1
+            displayName: 'Configure App Settings'
+            inputs:
+              azureSubscription: '$(AzureSubscription)'
+              appName: '$(ApiAppServiceName)'
+              resourceGroupName: '$(ResourceGroupName)'
+              appSettings: |
+                [
+                  {
+                    "name": "ASPNETCORE_ENVIRONMENT",
+                    "value": "Production",
+                    "slotSetting": false
+                  },
+                  {
+                    "name": "ConnectionStrings__DefaultConnection",
+                    "value": "$(AzureSqlConnectionString)",
+                    "slotSetting": false
+                  },
+                  {
+                    "name": "Jwt__SecretKey",
+                    "value": "$(JwtSecretKey)",
+                    "slotSetting": false
+                  },
+                  {
+                    "name": "Jwt__Issuer",
+                    "value": "AllowanceTracker",
+                    "slotSetting": false
+                  },
+                  {
+                    "name": "Jwt__Audience",
+                    "value": "AllowanceTracker",
+                    "slotSetting": false
+                  },
+                  {
+                    "name": "Jwt__ExpiryInDays",
+                    "value": "7",
+                    "slotSetting": false
+                  },
+                  {
+                    "name": "AllowedHosts",
+                    "value": "*",
+                    "slotSetting": false
+                  }
+                ]
 
           - task: AzureCLI@2
             displayName: 'Run EF Core Migrations'
@@ -125,21 +239,135 @@ stages:
               inlineScript: |
                 # Install dotnet-ef tool
                 dotnet tool install --global dotnet-ef --version 8.0.11
+                export PATH="$PATH:$HOME/.dotnet/tools"
 
-                # Extract the published app
-                cd $(Pipeline.Workspace)/drop/publish
+                # Extract and run migrations
+                cd $(Pipeline.Workspace)/api
                 unzip -o *.zip -d app
                 cd app
 
                 # Run migrations
-                dotnet ef database update --connection "$(AzureSqlConnectionString)"
+                dotnet ef database update --no-build --connection "$(AzureSqlConnectionString)"
 
+# ===========================
+# Stage 4: Deploy Azure Function
+# ===========================
+- stage: DeployFunction
+  displayName: 'Deploy Azure Function'
+  dependsOn: BuildFunction
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployFunctionApp
+    displayName: 'Deploy Function to Azure'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureFunctionApp@2
+            displayName: 'Deploy to Azure Function App'
+            inputs:
+              azureSubscription: '$(AzureSubscription)'
+              appType: 'functionAppLinux'
+              appName: '$(FunctionAppName)'
+              package: '$(Pipeline.Workspace)/function/*.zip'
+              runtimeStack: 'DOTNET-ISOLATED|8.0'
+              deploymentMethod: 'zipDeploy'
+
+          - task: AzureCLI@2
+            displayName: 'Configure Function App Settings'
+            inputs:
+              azureSubscription: '$(AzureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Configure Function App settings
+                az functionapp config appsettings set \
+                  --name $(FunctionAppName) \
+                  --resource-group $(ResourceGroupName) \
+                  --settings \
+                    "ConnectionStrings__DefaultConnection=$(AzureSqlConnectionString)" \
+                    "APPLICATIONINSIGHTS_CONNECTION_STRING=$(ApplicationInsightsConnectionString)" \
+                    "FUNCTIONS_WORKER_RUNTIME=dotnet-isolated"
+
+# ===========================
+# Stage 5: Deploy React to Storage
+# ===========================
+- stage: DeployReact
+  displayName: 'Deploy React to Storage'
+  dependsOn: BuildReact
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployReactToStorage
+    displayName: 'Deploy React to Azure Storage'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            displayName: 'Deploy to Azure Storage Static Website'
+            inputs:
+              azureSubscription: '$(AzureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Enable static website hosting
+                az storage blob service-properties update \
+                  --account-name $(StorageAccountName) \
+                  --static-website \
+                  --index-document index.html \
+                  --404-document index.html
+
+                # Upload files to $web container
+                az storage blob upload-batch \
+                  --account-name $(StorageAccountName) \
+                  --auth-mode key \
+                  --destination '$web' \
+                  --source $(Pipeline.Workspace)/react \
+                  --overwrite \
+                  --content-cache-control "public, max-age=31536000, immutable" \
+                  --pattern "assets/*"
+
+                # Upload index.html and other files without cache
+                az storage blob upload-batch \
+                  --account-name $(StorageAccountName) \
+                  --auth-mode key \
+                  --destination '$web' \
+                  --source $(Pipeline.Workspace)/react \
+                  --overwrite \
+                  --content-cache-control "no-cache" \
+                  --exclude-pattern "assets/*"
+
+          - task: AzureCLI@2
+            displayName: 'Purge CDN (if configured)'
+            inputs:
+              azureSubscription: '$(AzureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Purge CDN if CDN is configured (optional)
+                if [ ! -z "$(CdnProfileName)" ] && [ ! -z "$(CdnEndpointName)" ]; then
+                  echo "Purging CDN endpoint..."
+                  az cdn endpoint purge \
+                    --resource-group $(ResourceGroupName) \
+                    --profile-name $(CdnProfileName) \
+                    --name $(CdnEndpointName) \
+                    --content-paths '/*'
+                else
+                  echo "CDN not configured, skipping purge"
+                fi
+            continueOnError: true
+
+# ===========================
+# Stage 6: Code Quality (runs in parallel)
+# ===========================
 - stage: CodeQuality
   displayName: 'Code Quality'
   dependsOn: []
   jobs:
-  - job: CodeAnalysis
-    displayName: 'Code Analysis'
+  - job: DotNetCodeAnalysis
+    displayName: '.NET Code Analysis'
     steps:
     - task: UseDotNet@2
       displayName: 'Install .NET SDK'
@@ -161,4 +389,29 @@ stages:
       inputs:
         command: 'build'
         arguments: '--no-restore -warnaserror'
+      continueOnError: true
+
+  - job: ReactCodeAnalysis
+    displayName: 'React Code Analysis'
+    steps:
+    - task: NodeTool@0
+      displayName: 'Install Node.js'
+      inputs:
+        versionSpec: $(nodeVersion)
+
+    - script: |
+        cd web
+        npm ci
+      displayName: 'Install dependencies'
+
+    - script: |
+        cd web
+        npm run lint
+      displayName: 'Run ESLint'
+      continueOnError: true
+
+    - script: |
+        cd web
+        npm run type-check
+      displayName: 'TypeScript type check'
       continueOnError: true

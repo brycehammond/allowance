@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using AllowanceTracker.Data;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
-using AllowanceTracker.BackgroundServices;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -79,9 +78,6 @@ builder.Services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();
 
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();
-
-// Add Weekly Allowance Background Job
-builder.Services.AddHostedService<WeeklyAllowanceJob>();
 
 var app = builder.Build();
 
