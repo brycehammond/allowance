@@ -1,3 +1,4 @@
+using AllowanceTracker.DTOs;
 using AllowanceTracker.Models;
 
 namespace AllowanceTracker.Services;
@@ -13,6 +14,11 @@ public interface IChildManagementService
     /// Update child's weekly allowance (parent only)
     /// </summary>
     Task<Child?> UpdateChildAllowanceAsync(Guid childId, decimal weeklyAllowance, Guid requestingUserId);
+
+    /// <summary>
+    /// Update child's settings including allowance and savings configuration (parent only)
+    /// </summary>
+    Task<Child?> UpdateChildSettingsAsync(Guid childId, UpdateChildSettingsDto dto, Guid requestingUserId);
 
     /// <summary>
     /// Delete child from family (parent only)

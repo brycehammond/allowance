@@ -1,4 +1,5 @@
 using AllowanceTracker.Data;
+using AllowanceTracker.DTOs;
 using AllowanceTracker.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,6 +56,57 @@ public class ChildManagementService : IChildManagementService
         }
 
         child.WeeklyAllowance = weeklyAllowance;
+        await _context.SaveChangesAsync();
+
+        return child;
+    }
+
+    public async Task<Child?> UpdateChildSettingsAsync(Guid childId, UpdateChildSettingsDto dto, Guid requestingUserId)
+    {
+        var requestingUser = await _context.Users.FindAsync(requestingUserId);
+        if (requestingUser == null || requestingUser.Role != UserRole.Parent)
+        {
+            return null;
+        }
+
+        var child = await _context.Children.FindAsync(childId);
+        if (child == null)
+        {
+            return null;
+        }
+
+        // Check same family
+        if (child.FamilyId != requestingUser.FamilyId)
+        {
+            return null;
+        }
+
+        // Update allowance
+        child.WeeklyAllowance = dto.WeeklyAllowance;
+
+        // Update savings settings
+        child.SavingsAccountEnabled = dto.SavingsAccountEnabled;
+        child.SavingsTransferType = dto.SavingsAccountEnabled ? dto.SavingsTransferType : SavingsTransferType.None;
+
+        if (dto.SavingsAccountEnabled)
+        {
+            if (dto.SavingsTransferType == SavingsTransferType.Percentage)
+            {
+                child.SavingsTransferPercentage = (int)(dto.SavingsTransferPercentage ?? 20);
+                child.SavingsTransferAmount = 0;
+            }
+            else if (dto.SavingsTransferType == SavingsTransferType.FixedAmount)
+            {
+                child.SavingsTransferAmount = dto.SavingsTransferAmount ?? 0;
+                child.SavingsTransferPercentage = 0;
+            }
+        }
+        else
+        {
+            child.SavingsTransferPercentage = 0;
+            child.SavingsTransferAmount = 0;
+        }
+
         await _context.SaveChangesAsync();
 
         return child;

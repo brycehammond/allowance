@@ -138,6 +138,11 @@ struct DashboardView: View {
 /// Detail view for a specific child
 struct ChildDetailView: View {
     let child: Child
+    @EnvironmentObject private var authViewModel: AuthViewModel
+
+    private var isParent: Bool {
+        authViewModel.currentUser?.isParent ?? false
+    }
 
     var body: some View {
         TabView {
@@ -147,11 +152,13 @@ struct ChildDetailView: View {
                     Label("Transactions", systemImage: "list.bullet")
                 }
 
-            // Savings tab
-            SavingsAccountView(childId: child.id)
-                .tabItem {
-                    Label("Savings", systemImage: "banknote")
-                }
+            // Savings tab (Parent only)
+            if isParent {
+                SavingsAccountView(childId: child.id)
+                    .tabItem {
+                        Label("Savings", systemImage: "banknote")
+                    }
+            }
 
             // Wish List tab
             WishListView(childId: child.id)
@@ -202,7 +209,7 @@ struct ChildDetailView: View {
     }
 }
 
-#Preview("Child Detail") {
+#Preview("Child Detail - Parent") {
     NavigationStack {
         ChildDetailView(
             child: Child(
@@ -214,5 +221,46 @@ struct ChildDetailView: View {
                 lastAllowanceDate: Date()
             )
         )
+        .environmentObject({
+            let vm = AuthViewModel()
+            vm.currentUser = User(
+                id: UUID(),
+                email: "parent@test.com",
+                firstName: "John",
+                lastName: "Doe",
+                role: .parent,
+                familyId: UUID()
+            )
+            vm.isAuthenticated = true
+            return vm
+        }())
+    }
+}
+
+#Preview("Child Detail - Child") {
+    NavigationStack {
+        ChildDetailView(
+            child: Child(
+                id: UUID(),
+                firstName: "Alice",
+                lastName: "Smith",
+                weeklyAllowance: 10.00,
+                currentBalance: 125.50,
+                lastAllowanceDate: Date()
+            )
+        )
+        .environmentObject({
+            let vm = AuthViewModel()
+            vm.currentUser = User(
+                id: UUID(),
+                email: "alice@test.com",
+                firstName: "Alice",
+                lastName: "Smith",
+                role: .child,
+                familyId: UUID()
+            )
+            vm.isAuthenticated = true
+            return vm
+        }())
     }
 }

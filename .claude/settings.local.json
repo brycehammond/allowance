@@ -28,7 +28,12 @@
       "Bash(dotnet run)",
       "Bash(pkill:*)",
       "Bash(dotnet clean:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(dotnet add package:*)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
