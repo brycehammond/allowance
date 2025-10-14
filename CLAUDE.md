@@ -1,30 +1,29 @@
 # Allowance Tracker - .NET Development Guide for Claude
 
 ## 🎯 Project Context
-A simple MVP allowance tracking application built with ASP.NET Core 8.0 and Blazor Server. Helps parents manage children's allowances, track spending, and teach financial responsibility through real-time web interface and API for mobile apps.
+A simple MVP allowance tracking application built with ASP.NET Core 8.0 Web API backend and React frontend. Helps parents manage children's allowances, track spending, and teach financial responsibility through modern web and mobile interfaces.
 
 **License**: MIT License (see LICENSE file)
 
 ## 🏗️ Current Architecture (MVP Focus)
 
 ### Technology Stack
-- **Backend**: ASP.NET Core 8.0
-- **Frontend**: Blazor Server (real-time UI, no JavaScript)
-- **Database**: PostgreSQL with Entity Framework Core 8
-- **Authentication**: ASP.NET Core Identity + JWT (for API)
-- **Real-time**: SignalR (built into Blazor Server)
+- **Backend**: ASP.NET Core 8.0 Web API
+- **Frontend**: React (separate repository/deployment)
+- **Database**: SQL Server with Entity Framework Core 8
+- **Authentication**: ASP.NET Core Identity + JWT tokens
 - **Background Jobs**: IHostedService (built-in, no external dependencies)
-- **Testing**: xUnit, FluentAssertions, Moq, Bogus
-- **Deployment**: Railway or Azure App Service
+- **Testing**: xUnit, FluentAssertions, Moq
+- **Deployment**: Azure App Service (API) or Railway
 
 ### Key Design Decisions
-1. **Blazor Server**: Real-time by default, single language (C#), fast development
+1. **RESTful API**: Clean separation of concerns, supports multiple clients (web, iOS, Android)
 2. **Entity Framework Core**: Code-first migrations, LINQ queries, good enough performance
 3. **Built-in DI**: Microsoft.Extensions.DependencyInjection - simple and effective
-4. **PostgreSQL**: Free tier on Railway, works great with EF Core
+4. **SQL Server**: Works great with EF Core, Azure integration
 5. **Minimal dependencies**: Faster to build, easier to maintain
 
-## 📁 Project Structure (Simple MVP)
+## 📁 Project Structure (API-Only)
 
 ```
 AllowanceTracker/
@@ -35,7 +34,7 @@ AllowanceTracker/
 │   ├── 04-implementation-phases.md # TDD development roadmap
 │   ├── 05-testing-strategy.md   # xUnit testing approach
 │   ├── 06-tdd-best-practices.md # TDD patterns for .NET
-│   └── 07-blazor-ui-specification.md # Blazor component architecture
+│   └── 08-ios-app-specification.md # iOS native app (SwiftUI)
 ├── Data/                        # EF Core DbContext
 │   ├── AllowanceContext.cs
 │   └── Migrations/
@@ -44,21 +43,24 @@ AllowanceTracker/
 │   ├── Family.cs
 │   ├── Child.cs
 │   └── Transaction.cs
+├── DTOs/                        # Data Transfer Objects
+│   ├── Auth/
+│   ├── Children/
+│   ├── Transactions/
+│   └── Analytics/
 ├── Services/                    # Business logic
 │   ├── FamilyService.cs
 │   ├── TransactionService.cs
-│   └── AllowanceService.cs
-├── Pages/                       # Blazor pages
-│   ├── Index.razor
-│   ├── Dashboard.razor
-│   └── Children/
-├── Shared/                      # Blazor components
-│   ├── MainLayout.razor
-│   └── Components/
-├── Api/                        # API controllers
-│   └── V1/
-│       └── TransactionsController.cs
-├── Program.cs                  # Startup and DI
+│   ├── AllowanceService.cs
+│   ├── JwtService.cs
+│   └── AccountService.cs
+├── Controllers/                 # API controllers
+│   ├── AuthController.cs
+│   ├── ChildrenController.cs
+│   ├── TransactionsController.cs
+│   ├── WishListController.cs
+│   └── AnalyticsController.cs
+├── Program.cs                  # Startup, DI, and middleware
 └── AllowanceTracker.Tests/    # xUnit tests
     ├── Models/
     ├── Services/
@@ -72,24 +74,24 @@ AllowanceTracker/
 # Check .NET SDK version (should be 8.0+)
 dotnet --version
 
-# Check PostgreSQL is running
-pg_isready
-
-# Check Node.js for Tailwind CSS
-node --version
+# Check SQL Server is running (or use LocalDB)
+# Windows: Check SQL Server service
+# Mac: Docker container with SQL Server
+docker ps | grep sql
 ```
 
 ### Initial Setup (if not done)
 ```bash
-# Create new Blazor Server project
-dotnet new blazorserver -n AllowanceTracker
+# Create new Web API project
+dotnet new webapi -n AllowanceTracker
 cd AllowanceTracker
 
 # Add required packages
 dotnet add package Microsoft.EntityFrameworkCore.Design
-dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
 dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
 dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+dotnet add package Swashbuckle.AspNetCore
 
 # Create test project
 dotnet new xunit -n AllowanceTracker.Tests
@@ -97,6 +99,7 @@ cd AllowanceTracker.Tests
 dotnet add package FluentAssertions
 dotnet add package Moq
 dotnet add package Microsoft.AspNetCore.Mvc.Testing
+dotnet add package Microsoft.EntityFrameworkCore.InMemory
 cd ..
 
 # Add test project to solution
@@ -105,8 +108,10 @@ dotnet sln add AllowanceTracker.Tests/AllowanceTracker.Tests.csproj
 # Setup database
 dotnet ef database update
 
-# Run application
+# Run API
 dotnet run
+# API will be available at https://localhost:5001
+# Swagger UI at https://localhost:5001/swagger
 ```
 
 ## 🔑 Key Models & Relationships
@@ -153,7 +158,6 @@ public virtual ICollection<Transaction> Transactions { get; set; }
 - ✅ After completing a full TDD cycle (Red → Green → Refactor)
 - ✅ After implementing a new API endpoint with tests
 - ✅ After adding a new service with full test coverage
-- ✅ After creating a new Blazor component with tests
 - ✅ After completing a phase milestone
 - ✅ After fixing a bug with regression tests
 - ✅ After successful refactoring with all tests passing
@@ -215,28 +219,6 @@ public async Task GetBalance_ReturnsCurrentBalance()
 // 5. Refactor if needed
 ```
 
-### Adding a Blazor Component (TDD Way)
-```csharp
-// 1. Write component test first
-[Fact]
-public void ChildCard_DisplaysBalance()
-{
-    // Arrange
-    var child = new Child { FirstName = "Alice", CurrentBalance = 100m };
-
-    // Act
-    var component = RenderComponent<ChildCard>(parameters => parameters
-        .Add(p => p.Child, child));
-
-    // Assert
-    component.Find(".balance").TextContent.Should().Contain("$100.00");
-}
-
-// 2. Run test - RED
-// 3. Create component
-// 4. Implement until GREEN
-```
-
 ### Adding a Service (TDD Way)
 ```csharp
 // 1. Write service test first
@@ -287,9 +269,9 @@ catch
 ## 🔐 Security Considerations
 
 ### Authentication Flow
-1. **Blazor**: ASP.NET Core Identity handles authentication
-2. **API**: JWT tokens with 24-hour expiration
-3. **Real-time**: SignalR authentication via Blazor
+1. **API**: JWT tokens with 24-hour expiration
+2. **Identity**: ASP.NET Core Identity for user management
+3. **CORS**: Configured for React frontend (localhost:5173, localhost:3000)
 
 ### Authorization Rules
 - Parents can manage all children in their family
@@ -423,7 +405,7 @@ az webapp deployment source config-zip --src publish.zip
 - [x] Implementation phases (TDD with xUnit)
 - [x] Testing strategy (.NET focused)
 - [x] TDD best practices (.NET/C#)
-- [x] Blazor UI specification
+- [x] Moved to API-only architecture with React frontend
 
 ### Phase 1: Foundation (Week 1) ✅ COMPLETE
 - [x] Initialize ASP.NET Core project
@@ -448,23 +430,11 @@ az webapp deployment source config-zip --src publish.zip
 - [x] Balance validation (insufficient funds check)
 - [x] **Total: 35 tests passing** (24 from Phase 1 + 11 new)
 
-### Phase 3: Blazor UI ✅ COMPLETE
-- [x] Setup Blazor Server (already done in Phase 1)
-- [x] Create MainLayout (already done in Phase 1)
-- [x] Add bUnit for Blazor component testing
-- [x] Create FamilyService for data access
-- [x] Create ChildDto for data transfer
-- [x] Implement Dashboard page with real-time updates
-- [x] Display children with balances in responsive grid
-- [x] **Write ChildCard component tests** (6 tests)
-- [x] Create ChildCard reusable component
-- [x] **Write TransactionForm component tests** (10 tests)
-- [x] Create TransactionForm component with validation
-- [x] **Write Dashboard component tests** (7 tests)
-- [x] Implement FamilyHub for SignalR group management
-- [x] Add real-time SignalR updates (TransactionCreated events)
-- [x] Graceful SignalR connection handling (works in tests)
-- [x] **Total: 133 tests passing** (123 from Phases 1-5 + 10 new Phase 3 UI tests)
+### Phase 3: React Frontend (Separate Repository)
+- [x] Moved to separate React repository
+- [x] Backend now API-only with CORS support
+- [x] Frontend communicates via REST API
+- [x] JWT authentication from React app
 
 ### Phase 4: Allowance Management & Background Jobs (Week 2-3) ✅ COMPLETE
 - [x] **Write AllowanceService tests FIRST** (10 tests)
@@ -505,7 +475,7 @@ az webapp deployment source config-zip --src publish.zip
 - [x] Configure JWT authentication middleware in Program.cs
 - [x] **Total: 123 tests passing** (45 from Phases 1-4 + 78 new Phase 5 tests)
 
-### Phase 7: Reports & Analytics UI ✅ COMPLETE
+### Phase 7: Reports & Analytics API ✅ COMPLETE
 - [x] Review existing TransactionAnalyticsService (already implemented in earlier phases)
 - [x] Verify all analytics DTOs exist (BalancePoint, TrendData, MonthlyComparison, etc.)
 - [x] **Write AnalyticsController tests** (10 tests)
@@ -513,15 +483,7 @@ az webapp deployment source config-zip --src publish.zip
 - [x] Analytics API endpoints: balance history, income vs spending, spending trends
 - [x] Analytics API endpoints: savings rate, monthly comparison, transaction heatmap
 - [x] Analytics API endpoints: spending breakdown by category
-- [x] **Write Analytics Blazor page tests** (9 tests)
-- [x] Implement Analytics.razor page with comprehensive data visualization
-- [x] Child selector dropdown with auto-selection for single child
-- [x] Balance history table with transaction descriptions
-- [x] Income vs Spending summary card with savings rate
-- [x] Spending breakdown by category with percentages
-- [x] Monthly comparison table with income, spending, and ending balances
-- [x] Parallel data loading for optimal performance
-- [x] **Total: 175 tests passing** (166 from previous phases + 19 new Phase 7 tests)
+- [x] Frontend integration handled in React app
 
 ## 🐛 Common Issues & Solutions
 
@@ -537,21 +499,24 @@ dotnet ef database update
 dotnet ef migrations remove
 ```
 
-### Issue: Blazor SignalR Disconnection
+### Issue: CORS Errors
 ```csharp
-// Add reconnection logic
-protected override async Task OnAfterRenderAsync(bool firstRender)
+// Ensure CORS is properly configured in Program.cs
+builder.Services.AddCors(options =>
 {
-    if (firstRender)
+    options.AddPolicy("AllowReactApp", policy =>
     {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/allowancehub"))
-            .WithAutomaticReconnect()
-            .Build();
+        policy.WithOrigins("http://localhost:5173", "http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
-        await hubConnection.StartAsync();
-    }
-}
+// And applied before authentication
+app.UseCors("AllowReactApp");
+app.UseAuthentication();
+app.UseAuthorization();
 ```
 
 ### Issue: JWT Token Invalid
@@ -580,15 +545,14 @@ builder.Services.AddAuthentication()
 - `specs/04-implementation-phases.md` - TDD roadmap
 - `specs/05-testing-strategy.md` - xUnit approach
 - `specs/06-tdd-best-practices.md` - .NET TDD patterns
-- `specs/07-blazor-ui-specification.md` - UI components
 - `specs/08-ios-app-specification.md` - iOS native app (SwiftUI)
 
 ### Core Implementation Files
 - `Data/AllowanceContext.cs` - EF Core DbContext
 - `Models/ApplicationUser.cs` - User authentication
 - `Services/TransactionService.cs` - Business logic
-- `Pages/Dashboard.razor` - Main UI
-- `Api/V1/TransactionsController.cs` - API endpoints
+- `Controllers/TransactionsController.cs` - API endpoints
+- `Controllers/AuthController.cs` - JWT authentication
 
 ## 🎯 Next Actions
 
@@ -631,12 +595,12 @@ dotnet watch test
 4. **Records for DTOs** - Use record types for immutable data
 5. **Dependency injection** - Constructor injection everywhere
 
-### Blazor Best Practices
-1. **Component isolation** - Keep components focused
-2. **State management** - Use cascading values wisely
-3. **Virtualization** - For long lists
-4. **Error boundaries** - Handle component errors
-5. **Dispose properly** - Implement IDisposable
+### API Best Practices
+1. **RESTful design** - Use proper HTTP verbs and status codes
+2. **DTOs for all endpoints** - Never expose domain models directly
+3. **Consistent error handling** - Use ProblemDetails for errors
+4. **API versioning** - Maintain backward compatibility
+5. **Swagger documentation** - Keep API docs up to date
 
 ### EF Core Best Practices
 1. **AsNoTracking()** - For read-only queries
@@ -659,10 +623,10 @@ dotnet watch test
 - [C# Programming Guide](https://docs.microsoft.com/dotnet/csharp/)
 - [ASP.NET Core Docs](https://docs.microsoft.com/aspnet/core/)
 
-### Blazor
-- [Blazor Documentation](https://docs.microsoft.com/aspnet/core/blazor/)
-- [Blazor University](https://blazor-university.com/)
-- [bUnit Testing](https://bunit.dev/)
+### Web API
+- [Web API Documentation](https://docs.microsoft.com/aspnet/core/web-api/)
+- [REST API Guidelines](https://github.com/microsoft/api-guidelines)
+- [Swagger/OpenAPI](https://swagger.io/docs/)
 
 ### Entity Framework Core
 - [EF Core Documentation](https://docs.microsoft.com/ef/core/)
@@ -713,33 +677,32 @@ public class TransactionService : ITransactionService
 }
 ```
 
-### Blazor Component Pattern
-```razor
-@page "/dashboard"
-@inject IFamilyService FamilyService
-
-<h1>Dashboard</h1>
-
-@if (IsLoading)
+### API Controller Pattern
+```csharp
+[ApiController]
+[Route("api/v1/[controller]")]
+[Authorize]
+public class TransactionsController : ControllerBase
 {
-    <LoadingSpinner />
-}
-else if (Children.Any())
-{
-    @foreach (var child in Children)
+    private readonly ITransactionService _transactionService;
+
+    public TransactionsController(ITransactionService transactionService)
     {
-        <ChildCard Child="@child" />
+        _transactionService = transactionService;
     }
-}
 
-@code {
-    private bool IsLoading = true;
-    private List<Child> Children = new();
-
-    protected override async Task OnInitializedAsync()
+    [HttpGet("{childId}")]
+    public async Task<ActionResult<List<TransactionDto>>> GetTransactions(Guid childId)
     {
-        Children = await FamilyService.GetChildrenAsync();
-        IsLoading = false;
+        var transactions = await _transactionService.GetTransactionsAsync(childId);
+        return Ok(transactions);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<TransactionDto>> CreateTransaction(CreateTransactionDto dto)
+    {
+        var transaction = await _transactionService.CreateTransactionAsync(dto);
+        return CreatedAtAction(nameof(GetTransactions), new { childId = transaction.ChildId }, transaction);
     }
 }
 ```
@@ -797,4 +760,4 @@ public async Task CreateTransaction_RequiresAuthentication()
 }
 ```
 
-## Remember: Read specs first, write tests first, keep it simple for MVP!
+## Remember: Read specs first, write tests first, API-first architecture, keep it simple for MVP!
