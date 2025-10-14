@@ -107,7 +107,7 @@ For production deployments:
 
 2. **Update Environment Variables**:
    - Set secure values in your `.env` file
-   - Or use your platform's secret management (Railway, Azure, etc.)
+   - Or use your platform's secret management (Azure Key Vault, etc.)
 
 3. **Use HTTPS**:
    - Configure SSL certificates

@@ -272,8 +272,8 @@ allowance/
 │   └── vite.config.ts
 ├── ios/                            # iOS Native App (SwiftUI)
 ├── specs/                          # Detailed specifications
-├── azure-pipelines.yml             # Azure DevOps CI/CD
-├── AZURE-DEPLOYMENT.md             # Azure deployment guide
+├── .github/workflows/              # GitHub Actions CI/CD workflows
+├── GITHUB-ACTIONS-DEPLOYMENT.md    # GitHub Actions deployment guide
 ├── LOCAL_DEVELOPMENT.md            # Local dev setup guide
 ├── CLAUDE.md                       # Development guide for AI
 └── README.md                       # This file
@@ -463,10 +463,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - Built with [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet)
-- UI powered by [Blazor](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor)
+- UI powered by [React](https://react.dev/) with [TypeScript](https://www.typescriptlang.org/)
 - Database by [Microsoft SQL Server](https://www.microsoft.com/sql-server)
-- Testing with [xUnit](https://xunit.net/), [FluentAssertions](https://fluentassertions.com/), and [bUnit](https://bunit.dev/)
-- Deployed on [Railway](https://railway.app/) or [Azure](https://azure.microsoft.com/)
+- Testing with [xUnit](https://xunit.net/) and [FluentAssertions](https://fluentassertions.com/)
+- Deployed on [Azure](https://azure.microsoft.com/)
 - Developed with ❤️ using Test-Driven Development
 
 ## 📞 Support

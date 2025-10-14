@@ -9,8 +9,8 @@ Practical TDD implementation plan for building the Allowance Tracker MVP in .NET
 ```bash
 # Create solution and projects
 dotnet new sln -n AllowanceTracker
-dotnet new blazorserver -n AllowanceTracker.Web
-dotnet sln add AllowanceTracker.Web
+dotnet new webapi -n AllowanceTracker
+dotnet sln add AllowanceTracker
 
 # Add test project
 dotnet new xunit -n AllowanceTracker.Tests
@@ -18,9 +18,9 @@ dotnet sln add AllowanceTracker.Tests
 dotnet add AllowanceTracker.Tests reference AllowanceTracker.Web
 
 # Add packages to main project
-cd AllowanceTracker.Web
+cd AllowanceTracker
 dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
-dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
 dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
 dotnet add package Swashbuckle.AspNetCore
 
@@ -706,52 +706,34 @@ ENTRYPOINT ["dotnet", "AllowanceTracker.Web.dll"]
 ```
 
 #### GitHub Actions CI/CD
-```yaml
-name: Build and Deploy
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+The project uses three separate GitHub Actions workflows for efficient CI/CD:
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
+**1. `.github/workflows/api.yml`** - API Workflow
+- Triggers on changes to `src/**`
+- Builds .NET API
+- Runs 213 tests with code coverage
+- Checks code formatting
+- Builds Docker image (on main branch)
 
-    steps:
-    - uses: actions/checkout@v3
+**2. `.github/workflows/web.yml`** - Web Workflow
+- Triggers on changes to `web/**`
+- Builds React app with Vite
+- Runs ESLint and TypeScript checks
+- Runs Lighthouse CI on PRs
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
+**3. `.github/workflows/ios.yml`** - iOS Workflow
+- Triggers on changes to `ios/**`
+- Builds iOS app with Xcode
+- Runs tests on iPhone 15 simulator
+- Runs SwiftLint for code quality
 
-    - name: Restore dependencies
-      run: dotnet restore
+**Benefits:**
+- Only relevant tests run for each change
+- Faster feedback for developers
+- More efficient use of CI/CD minutes
 
-    - name: Build
-      run: dotnet build --no-restore
-
-    - name: Test
-      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"
-
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Deploy to Railway
-      uses: railway/deploy-action@v1
-      with:
-        railway_token: ${{ secrets.RAILWAY_TOKEN }}
-```
+See individual workflow files for complete configuration.
 
 ## TDD Best Practices for .NET
 

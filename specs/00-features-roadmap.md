@@ -23,7 +23,7 @@ This document provides a comprehensive roadmap for all planned features beyond t
 - ✅ Advanced Blazor Components (13 tests)
 - ✅ Real-Time SignalR Updates
 - ✅ Docker & Deployment Configuration
-- ✅ CI/CD Pipelines (GitHub Actions + Azure)
+- ✅ CI/CD Pipelines (Azure Pipelines)
 - ✅ Complete Authentication Flow
 - ✅ Full REST API Coverage
 

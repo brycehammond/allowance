@@ -6,9 +6,9 @@ This document outlines the remaining features and enhancements to complete the f
 ## Current Status (Completed)
 
 ### ✅ Phase 1: Foundation
-- ASP.NET Core 8.0 Blazor Server project
-- EF Core with PostgreSQL
-- Identity authentication
+- ASP.NET Core 8.0 Web API
+- EF Core with Azure SQL Database
+- Identity authentication + JWT
 - All domain models
 - Initial database migration
 - **24 tests passing**
@@ -27,10 +27,11 @@ This document outlines the remaining features and enhancements to complete the f
 - Batch processing
 - **45 tests passing**
 
-### ✅ Phase 3: Blazor UI (Basic)
-- FamilyService for data access
-- Dashboard page
-- bUnit testing infrastructure
+### ✅ Phase 3: React Frontend
+- React 19 + TypeScript + Vite
+- API integration with Axios
+- Dashboard and transaction pages
+- JWT authentication
 - **45 tests passing**
 
 ## Remaining Enhancements
@@ -329,9 +330,9 @@ public class TransactionsController : ControllerBase
 }
 ```
 
-### Enhancement 2: Advanced Blazor Components
+### Enhancement 2: Advanced React Components
 
-#### 2.1 ChildCard Component (TDD with bUnit)
+#### 2.1 ChildCard Component (TDD with React Testing Library)
 
 **Test First:**
 ```csharp
@@ -602,9 +603,11 @@ public async Task TransactionForm_ValidInput_CallsOnSaved()
 }
 ```
 
-### Enhancement 3: Real-Time SignalR Updates
+### Enhancement 3: Real-Time Updates (Optional)
 
-#### 3.1 FamilyHub for Real-Time Communication
+**Note:** Real-time updates with SignalR are optional. The React app works great with polling or manual refresh.
+
+#### 3.1 FamilyHub for Real-Time Communication (Optional)
 
 **Test First:**
 ```csharp
@@ -818,78 +821,28 @@ volumes:
   postgres_data:
 ```
 
-#### 4.2 Railway Deployment
+#### 4.2 GitHub Actions CI/CD
 
-**railway.json:**
-```json
-{
-  "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "dotnet restore && dotnet publish -c Release -o out"
-  },
-  "deploy": {
-    "startCommand": "cd out && dotnet AllowanceTracker.dll",
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
-  }
-}
-```
+**GitHub Actions Workflows:**
 
-**Environment Variables:**
-```
-ASPNETCORE_ENVIRONMENT=Production
-ConnectionStrings__DefaultConnection=${{Postgres.DATABASE_URL}}
-Jwt__SecretKey=${{JWT_SECRET_KEY}}
-ASPNETCORE_URLS=http://0.0.0.0:${{PORT}}
-```
+The project uses three separate GitHub Actions workflows for efficient CI/CD:
 
-#### 4.3 GitHub Actions CI/CD
+**1. `.github/workflows/api.yml`** - API Workflow
+- Builds .NET API with tests and code coverage
+- Code quality checks
+- Docker image build
 
-**.github/workflows/ci.yml:**
-```yaml
-name: CI/CD
+**2. `.github/workflows/web.yml`** - Web Workflow
+- Builds React app with Vite
+- ESLint and TypeScript checks
+- Lighthouse CI for performance
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+**3. `.github/workflows/ios.yml`** - iOS Workflow
+- Builds iOS app with Xcode
+- Runs tests on iPhone 15 simulator
+- SwiftLint for code quality
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore
-
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Deploy to Railway
-      uses: bervProject/railway-deploy@main
-      with:
-        railway_token: ${{ secrets.RAILWAY_TOKEN }}
-        service: allowance-tracker
-```
+See individual workflow files in `.github/workflows/` for complete configuration.
 
 ## Implementation Priority
 
@@ -899,14 +852,14 @@ jobs:
    - ChildCard component
 
 2. **Medium Priority** (Enhanced UX):
-   - Real-time SignalR updates
-   - Comprehensive bUnit tests
-   - Additional Blazor components
+   - Real-time SignalR updates (optional)
+   - Comprehensive React component tests
+   - Additional React components
 
 3. **Low Priority** (DevOps):
    - Docker configuration
-   - Railway deployment
-   - GitHub Actions CI/CD
+   - Azure deployment
+   - GitHub Actions CI/CD enhancements
 
 ## Testing Strategy for Enhancements
 
@@ -925,15 +878,15 @@ All enhancements should follow strict TDD:
 - [ ] Real-time balance updates via SignalR
 - [ ] All new features have comprehensive tests
 - [ ] Docker containerization working
-- [ ] One-click deployment to Railway
-- [ ] CI/CD pipeline with automated testing
-- [ ] All tests passing (target: >55 tests)
+- [ ] Azure deployment configured
+- [ ] GitHub Actions CI/CD with automated testing
+- [ ] All tests passing (target: >213 tests)
 
 ## Estimated Effort
 
-- Enhancement 1 (JWT & API): 8-12 hours
-- Enhancement 2 (Blazor Components): 6-8 hours
-- Enhancement 3 (SignalR): 4-6 hours
-- Enhancement 4 (Deployment): 3-4 hours
+- Enhancement 1 (JWT & API): ✅ Complete
+- Enhancement 2 (React Components): ✅ Complete
+- Enhancement 3 (SignalR): Optional (4-6 hours if needed)
+- Enhancement 4 (Deployment): ✅ Complete with GitHub Actions
 
-**Total: 21-30 hours** for complete implementation
+**Total: Most enhancements complete, optional SignalR remains**

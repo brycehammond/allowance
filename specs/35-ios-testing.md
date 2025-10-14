@@ -1266,50 +1266,56 @@ class MockKeychainService: KeychainServiceProtocol {
 
 ## CI/CD Configuration
 
-### GitHub Actions Workflow
+### Azure Pipelines for iOS
+The iOS app integrates with the main Azure Pipelines configuration for comprehensive CI/CD:
+
+**Pipeline Configuration:**
 ```yaml
-name: iOS CI
+# azure-pipelines.yml (iOS stages)
+stages:
+  - stage: BuildiOS
+    jobs:
+      - job: BuildiOS
+        pool:
+          vmImage: 'macOS-latest'
+        steps:
+          - task: Xcode@5
+            inputs:
+              actions: 'build'
+              scheme: 'AllowanceTracker'
+              sdk: 'iphoneos'
+              configuration: 'Release'
+              xcodeVersion: 'default'
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+  - stage: TestiOS
+    dependsOn: BuildiOS
+    jobs:
+      - job: TestiOS
+        pool:
+          vmImage: 'macOS-latest'
+        steps:
+          - task: Xcode@5
+            displayName: 'Run Unit Tests'
+            inputs:
+              actions: 'test'
+              scheme: 'AllowanceTracker'
+              sdk: 'iphonesimulator'
+              configuration: 'Debug'
+              destinationPlatformOption: 'iOS'
+              destinationSimulators: 'iPhone 15'
+              publishJUnitResults: true
 
-jobs:
-  test:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.2.app
-
-      - name: Build
-        run: |
-          xcodebuild clean build \
-            -scheme AllowanceTracker \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2'
-
-      - name: Run Unit Tests
-        run: |
-          xcodebuild test \
-            -scheme AllowanceTracker \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
-            -enableCodeCoverage YES
-
-      - name: Run UI Tests
-        run: |
-          xcodebuild test \
-            -scheme AllowanceTrackerUITests \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2'
-
-      - name: Upload Coverage
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml
-          fail_ci_if_error: true
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 ```
+
+**Key Features:**
+- Automated builds on every commit to main/develop
+- Unit and UI test execution on iOS Simulator
+- Code coverage reporting integrated with Azure DevOps
+- TestFlight deployment for release branches (future)
 
 ## Test Execution Commands
 

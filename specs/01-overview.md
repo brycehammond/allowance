@@ -1,7 +1,7 @@
 # Allowance Tracker - MVP Overview (.NET)
 
 ## Project Vision
-A simple, fast allowance tracking application for families, built with .NET 8 and Blazor Server for real-time updates.
+A simple, fast allowance tracking application for families, built with .NET 8 API and React for modern user experience.
 
 ## MVP Scope
 Focus on core functionality that delivers immediate value:
@@ -14,21 +14,21 @@ Focus on core functionality that delivers immediate value:
 ## Technical Stack (Simple & Effective)
 
 ### Core Technologies
-- **Backend**: ASP.NET Core 8.0 (single project, no complex layers)
-- **Frontend**: Blazor Server (real-time, no JavaScript needed)
-- **Database**: PostgreSQL with Entity Framework Core
-- **Authentication**: ASP.NET Core Identity (built-in, simple)
-- **Real-time**: SignalR (comes with Blazor Server)
-- **Background Jobs**: IHostedService (built-in, no external dependencies)
-- **Testing**: xUnit + basic integration tests
-- **Deployment**: Railway or Azure App Service
+- **Backend**: ASP.NET Core 8.0 Web API
+- **Frontend**: React 19 + TypeScript + Vite
+- **Database**: Azure SQL Database with Entity Framework Core
+- **Authentication**: ASP.NET Core Identity + JWT tokens
+- **Background Jobs**: Azure Functions (Timer Trigger)
+- **Testing**: xUnit + FluentAssertions + Moq
+- **Deployment**: Azure App Service (API) + Azure Storage (Frontend)
 
 ### Why These Choices?
-- **Blazor Server**: Real-time by default, single language (C#), fast development
+- **React + TypeScript**: Modern UI framework with excellent ecosystem and type safety
 - **Entity Framework Core**: Migrations, LINQ queries, good enough performance
-- **Built-in DI**: No need for external containers, works great
-- **PostgreSQL**: Free tier on Railway, reliable, good with EF Core
-- **Minimal external dependencies**: Faster to build, easier to maintain
+- **JWT Authentication**: Stateless, works with any client (web, iOS, Android)
+- **Azure SQL Database**: Reliable, excellent EF Core integration, managed service
+- **Azure Functions**: Serverless background jobs, nearly free on consumption plan
+- **GitHub Actions**: Free for public repos, separate workflows for efficiency
 
 ## Simple Project Structure
 
@@ -46,16 +46,15 @@ AllowanceTracker/
 │   ├── FamilyService.cs
 │   ├── TransactionService.cs
 │   └── AllowanceService.cs
-├── Pages/                # Blazor pages
-│   ├── Index.razor
-│   ├── Dashboard.razor
+├── Api/                  # REST API controllers
+│   ├── AuthController.cs
+│   ├── ChildrenController.cs
+│   ├── TransactionsController.cs
+│   └── AnalyticsController.cs
+├── DTOs/                 # Data transfer objects
+│   ├── Auth/
 │   ├── Children/
 │   └── Transactions/
-├── Shared/               # Blazor components
-│   ├── MainLayout.razor
-│   └── Components/
-├── Api/                  # API controllers (if needed for mobile)
-│   └── TransactionsController.cs
 └── Program.cs            # Startup and DI configuration
 ```
 
@@ -158,10 +157,11 @@ public class Transaction
 4. Target 70% code coverage (good enough for MVP)
 
 ### Deployment Strategy
-- Single deployment unit (one .NET project)
+- API and Frontend deployed separately
 - Environment variables for configuration
-- GitHub Actions for CI/CD
-- Railway for hosting (or Azure App Service)
+- GitHub Actions for CI/CD with separate workflows
+- Azure App Service for API hosting
+- Azure Storage Static Website for React frontend
 
 ## MVP Success Criteria
 
@@ -182,17 +182,23 @@ public class Transaction
 
 ## Technology Decisions Explained
 
-### Why Blazor Server?
-- Real-time updates built-in (no separate WebSocket setup)
-- No JavaScript required (all C#)
-- Simpler than Blazor WebAssembly for MVP
-- Great for internal/family apps with known user base
+### Why React + REST API?
+- Modern UI framework with excellent ecosystem
+- Separation allows for native mobile apps (iOS, Android)
+- TypeScript provides type safety
+- API-first enables multiple clients
+
+### Why GitHub Actions with Separate Workflows?
+- Free for public repositories
+- Separate workflows for API, Web, and iOS
+- Only runs tests for changed components
+- Efficient use of CI/CD minutes
 
 ### Why Not Microservices/Clean Architecture?
 - Overkill for family app MVP
 - Adds complexity without benefit at this scale
 - Can refactor later if needed
-- Single deployment is simpler
+- Single API deployment is simpler
 
 ### Why Entity Framework Core?
 - Fastest way to get started with .NET

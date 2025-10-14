@@ -100,9 +100,7 @@ This information is **hidden in Release builds** for security.
 
 | Environment | URL | Notes |
 |-------------|-----|-------|
-| Local (Railway CLI) | `http://localhost:5000` | Use Railway CLI: `railway run` |
 | Local (.NET) | `http://localhost:5001` | Use `dotnet run` |
-| Railway Dev | `https://your-app.up.railway.app` | Railway deployment |
 | Azure Staging | `https://allowancetracker-staging.azurewebsites.net` | Azure staging slot |
 | Azure Production | `https://api.allowancetracker.com` | Production |
 
@@ -174,7 +172,7 @@ Add this to Info.plist temporarily:
 
 **For Production Testing:**
 
-1. Deploy backend to Azure/Railway
+1. Deploy backend to Azure
 
 2. Update Info.plist with production URL:
    ```xml
@@ -203,7 +201,7 @@ Add this to Info.plist temporarily:
 **Problem: Certificate errors on staging**
 
 - **Solution**: Ensure staging uses valid SSL certificate
-- **Workaround**: Use Railway or Azure (both provide free SSL)
+- **Workaround**: Use Azure App Service (provides free SSL)
 
 ### Best Practices
 
@@ -211,7 +209,7 @@ Add this to Info.plist temporarily:
 2. ✅ **Use HTTPS in production**
 3. ✅ **Create separate build configurations** for dev/staging/prod
 4. ✅ **Test on device, not just simulator** (networking behaves differently)
-5. ✅ **Use Railway CLI or ngrok** for mobile device testing with local backend
+5. ✅ **Use ngrok** for mobile device testing with local backend
 
 ### Related Files
 

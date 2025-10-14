@@ -4,73 +4,9 @@ This guide covers deploying the Allowance Tracker application to various platfor
 
 ## Table of Contents
 
-- [Railway](#railway-deployment)
 - [Azure App Service](#azure-app-service)
 - [Docker (Self-Hosted)](#docker-self-hosted)
 - [CI/CD Pipelines](#cicd-pipelines)
-
----
-
-## Railway Deployment
-
-Railway provides the easiest deployment experience with automatic builds and PostgreSQL provisioning.
-
-### Prerequisites
-
-- Railway account
-- GitHub repository connected to Railway
-
-### Steps
-
-1. **Create New Project on Railway**
-   ```bash
-   # Install Railway CLI (optional)
-   npm i -g @railway/cli
-   railway login
-   ```
-
-2. **Add PostgreSQL Database**
-   - In Railway dashboard, click "New"
-   - Select "Database" → "PostgreSQL"
-   - Note the connection string
-
-3. **Configure Environment Variables**
-
-   In Railway dashboard, add these variables:
-
-   ```
-   ASPNETCORE_ENVIRONMENT=Production
-   ConnectionStrings__DefaultConnection=${{Postgres.DATABASE_URL}}
-   Jwt__SecretKey=<generate-secure-random-string-32-chars>
-   Jwt__Issuer=AllowanceTracker
-   Jwt__Audience=AllowanceTracker
-   ASPNETCORE_URLS=http://0.0.0.0:${{PORT}}
-   ```
-
-4. **Deploy**
-
-   Railway will automatically:
-   - Detect the `railway.json` configuration
-   - Build using the specified commands
-   - Deploy and provide a public URL
-
-5. **Run Migrations**
-
-   ```bash
-   railway run dotnet ef database update --project src/AllowanceTracker
-   ```
-
-### Railway Configuration
-
-The `railway.json` file configures:
-- Build command: `dotnet restore && dotnet publish`
-- Start command: `dotnet AllowanceTracker.dll`
-- Restart policy: ON_FAILURE with 10 retries
-
-### Cost
-
-- Free tier: 500 hours/month, 500MB RAM
-- Paid: $5/month base + usage
 
 ---
 
@@ -255,58 +191,51 @@ See [DOCKER.md](./DOCKER.md) for detailed Docker instructions.
 
 ### GitHub Actions
 
-The `.github/workflows/ci.yml` workflow automatically:
+The project uses three separate GitHub Actions workflows for efficient CI/CD:
 
-1. **On Every Push/PR**:
-   - Restore dependencies
-   - Build project
-   - Run tests
-   - Upload test results
+#### 1. **API Workflow** (`.github/workflows/api.yml`)
+   - Triggers on changes to `src/**`
+   - Builds .NET API
+   - Runs 213 tests with code coverage
+   - Checks code formatting
+   - Builds Docker image (on main branch)
 
-2. **On Main Branch Push**:
-   - Build Docker image
-   - Deploy to Railway (if configured)
-   - Check code quality
+#### 2. **Web Workflow** (`.github/workflows/web.yml`)
+   - Triggers on changes to `web/**`
+   - Builds React app with Vite
+   - Runs ESLint and TypeScript checks
+   - Creates production build
+   - Runs Lighthouse CI on PRs
 
-**Setup**:
+#### 3. **iOS Workflow** (`.github/workflows/ios.yml`)
+   - Triggers on changes to `ios/**`
+   - Builds iOS app with Xcode
+   - Runs tests on iPhone 15 simulator
+   - Runs SwiftLint for code quality
 
-1. Add secrets to GitHub repository:
-   - `RAILWAY_TOKEN` (from Railway dashboard)
-
-2. Configure environments:
-   - Create "production" environment
-   - Add required approvals (optional)
-
-### Azure Pipelines
-
-The `azure-pipelines.yml` pipeline provides:
-
-1. **Build Stage**:
-   - Restore, build, test
-   - Code coverage reports
-   - Publish artifacts
-
-2. **Docker Stage**:
-   - Build Docker images
-   - Tag with build ID
-
-3. **Deploy Stage**:
-   - Deploy to Azure App Service
-   - Requires Azure service connection
-
-4. **Code Quality Stage**:
-   - Format checking
-   - Build warnings check
+**Benefits of Separate Workflows**:
+- Only relevant tests run for each change
+- Faster feedback for developers
+- Independent deployment pipelines
+- More efficient CI/CD resource usage
 
 **Setup**:
 
-1. Create Azure DevOps project
-2. Create service connection to Azure subscription
-3. Configure pipeline variables:
-   - `AzureSubscription`: Azure service connection
-   - `WebAppName`: Your App Service name
+1. Configure GitHub Secrets in repository settings:
+   - `AZURE_CREDENTIALS`: Azure service principal JSON
+   - `AZURE_SQL_CONNECTION_STRING`: Database connection string
+   - `JWT_SECRET_KEY`: JWT secret key (min 32 chars)
+   - `APPLICATION_INSIGHTS_CONNECTION_STRING`: App Insights connection
 
-4. Create and run pipeline from `azure-pipelines.yml`
+2. Configure GitHub Variables:
+   - `AZURE_WEBAPP_NAME`: API App Service name
+   - `AZURE_FUNCTION_APP_NAME`: Function App name
+   - `AZURE_STORAGE_ACCOUNT`: Storage account name
+   - `AZURE_RESOURCE_GROUP`: Resource group name
+
+3. Push to `main` or `develop` branches to trigger workflows
+
+See **[GITHUB-ACTIONS-DEPLOYMENT.md](GITHUB-ACTIONS-DEPLOYMENT.md)** for detailed setup instructions.
 
 ---
 
@@ -416,12 +345,7 @@ builder.Host.UseSerilog((context, configuration) =>
 
 **Connection String Format**
 
-Railway uses `DATABASE_URL` format:
-```
-postgresql://user:pass@host:5432/dbname
-```
-
-Convert to .NET format:
+Azure PostgreSQL connection string format:
 ```
 Host=host;Database=dbname;Username=user;Password=pass;SSL Mode=Require
 ```
@@ -448,7 +372,6 @@ dotnet ef migrations list
 
 ## Support
 
-- [Railway Docs](https://docs.railway.app/)
 - [Azure App Service Docs](https://docs.microsoft.com/azure/app-service/)
 - [Docker Docs](https://docs.docker.com/)
 - [ASP.NET Core Deployment](https://docs.microsoft.com/aspnet/core/host-and-deploy/)

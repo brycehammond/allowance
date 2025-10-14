@@ -41,7 +41,7 @@ Focus on core functionality that delivers immediate value through native iOS fea
 - **Local Storage**: Core Data (offline caching)
 - **Secure Storage**: Keychain (for JWT tokens)
 - **Testing**: XCTest + Quick/Nimble (unit & integration tests)
-- **CI/CD**: Xcode Cloud or GitHub Actions
+- **CI/CD**: Azure Pipelines with macOS agents
 
 ### Swift Package Dependencies (Minimal for MVP)
 ```swift

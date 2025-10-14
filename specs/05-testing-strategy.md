@@ -551,60 +551,27 @@ public class SecurityTests
 
 ## Continuous Integration
 
-### GitHub Actions Configuration
-```yaml
-name: .NET CI/CD
+### Azure Pipelines Configuration
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+The project uses `azure-pipelines.yml` for comprehensive CI/CD with multiple stages:
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
+**Key Stages:**
+- **BuildAPI**: Build and test .NET API with code coverage
+- **BuildFunction**: Build Azure Function
+- **BuildReact**: Build React frontend
+- **DeployAPI**: Deploy to Azure App Service (main branch only)
+- **DeployFunction**: Deploy Azure Function (main branch only)
+- **DeployReact**: Deploy to Azure Storage Static Website (main branch only)
+- **CodeQuality**: .NET formatting, ESLint, TypeScript checks
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+**Features:**
+- Parallel builds for faster feedback
+- Comprehensive test coverage reports
+- Automated EF Core migrations
+- Environment-specific deployments
+- Code quality validation
 
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore
-
-    - name: Test
-      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"
-      env:
-        ConnectionStrings__DefaultConnection: "Host=localhost;Database=test;Username=postgres;Password=postgres"
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./coverage.cobertura.xml
-
-    - name: Run benchmarks
-      run: dotnet run -c Release --project AllowanceTracker.Benchmarks
-```
+See `azure-pipelines.yml` in the root directory for complete configuration.
 
 ## Test Execution Commands
 

@@ -1,38 +1,39 @@
 # GitHub Actions Deployment Guide
 
-This guide explains how to deploy the Allowance Tracker application to Azure using **GitHub Actions** with a modern architecture:
+This guide explains how to deploy the Allowance Tracker application to Azure using **GitHub Actions** with a modern multi-workflow architecture:
 - **.NET API** → Azure App Service (Linux)
 - **Azure Function** → Azure Function App (Weekly Allowance Processing)
 - **React Frontend** → Azure Storage Static Website
+- **iOS App** → Built and tested on macOS runners
 
 ## Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────┐
-│           GitHub Actions Workflow           │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────┐│
-│  │  Build API   │ │Build Function│ │ React││
-│  │  (dotnet)    │ │  (dotnet)    │ │(vite)││
-│  └──────┬───────┘ └──────┬───────┘ └───┬──┘│
-└─────────┼─────────────────┼──────────────┼──┘
-          │                 │              │
-          ▼                 ▼              ▼
-┌──────────────┐  ┌─────────────────┐  ┌─────────┐
-│ App Service  │  │  Function App   │  │ Storage │
-│ (API)        │  │ (Allowances)    │  │ (React) │
-└──────┬───────┘  └────────┬────────┘  └─────────┘
-       │                   │
-       └───────┬───────────┘
-               ▼
-      ┌────────────────┐
-      │  Azure SQL     │
-      └────────────────┘
+│       GitHub Actions Workflows              │
+│  ┌──────────┐ ┌──────────┐ ┌──────┐ ┌─────┐│
+│  │API Build │ │Web Build │ │ iOS  ││Azure││
+│  │  (.NET)  │ │ (React)  │ │Build ││Func ││
+│  └─────┬────┘ └─────┬────┘ └───┬──┘└──┬──┘│
+└────────┼────────────┼──────────┼───────┼───┘
+         │            │          │       │
+         ▼            ▼          ▼       ▼
+┌─────────────┐ ┌──────────┐ [iOS]  ┌────────┐
+│App Service  │ │ Storage  │        │Function│
+│   (API)     │ │ (React)  │        │  App   │
+└──────┬──────┘ └──────────┘        └────┬───┘
+       │                                  │
+       └────────────┬─────────────────────┘
+                    ▼
+           ┌────────────────┐
+           │  Azure SQL     │
+           └────────────────┘
 ```
 
 ## Prerequisites
 
+- GitHub repository
 - Azure Subscription
-- GitHub repository with Actions enabled
 - Azure CLI installed (for initial setup)
 
 ---
@@ -110,8 +111,6 @@ az webapp log config \
 
 ### 1.4 Create Azure Function App
 
-**Important:** The Function App runs the weekly allowance processing job.
-
 ```bash
 # Create Storage Account for Function App (required)
 az storage account create \
@@ -130,13 +129,6 @@ az functionapp create \
   --functions-version 4 \
   --storage-account allowancefuncstorage \
   --os-type Linux
-
-# Configure Function App settings
-az functionapp config appsettings set \
-  --name allowancetracker-function \
-  --resource-group allowancetracker-rg \
-  --settings \
-    "FUNCTIONS_WORKER_RUNTIME=dotnet-isolated"
 ```
 
 ### 1.5 Create Application Insights (Monitoring)
@@ -222,17 +214,17 @@ az webapp cors add \
 
 ---
 
-## 2. GitHub Actions Setup
+## 2. GitHub Setup
 
 ### 2.1 Create Azure Service Principal
 
-Create a service principal for GitHub Actions to authenticate with Azure:
+GitHub Actions needs credentials to deploy to Azure. Create a service principal:
 
 ```bash
 # Get your subscription ID
 SUBSCRIPTION_ID=$(az account show --query id --output tsv)
 
-# Create service principal
+# Create service principal with Contributor role on resource group
 az ad sp create-for-rbac \
   --name "github-actions-allowancetracker" \
   --role contributor \
@@ -240,44 +232,46 @@ az ad sp create-for-rbac \
   --sdk-auth
 ```
 
-This will output JSON like:
+**Copy the entire JSON output** - you'll need it for GitHub Secrets.
+
+Example output:
 ```json
 {
-  "clientId": "<guid>",
-  "clientSecret": "<secret>",
-  "subscriptionId": "<guid>",
-  "tenantId": "<guid>",
+  "clientId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "clientSecret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "subscriptionId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "tenantId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   ...
 }
 ```
 
-**⚠️ Save this entire JSON output** - you'll need it for GitHub Secrets!
-
 ### 2.2 Configure GitHub Secrets
 
-Go to your GitHub repository → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+In your GitHub repository, go to **Settings** → **Secrets and variables** → **Actions** → **New repository secret**.
 
 Add these secrets:
 
 | Secret Name | Value | Description |
 |------------|-------|-------------|
-| `AZURE_CREDENTIALS` | *(Entire JSON from step 2.1)* | Service principal credentials |
-| `API_APP_SERVICE_NAME` | `allowancetracker-api` | App Service name for API |
-| `FUNCTION_APP_NAME` | `allowancetracker-function` | Function App name |
-| `RESOURCE_GROUP_NAME` | `allowancetracker-rg` | Azure resource group |
-| `STORAGE_ACCOUNT_NAME` | `allowancetrackerweb` | Storage account for React |
-| `AZURE_SQL_CONNECTION_STRING` | `Server=tcp:allowancetracker-sql...` | Full SQL connection string |
-| `JWT_SECRET_KEY` | *(Generate secure 48-char key)* | JWT signing key |
-| `REACT_APP_API_URL` | `https://allowancetracker-api.azurewebsites.net` | API URL for React |
-| `APPLICATION_INSIGHTS_CONNECTION_STRING` | *(From step 1.5)* | Application Insights connection |
+| `AZURE_CREDENTIALS` | *JSON from step 2.1* | Azure service principal credentials |
+| `AZURE_SQL_CONNECTION_STRING` | *From step 1.2* | Database connection string |
+| `JWT_SECRET_KEY` | *Generate 48-char key* | JWT signing key (see below) |
+| `APPLICATION_INSIGHTS_CONNECTION_STRING` | *From step 1.5* | App Insights connection |
 
-**Optional (for CDN):**
-| Secret Name | Value |
-|------------|-------|
-| `CDN_PROFILE_NAME` | `allowancetracker-cdn` |
-| `CDN_ENDPOINT_NAME` | `allowancetracker` |
+### 2.3 Configure GitHub Variables
 
-### 2.3 Generate Secure JWT Key
+Go to **Settings** → **Secrets and variables** → **Actions** → **Variables** → **New repository variable**.
+
+Add these variables:
+
+| Variable Name | Value |
+|--------------|-------|
+| `AZURE_WEBAPP_NAME` | `allowancetracker-api` |
+| `AZURE_FUNCTION_APP_NAME` | `allowancetracker-function` |
+| `AZURE_STORAGE_ACCOUNT` | `allowancetrackerweb` |
+| `AZURE_RESOURCE_GROUP` | `allowancetracker-rg` |
+
+### 2.4 Generate Secure JWT Key
 
 **Bash/Linux/macOS:**
 ```bash
@@ -291,92 +285,129 @@ openssl rand -base64 48
 
 ---
 
-## 3. GitHub Actions Workflow Explained
+## 3. GitHub Actions Workflows Explained
 
-The workflow (`.github/workflows/deploy.yml`) contains 7 jobs:
+The project has three separate workflows that run independently:
 
-### Job 1: `build-api`
-- Builds and tests .NET API
-- Runs all 213 unit tests
-- Creates deployment artifact
+### Workflow 1: `api.yml` - API CI/CD
 
-### Job 2: `build-function`
-- Builds Azure Function project
-- Creates Function deployment artifact
+**Triggers:**
+- Push to `main` or `develop` branches
+- Pull requests to `main` or `develop`
+- Only when files in `src/**` change
 
-### Job 3: `build-react`
-- Builds React app with Vite
-- Injects API URL from secrets
-- Creates static website artifact
+**Jobs:**
+1. **build-and-test**
+   - Restores .NET dependencies
+   - Builds solution in Release mode
+   - Runs all 213 tests with code coverage
+   - Uploads test results and coverage artifacts
 
-### Job 4: `code-quality`
-- Runs .NET code formatting checks
-- Runs ESLint and TypeScript checks
-- Runs in parallel with builds
+2. **code-quality**
+   - Checks code formatting (`dotnet format`)
+   - Builds with warnings as errors
+   - Runs in parallel with build-and-test
 
-### Job 5: `deploy-api`
-- Deploys API to App Service
-- Configures app settings
-- Runs EF Core migrations
-- Only runs on `main` branch
+3. **build-docker**
+   - Builds Docker image for API
+   - Only runs on push to `main`
+   - Uses GitHub Actions cache for faster builds
 
-### Job 6: `deploy-function`
-- Deploys Function to Azure
-- Configures connection strings
-- Only runs on `main` branch
+**Environment:**
+- Runs on: `ubuntu-latest`
+- .NET version: 8.0.x
 
-### Job 7: `deploy-react`
-- Deploys React to Storage
-- Configures cache headers
-- Optionally purges CDN
-- Only runs on `main` branch
+### Workflow 2: `web.yml` - React CI/CD
+
+**Triggers:**
+- Push to `main` or `develop` branches
+- Pull requests to `main` or `develop`
+- Only when files in `web/**` change
+
+**Jobs:**
+1. **build-and-test**
+   - Installs Node.js dependencies
+   - Runs ESLint for code quality
+   - Runs TypeScript type checking
+   - Builds React app with Vite
+   - Uploads build artifact
+
+2. **lighthouse**
+   - Downloads build artifact
+   - Runs Lighthouse CI for performance testing
+   - Only runs on pull requests
+   - Provides performance feedback in PR
+
+**Environment:**
+- Runs on: `ubuntu-latest`
+- Node.js version: 20.x
+
+### Workflow 3: `ios.yml` - iOS CI/CD
+
+**Triggers:**
+- Push to `main` or `develop` branches
+- Pull requests to `main` or `develop`
+- Only when files in `ios/**` change
+
+**Jobs:**
+1. **build-and-test**
+   - Selects Xcode 15.2
+   - Installs Swift Package Manager dependencies
+   - Builds iOS app for simulator
+   - Runs tests on iPhone 15 simulator
+   - Uploads test results
+
+2. **swiftlint**
+   - Installs SwiftLint via Homebrew
+   - Runs SwiftLint for code quality
+   - Runs in parallel with build-and-test
+
+**Environment:**
+- Runs on: `macos-14`
+- Xcode version: 15.2
 
 ---
 
-## 4. First Deployment
+## 4. Workflow Benefits
 
-### Commit and Push
+### Efficiency
+- **Path filtering**: Only relevant workflows run for each change
+- **Parallel execution**: Jobs within each workflow run concurrently
+- **Faster feedback**: Developers get results for only what changed
+
+### Independence
+- API changes don't trigger React builds
+- React changes don't trigger API tests
+- iOS changes are completely isolated
+
+### Resource Optimization
+- Less GitHub Actions minutes consumed
+- Faster CI/CD pipeline overall
+- More focused error messages
+
+---
+
+## 5. First Deployment
+
+### 5.1 Push to GitHub
 
 ```bash
-# Ensure workflow file exists
-ls .github/workflows/deploy.yml
-
-# Commit and push to trigger deployment
-git add .github/workflows/deploy.yml
-git commit -m "Add GitHub Actions deployment workflow"
+# Commit and push to main branch
+git add .
+git commit -m "Configure GitHub Actions workflows"
 git push origin main
 ```
 
-### Monitor Deployment
+### 5.2 Monitor Workflows
 
 1. Go to your GitHub repository
-2. Click **Actions** tab
-3. Watch the workflow run in real-time
-4. Each job shows detailed logs
+2. Click on **Actions** tab
+3. Watch workflows execute in real-time
+4. Each workflow shows detailed logs
 
-### View Deployed Resources
+### 5.3 Verify Deployment
 
-```bash
-# API URL
-echo "https://allowancetracker-api.azurewebsites.net"
-
-# Function App URL
-echo "https://allowancetracker-function.azurewebsites.net"
-
-# Frontend URL
-az storage account show \
-  --name allowancetrackerweb \
-  --resource-group allowancetracker-rg \
-  --query "primaryEndpoints.web" \
-  --output tsv
-```
-
----
-
-## 5. Verify Deployment
-
-### Check API
-
+**Check API:**
 ```bash
 # Test health endpoint
 curl https://allowancetracker-api.azurewebsites.net/api/health
@@ -385,8 +416,7 @@ curl https://allowancetracker-api.azurewebsites.net/api/health
 open https://allowancetracker-api.azurewebsites.net/swagger
 ```
 
-### Check Function
-
+**Check Function:**
 ```bash
 # View Function in Azure Portal
 az functionapp show \
@@ -399,8 +429,7 @@ az functionapp log tail \
   --resource-group allowancetracker-rg
 ```
 
-### Check Frontend
-
+**Check Frontend:**
 ```bash
 # Get URL and open
 FRONTEND_URL=$(az storage account show \
@@ -414,48 +443,120 @@ open "$FRONTEND_URL"
 
 ---
 
-## 6. Testing the Weekly Allowance Function
+## 6. Common Workflows
 
-### Via Azure Portal
+### Development Workflow
 
-1. Go to Azure Portal → Function App
-2. Navigate to **Functions** → `ProcessWeeklyAllowances`
-3. Click **Code + Test**
-4. Click **Test/Run** → **Run**
-5. Check execution logs
+1. **Create feature branch:**
+   ```bash
+   git checkout -b feature/new-feature
+   ```
 
-### Via HTTP Trigger (Manual Test)
+2. **Make changes to API:**
+   ```bash
+   # Edit files in src/
+   git add src/
+   git commit -m "Add new API feature"
+   git push origin feature/new-feature
+   ```
+
+3. **Only API workflow runs** - Web and iOS workflows are skipped
+
+4. **Create PR:**
+   - GitHub Actions runs on PR
+   - Code review and merge
+
+### Multi-Component Changes
+
+If you change files in multiple directories:
 
 ```bash
-# Get Function key
-FUNCTION_KEY=$(az functionapp keys list \
-  --name allowancetracker-function \
-  --resource-group allowancetracker-rg \
-  --query "functionKeys.default" \
-  --output tsv)
-
-# Manually trigger allowance processing
-curl -X POST \
-  "https://allowancetracker-function.azurewebsites.net/api/ProcessWeeklyAllowancesManual" \
-  -H "x-functions-key: $FUNCTION_KEY"
+# Change API and React
+git add src/ web/
+git commit -m "Add feature across API and web"
+git push
 ```
 
-### Check Function Logs
+**Both API and Web workflows run** - iOS workflow is skipped
 
-```bash
-# Stream logs
-az functionapp log tail \
-  --name allowancetracker-function \
-  --resource-group allowancetracker-rg
+---
+
+## 7. Extending Workflows
+
+### Add Deployment Step to API Workflow
+
+Edit `.github/workflows/api.yml`:
+
+```yaml
+jobs:
+  # ... existing jobs ...
+
+  deploy:
+    name: Deploy to Azure
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-build
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          package: .
+```
+
+### Add Deployment Step to Web Workflow
+
+Edit `.github/workflows/web.yml`:
+
+```yaml
+jobs:
+  # ... existing jobs ...
+
+  deploy:
+    name: Deploy to Azure Storage
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: react-build
+          path: ./dist
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Upload to Azure Storage
+        run: |
+          az storage blob upload-batch \
+            --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
+            --destination '$web' \
+            --source ./dist \
+            --overwrite
 ```
 
 ---
 
-## 7. Cost Optimization
+## 8. Cost Optimization
 
 ### Monthly Cost Estimates
 
-**With Azure Function (Recommended):**
+**Azure Resources:**
 - App Service B1 (API): ~$13/month
 - Function App (Consumption): **~$0/month** (free tier)
 - SQL Database S0: ~$15/month
@@ -463,118 +564,144 @@ az functionapp log tail \
 - Application Insights: ~$2/month
 - **Total: ~$31/month** 💰
 
-**Savings vs Background Service:**
-- No need for "Always On" setting
-- Function runs on consumption plan (nearly free)
-- API can scale independently
+**GitHub Actions:**
+- Public repositories: **Free unlimited**
+- Private repositories: 2,000 minutes/month free (Linux), 1,000 minutes/month (macOS)
+- Additional minutes: $0.008/minute (Linux), $0.08/minute (macOS)
+
+**Savings with Separate Workflows:**
+- Only run necessary builds
+- Reduced minutes consumption
+- Faster feedback = more productivity
 
 ---
 
-## 8. Monitoring
+## 9. Monitoring & Debugging
 
-### Application Insights Dashboard
-
-View in Azure Portal → Application Insights → `allowancetracker-insights`:
-
-**API Metrics:**
-- Request rates and response times
-- Failed requests and exceptions
-- Dependency calls (SQL queries)
-
-**Function Metrics:**
-- Function executions (should show daily)
-- Success/failure rate
-- Execution duration
-- Allowances processed
-
-### Set Up Alerts
+### View Workflow Runs
 
 ```bash
-# Alert if Function fails
-az monitor metrics alert create \
-  --name "function-failures" \
-  --resource-group allowancetracker-rg \
-  --scopes $(az functionapp show --name allowancetracker-function --resource-group allowancetracker-rg --query id -o tsv) \
-  --condition "count FunctionExecutionCount where resultCode == '500' > 0" \
-  --window-size 5m \
-  --evaluation-frequency 1m \
-  --action email@example.com
+# Install GitHub CLI
+brew install gh
+
+# List recent workflow runs
+gh run list
+
+# View specific run
+gh run view <run-id>
+
+# View logs
+gh run view <run-id> --log
 ```
+
+### Common Issues
+
+**1. Authentication Failed**
+```
+Error: Login failed with Error: Azure login failed
+```
+**Fix:** Verify `AZURE_CREDENTIALS` secret is correct
+
+**2. Path Filter Not Working**
+```
+Workflow runs for all changes
+```
+**Fix:** Check that `paths` in workflow trigger matches your directory structure
+
+**3. Docker Build Failed**
+```
+Error: Cannot find Dockerfile
+```
+**Fix:** Ensure Dockerfile is in repository root
+
+**4. iOS Build Failed - Xcode Version**
+```
+Error: Xcode 15.2 not found
+```
+**Fix:** Update `XCODE_VERSION` in `.github/workflows/ios.yml` to available version on `macos-14`
 
 ---
 
-## 9. Troubleshooting
+## 10. Security Best Practices
 
-### Function Not Running
+### Secrets Management
+- Never commit secrets to repository
+- Rotate secrets every 90 days
+- Use minimal scope for service principal
+- Enable secret scanning on GitHub
 
-**Check schedule:**
+### Service Principal Permissions
 ```bash
-# View Function configuration
-az functionapp config show \
-  --name allowancetracker-function \
-  --resource-group allowancetracker-rg
+# List current permissions
+az role assignment list \
+  --assignee <client-id> \
+  --output table
+
+# Remove unnecessary permissions
+az role assignment delete \
+  --assignee <client-id> \
+  --role Contributor \
+  --scope /subscriptions/<subscription-id>
 ```
-
-**Check logs:**
-```bash
-az functionapp log tail \
-  --name allowancetracker-function \
-  --resource-group allowancetracker-rg
-```
-
-**Common issues:**
-- Function App stopped
-- Connection string missing
-- Application Insights not configured
-
-### API Issues
-
-Same as before - check logs:
-```bash
-az webapp log tail \
-  --name allowancetracker-api \
-  --resource-group allowancetracker-rg
-```
-
----
-
-## 10. GitHub Actions Best Practices
 
 ### Branch Protection
-
-Protect `main` branch:
 1. Go to **Settings** → **Branches**
-2. Add rule for `main`
-3. Enable:
+2. Add branch protection rule for `main`:
    - Require pull request reviews
-   - Require status checks to pass
-   - Include administrators
+   - Require status checks to pass (all workflows)
+   - Require branches to be up to date
+   - Enforce for administrators
 
-### Environment Protection
+---
 
-Add approval gates for production:
-1. Go to **Settings** → **Environments**
-2. Create `production` environment
-3. Add required reviewers
-4. Set deployment branches to `main` only
+## 11. Troubleshooting
 
-### Secrets Rotation
+### Workflow Not Triggering
 
-Rotate secrets every 90 days:
+**Check path filters:**
+```yaml
+on:
+  push:
+    paths:
+      - 'src/**'  # Make sure this matches your directory
+```
+
+**Test locally:**
 ```bash
-# Create new service principal
-az ad sp create-for-rbac --name "github-actions-allowancetracker-2" ...
+# Install act (GitHub Actions locally)
+brew install act
 
-# Update GitHub secret
-# Delete old service principal
+# Run workflow locally
+act -W .github/workflows/api.yml
+```
+
+### Test Failures
+
+```bash
+# Run tests locally
+cd src/AllowanceTracker.Tests
+dotnet test --logger "console;verbosity=detailed"
+```
+
+### Deployment Failures
+
+**Check Azure logs:**
+```bash
+# API logs
+az webapp log tail --name allowancetracker-api --resource-group allowancetracker-rg
+
+# Function logs
+az functionapp log tail --name allowancetracker-function --resource-group allowancetracker-rg
 ```
 
 ---
 
-## Quick Reference
+## 12. Quick Reference
+
+### Useful Commands
 
 ```bash
-# View all resources
+# View all Azure resources
 az resource list --resource-group allowancetracker-rg --output table
 
 # Restart API
@@ -583,18 +710,36 @@ az webapp restart --name allowancetracker-api --resource-group allowancetracker-
 # Restart Function
 az functionapp restart --name allowancetracker-function --resource-group allowancetracker-rg
 
-# View costs
-az consumption usage list --start-date 2025-10-01 --end-date 2025-10-31
+# View GitHub Actions runs
+gh run list --workflow=api.yml
 
-# Delete everything
+# View workflow file
+cat .github/workflows/api.yml
+
+# Trigger workflow manually
+gh workflow run api.yml
+
+# Delete everything (CAREFUL!)
 az group delete --name allowancetracker-rg --yes --no-wait
 ```
+
+### Workflow URLs
+
+- **API Workflow**: `https://github.com/<owner>/<repo>/actions/workflows/api.yml`
+- **Web Workflow**: `https://github.com/<owner>/<repo>/actions/workflows/web.yml`
+- **iOS Workflow**: `https://github.com/<owner>/<repo>/actions/workflows/ios.yml`
 
 ---
 
 ## Additional Resources
 
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Azure Functions Documentation](https://docs.microsoft.com/azure/azure-functions/)
-- [Azure App Service on Linux](https://docs.microsoft.com/azure/app-service/overview)
-- [Azure Storage Static Websites](https://docs.microsoft.com/azure/storage/blobs/storage-blob-static-website)
+- [GitHub Actions Documentation](https://docs.github.com/actions)
+- [Azure CLI Documentation](https://docs.microsoft.com/cli/azure/)
+- [Azure Web Apps Deployment](https://docs.microsoft.com/azure/app-service/deploy-github-actions)
+- [GitHub Actions for Azure](https://github.com/Azure/actions)
+
+---
+
+**Built with GitHub Actions** 🚀
+**Three Efficient Workflows** ⚡
+**Modern CI/CD** 🎯
