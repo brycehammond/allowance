@@ -34,7 +34,13 @@
       "Bash(npm install:*)",
       "Bash(npx tailwindcss:*)",
       "Bash(npm run build:*)",
-      "Bash(dotnet new:*)"
+      "Bash(dotnet new:*)",
+      "Bash(claude mcp add playwright npx '@playwright/mcp@latest')",
+      "Bash(npm run dev)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "WebFetch(domain:localhost)",
+      "Read(//private/tmp/**)"
     ],
     "deny": [],
     "ask": []

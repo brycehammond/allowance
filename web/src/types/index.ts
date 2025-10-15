@@ -19,6 +19,7 @@ export interface RegisterRequest {
   confirmPassword: string;
   firstName: string;
   lastName: string;
+  familyName: string;
 }
 
 export interface AuthResponse {
@@ -71,11 +72,35 @@ export const TransactionType = {
 
 export type TransactionType = typeof TransactionType[keyof typeof TransactionType];
 
+// Categories (defined early since Transaction uses it)
+export const TransactionCategory = {
+  // Income categories
+  Allowance: 'Allowance',
+  Chores: 'Chores',
+  Gift: 'Gift',
+  Other: 'Other',
+
+  // Expense categories
+  Toys: 'Toys',
+  Games: 'Games',
+  Candy: 'Candy',
+  Books: 'Books',
+  Clothes: 'Clothes',
+  Electronics: 'Electronics',
+  Food: 'Food',
+  Entertainment: 'Entertainment',
+  Savings: 'Savings',
+  Charity: 'Charity',
+} as const;
+
+export type TransactionCategory = typeof TransactionCategory[keyof typeof TransactionCategory];
+
 export interface Transaction {
   id: string;
   childId: string;
   amount: number;
   type: TransactionType;
+  category: TransactionCategory;
   description: string;
   balanceAfter: number;
   createdAt: string;
@@ -87,6 +112,7 @@ export interface CreateTransactionRequest {
   childId: string;
   amount: number;
   type: TransactionType;
+  category: TransactionCategory;
   description: string;
 }
 
@@ -94,12 +120,13 @@ export interface CreateTransactionRequest {
 export interface WishListItem {
   id: string;
   childId: string;
-  itemName: string;
-  targetAmount: number;
-  currentlySaved: number;
+  name: string;
+  price: number;
+  url?: string;
+  notes?: string;
   isPurchased: boolean;
-  createdAt: string;
   purchasedAt?: string;
+  createdAt: string;
   canAfford: boolean;
 }
 
@@ -221,29 +248,7 @@ export interface UpdateSavingsConfigRequest {
   amount: number;
 }
 
-// Categories
-export const TransactionCategory = {
-  // Income categories
-  Allowance: 'Allowance',
-  Chores: 'Chores',
-  Gift: 'Gift',
-  Other: 'Other',
-
-  // Expense categories
-  Toys: 'Toys',
-  Games: 'Games',
-  Candy: 'Candy',
-  Books: 'Books',
-  Clothes: 'Clothes',
-  Electronics: 'Electronics',
-  Food: 'Food',
-  Entertainment: 'Entertainment',
-  Savings: 'Savings',
-  Charity: 'Charity',
-} as const;
-
-export type TransactionCategory = typeof TransactionCategory[keyof typeof TransactionCategory];
-
+// CategoryInfo (TransactionCategory is defined earlier in the file)
 export interface CategoryInfo {
   category: TransactionCategory;
   displayName: string;

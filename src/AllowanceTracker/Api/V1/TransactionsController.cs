@@ -19,21 +19,33 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpGet("children/{childId}")]
-    public async Task<ActionResult<List<Transaction>>> GetChildTransactions(
+    public async Task<ActionResult<List<TransactionDto>>> GetChildTransactions(
         Guid childId,
         [FromQuery] int limit = 20)
     {
         var transactions = await _transactionService.GetChildTransactionsAsync(childId, limit);
-        return Ok(transactions);
+        var dtos = transactions.Select(TransactionDto.FromTransaction).ToList();
+        return Ok(dtos);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Transaction>> CreateTransaction(CreateTransactionDto dto)
+    public async Task<ActionResult<TransactionDto>> CreateTransaction(CreateTransactionDto dto)
     {
         var transaction = await _transactionService.CreateTransactionAsync(dto);
+
+        // Reload to get CreatedBy navigation property
+        var transactions = await _transactionService.GetChildTransactionsAsync(dto.ChildId, 1);
+        var latestTransaction = transactions.FirstOrDefault();
+
+        if (latestTransaction == null)
+        {
+            return StatusCode(500, "Transaction was created but could not be retrieved");
+        }
+
+        var transactionDto = TransactionDto.FromTransaction(latestTransaction);
         return CreatedAtAction(nameof(GetChildTransactions),
             new { childId = dto.ChildId },
-            transaction);
+            transactionDto);
     }
 
     [HttpGet("children/{childId}/balance")]

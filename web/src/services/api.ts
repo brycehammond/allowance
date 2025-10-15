@@ -74,7 +74,7 @@ export const authApi = {
   },
 
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/api/v1/auth/register', data);
+    const response = await apiClient.post<AuthResponse>('/api/v1/auth/register/parent', data);
     return response.data;
   },
 
@@ -97,7 +97,9 @@ export const childrenApi = {
   },
 
   create: async (data: CreateChildRequest): Promise<Child> => {
-    const response = await apiClient.post<Child>('/api/v1/children', data);
+    // Remove confirmPassword as backend doesn't expect it
+    const { confirmPassword, ...backendData } = data;
+    const response = await apiClient.post<Child>('/api/v1/auth/register/child', backendData);
     return response.data;
   },
 
@@ -115,9 +117,7 @@ export const childrenApi = {
 // Transactions API
 export const transactionsApi = {
   getByChild: async (childId: string): Promise<Transaction[]> => {
-    const response = await apiClient.get<Transaction[]>('/api/v1/transactions', {
-      params: { childId },
-    });
+    const response = await apiClient.get<Transaction[]>(`/api/v1/transactions/children/${childId}`);
     return response.data;
   },
 
@@ -135,14 +135,18 @@ export const transactionsApi = {
 // Wish List API
 export const wishListApi = {
   getByChild: async (childId: string): Promise<WishListItem[]> => {
-    const response = await apiClient.get<WishListItem[]>('/api/v1/wishlist', {
-      params: { childId },
-    });
+    const response = await apiClient.get<WishListItem[]>(`/api/v1/wishlist/children/${childId}`);
     return response.data;
   },
 
   create: async (data: CreateWishListItemRequest): Promise<WishListItem> => {
-    const response = await apiClient.post<WishListItem>('/api/v1/wishlist', data);
+    // Map frontend property names to backend DTO names
+    const backendData = {
+      childId: data.childId,
+      name: data.itemName,
+      price: data.targetAmount,
+    };
+    const response = await apiClient.post<WishListItem>('/api/v1/wishlist', backendData);
     return response.data;
   },
 

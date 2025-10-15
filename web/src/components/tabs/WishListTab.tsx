@@ -98,10 +98,6 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
     }).format(amount);
   };
 
-  const calculateProgress = (item: WishListItem) => {
-    return Math.min((item.currentlySaved / item.targetAmount) * 100, 100);
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -244,7 +240,7 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <h4 className={`text-lg font-medium ${item.isPurchased ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-                    {item.itemName}
+                    {item.name}
                   </h4>
                   {item.isPurchased && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -255,12 +251,8 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Target:</span>
-                    <span className="font-medium text-gray-900">{formatCurrency(item.targetAmount)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Saved:</span>
-                    <span className="font-medium text-gray-900">{formatCurrency(item.currentlySaved)}</span>
+                    <span className="text-gray-600">Price:</span>
+                    <span className="font-medium text-gray-900">{formatCurrency(item.price)}</span>
                   </div>
                   {item.canAfford && !item.isPurchased && (
                     <div className="mt-2 p-2 bg-green-50 rounded-md">
@@ -269,26 +261,6 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
                       </p>
                     </div>
                   )}
-                </div>
-
-                {/* Progress Bar */}
-                <div className="mb-4">
-                  <div className="flex justify-between text-xs text-gray-600 mb-1">
-                    <span>Progress</span>
-                    <span>{Math.round(calculateProgress(item))}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full ${
-                        item.isPurchased
-                          ? 'bg-green-500'
-                          : item.canAfford
-                          ? 'bg-primary-500'
-                          : 'bg-primary-300'
-                      }`}
-                      style={{ width: `${calculateProgress(item)}%` }}
-                    ></div>
-                  </div>
                 </div>
 
                 {/* Actions (Parent Only) */}

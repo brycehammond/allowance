@@ -1,4 +1,5 @@
 using AllowanceTracker.DTOs;
+using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -93,15 +94,20 @@ public class ChildrenController : ControllerBase
 
         return Ok(new
         {
-            childId = child.Id,
+            id = child.Id,
             userId = child.UserId,
             firstName = child.User.FirstName,
             lastName = child.User.LastName,
+            fullName = $"{child.User.FirstName} {child.User.LastName}",
             email = child.User.Email,
             currentBalance = child.CurrentBalance,
             weeklyAllowance = child.WeeklyAllowance,
             lastAllowanceDate = child.LastAllowanceDate,
             nextAllowanceDate = nextAllowanceDate,
+            savingsAccountEnabled = child.SavingsAccountEnabled,
+            savingsTransferType = child.SavingsTransferType == SavingsTransferType.Percentage ? "Percentage" : "FixedAmount",
+            savingsTransferPercentage = child.SavingsTransferPercentage,
+            savingsTransferAmount = child.SavingsTransferAmount,
             createdAt = child.CreatedAt
         });
     }

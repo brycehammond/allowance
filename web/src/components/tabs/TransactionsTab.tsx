@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { transactionsApi } from '../../services/api';
-import { TransactionType, type Transaction, type CreateTransactionRequest } from '../../types';
+import { TransactionType, TransactionCategory, type Transaction, type CreateTransactionRequest } from '../../types';
 
 interface TransactionsTabProps {
   childId: string;
@@ -17,6 +17,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
     childId,
     amount: 0,
     type: TransactionType.Credit,
+    category: TransactionCategory.Allowance,
     description: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,6 +58,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
         childId,
         amount: 0,
         type: TransactionType.Credit,
+        category: TransactionCategory.Allowance,
         description: '',
       });
       await loadTransactions();
@@ -168,6 +170,40 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
                   />
                 </div>
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                Category
+              </label>
+              <select
+                id="category"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as typeof TransactionCategory[keyof typeof TransactionCategory] })}
+                className="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+              >
+                {formData.type === TransactionType.Credit ? (
+                  <>
+                    <option value={TransactionCategory.Allowance}>Allowance</option>
+                    <option value={TransactionCategory.Chores}>Chores</option>
+                    <option value={TransactionCategory.Gift}>Gift</option>
+                    <option value={TransactionCategory.Other}>Other</option>
+                  </>
+                ) : (
+                  <>
+                    <option value={TransactionCategory.Toys}>Toys</option>
+                    <option value={TransactionCategory.Games}>Games</option>
+                    <option value={TransactionCategory.Candy}>Candy</option>
+                    <option value={TransactionCategory.Books}>Books</option>
+                    <option value={TransactionCategory.Clothes}>Clothes</option>
+                    <option value={TransactionCategory.Electronics}>Electronics</option>
+                    <option value={TransactionCategory.Food}>Food</option>
+                    <option value={TransactionCategory.Entertainment}>Entertainment</option>
+                    <option value={TransactionCategory.Savings}>Savings</option>
+                    <option value={TransactionCategory.Charity}>Charity</option>
+                  </>
+                )}
+              </select>
             </div>
 
             <div>

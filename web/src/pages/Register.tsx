@@ -12,6 +12,7 @@ export const Register: React.FC = () => {
     confirmPassword: '',
     firstName: '',
     lastName: '',
+    familyName: '',
   });
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -94,6 +95,21 @@ export const Register: React.FC = () => {
                   className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 />
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="familyName" className="block text-sm font-medium text-gray-700">
+                Family Name
+              </label>
+              <input
+                id="familyName"
+                name="familyName"
+                type="text"
+                required
+                value={formData.familyName}
+                onChange={handleChange}
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+              />
             </div>
 
             <div>
