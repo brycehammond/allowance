@@ -57,16 +57,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (credentials: LoginRequest) => {
     const response: AuthResponse = await authApi.login(credentials);
+    const user: User = {
+      id: response.userId,
+      email: response.email,
+      firstName: response.firstName,
+      lastName: response.lastName,
+      role: response.role,
+      familyId: response.familyId || '',
+    };
     localStorage.setItem('token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    setUser(response.user);
+    localStorage.setItem('user', JSON.stringify(user));
+    setUser(user);
   };
 
   const register = async (data: RegisterRequest) => {
     const response: AuthResponse = await authApi.register(data);
+    const user: User = {
+      id: response.userId,
+      email: response.email,
+      firstName: response.firstName,
+      lastName: response.lastName,
+      role: response.role,
+      familyId: response.familyId || '',
+    };
     localStorage.setItem('token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    setUser(response.user);
+    localStorage.setItem('user', JSON.stringify(user));
+    setUser(user);
   };
 
   const logout = () => {

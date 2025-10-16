@@ -59,6 +59,7 @@ public class TransactionService : ITransactionService
                 Type = dto.Type,
                 Category = dto.Category,
                 Description = dto.Description,
+                Notes = dto.Notes,
                 BalanceAfter = child.CurrentBalance,
                 CreatedById = _currentUser.UserId,
                 CreatedAt = DateTime.UtcNow

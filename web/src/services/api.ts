@@ -74,7 +74,9 @@ export const authApi = {
   },
 
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/api/v1/auth/register/parent', data);
+    // Remove confirmPassword as backend doesn't expect it
+    const { confirmPassword, ...backendData } = data;
+    const response = await apiClient.post<AuthResponse>('/api/v1/auth/register/parent', backendData);
     return response.data;
   },
 

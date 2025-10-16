@@ -107,12 +107,12 @@ public class AccountService : IAccountService
                     UserId = user.Id,
                     FamilyId = familyId,
                     WeeklyAllowance = dto.WeeklyAllowance,
-                    CurrentBalance = 0,
+                    CurrentBalance = dto.InitialBalance,
                     SavingsAccountEnabled = dto.SavingsAccountEnabled,
                     SavingsTransferType = dto.SavingsTransferType,
                     SavingsTransferPercentage = dto.SavingsTransferPercentage.HasValue ? (int)dto.SavingsTransferPercentage.Value : 0,
                     SavingsTransferAmount = dto.SavingsTransferAmount ?? 0,
-                    SavingsBalance = 0,
+                    SavingsBalance = dto.InitialSavingsBalance,
                     CreatedAt = DateTime.UtcNow
                 };
 

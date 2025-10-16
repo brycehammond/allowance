@@ -11,4 +11,6 @@ public record RegisterChildDto(
     bool SavingsAccountEnabled = false,
     SavingsTransferType SavingsTransferType = SavingsTransferType.Percentage,
     decimal? SavingsTransferPercentage = null,
-    decimal? SavingsTransferAmount = null);
+    decimal? SavingsTransferAmount = null,
+    decimal InitialBalance = 0,
+    decimal InitialSavingsBalance = 0);

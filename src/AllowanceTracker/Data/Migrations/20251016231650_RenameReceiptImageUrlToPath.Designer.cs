@@ -4,16 +4,19 @@ using AllowanceTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AllowanceTracker.Migrations
+namespace AllowanceTracker.Data.Migrations
 {
     [DbContext(typeof(AllowanceContext))]
-    partial class AllowanceContextModelSnapshot : ModelSnapshot
+    [Migration("20251016231650_RenameReceiptImageUrlToPath")]
+    partial class RenameReceiptImageUrlToPath
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -316,6 +319,9 @@ namespace AllowanceTracker.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReceiptImagePath")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")

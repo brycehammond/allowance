@@ -13,6 +13,7 @@ public class Transaction : IHasCreatedAt
     public decimal BalanceAfter { get; set; }
     public Guid CreatedById { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string? Notes { get; set; }
 
     // Navigation properties
     public virtual Child Child { get; set; } = null!;

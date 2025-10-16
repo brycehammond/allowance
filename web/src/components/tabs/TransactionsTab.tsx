@@ -19,6 +19,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
     type: TransactionType.Credit,
     category: TransactionCategory.Allowance,
     description: '',
+    notes: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,6 +61,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
         type: TransactionType.Credit,
         category: TransactionCategory.Allowance,
         description: '',
+        notes: '',
       });
       await loadTransactions();
     } catch (err: any) {
@@ -221,6 +223,20 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
               />
             </div>
 
+            <div>
+              <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
+                Notes (optional)
+              </label>
+              <textarea
+                id="notes"
+                rows={3}
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Add any additional details..."
+              />
+            </div>
+
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
@@ -295,6 +311,11 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
                         <p className="text-sm text-gray-500">
                           {formatDate(transaction.createdAt)} • By {transaction.createdByName}
                         </p>
+                        {transaction.notes && (
+                          <p className="text-sm text-gray-600 mt-1 italic">
+                            {transaction.notes}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="ml-4 flex-shrink-0 text-right">

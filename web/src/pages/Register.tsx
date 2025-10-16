@@ -41,7 +41,7 @@ export const Register: React.FC = () => {
       navigate('/dashboard');
     } catch (err: any) {
       setError(
-        err.response?.data?.message || 'Registration failed. Please try again.'
+        err.response?.data?.error?.message || err.response?.data?.message || 'Registration failed. Please try again.'
       );
     } finally {
       setIsLoading(false);

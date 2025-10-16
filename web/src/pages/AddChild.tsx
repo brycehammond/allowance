@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { childrenApi } from '../services/api';
 import type { CreateChildRequest } from '../types';
+import { Layout } from '../components/Layout';
+import { ArrowLeft } from 'lucide-react';
 
 export const AddChild: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +18,8 @@ export const AddChild: React.FC = () => {
     savingsTransferType: 'Percentage',
     savingsTransferPercentage: 10,
     savingsTransferAmount: undefined,
+    initialBalance: 0,
+    initialSavingsBalance: 0,
   });
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -82,22 +86,20 @@ export const AddChild: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
+    <Layout>
+      <div className="max-w-3xl">
+        <div className="mb-6">
           <button
             onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
-            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ArrowLeft className="w-4 h-4 mr-1" />
             Back to Dashboard
           </button>
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Add Child Account</h2>
+        <div className="bg-white shadow-sm rounded-lg p-6 md:p-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">Add Child Account</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
@@ -212,6 +214,50 @@ export const AddChild: React.FC = () => {
                   />
                 </div>
               </div>
+
+              <div>
+                <label htmlFor="initialBalance" className="block text-sm font-medium text-gray-700">
+                  Initial Account Balance
+                </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-gray-500 sm:text-sm">$</span>
+                  </div>
+                  <input
+                    id="initialBalance"
+                    name="initialBalance"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.initialBalance}
+                    onChange={handleChange}
+                    className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  />
+                </div>
+                <p className="mt-1 text-sm text-gray-500">Starting balance for the child's account (optional)</p>
+              </div>
+
+              <div>
+                <label htmlFor="initialSavingsBalance" className="block text-sm font-medium text-gray-700">
+                  Initial Savings Balance
+                </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-gray-500 sm:text-sm">$</span>
+                  </div>
+                  <input
+                    id="initialSavingsBalance"
+                    name="initialSavingsBalance"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.initialSavingsBalance}
+                    onChange={handleChange}
+                    className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  />
+                </div>
+                <p className="mt-1 text-sm text-gray-500">Starting balance for the child's savings account (optional)</p>
+              </div>
             </div>
 
             {/* Savings Account Settings */}
@@ -316,6 +362,6 @@ export const AddChild: React.FC = () => {
           </form>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };

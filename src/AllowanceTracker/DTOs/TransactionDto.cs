@@ -11,7 +11,8 @@ public record TransactionDto(
     string Description,
     decimal BalanceAfter,
     DateTime CreatedAt,
-    string CreatedByName)
+    string CreatedByName,
+    string? Notes)
 {
     public static TransactionDto FromTransaction(Transaction transaction)
     {
@@ -24,6 +25,7 @@ public record TransactionDto(
             transaction.Description,
             transaction.BalanceAfter,
             transaction.CreatedAt,
-            $"{transaction.CreatedBy.FirstName} {transaction.CreatedBy.LastName}");
+            $"{transaction.CreatedBy.FirstName} {transaction.CreatedBy.LastName}",
+            transaction.Notes);
     }
 }

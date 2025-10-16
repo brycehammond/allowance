@@ -23,9 +23,15 @@ export interface RegisterRequest {
 }
 
 export interface AuthResponse {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'Parent' | 'Child';
+  familyId: string | null;
+  familyName: string | null;
   token: string;
   expiresAt: string;
-  user: User;
 }
 
 // Child
@@ -54,6 +60,8 @@ export interface CreateChildRequest {
   savingsTransferType?: 'Percentage' | 'FixedAmount';
   savingsTransferPercentage?: number;
   savingsTransferAmount?: number;
+  initialBalance?: number;
+  initialSavingsBalance?: number;
 }
 
 export interface UpdateChildSettingsRequest {
@@ -106,6 +114,7 @@ export interface Transaction {
   createdAt: string;
   createdBy: string;
   createdByName: string;
+  notes?: string;
 }
 
 export interface CreateTransactionRequest {
@@ -114,6 +123,7 @@ export interface CreateTransactionRequest {
   type: TransactionType;
   category: TransactionCategory;
   description: string;
+  notes?: string;
 }
 
 // Wish List
