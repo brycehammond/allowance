@@ -11,6 +11,12 @@ public class Child : IHasCreatedAt
     public decimal CurrentBalance { get; set; } = 0;
     public DateTime? LastAllowanceDate { get; set; }
 
+    /// <summary>
+    /// Optional preferred day of the week for allowance payment (0=Sunday, 6=Saturday).
+    /// If null, uses rolling 7-day window from LastAllowanceDate.
+    /// </summary>
+    public DayOfWeek? AllowanceDay { get; set; }
+
     // Savings Account Properties
     /// <summary>
     /// Is savings account feature enabled for this child?

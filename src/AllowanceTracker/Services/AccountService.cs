@@ -154,6 +154,7 @@ public class AccountService : IAccountService
                     FamilyId = familyId,
                     WeeklyAllowance = dto.WeeklyAllowance,
                     CurrentBalance = dto.InitialBalance,
+                    AllowanceDay = dto.AllowanceDay,
                     SavingsAccountEnabled = dto.SavingsAccountEnabled,
                     SavingsTransferType = dto.SavingsTransferType,
                     SavingsTransferPercentage = dto.SavingsTransferPercentage.HasValue ? (int)dto.SavingsTransferPercentage.Value : 0,

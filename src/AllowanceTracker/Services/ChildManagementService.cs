@@ -83,6 +83,7 @@ public class ChildManagementService : IChildManagementService
 
         // Update allowance
         child.WeeklyAllowance = dto.WeeklyAllowance;
+        child.AllowanceDay = dto.AllowanceDay;
 
         // Update savings settings
         child.SavingsAccountEnabled = dto.SavingsAccountEnabled;

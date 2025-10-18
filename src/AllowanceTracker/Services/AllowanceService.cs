@@ -44,6 +44,14 @@ public class AllowanceService : IAllowanceService
                 throw new InvalidOperationException("Allowance already paid this week");
         }
 
+        // If AllowanceDay is set, verify today matches the scheduled day
+        if (child.AllowanceDay.HasValue)
+        {
+            var today = DateTime.UtcNow.DayOfWeek;
+            if (today != child.AllowanceDay.Value)
+                throw new InvalidOperationException($"Today is {today}, but this child's allowance is scheduled for {child.AllowanceDay.Value}. This is not the scheduled allowance day.");
+        }
+
         // Create transaction for allowance payment
         var dto = new CreateTransactionDto(
             childId,
@@ -93,14 +101,20 @@ public class AllowanceService : IAllowanceService
 
         var processedCount = 0;
         var errorCount = 0;
+        var today = DateTime.UtcNow.DayOfWeek;
 
         foreach (var child in children)
         {
             try
             {
                 // Check if child is eligible for allowance payment
-                if (!child.LastAllowanceDate.HasValue ||
-                    (DateTime.UtcNow - child.LastAllowanceDate.Value).TotalDays >= 7)
+                var timingEligible = !child.LastAllowanceDate.HasValue ||
+                    (DateTime.UtcNow - child.LastAllowanceDate.Value).TotalDays >= 7;
+
+                // If AllowanceDay is set, also check if today matches
+                var dayEligible = !child.AllowanceDay.HasValue || child.AllowanceDay.Value == today;
+
+                if (timingEligible && dayEligible)
                 {
                     await PayWeeklyAllowanceAsync(child.Id);
                     processedCount++;

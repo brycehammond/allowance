@@ -234,6 +234,127 @@ public class AllowanceServiceTests : IDisposable
             Times.Exactly(2));
     }
 
+    [Fact]
+    public async Task PayAllowance_WithAllowanceDay_OnCorrectDay_Succeeds()
+    {
+        // Arrange - Create child with AllowanceDay set to today's day of week
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowanceDay = DateTime.UtcNow.DayOfWeek;
+        child.LastAllowanceDate = DateTime.UtcNow.AddDays(-8); // Last paid 8 days ago
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.PayWeeklyAllowanceAsync(child.Id);
+
+        // Assert - Should succeed because today matches AllowanceDay
+        _mockTransactionService.Verify(
+            x => x.CreateTransactionAsync(It.IsAny<DTOs.CreateTransactionDto>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task PayAllowance_WithAllowanceDay_OnWrongDay_Fails()
+    {
+        // Arrange - Create child with AllowanceDay set to different day
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowanceDay = (DayOfWeek)(((int)DateTime.UtcNow.DayOfWeek + 1) % 7); // Different day
+        child.LastAllowanceDate = DateTime.UtcNow.AddDays(-8); // Last paid 8 days ago
+        await _context.SaveChangesAsync();
+
+        // Act
+        var act = () => _allowanceService.PayWeeklyAllowanceAsync(child.Id);
+
+        // Assert - Should fail because today doesn't match AllowanceDay
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*not the scheduled allowance day*");
+    }
+
+    [Fact]
+    public async Task PayAllowance_WithAllowanceDay_FirstTime_OnCorrectDay_Succeeds()
+    {
+        // Arrange - First allowance payment on correct day
+        var child = await CreateTestChild(weeklyAllowance: 20.00m);
+        child.AllowanceDay = DateTime.UtcNow.DayOfWeek;
+        child.LastAllowanceDate = null; // Never paid before
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.PayWeeklyAllowanceAsync(child.Id);
+
+        // Assert
+        _mockTransactionService.Verify(
+            x => x.CreateTransactionAsync(It.IsAny<DTOs.CreateTransactionDto>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task PayAllowance_WithNullAllowanceDay_UsesRollingWindow()
+    {
+        // Arrange - Child without AllowanceDay set (null)
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowanceDay = null;
+        child.LastAllowanceDate = DateTime.UtcNow.AddDays(-8); // Last paid 8 days ago
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.PayWeeklyAllowanceAsync(child.Id);
+
+        // Assert - Should succeed with 7-day rolling window logic
+        _mockTransactionService.Verify(
+            x => x.CreateTransactionAsync(It.IsAny<DTOs.CreateTransactionDto>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task PayAllowance_WithAllowanceDay_SameWeek_SameDay_Fails()
+    {
+        // Arrange - Already paid today
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowanceDay = DateTime.UtcNow.DayOfWeek;
+        child.LastAllowanceDate = DateTime.UtcNow.AddHours(-2); // Paid 2 hours ago today
+        await _context.SaveChangesAsync();
+
+        // Act
+        var act = () => _allowanceService.PayWeeklyAllowanceAsync(child.Id);
+
+        // Assert - Should fail because already paid this week
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Allowance already paid this week");
+    }
+
+    [Fact]
+    public async Task ProcessAllPendingAllowances_RespectsAllowanceDay()
+    {
+        // Arrange
+        var today = DateTime.UtcNow.DayOfWeek;
+        var tomorrow = (DayOfWeek)(((int)today + 1) % 7);
+
+        // Child 1: AllowanceDay is today, eligible
+        var child1 = await CreateTestChild(weeklyAllowance: 10.00m, firstName: "Child1");
+        child1.AllowanceDay = today;
+        child1.LastAllowanceDate = DateTime.UtcNow.AddDays(-8);
+
+        // Child 2: AllowanceDay is tomorrow, not eligible
+        var child2 = await CreateTestChild(weeklyAllowance: 15.00m, firstName: "Child2");
+        child2.AllowanceDay = tomorrow;
+        child2.LastAllowanceDate = DateTime.UtcNow.AddDays(-8);
+
+        // Child 3: No AllowanceDay, eligible (rolling window)
+        var child3 = await CreateTestChild(weeklyAllowance: 20.00m, firstName: "Child3");
+        child3.AllowanceDay = null;
+        child3.LastAllowanceDate = DateTime.UtcNow.AddDays(-8);
+
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.ProcessAllPendingAllowancesAsync();
+
+        // Assert - Should process child1 and child3, but not child2
+        _mockTransactionService.Verify(
+            x => x.CreateTransactionAsync(It.IsAny<DTOs.CreateTransactionDto>()),
+            Times.Exactly(2));
+    }
+
     private async Task<Child> CreateTestChild(
         decimal balance = 0m,
         decimal weeklyAllowance = 10m,

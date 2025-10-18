@@ -13,4 +13,5 @@ public record RegisterChildDto(
     decimal? SavingsTransferPercentage = null,
     decimal? SavingsTransferAmount = null,
     decimal InitialBalance = 0,
-    decimal InitialSavingsBalance = 0);
+    decimal InitialSavingsBalance = 0,
+    DayOfWeek? AllowanceDay = null);
