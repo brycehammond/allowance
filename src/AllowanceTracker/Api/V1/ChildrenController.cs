@@ -59,7 +59,8 @@ public class ChildrenController : ControllerBase
             c.LastName,
             c.WeeklyAllowance,
             c.CurrentBalance,
-            c.LastAllowanceDate)).ToList();
+            c.LastAllowanceDate,
+            c.AllowanceDay)).ToList();
 
         return Ok(children);
     }
@@ -102,6 +103,7 @@ public class ChildrenController : ControllerBase
             email = child.User.Email,
             currentBalance = child.CurrentBalance,
             weeklyAllowance = child.WeeklyAllowance,
+            allowanceDay = child.AllowanceDay,
             lastAllowanceDate = child.LastAllowanceDate,
             nextAllowanceDate = nextAllowanceDate,
             savingsAccountEnabled = child.SavingsAccountEnabled,
@@ -178,6 +180,48 @@ public class ChildrenController : ControllerBase
             childId = child.Id,
             weeklyAllowance = child.WeeklyAllowance,
             message = "Weekly allowance updated successfully"
+        });
+    }
+
+    /// <summary>
+    /// Update all child settings including allowance, savings, and AllowanceDay (Parent only)
+    /// </summary>
+    [HttpPut("{childId}/settings")]
+    [Authorize(Roles = "Parent")]
+    public async Task<ActionResult<object>> UpdateChildSettings(Guid childId, [FromBody] UpdateChildSettingsDto dto)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var child = await _childManagementService.UpdateChildSettingsAsync(childId, dto, currentUser.Id);
+
+        if (child == null)
+        {
+            return NotFound(new
+            {
+                error = new
+                {
+                    code = "NOT_FOUND",
+                    message = "Child not found or access denied"
+                }
+            });
+        }
+
+        return Ok(new
+        {
+            childId = child.Id,
+            firstName = child.User.FirstName,
+            lastName = child.User.LastName,
+            weeklyAllowance = child.WeeklyAllowance,
+            allowanceDay = child.AllowanceDay,
+            savingsAccountEnabled = child.SavingsAccountEnabled,
+            savingsTransferType = child.SavingsTransferType.ToString(),
+            savingsTransferPercentage = child.SavingsTransferPercentage,
+            savingsTransferAmount = child.SavingsTransferAmount,
+            message = "Child settings updated successfully"
         });
     }
 

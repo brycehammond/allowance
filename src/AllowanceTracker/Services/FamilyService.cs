@@ -125,7 +125,8 @@ public class FamilyService : IFamilyService
             c.CurrentBalance,
             c.WeeklyAllowance,
             c.LastAllowanceDate,
-            c.LastAllowanceDate?.AddDays(7))).ToList();
+            c.LastAllowanceDate?.AddDays(7),
+            c.AllowanceDay)).ToList();
 
         return new FamilyChildrenDto(family.Id, family.Name, children);
     }

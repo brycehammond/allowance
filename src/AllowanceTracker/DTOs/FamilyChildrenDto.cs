@@ -14,4 +14,5 @@ public record ChildDetailDto(
     decimal CurrentBalance,
     decimal WeeklyAllowance,
     DateTime? LastAllowanceDate,
-    DateTime? NextAllowanceDate);
+    DateTime? NextAllowanceDate,
+    DayOfWeek? AllowanceDay);

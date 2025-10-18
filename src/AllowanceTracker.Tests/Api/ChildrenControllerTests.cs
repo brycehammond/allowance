@@ -278,8 +278,8 @@ public class ChildrenControllerTests
             "Test Family",
             new List<ChildDetailDto>
             {
-                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Alice", "Smith", "alice@test.com", 100m, 10m, null, null),
-                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Bob", "Smith", "bob@test.com", 150m, 15m, DateTime.UtcNow.AddDays(-3), DateTime.UtcNow.AddDays(4))
+                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Alice", "Smith", "alice@test.com", 100m, 10m, null, null, DayOfWeek.Friday),
+                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Bob", "Smith", "bob@test.com", 150m, 15m, DateTime.UtcNow.AddDays(-3), DateTime.UtcNow.AddDays(4), null)
             });
 
         _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);
@@ -408,5 +408,169 @@ public class ChildrenControllerTests
         // Assert
         var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
         notFoundResult.Value.Should().NotBeNull();
+    }
+
+    // UpdateChildSettings Tests
+
+    [Fact]
+    public async Task UpdateChildSettings_WithValidData_ReturnsOkWithUpdatedChild()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var childId = Guid.NewGuid();
+        var currentUser = new ApplicationUser
+        {
+            Id = userId,
+            Email = "parent@test.com",
+            Role = UserRole.Parent
+        };
+
+        var dto = new UpdateChildSettingsDto(
+            WeeklyAllowance: 20m,
+            SavingsAccountEnabled: true,
+            SavingsTransferType: SavingsTransferType.Percentage,
+            SavingsTransferPercentage: 25,
+            SavingsTransferAmount: null,
+            AllowanceDay: DayOfWeek.Friday);
+
+        var updatedChild = new Child
+        {
+            Id = childId,
+            WeeklyAllowance = 20m,
+            AllowanceDay = DayOfWeek.Friday,
+            SavingsAccountEnabled = true,
+            SavingsTransferType = SavingsTransferType.Percentage,
+            SavingsTransferPercentage = 25,
+            User = new ApplicationUser { FirstName = "Alice", LastName = "Smith" }
+        };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);
+        _mockChildManagementService
+            .Setup(x => x.UpdateChildSettingsAsync(childId, dto, userId))
+            .ReturnsAsync(updatedChild);
+
+        // Act
+        var result = await _controller.UpdateChildSettings(childId, dto);
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task UpdateChildSettings_WhenUserNotAuthenticated_ReturnsUnauthorized()
+    {
+        // Arrange
+        var childId = Guid.NewGuid();
+        var dto = new UpdateChildSettingsDto(
+            WeeklyAllowance: 20m,
+            AllowanceDay: DayOfWeek.Monday);
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync((ApplicationUser?)null);
+
+        // Act
+        var result = await _controller.UpdateChildSettings(childId, dto);
+
+        // Assert
+        result.Result.Should().BeOfType<UnauthorizedResult>();
+    }
+
+    [Fact]
+    public async Task UpdateChildSettings_WhenChildNotFound_ReturnsNotFound()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var childId = Guid.NewGuid();
+        var currentUser = new ApplicationUser { Id = userId, Role = UserRole.Parent };
+        var dto = new UpdateChildSettingsDto(
+            WeeklyAllowance: 20m,
+            AllowanceDay: DayOfWeek.Friday);
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);
+        _mockChildManagementService
+            .Setup(x => x.UpdateChildSettingsAsync(childId, dto, userId))
+            .ReturnsAsync((Child?)null);
+
+        // Act
+        var result = await _controller.UpdateChildSettings(childId, dto);
+
+        // Assert
+        var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
+        notFoundResult.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task UpdateChildSettings_WithAllowanceDay_UpdatesCorrectly()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var childId = Guid.NewGuid();
+        var currentUser = new ApplicationUser
+        {
+            Id = userId,
+            Email = "parent@test.com",
+            Role = UserRole.Parent
+        };
+
+        var dto = new UpdateChildSettingsDto(
+            WeeklyAllowance: 15m,
+            AllowanceDay: DayOfWeek.Sunday);
+
+        var updatedChild = new Child
+        {
+            Id = childId,
+            WeeklyAllowance = 15m,
+            AllowanceDay = DayOfWeek.Sunday,
+            User = new ApplicationUser { FirstName = "Bob", LastName = "Test" }
+        };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);
+        _mockChildManagementService
+            .Setup(x => x.UpdateChildSettingsAsync(childId, dto, userId))
+            .ReturnsAsync(updatedChild);
+
+        // Act
+        var result = await _controller.UpdateChildSettings(childId, dto);
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().NotBeNull();
+        _mockChildManagementService.Verify(
+            x => x.UpdateChildSettingsAsync(childId, dto, userId),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateChildSettings_CallsServiceWithCorrectParameters()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var childId = Guid.NewGuid();
+        var currentUser = new ApplicationUser { Id = userId, Role = UserRole.Parent };
+        var dto = new UpdateChildSettingsDto(
+            WeeklyAllowance: 30m,
+            SavingsAccountEnabled: false,
+            AllowanceDay: null); // Test null AllowanceDay
+
+        var updatedChild = new Child
+        {
+            Id = childId,
+            WeeklyAllowance = 30m,
+            AllowanceDay = null,
+            User = new ApplicationUser { FirstName = "Charlie", LastName = "Test" }
+        };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);
+        _mockChildManagementService
+            .Setup(x => x.UpdateChildSettingsAsync(It.IsAny<Guid>(), It.IsAny<UpdateChildSettingsDto>(), It.IsAny<Guid>()))
+            .ReturnsAsync(updatedChild);
+
+        // Act
+        await _controller.UpdateChildSettings(childId, dto);
+
+        // Assert
+        _mockChildManagementService.Verify(
+            x => x.UpdateChildSettingsAsync(childId, dto, userId),
+            Times.Once);
     }
 }
