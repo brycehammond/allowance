@@ -237,27 +237,6 @@ export const AddChild: React.FC = () => {
                 <p className="mt-1 text-sm text-gray-500">Starting balance for the child's account (optional)</p>
               </div>
 
-              <div>
-                <label htmlFor="initialSavingsBalance" className="block text-sm font-medium text-gray-700">
-                  Initial Savings Balance
-                </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 sm:text-sm">$</span>
-                  </div>
-                  <input
-                    id="initialSavingsBalance"
-                    name="initialSavingsBalance"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.initialSavingsBalance}
-                    onChange={handleChange}
-                    className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                  />
-                </div>
-                <p className="mt-1 text-sm text-gray-500">Starting balance for the child's savings account (optional)</p>
-              </div>
             </div>
 
             {/* Savings Account Settings */}
@@ -275,6 +254,30 @@ export const AddChild: React.FC = () => {
                   Enable Savings Account
                 </label>
               </div>
+
+              {formData.savingsAccountEnabled && (
+                <div>
+                  <label htmlFor="initialSavingsBalance" className="block text-sm font-medium text-gray-700">
+                    Initial Savings Balance
+                  </label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">$</span>
+                    </div>
+                    <input
+                      id="initialSavingsBalance"
+                      name="initialSavingsBalance"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.initialSavingsBalance}
+                      onChange={handleChange}
+                      className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    />
+                  </div>
+                  <p className="mt-1 text-sm text-gray-500">Starting balance for the child's savings account (optional)</p>
+                </div>
+              )}
 
               {formData.savingsAccountEnabled && (
                 <div className="ml-6 space-y-4">

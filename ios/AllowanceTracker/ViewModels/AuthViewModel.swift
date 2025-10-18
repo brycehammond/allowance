@@ -150,6 +150,147 @@ final class AuthViewModel: ObservableObject {
         errorMessage = nil
     }
 
+    /// Change password for current user
+    /// - Parameters:
+    ///   - currentPassword: User's current password
+    ///   - newPassword: New password to set
+    ///   - confirmPassword: Confirmation of new password
+    /// - Returns: True if successful, false otherwise
+    func changePassword(
+        currentPassword: String,
+        newPassword: String,
+        confirmPassword: String
+    ) async -> Bool {
+        // Clear previous errors
+        errorMessage = nil
+
+        // Validate inputs
+        guard !currentPassword.isEmpty else {
+            errorMessage = "Please enter your current password."
+            return false
+        }
+
+        guard newPassword.count >= 6 else {
+            errorMessage = "New password must be at least 6 characters long."
+            return false
+        }
+
+        guard newPassword == confirmPassword else {
+            errorMessage = "New passwords do not match."
+            return false
+        }
+
+        // Set loading state
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let request = ChangePasswordRequest(
+                currentPassword: currentPassword,
+                newPassword: newPassword
+            )
+            _ = try await apiService.changePassword(request)
+            return true
+
+        } catch let error as APIError {
+            errorMessage = error.localizedDescription
+            return false
+        } catch {
+            errorMessage = "Failed to change password. Please try again."
+            return false
+        }
+    }
+
+    /// Request password reset email
+    /// - Parameter email: User's email address
+    /// - Returns: True if successful, false otherwise
+    func forgotPassword(email: String) async -> Bool {
+        // Clear previous errors
+        errorMessage = nil
+
+        // Validate input
+        guard validateEmail(email) else {
+            errorMessage = "Please enter a valid email address."
+            return false
+        }
+
+        // Set loading state
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let request = ForgotPasswordRequest(email: email)
+            _ = try await apiService.forgotPassword(request)
+            return true
+
+        } catch let error as APIError {
+            errorMessage = error.localizedDescription
+            return false
+        } catch {
+            errorMessage = "Failed to send reset email. Please try again."
+            return false
+        }
+    }
+
+    /// Reset password with token from email
+    /// - Parameters:
+    ///   - email: User's email address
+    ///   - token: Reset token from email
+    ///   - newPassword: New password to set
+    ///   - confirmPassword: Confirmation of new password
+    /// - Returns: True if successful, false otherwise
+    func resetPassword(
+        email: String,
+        token: String,
+        newPassword: String,
+        confirmPassword: String
+    ) async -> Bool {
+        // Clear previous errors
+        errorMessage = nil
+
+        // Validate inputs
+        guard validateEmail(email) else {
+            errorMessage = "Please enter a valid email address."
+            return false
+        }
+
+        guard !token.isEmpty else {
+            errorMessage = "Invalid reset token."
+            return false
+        }
+
+        guard newPassword.count >= 6 else {
+            errorMessage = "Password must be at least 6 characters long."
+            return false
+        }
+
+        guard newPassword == confirmPassword else {
+            errorMessage = "Passwords do not match."
+            return false
+        }
+
+        // Set loading state
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let request = ResetPasswordRequest(
+                email: email,
+                resetToken: token,
+                newPassword: newPassword
+            )
+            _ = try await apiService.resetPassword(request)
+            return true
+
+        } catch let error as APIError {
+            errorMessage = error.localizedDescription
+            return false
+        } catch {
+            errorMessage = "Failed to reset password. Please try again."
+            return false
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Validate email format

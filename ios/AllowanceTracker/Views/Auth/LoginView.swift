@@ -8,6 +8,7 @@ struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var showRegister = false
+    @State private var showForgotPassword = false
 
     // MARK: - Body
 
@@ -24,6 +25,9 @@ struct LoginView: View {
                     // Login button
                     loginButton
 
+                    // Forgot password link
+                    forgotPasswordLink
+
                     // Register link
                     registerLink
 
@@ -39,6 +43,10 @@ struct LoginView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showRegister) {
                 RegisterView()
+            }
+            .sheet(isPresented: $showForgotPassword) {
+                ForgotPasswordView()
+                    .environmentObject(viewModel)
             }
         }
     }
@@ -113,6 +121,18 @@ struct LoginView: View {
             .background(Color.blue)
             .foregroundColor(.white)
             .cornerRadius(12)
+        }
+        .disabled(viewModel.isLoading)
+    }
+
+    private var forgotPasswordLink: some View {
+        Button {
+            showForgotPassword = true
+        } label: {
+            Text("Forgot your password?")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundStyle(.blue)
         }
         .disabled(viewModel.isLoading)
     }

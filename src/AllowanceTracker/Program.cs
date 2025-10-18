@@ -8,6 +8,7 @@ using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using System.Reflection;
 using System.Text;
+using SendGrid;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -136,6 +137,11 @@ builder.Services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();
 
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();
+
+// Add SendGrid email service
+var sendGridApiKey = builder.Configuration["SendGrid:ApiKey"] ?? "";
+builder.Services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 
 var app = builder.Build();
 

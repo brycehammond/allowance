@@ -80,8 +80,28 @@ export const authApi = {
     return response.data;
   },
 
+  registerAdditionalParent: async (data: { email: string; password: string; firstName: string; lastName: string }): Promise<User> => {
+    const response = await apiClient.post<User>('/api/v1/auth/register/parent/additional', data);
+    return response.data;
+  },
+
   getCurrentUser: async (): Promise<User> => {
     const response = await apiClient.get<User>('/api/v1/auth/me');
+    return response.data;
+  },
+
+  changePassword: async (data: { currentPassword: string; newPassword: string }): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>('/api/v1/auth/change-password', data);
+    return response.data;
+  },
+
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>('/api/v1/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  resetPassword: async (data: { email: string; resetToken: string; newPassword: string }): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>('/api/v1/auth/reset-password', data);
     return response.data;
   },
 };

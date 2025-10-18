@@ -47,6 +47,12 @@ struct ProfileView: View {
                 // Settings Section
                 Section("Settings") {
                     NavigationLink {
+                        ChangePasswordView()
+                    } label: {
+                        Label("Change Password", systemImage: "key.fill")
+                    }
+
+                    NavigationLink {
                         NotificationsSettingsView()
                     } label: {
                         Label("Notifications", systemImage: "bell.fill")

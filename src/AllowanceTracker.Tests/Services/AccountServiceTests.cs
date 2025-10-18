@@ -16,6 +16,7 @@ public class AccountServiceTests : IDisposable
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly Mock<SignInManager<ApplicationUser>> _signInManagerMock;
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+    private readonly Mock<IEmailService> _emailServiceMock;
     private readonly AccountService _accountService;
 
     public AccountServiceTests()
@@ -42,12 +43,14 @@ public class AccountServiceTests : IDisposable
             null!, null!, null!, null!);
 
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+        _emailServiceMock = new Mock<IEmailService>();
 
         _accountService = new AccountService(
             _userManagerMock.Object,
             _signInManagerMock.Object,
             _context,
-            _httpContextAccessorMock.Object);
+            _httpContextAccessorMock.Object,
+            _emailServiceMock.Object);
     }
 
     [Fact]
@@ -238,6 +241,292 @@ public class AccountServiceTests : IDisposable
         // Assert
         currentUser.Should().NotBeNull();
         currentUser!.Id.Should().Be(user.Id);
+    }
+
+    [Fact]
+    public async Task RegisterAdditionalParent_AddsParentToExistingFamily()
+    {
+        // Arrange
+        var family = new Family
+        {
+            Id = Guid.NewGuid(),
+            Name = "Smith Family",
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        var dto = new RegisterAdditionalParentDto(
+            "parent2@test.com",
+            "Test123!",
+            "Jane",
+            "Smith");
+
+        _userManagerMock
+            .Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success)
+            .Callback<ApplicationUser, string>((user, password) =>
+            {
+                _context.Users.Add(user);
+                _context.SaveChanges();
+            });
+
+        // Act
+        var result = await _accountService.RegisterAdditionalParentAsync(dto, family.Id);
+
+        // Assert
+        result.Succeeded.Should().BeTrue();
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        user.Should().NotBeNull();
+        user!.Role.Should().Be(UserRole.Parent);
+        user.FamilyId.Should().Be(family.Id);
+        user.FirstName.Should().Be("Jane");
+        user.LastName.Should().Be("Smith");
+    }
+
+    [Fact]
+    public async Task RegisterAdditionalParent_WithInvalidFamilyId_ReturnsFailure()
+    {
+        // Arrange
+        var dto = new RegisterAdditionalParentDto(
+            "parent2@test.com",
+            "Test123!",
+            "Jane",
+            "Smith");
+        var invalidFamilyId = Guid.NewGuid();
+
+        // Act
+        var result = await _accountService.RegisterAdditionalParentAsync(dto, invalidFamilyId);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Description.Contains("Family not found"));
+    }
+
+    [Fact]
+    public async Task RegisterAdditionalParent_WithFailedUserCreation_ReturnsFailure()
+    {
+        // Arrange
+        var family = new Family
+        {
+            Id = Guid.NewGuid(),
+            Name = "Smith Family",
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        var dto = new RegisterAdditionalParentDto(
+            "parent2@test.com",
+            "Test123!",
+            "Jane",
+            "Smith");
+
+        _userManagerMock
+            .Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "User creation failed" }));
+
+        // Act
+        var result = await _accountService.RegisterAdditionalParentAsync(dto, family.Id);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Description == "User creation failed");
+    }
+
+    [Fact]
+    public async Task ChangePassword_WithValidCredentials_Succeeds()
+    {
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@test.com",
+            UserName = "test@test.com",
+            FirstName = "John",
+            LastName = "Doe"
+        };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        _userManagerMock
+            .Setup(x => x.FindByIdAsync(user.Id.ToString()))
+            .ReturnsAsync(user);
+
+        _userManagerMock
+            .Setup(x => x.ChangePasswordAsync(user, "OldPassword123!", "NewPassword123!"))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        var result = await _accountService.ChangePasswordAsync(user.Id, "OldPassword123!", "NewPassword123!");
+
+        // Assert
+        result.Succeeded.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ChangePassword_WithInvalidCurrentPassword_Fails()
+    {
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@test.com",
+            UserName = "test@test.com",
+            FirstName = "John",
+            LastName = "Doe"
+        };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        _userManagerMock
+            .Setup(x => x.FindByIdAsync(user.Id.ToString()))
+            .ReturnsAsync(user);
+
+        _userManagerMock
+            .Setup(x => x.ChangePasswordAsync(user, "WrongPassword!", "NewPassword123!"))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Incorrect password" }));
+
+        // Act
+        var result = await _accountService.ChangePasswordAsync(user.Id, "WrongPassword!", "NewPassword123!");
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Description == "Incorrect password");
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithValidToken_Succeeds()
+    {
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@test.com",
+            UserName = "test@test.com",
+            FirstName = "John",
+            LastName = "Doe"
+        };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        var resetToken = "valid-reset-token";
+
+        _userManagerMock
+            .Setup(x => x.FindByEmailAsync(user.Email))
+            .ReturnsAsync(user);
+
+        _userManagerMock
+            .Setup(x => x.ResetPasswordAsync(user, resetToken, "NewPassword123!"))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        var result = await _accountService.ResetPasswordAsync(user.Email, resetToken, "NewPassword123!");
+
+        // Assert
+        result.Succeeded.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithInvalidToken_Fails()
+    {
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@test.com",
+            UserName = "test@test.com",
+            FirstName = "John",
+            LastName = "Doe"
+        };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        var invalidToken = "invalid-token";
+
+        _userManagerMock
+            .Setup(x => x.FindByEmailAsync(user.Email))
+            .ReturnsAsync(user);
+
+        _userManagerMock
+            .Setup(x => x.ResetPasswordAsync(user, invalidToken, "NewPassword123!"))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Invalid token" }));
+
+        // Act
+        var result = await _accountService.ResetPasswordAsync(user.Email, invalidToken, "NewPassword123!");
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Description == "Invalid token");
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithNonexistentEmail_Fails()
+    {
+        // Arrange
+        _userManagerMock
+            .Setup(x => x.FindByEmailAsync("nonexistent@test.com"))
+            .ReturnsAsync((ApplicationUser?)null);
+
+        // Act
+        var result = await _accountService.ResetPasswordAsync("nonexistent@test.com", "token", "NewPassword123!");
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Description.Contains("User not found"));
+    }
+
+    [Fact]
+    public async Task ForgotPassword_SendsEmailWithResetToken()
+    {
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@test.com",
+            UserName = "test@test.com",
+            FirstName = "John",
+            LastName = "Doe"
+        };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        var resetToken = "generated-reset-token";
+
+        _userManagerMock
+            .Setup(x => x.FindByEmailAsync(user.Email))
+            .ReturnsAsync(user);
+
+        _userManagerMock
+            .Setup(x => x.GeneratePasswordResetTokenAsync(user))
+            .ReturnsAsync(resetToken);
+
+        // Act
+        var result = await _accountService.ForgotPasswordAsync(user.Email);
+
+        // Assert
+        result.Should().BeTrue();
+        _emailServiceMock.Verify(
+            x => x.SendPasswordResetEmailAsync(user.Email, resetToken, "John Doe"),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task ForgotPassword_WithNonexistentEmail_ReturnsFalseWithoutSendingEmail()
+    {
+        // Arrange
+        _userManagerMock
+            .Setup(x => x.FindByEmailAsync("nonexistent@test.com"))
+            .ReturnsAsync((ApplicationUser?)null);
+
+        // Act
+        var result = await _accountService.ForgotPasswordAsync("nonexistent@test.com");
+
+        // Assert
+        result.Should().BeFalse();
+        _emailServiceMock.Verify(
+            x => x.SendPasswordResetEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+            Times.Never);
     }
 
     public void Dispose()

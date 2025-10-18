@@ -197,6 +197,82 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Add an additional parent to the family (Parent only)
+    /// </summary>
+    /// <param name="dto">Parent registration details including email, password, and name</param>
+    /// <returns>User information for the newly created parent account</returns>
+    /// <response code="201">Parent account created and added to family successfully</response>
+    /// <response code="400">Registration failed (e.g., email already exists, current user has no family)</response>
+    /// <response code="401">User is not authenticated</response>
+    /// <response code="403">User is not a parent</response>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/v1/auth/register/parent/additional
+    ///     {
+    ///         "email": "parent2@example.com",
+    ///         "password": "Password123",
+    ///         "firstName": "Jane",
+    ///         "lastName": "Doe"
+    ///     }
+    ///
+    /// Requirements:
+    /// - Only parents can add additional parents
+    /// - New parent is automatically added to the current parent's family
+    /// - Useful for adding co-parents or guardians to manage the family together
+    /// </remarks>
+    [HttpPost("register/parent/additional")]
+    [Authorize(Roles = "Parent")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<UserInfoDto>> RegisterAdditionalParent([FromBody] RegisterAdditionalParentDto dto)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser?.FamilyId == null)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "NO_FAMILY",
+                    message = "Current user has no associated family"
+                }
+            });
+        }
+
+        var result = await _accountService.RegisterAdditionalParentAsync(dto, currentUser.FamilyId.Value);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "REGISTRATION_FAILED",
+                    message = string.Join(", ", result.Errors.Select(e => e.Description))
+                }
+            });
+        }
+
+        var user = await _context.Users
+            .Include(u => u.Family)
+            .FirstAsync(u => u.Email == dto.Email);
+
+        return CreatedAtAction(
+            nameof(GetCurrentUser),
+            new UserInfoDto(
+                user.Id,
+                user.Email!,
+                user.FirstName,
+                user.LastName,
+                user.Role.ToString(),
+                user.FamilyId,
+                user.Family?.Name));
+    }
+
+    /// <summary>
     /// Login with email and password
     /// </summary>
     /// <param name="dto">Login credentials (email and password)</param>
@@ -296,5 +372,92 @@ public class AuthController : ControllerBase
             user.Role.ToString(),
             user.FamilyId,
             family?.Name));
+    }
+
+    /// <summary>
+    /// Change password for authenticated user
+    /// </summary>
+    /// <param name="dto">Current and new password</param>
+    /// <returns>Success or failure</returns>
+    /// <response code="200">Password changed successfully</response>
+    /// <response code="400">Password change failed (e.g., incorrect current password)</response>
+    /// <response code="401">User is not authenticated</response>
+    [HttpPost("change-password")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+            return Unauthorized();
+
+        var result = await _accountService.ChangePasswordAsync(currentUser.Id, dto.CurrentPassword, dto.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "PASSWORD_CHANGE_FAILED",
+                    message = string.Join(", ", result.Errors.Select(e => e.Description))
+                }
+            });
+        }
+
+        return Ok(new { message = "Password changed successfully" });
+    }
+
+    /// <summary>
+    /// Request password reset email
+    /// </summary>
+    /// <param name="dto">Email address to send reset link</param>
+    /// <returns>Success message (regardless of whether email exists for security)</returns>
+    /// <response code="200">Reset email sent if account exists</response>
+    /// <remarks>
+    /// For security, this endpoint always returns success even if the email doesn't exist.
+    /// If the email is registered, a password reset link will be sent.
+    /// </remarks>
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
+    {
+        await _accountService.ForgotPasswordAsync(dto.Email);
+
+        // Always return success for security (don't reveal if email exists)
+        return Ok(new { message = "If your email is registered, you will receive a password reset link shortly" });
+    }
+
+    /// <summary>
+    /// Reset password using reset token from email
+    /// </summary>
+    /// <param name="dto">Email, reset token, and new password</param>
+    /// <returns>Success or failure</returns>
+    /// <response code="200">Password reset successfully</response>
+    /// <response code="400">Reset failed (e.g., invalid or expired token)</response>
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+    {
+        var result = await _accountService.ResetPasswordAsync(dto.Email, dto.ResetToken, dto.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "PASSWORD_RESET_FAILED",
+                    message = string.Join(", ", result.Errors.Select(e => e.Description))
+                }
+            });
+        }
+
+        return Ok(new { message = "Password reset successfully" });
     }
 }

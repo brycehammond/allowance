@@ -68,3 +68,24 @@ struct AuthResponse: Codable {
         )
     }
 }
+
+// MARK: - Password Management DTOs
+
+struct ChangePasswordRequest: Codable {
+    let currentPassword: String
+    let newPassword: String
+}
+
+struct ForgotPasswordRequest: Codable {
+    let email: String
+}
+
+struct ResetPasswordRequest: Codable {
+    let email: String
+    let resetToken: String
+    let newPassword: String
+}
+
+struct PasswordMessageResponse: Codable {
+    let message: String
+}

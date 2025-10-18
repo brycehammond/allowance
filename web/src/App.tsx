@@ -5,7 +5,11 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { AddChild } from './pages/AddChild';
+import { AddParent } from './pages/AddParent';
 import { ChildDetail } from './pages/ChildDetail';
+import { ChangePassword } from './pages/ChangePassword';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 
 function App() {
   return (
@@ -14,6 +18,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/dashboard"
             element={
@@ -27,6 +33,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <AddChild />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/parent/add"
+            element={
+              <ProtectedRoute>
+                <AddParent />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
               </ProtectedRoute>
             }
           />

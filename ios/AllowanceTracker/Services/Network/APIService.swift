@@ -87,6 +87,47 @@ final class APIService: APIServiceProtocol {
         try keychainService.deleteToken()
     }
 
+    /// Change password for authenticated user
+    /// - Parameter request: Change password request with current and new password
+    /// - Returns: Success message
+    /// - Throws: APIError if request fails
+    func changePassword(_ request: ChangePasswordRequest) async throws -> PasswordMessageResponse {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/auth/change-password")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Request password reset email
+    /// - Parameter request: Forgot password request with email
+    /// - Returns: Success message
+    /// - Throws: APIError if request fails
+    func forgotPassword(_ request: ForgotPasswordRequest) async throws -> PasswordMessageResponse {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/auth/forgot-password")
+
+        var urlRequest = URLRequest(url: endpoint)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try jsonEncoder.encode(request)
+
+        return try await performRequest(urlRequest)
+    }
+
+    /// Reset password with token from email
+    /// - Parameter request: Reset password request with email, token, and new password
+    /// - Returns: Success message
+    /// - Throws: APIError if request fails
+    func resetPassword(_ request: ResetPasswordRequest) async throws -> PasswordMessageResponse {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/auth/reset-password")
+
+        var urlRequest = URLRequest(url: endpoint)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try jsonEncoder.encode(request)
+
+        return try await performRequest(urlRequest)
+    }
+
     // MARK: - Children
 
     /// Get all children for the current family

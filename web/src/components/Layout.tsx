@@ -10,6 +10,7 @@ import {
   X,
   DollarSign,
   TrendingUp,
+  Key,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -30,6 +31,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Add Child', href: '/children/add', icon: UserPlus },
+    { name: 'Add Co-Parent', href: '/parent/add', icon: Users },
+    { name: 'Change Password', href: '/change-password', icon: Key },
   ];
 
   const isActivePath = (path: string) => {

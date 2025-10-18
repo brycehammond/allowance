@@ -97,10 +97,16 @@ export const Login: React.FC = () => {
             </button>
           </div>
 
-          <div className="text-center">
+          <div className="text-center space-y-2">
+            <Link
+              to="/forgot-password"
+              className="block text-sm font-medium text-primary-600 hover:text-primary-500"
+            >
+              Forgot your password?
+            </Link>
             <Link
               to="/register"
-              className="font-medium text-primary-600 hover:text-primary-500"
+              className="block font-medium text-primary-600 hover:text-primary-500"
             >
               Don't have an account? Register here
             </Link>
