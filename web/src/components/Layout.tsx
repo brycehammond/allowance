@@ -9,7 +9,6 @@ import {
   Menu,
   X,
   DollarSign,
-  TrendingUp,
   Key,
 } from 'lucide-react';
 

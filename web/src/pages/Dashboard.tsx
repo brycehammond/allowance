@@ -21,8 +21,11 @@ export const Dashboard: React.FC = () => {
       setIsLoading(true);
       const data = await childrenApi.getAll();
       setChildren(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load children');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to load children');
     } finally {
       setIsLoading(false);
     }

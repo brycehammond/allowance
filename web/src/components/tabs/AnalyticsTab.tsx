@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { analyticsApi } from '../../services/api';
 import {
   LineChart,
@@ -37,11 +37,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ childId }) => {
   const [error, setError] = useState<string>('');
   const [days, setDays] = useState(30);
 
-  useEffect(() => {
-    loadAnalytics();
-  }, [childId, days]);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     try {
       setIsLoading(true);
       setError('');
@@ -58,12 +54,19 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ childId }) => {
       setIncomeSpending(income);
       setMonthlyComparison(monthly);
       setCategoryBreakdown(category);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load analytics');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to load analytics');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [childId, days]);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [loadAnalytics]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -302,7 +305,10 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ childId }) => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={(entry: any) => `${entry.category}: ${entry.percentage.toFixed(0)}%`}
+                  label={(entry) => {
+                    const data = entry as unknown as { category: string; percentage: number };
+                    return `${data.category}: ${data.percentage.toFixed(0)}%`;
+                  }}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"

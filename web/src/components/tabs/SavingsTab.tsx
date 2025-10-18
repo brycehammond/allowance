@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { savingsApi } from '../../services/api';
 import type {
   SavingsAccountSummary,
@@ -30,11 +30,7 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    loadSavingsData();
-  }, [childId]);
-
-  const loadSavingsData = async () => {
+  const loadSavingsData = useCallback(async () => {
     try {
       setIsLoading(true);
       const [summaryData, historyData] = await Promise.all([
@@ -43,12 +39,19 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
       ]);
       setSummary(summaryData);
       setTransactions(historyData);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load savings data');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to load savings data');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [childId]);
+
+  useEffect(() => {
+    loadSavingsData();
+  }, [loadSavingsData]);
 
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,8 +69,11 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
       setShowDepositForm(false);
       setDepositData({ childId, amount: 0, description: '' });
       await loadSavingsData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to deposit funds');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to deposit funds');
     } finally {
       setIsSubmitting(false);
     }
@@ -89,8 +95,11 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
       setShowWithdrawForm(false);
       setWithdrawData({ childId, amount: 0, description: '' });
       await loadSavingsData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to withdraw funds');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to withdraw funds');
     } finally {
       setIsSubmitting(false);
     }

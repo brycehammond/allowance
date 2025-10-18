@@ -66,10 +66,12 @@ export const ResetPassword: React.FC = () => {
       setTimeout(() => {
         navigate('/login');
       }, 2000);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error?.message || 'Failed to reset password. Please try again or request a new reset link.'
-      );
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { error?: { message?: string }; message?: string } } }).response?.data?.error?.message ||
+          (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to reset password. Please try again or request a new reset link.');
     } finally {
       setIsLoading(false);
     }

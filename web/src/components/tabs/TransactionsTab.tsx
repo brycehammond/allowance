@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { transactionsApi } from '../../services/api';
 import { TransactionType, TransactionCategory, type Transaction, type CreateTransactionRequest } from '../../types';
@@ -25,21 +25,24 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
 
   const isParent = user?.role === 'Parent';
 
-  useEffect(() => {
-    loadTransactions();
-  }, [childId]);
-
-  const loadTransactions = async () => {
+  const loadTransactions = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await transactionsApi.getByChild(childId);
       setTransactions(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load transactions');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to load transactions');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [childId]);
+
+  useEffect(() => {
+    loadTransactions();
+  }, [loadTransactions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,8 +67,11 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
         notes: '',
       });
       await loadTransactions();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create transaction');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to create transaction');
     } finally {
       setIsSubmitting(false);
     }

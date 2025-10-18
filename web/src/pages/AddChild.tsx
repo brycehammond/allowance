@@ -76,10 +76,11 @@ export const AddChild: React.FC = () => {
     try {
       await childrenApi.create(formData);
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || 'Failed to create child account. Please try again.'
-      );
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to create child account. Please try again.');
     } finally {
       setIsLoading(false);
     }

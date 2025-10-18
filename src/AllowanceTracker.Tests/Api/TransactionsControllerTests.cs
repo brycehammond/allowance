@@ -25,10 +25,43 @@ public class TransactionsControllerTests
     {
         // Arrange
         var childId = Guid.NewGuid();
+        var createdBy = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "Test",
+            LastName = "Parent",
+            Email = "parent@test.com",
+            UserName = "parent@test.com"
+        };
+
         var transactions = new List<Transaction>
         {
-            new() { Id = Guid.NewGuid(), ChildId = childId, Amount = 10m, Type = TransactionType.Credit },
-            new() { Id = Guid.NewGuid(), ChildId = childId, Amount = 5m, Type = TransactionType.Debit }
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ChildId = childId,
+                Amount = 10m,
+                Type = TransactionType.Credit,
+                Category = TransactionCategory.Allowance,
+                Description = "Test credit",
+                BalanceAfter = 10m,
+                CreatedBy = createdBy,
+                CreatedById = createdBy.Id,
+                CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ChildId = childId,
+                Amount = 5m,
+                Type = TransactionType.Debit,
+                Category = TransactionCategory.Toys,
+                Description = "Test debit",
+                BalanceAfter = 5m,
+                CreatedBy = createdBy,
+                CreatedById = createdBy.Id,
+                CreatedAt = DateTime.UtcNow
+            }
         };
 
         _mockTransactionService
@@ -40,7 +73,7 @@ public class TransactionsControllerTests
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedTransactions = okResult.Value.Should().BeAssignableTo<List<Transaction>>().Subject;
+        var returnedTransactions = okResult.Value.Should().BeAssignableTo<List<TransactionDto>>().Subject;
         returnedTransactions.Should().HaveCount(2);
     }
 
@@ -70,21 +103,37 @@ public class TransactionsControllerTests
         // Arrange
         var childId = Guid.NewGuid();
         var dto = new CreateTransactionDto(childId, 25m, TransactionType.Credit, TransactionCategory.Allowance, "Allowance");
+        var createdBy = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "Test",
+            LastName = "Parent",
+            Email = "parent@test.com",
+            UserName = "parent@test.com"
+        };
+
         var createdTransaction = new Transaction
         {
             Id = Guid.NewGuid(),
             ChildId = childId,
             Amount = 25m,
             Type = TransactionType.Credit,
+            Category = TransactionCategory.Allowance,
             Description = "Allowance",
             BalanceAfter = 25m,
-            CreatedById = Guid.NewGuid(),
+            CreatedById = createdBy.Id,
+            CreatedBy = createdBy,
             CreatedAt = DateTime.UtcNow
         };
 
         _mockTransactionService
             .Setup(x => x.CreateTransactionAsync(dto))
             .ReturnsAsync(createdTransaction);
+
+        // Mock the reload call to get CreatedBy navigation property
+        _mockTransactionService
+            .Setup(x => x.GetChildTransactionsAsync(childId, 1))
+            .ReturnsAsync(new List<Transaction> { createdTransaction });
 
         // Act
         var result = await _controller.CreateTransaction(dto);
@@ -94,7 +143,7 @@ public class TransactionsControllerTests
         createdResult.ActionName.Should().Be(nameof(TransactionsController.GetChildTransactions));
         createdResult.RouteValues!["childId"].Should().Be(childId);
 
-        var returnedTransaction = createdResult.Value.Should().BeAssignableTo<Transaction>().Subject;
+        var returnedTransaction = createdResult.Value.Should().BeAssignableTo<TransactionDto>().Subject;
         returnedTransaction.Id.Should().Be(createdTransaction.Id);
         returnedTransaction.Amount.Should().Be(25m);
     }
@@ -130,17 +179,37 @@ public class TransactionsControllerTests
         // Arrange
         var childId = Guid.NewGuid();
         var dto = new CreateTransactionDto(childId, 10m, TransactionType.Debit, TransactionCategory.Toys, "Spent on toys");
+        var createdBy = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "Test",
+            LastName = "Parent",
+            Email = "parent@test.com",
+            UserName = "parent@test.com"
+        };
+
         var transaction = new Transaction
         {
             Id = Guid.NewGuid(),
             ChildId = childId,
             Amount = 10m,
-            Type = TransactionType.Debit
+            Type = TransactionType.Debit,
+            Category = TransactionCategory.Toys,
+            Description = "Spent on toys",
+            BalanceAfter = 90m,
+            CreatedById = createdBy.Id,
+            CreatedBy = createdBy,
+            CreatedAt = DateTime.UtcNow
         };
 
         _mockTransactionService
             .Setup(x => x.CreateTransactionAsync(It.IsAny<CreateTransactionDto>()))
             .ReturnsAsync(transaction);
+
+        // Mock the reload call to get CreatedBy navigation property
+        _mockTransactionService
+            .Setup(x => x.GetChildTransactionsAsync(childId, 1))
+            .ReturnsAsync(new List<Transaction> { transaction });
 
         // Act
         await _controller.CreateTransaction(dto);

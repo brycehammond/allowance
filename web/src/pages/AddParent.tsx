@@ -52,10 +52,12 @@ export const AddParent: React.FC = () => {
         lastName: formData.lastName,
       });
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error?.message || 'Failed to add parent account. Please try again.'
-      );
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { error?: { message?: string }; message?: string } } }).response?.data?.error?.message ||
+          (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to add parent account. Please try again.');
     } finally {
       setIsLoading(false);
     }

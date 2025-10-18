@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { childrenApi } from '../services/api';
@@ -23,25 +23,28 @@ export const ChildDetail: React.FC = () => {
 
   const isParent = user?.role === 'Parent';
 
-  useEffect(() => {
-    if (childId) {
-      loadChild();
-    }
-  }, [childId]);
-
-  const loadChild = async () => {
+  const loadChild = useCallback(async () => {
     if (!childId) return;
 
     try {
       setIsLoading(true);
       const data = await childrenApi.getById(childId);
       setChild(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load child details');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to load child details');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [childId]);
+
+  useEffect(() => {
+    if (childId) {
+      loadChild();
+    }
+  }, [childId, loadChild]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -83,7 +86,7 @@ export const ChildDetail: React.FC = () => {
     );
   }
 
-  const tabs: Array<{ id: TabType; label: string; icon: React.FC<any> }> = [
+  const tabs: Array<{ id: TabType; label: string; icon: React.FC<{ className?: string }> }> = [
     { id: 'transactions', label: 'Transactions', icon: Receipt },
     { id: 'wishlist', label: 'Wish List', icon: Star },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },

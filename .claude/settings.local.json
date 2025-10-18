@@ -41,7 +41,12 @@
       "Bash(python3:*)",
       "WebFetch(domain:localhost)",
       "Read(//private/tmp/**)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm run type-check)",
+      "Bash(for file in AddParent.tsx ChangePassword.tsx ResetPassword.tsx)",
+      "Bash(do)",
+      "Bash(echo \"=== $file ===\")",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

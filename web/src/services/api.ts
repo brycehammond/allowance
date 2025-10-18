@@ -75,7 +75,8 @@ export const authApi = {
 
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
     // Remove confirmPassword as backend doesn't expect it
-    const { confirmPassword, ...backendData } = data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirmPassword: _confirmPassword, ...backendData } = data;
     const response = await apiClient.post<AuthResponse>('/api/v1/auth/register/parent', backendData);
     return response.data;
   },
@@ -120,7 +121,8 @@ export const childrenApi = {
 
   create: async (data: CreateChildRequest): Promise<Child> => {
     // Remove confirmPassword as backend doesn't expect it
-    const { confirmPassword, ...backendData } = data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirmPassword: _confirmPassword, ...backendData } = data;
     const response = await apiClient.post<Child>('/api/v1/auth/register/child', backendData);
     return response.data;
   },

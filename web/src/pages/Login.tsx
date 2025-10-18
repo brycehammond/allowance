@@ -28,8 +28,11 @@ export const Login: React.FC = () => {
     try {
       await login(formData);
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }

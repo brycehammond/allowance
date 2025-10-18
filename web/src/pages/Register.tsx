@@ -39,10 +39,12 @@ export const Register: React.FC = () => {
     try {
       await register(formData);
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error?.message || err.response?.data?.message || 'Registration failed. Please try again.'
-      );
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { error?: { message?: string }; message?: string } } }).response?.data?.error?.message ||
+          (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

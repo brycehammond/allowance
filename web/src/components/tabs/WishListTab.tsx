@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { wishListApi } from '../../services/api';
 import type { WishListItem, CreateWishListItemRequest } from '../../types';
@@ -22,21 +22,24 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
 
   const isParent = user?.role === 'Parent';
 
-  useEffect(() => {
-    loadWishList();
-  }, [childId]);
-
-  const loadWishList = async () => {
+  const loadWishList = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await wishListApi.getByChild(childId);
       setItems(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load wish list');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to load wish list');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [childId]);
+
+  useEffect(() => {
+    loadWishList();
+  }, [loadWishList]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,8 +61,11 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
         targetAmount: 0,
       });
       await loadWishList();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create wish list item');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to create wish list item');
     } finally {
       setIsSubmitting(false);
     }
@@ -75,8 +81,11 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
         await wishListApi.markAsPurchased(item.id);
       }
       await loadWishList();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update wish list item');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to update wish list item');
     }
   };
 
@@ -86,8 +95,11 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
     try {
       await wishListApi.delete(itemId);
       await loadWishList();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to delete wish list item');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to delete wish list item');
     }
   };
 

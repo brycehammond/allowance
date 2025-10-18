@@ -59,10 +59,12 @@ export const ChangePassword: React.FC = () => {
         newPassword: '',
         confirmPassword: '',
       });
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error?.message || 'Failed to change password. Please try again.'
-      );
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { error?: { message?: string }; message?: string } } }).response?.data?.error?.message ||
+          (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || 'Failed to change password. Please try again.');
     } finally {
       setIsLoading(false);
     }
