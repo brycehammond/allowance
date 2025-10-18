@@ -40,7 +40,8 @@
       "Bash(curl:*)",
       "Bash(python3:*)",
       "WebFetch(domain:localhost)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []
