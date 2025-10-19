@@ -171,6 +171,14 @@ struct ChildDetailView: View {
                 .tabItem {
                     Label("Analytics", systemImage: "chart.bar")
                 }
+
+            // Settings tab (Parent only)
+            if isParent {
+                ChildSettingsView(childId: child.id, apiService: APIService())
+                    .tabItem {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+            }
         }
         .navigationTitle(child.fullName)
         .navigationBarTitleDisplayMode(.inline)
@@ -218,7 +226,8 @@ struct ChildDetailView: View {
                 lastName: "Smith",
                 weeklyAllowance: 10.00,
                 currentBalance: 125.50,
-                lastAllowanceDate: Date()
+                lastAllowanceDate: Date(),
+                allowanceDay: .friday
             )
         )
         .environmentObject({
@@ -246,7 +255,8 @@ struct ChildDetailView: View {
                 lastName: "Smith",
                 weeklyAllowance: 10.00,
                 currentBalance: 125.50,
-                lastAllowanceDate: Date()
+                lastAllowanceDate: Date(),
+                allowanceDay: nil
             )
         )
         .environmentObject({

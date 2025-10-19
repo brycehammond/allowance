@@ -7,4 +7,5 @@ protocol APIServiceProtocol {
     func logout() async throws
     func getChildren() async throws -> [Child]
     func getChild(id: UUID) async throws -> Child
+    func updateChildSettings(childId: UUID, _ request: UpdateChildSettingsRequest) async throws -> UpdateChildSettingsResponse
 }

@@ -54,6 +54,19 @@ struct ChildCardView: View {
                         .fontDesign(.monospaced)
                 }
 
+                // Allowance day
+                HStack {
+                    Text("Allowance Schedule:")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Text(child.allowanceDayDisplay)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+
                 // Last allowance date (if available)
                 if let lastDate = child.lastAllowanceDate {
                     HStack {
@@ -101,7 +114,8 @@ struct ChildCardView: View {
             lastName: "Smith",
             weeklyAllowance: 10.00,
             currentBalance: 125.50,
-            lastAllowanceDate: Date()
+            lastAllowanceDate: Date(),
+            allowanceDay: .friday
         ),
         onTap: { print("Card tapped") }
     )
@@ -117,7 +131,8 @@ struct ChildCardView: View {
             lastName: "Johnson",
             weeklyAllowance: 15.00,
             currentBalance: 0.00,
-            lastAllowanceDate: nil
+            lastAllowanceDate: nil,
+            allowanceDay: nil
         ),
         onTap: { print("Card tapped") }
     )
@@ -133,7 +148,8 @@ struct ChildCardView: View {
             lastName: "Brown",
             weeklyAllowance: 20.00,
             currentBalance: -5.25,
-            lastAllowanceDate: Date()
+            lastAllowanceDate: Date(),
+            allowanceDay: .monday
         ),
         onTap: { print("Card tapped") }
     )
@@ -150,7 +166,8 @@ struct ChildCardView: View {
                 lastName: "Smith",
                 weeklyAllowance: 10.00,
                 currentBalance: 125.50,
-                lastAllowanceDate: Date()
+                lastAllowanceDate: Date(),
+                allowanceDay: .wednesday
             ),
             onTap: { print("Alice tapped") }
         )
@@ -162,7 +179,8 @@ struct ChildCardView: View {
                 lastName: "Johnson",
                 weeklyAllowance: 15.00,
                 currentBalance: 45.00,
-                lastAllowanceDate: Date()
+                lastAllowanceDate: Date(),
+                allowanceDay: nil
             ),
             onTap: { print("Bob tapped") }
         )

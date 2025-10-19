@@ -149,6 +149,19 @@ final class APIService: APIServiceProtocol {
         return try await performRequest(urlRequest)
     }
 
+    /// Update child settings including allowance, allowanceDay, and savings configuration
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - request: Update request with all settings
+    /// - Returns: Updated child settings response
+    /// - Throws: APIError if request fails
+    func updateChildSettings(childId: UUID, _ request: UpdateChildSettingsRequest) async throws -> UpdateChildSettingsResponse {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/settings")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
+        return try await performRequest(urlRequest)
+    }
+
     // MARK: - Transactions
 
     /// Get transactions for a specific child
