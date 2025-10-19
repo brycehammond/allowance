@@ -1,0 +1,85 @@
+name: Azure Function CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/AllowanceTracker.Functions/**'
+      - 'src/AllowanceTracker/Models/**'
+      - 'src/AllowanceTracker/Data/**'
+      - 'src/AllowanceTracker/Services/**'
+      - '.github/workflows/function.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/AllowanceTracker.Functions/**'
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'src/AllowanceTracker.Functions'
+
+jobs:
+  # Build and test Azure Function
+  build-and-test:
+    name: Build and Test Azure Function
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Publish Azure Function
+        run: dotnet publish ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/AllowanceTracker.Functions.csproj --configuration Release --output ./function-publish
+
+      - name: Upload Function artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-build-${{ github.sha }}
+          path: ./function-publish
+          retention-days: 30
+
+  # Deploy to Azure Functions
+  deploy-function:
+    name: Deploy to Azure Functions
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://${{ vars.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net
+
+    steps:
+      - name: Download Function artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: function-build-${{ github.sha }}
+          path: ./function-publish
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
+          package: ./function-publish
+
+      - name: Logout from Azure
+        run: az logout
+        if: always()
