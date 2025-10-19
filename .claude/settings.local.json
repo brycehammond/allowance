@@ -46,7 +46,8 @@
       "Bash(for file in AddParent.tsx ChangePassword.tsx ResetPassword.tsx)",
       "Bash(do)",
       "Bash(echo \"=== $file ===\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(awk '{print $NF}')"
     ],
     "deny": [],
     "ask": []

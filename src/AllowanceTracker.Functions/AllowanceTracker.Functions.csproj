@@ -21,10 +21,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AllowanceTracker\AllowanceTracker.csproj" />
+    <ProjectReference Include="..\AllowanceTracker.Core\AllowanceTracker.Core.csproj" />
+    <ProjectReference Include="..\AllowanceTracker.Azure.Adapter\AllowanceTracker.Azure.Adapter.csproj" />
   </ItemGroup>
 
 </Project>
