@@ -143,6 +143,12 @@ var sendGridApiKey = builder.Configuration["SendGrid:ApiKey"] ?? "";
 builder.Services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 
+// Add Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AllowanceContext>(
+        name: "database",
+        tags: new[] { "db", "sql" });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -158,6 +164,31 @@ app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Map health check endpoints
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var response = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds
+            }),
+            totalDuration = report.TotalDuration.TotalMilliseconds
+        };
+        await context.Response.WriteAsJsonAsync(response);
+    }
+});
+
+// Simple health check endpoint (no database check)
+app.MapHealthChecks("/health/ready");
 
 app.MapControllers();
 

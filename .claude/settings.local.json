@@ -47,7 +47,11 @@
       "Bash(do)",
       "Bash(echo \"=== $file ===\")",
       "Bash(done)",
-      "Bash(awk '{print $NF}')"
+      "Bash(awk '{print $NF}')",
+      "WebFetch(domain:github.com)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp:*)",
+      "Bash(az account:*)"
     ],
     "deny": [],
     "ask": []

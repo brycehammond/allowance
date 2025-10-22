@@ -1,4 +1,4 @@
-name: Azure Function CI/CD
+name: Azure Function CI
 
 on:
   push:
@@ -40,46 +40,35 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
-      - name: Publish Azure Function
-        run: dotnet publish ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/AllowanceTracker.Functions.csproj --configuration Release --output ./function-publish
-
-      - name: Upload Function artifact
+      - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: function-build-${{ github.sha }}
-          path: ./function-publish
-          retention-days: 30
+          name: function-test-results-${{ github.sha }}
+          path: '**/test-results.trx'
+          retention-days: 7
 
-  # Deploy to Azure Functions
-  deploy-function:
-    name: Deploy to Azure Functions
+  # Code quality checks
+  code-quality:
+    name: Code Quality
     runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment:
-      name: production
-      url: https://${{ vars.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net
 
     steps:
-      - name: Download Function artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: function-build-${{ github.sha }}
-          path: ./function-publish
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Login to Azure
-        uses: azure/login@v1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Deploy to Azure Functions
-        uses: Azure/functions-action@v1
-        with:
-          app-name: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
-          package: ./function-publish
+      - name: Restore dependencies
+        run: dotnet restore
 
-      - name: Logout from Azure
-        run: az logout
-        if: always()
+      - name: Check code formatting
+        run: dotnet format --verify-no-changes --no-restore
+
+      - name: Build with warnings as errors
+        run: dotnet build --no-restore -warnaserror
