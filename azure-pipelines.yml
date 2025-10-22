@@ -1,23 +1,21 @@
 # ===========================
-# Azure DevOps Deployment Pipeline
+# Azure DevOps CI Pipeline
 # ===========================
 #
-# This pipeline handles automated deployment to Azure for:
-#   - .NET 8.0 Web API → Azure App Service
-#   - Azure Functions (Background Jobs) → Azure Functions
-#   - React Frontend → Azure Storage (Static Website)
+# This pipeline handles continuous integration and validation:
+#   - .NET 8.0 Web API build and test
+#   - Azure Functions build (background jobs)
+#   - React Frontend build
+#   - Code quality analysis
+#   - Test coverage reporting
 #
-# GitHub Actions (separate) handles CI/validation:
-#   - Build verification
-#   - Automated testing
-#   - Code quality checks
-#   - Security scanning
-#
-# Deployment Strategy:
+# Build Strategy:
 #   - Builds: Run in parallel for speed
-#   - Deployments: Only on 'main' branch
-#   - Health checks: Automatic verification after deployment
-#   - Migrations: Run automatically before deployment
+#   - Tests: Run on all branches
+#   - Artifacts: Published for all successful builds
+#   - Code Quality: Runs in parallel with builds
+#
+# Deployment: Handled separately (Railway, manual, etc.)
 #
 # Documentation: See docs/azure-devops-setup.md
 # ===========================
@@ -185,193 +183,16 @@ stages:
         publishLocation: 'Container'
 
 # ===========================
-# Stage 3: Deploy API to App Service
+# NOTE: Azure deployment stages removed
 # ===========================
-- stage: DeployAPI
-  displayName: 'Deploy API to App Service'
-  dependsOn: BuildAPI
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-  jobs:
-  - deployment: DeployAPIToAppService
-    displayName: 'Deploy API to Azure App Service'
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebApp@1
-            displayName: 'Deploy to Azure App Service'
-            inputs:
-              azureSubscription: '$(AzureSubscription)'
-              appType: 'webAppLinux'
-              appName: '$(ApiAppServiceName)'
-              package: '$(Pipeline.Workspace)/api/*.zip'
-              runtimeStack: 'DOTNETCORE|8.0'
-              startUpCommand: 'dotnet AllowanceTracker.dll'
-
-          # Note: All app settings and connection strings are configured in Azure Portal
-          # App Service → Configuration
-          # This includes: Connection strings, JWT settings, ASPNETCORE_ENVIRONMENT, etc.
-          # See docs/AZURE-APP-SERVICE-CONFIG.md for complete configuration guide
-
-          # Note: Using AzureCLI here as there is no native Azure DevOps task for EF Core migrations
-          # This is a legitimate use case for Azure CLI in pipelines
-          - task: AzureCLI@2
-            displayName: 'Run EF Core Migrations'
-            inputs:
-              azureSubscription: '$(AzureSubscription)'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                # Install dotnet-ef tool
-                dotnet tool install --global dotnet-ef --version 8.0.11
-                export PATH="$PATH:$HOME/.dotnet/tools"
-
-                # Extract and run migrations
-                cd $(Pipeline.Workspace)/api
-                unzip -o *.zip -d app
-                cd app
-
-                # Run migrations against Azure SQL
-                dotnet ef database update --no-build --connection "$(AzureSqlConnectionString)"
-
-                if [ $? -eq 0 ]; then
-                  echo "✅ Database migrations completed successfully"
-                else
-                  echo "❌ Database migrations failed"
-                  exit 1
-                fi
-
-          - task: PowerShell@2
-            displayName: 'Verify Deployment Health'
-            inputs:
-              targetType: 'inline'
-              script: |
-                $appUrl = "https://$(ApiAppServiceName).azurewebsites.net/health"
-                Write-Host "Verifying deployment at: $appUrl"
-
-                # Wait for app to be ready after deployment
-                Start-Sleep -Seconds 30
-
-                try {
-                  $response = Invoke-WebRequest -Uri $appUrl -Method Get -UseBasicParsing -TimeoutSec 30
-                  $statusCode = $response.StatusCode
-
-                  if ($statusCode -eq 200) {
-                    Write-Host "✅ Deployment health check passed (HTTP $statusCode)" -ForegroundColor Green
-                  } else {
-                    Write-Host "⚠️ Deployment health check returned HTTP $statusCode" -ForegroundColor Yellow
-                  }
-                } catch {
-                  Write-Host "⚠️ Health check failed: $($_.Exception.Message)" -ForegroundColor Yellow
-                  Write-Host "Note: App may still be warming up"
-                }
-            continueOnError: true
-
+# This pipeline now only handles build and code quality validation.
+# Deployment is handled separately (Railway, manual deployment, etc.)
+#
+# If you need Azure deployment in the future, you can:
+# 1. Set up an Azure Service Connection in Azure DevOps
+# 2. Configure the required pipeline variables (AzureSubscription, etc.)
+# 3. Re-enable the deployment stages below
 # ===========================
-# Stage 4: Deploy Azure Function
-# ===========================
-- stage: DeployFunction
-  displayName: 'Deploy Azure Function'
-  dependsOn: BuildFunction
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-  jobs:
-  - deployment: DeployFunctionApp
-    displayName: 'Deploy Function to Azure'
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureFunctionApp@2
-            displayName: 'Deploy to Azure Function App'
-            inputs:
-              azureSubscription: '$(AzureSubscription)'
-              appType: 'functionAppLinux'
-              appName: '$(FunctionAppName)'
-              package: '$(Pipeline.Workspace)/function/*.zip'
-              runtimeStack: 'DOTNET-ISOLATED|8.0'
-              deploymentMethod: 'zipDeploy'
-
-          # Note: All app settings and connection strings are configured in Azure Portal
-          # Function App → Configuration
-          # This includes: AzureWebJobsStorage, Connection strings, Application Insights, etc.
-          # See docs/AZURE-APP-SERVICE-CONFIG.md for complete configuration guide
-
-# ===========================
-# Stage 5: Deploy React to Storage
-# ===========================
-- stage: DeployReact
-  displayName: 'Deploy React to Storage'
-  dependsOn: BuildReact
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-  jobs:
-  - deployment: DeployReactToStorage
-    displayName: 'Deploy React to Azure Storage'
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzurePowerShell@5
-            displayName: 'Enable Static Website Hosting'
-            inputs:
-              azureSubscription: '$(AzureSubscription)'
-              scriptType: 'inlineScript'
-              inline: |
-                $storageAccount = Get-AzStorageAccount -ResourceGroupName "$(ResourceGroupName)" -Name "$(StorageAccountName)"
-                $ctx = $storageAccount.Context
-
-                # Enable static website hosting
-                Enable-AzStorageStaticWebsite -Context $ctx -IndexDocument "index.html" -ErrorDocument404Path "index.html"
-                Write-Host "✅ Static website hosting enabled"
-              azurePowerShellVersion: 'latestVersion'
-
-          - task: AzureFileCopy@4
-            displayName: 'Upload Static Assets to Storage (with cache)'
-            inputs:
-              sourcePath: '$(Pipeline.Workspace)/react/assets'
-              azureSubscription: '$(AzureSubscription)'
-              destination: 'azureBlob'
-              storage: '$(StorageAccountName)'
-              containerName: '$web'
-              blobPrefix: 'assets'
-              additionalArgumentsForBlobCopy: '--content-cache-control "public, max-age=31536000, immutable" --overwrite=true'
-            condition: succeeded()
-
-          - task: AzureFileCopy@4
-            displayName: 'Upload HTML/JS files to Storage (no cache)'
-            inputs:
-              sourcePath: '$(Pipeline.Workspace)/react'
-              azureSubscription: '$(AzureSubscription)'
-              destination: 'azureBlob'
-              storage: '$(StorageAccountName)'
-              containerName: '$web'
-              additionalArgumentsForBlobCopy: '--content-cache-control "no-cache" --exclude-path "assets" --overwrite=true'
-            condition: succeeded()
-
-          - task: AzurePowerShell@5
-            displayName: 'Purge CDN (if configured)'
-            inputs:
-              azureSubscription: '$(AzureSubscription)'
-              scriptType: 'inlineScript'
-              inline: |
-                $cdnProfile = "$(CdnProfileName)"
-                $cdnEndpoint = "$(CdnEndpointName)"
-
-                if ([string]::IsNullOrEmpty($cdnProfile) -or [string]::IsNullOrEmpty($cdnEndpoint)) {
-                  Write-Host "ℹ️ CDN not configured, skipping purge" -ForegroundColor Cyan
-                } else {
-                  Write-Host "Purging CDN endpoint: $cdnEndpoint"
-                  Clear-AzCdnEndpointContent `
-                    -ResourceGroupName "$(ResourceGroupName)" `
-                    -ProfileName $cdnProfile `
-                    -EndpointName $cdnEndpoint `
-                    -ContentPath "/*"
-                  Write-Host "✅ CDN purge initiated" -ForegroundColor Green
-                }
-              azurePowerShellVersion: 'latestVersion'
-            continueOnError: true
 
 # ===========================
 # Stage 6: Code Quality (runs in parallel)
