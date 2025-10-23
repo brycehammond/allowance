@@ -2,7 +2,7 @@
 
 A modern allowance management system built with **React** + **ASP.NET Core 8.0**. Helps parents manage children's allowances, track spending, and teach financial responsibility through an intuitive web interface and REST API.
 
-[![Build & Test](https://github.com/yourusername/allowance-tracker/workflows/CI%2FCD/badge.svg)](https://github.com/yourusername/allowance-tracker/actions)
+[![CI Pipeline](https://github.com/yourusername/allowance-tracker/workflows/CI%20Pipeline/badge.svg)](https://github.com/yourusername/allowance-tracker/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## ✨ Features

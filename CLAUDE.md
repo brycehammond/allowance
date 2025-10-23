@@ -14,6 +14,7 @@ A simple MVP allowance tracking application built with ASP.NET Core 8.0 Web API 
 - **Authentication**: ASP.NET Core Identity + JWT tokens
 - **Background Jobs**: IHostedService (built-in, no external dependencies)
 - **Testing**: xUnit, FluentAssertions, Moq
+- **CI/CD**: GitHub Actions
 - **Deployment**: Azure App Service (API) or Railway
 
 ### Key Design Decisions
