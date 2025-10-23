@@ -116,15 +116,26 @@ XCODE_VERSION: '15.2'        # Xcode version for iOS
 
 ## Secrets Configuration
 
-Configure these secrets in GitHub repository settings:
+**For CI/CD (Build & Test)**: ✅ **No secrets required!**
 
-### Required for Deployment (if deploying to Azure)
+The current workflows build, test, and publish artifacts without any secrets.
+
+### Optional Secrets
+
+Configure these **only if needed** in GitHub repository settings (Settings → Secrets and variables → Actions):
+
+#### For React Builds (Optional)
+- `VITE_API_URL` - Production API URL for React builds
+  - **Default**: Falls back to `https://api.example.com`
+  - **When to set**: If you have a production API running
+
+#### For Azure Deployment (Optional)
 - `AZURE_WEBAPP_PUBLISH_PROFILE` - API deployment credential
 - `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` - Function deployment credential
 - `AZURE_STORAGE_CONNECTION_STRING` - Frontend storage credential
+- `AZURE_SQL_CONNECTION_STRING` - Database connection for migrations
 
-### Optional
-- `VITE_API_URL` - API URL for React builds (defaults to example URL)
+**📖 Detailed setup instructions**: See [GITHUB-SECRETS-SETUP.md](GITHUB-SECRETS-SETUP.md)
 
 ## Parallel Execution
 
