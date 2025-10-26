@@ -54,7 +54,17 @@
       "Bash(az account:*)",
       "Bash(git rm:*)",
       "Bash(git mv:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(gh secret:*)",
+      "Bash(gh auth login:*)",
+      "Bash(git remote:*)",
+      "Bash(az group:*)",
+      "Bash(az resource list:*)",
+      "Bash(az webapp show:*)",
+      "Bash(az functionapp show:*)",
+      "Bash(az storage account list:*)",
+      "Bash(az ad sp create-for-rbac:*)",
+      "Bash(az cdn profile list:*)"
     ],
     "deny": [],
     "ask": []
