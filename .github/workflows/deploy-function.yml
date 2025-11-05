@@ -14,6 +14,7 @@ on:
 env:
   DOTNET_VERSION: '8.0.x'
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './publish/function'
+  AZURE_FUNCTIONAPP_NAME: 'allowance-update-function'
 
 jobs:
   build:
@@ -53,7 +54,7 @@ jobs:
     needs: build
     environment:
       name: 'Production'
-      url: 'https://${{ secrets.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net'
+      url: 'https://${{ env.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net'
 
     steps:
       - name: Download artifact from build job
@@ -70,12 +71,12 @@ jobs:
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
         with:
-          app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME }}
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
       - name: Verify deployment
         run: |
-          echo "Function deployed to: https://${{ secrets.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net"
+          echo "Function deployed to: https://${{ env.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net"
           # Wait for function app to warm up
           sleep 15
 

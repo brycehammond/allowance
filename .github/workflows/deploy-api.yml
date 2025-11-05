@@ -11,6 +11,7 @@ on:
 env:
   DOTNET_VERSION: '8.0.x'
   AZURE_WEBAPP_PACKAGE_PATH: './publish/api'
+  AZURE_WEBAPP_NAME: 'allowance'
 
 jobs:
   build:
@@ -68,7 +69,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
       - name: Verify deployment
