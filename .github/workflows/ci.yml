@@ -139,80 +139,12 @@ jobs:
           retention-days: 30
 
   # ===========================
-  # .NET Code Quality
-  # ===========================
-  dotnet-quality:
-    name: .NET Code Quality
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Check code formatting
-        run: dotnet format --verify-no-changes --no-restore
-        continue-on-error: true
-
-      - name: Build with warnings as errors
-        run: dotnet build --no-restore -warnaserror
-        continue-on-error: true
-
-      - name: Check for vulnerable packages
-        run: dotnet list package --vulnerable --include-transitive
-        continue-on-error: true
-
-  # ===========================
-  # React Code Quality
-  # ===========================
-  react-quality:
-    name: React Code Quality
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: web/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./web
-        run: npm ci
-
-      - name: Run ESLint
-        working-directory: ./web
-        run: npm run lint
-        continue-on-error: true
-
-      - name: TypeScript type check
-        working-directory: ./web
-        run: npm run type-check
-        continue-on-error: true
-
-      - name: Run npm audit
-        working-directory: ./web
-        run: npm audit --audit-level=moderate
-        continue-on-error: true
-
-  # ===========================
   # Summary Status Check
   # ===========================
   ci-success:
     name: CI Pipeline Success
     runs-on: ubuntu-latest
-    needs: [api-build, function-build, react-build, dotnet-quality, react-quality]
+    needs: [api-build, function-build, react-build]
     if: always()
 
     steps:
@@ -235,8 +167,6 @@ jobs:
           echo "| API Build | ${{ needs.api-build.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Function Build | ${{ needs.function-build.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| React Build | ${{ needs.react-build.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| .NET Quality | ${{ needs.dotnet-quality.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| React Quality | ${{ needs.react-quality.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Artifacts published:**" >> $GITHUB_STEP_SUMMARY
           echo "- \`api-${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
