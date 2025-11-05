@@ -34,13 +34,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj
+        run: dotnet restore AllowanceTracker.sln
 
-      - name: Build function project
-        run: dotnet build src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --no-restore
+      - name: Build solution
+        run: dotnet build AllowanceTracker.sln --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test AllowanceTracker.sln --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
         if: always()
@@ -65,10 +65,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj
+        run: dotnet restore AllowanceTracker.sln
 
       - name: Check code formatting
-        run: dotnet format src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --verify-no-changes --no-restore
+        run: dotnet format AllowanceTracker.sln --verify-no-changes --no-restore
 
       - name: Build with warnings as errors
-        run: dotnet build src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --no-restore -warnaserror
+        run: dotnet build AllowanceTracker.sln --no-restore -warnaserror
