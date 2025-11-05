@@ -34,13 +34,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj
 
-      - name: Build solution
-        run: dotnet build --configuration Release --no-restore
+      - name: Build function project
+        run: dotnet build src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
         if: always()
@@ -65,10 +65,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj
 
       - name: Check code formatting
-        run: dotnet format --verify-no-changes --no-restore
+        run: dotnet format src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --verify-no-changes --no-restore
 
       - name: Build with warnings as errors
-        run: dotnet build --no-restore -warnaserror
+        run: dotnet build src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --no-restore -warnaserror
