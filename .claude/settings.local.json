@@ -64,7 +64,8 @@
       "Bash(az functionapp show:*)",
       "Bash(az storage account list:*)",
       "Bash(az ad sp create-for-rbac:*)",
-      "Bash(az cdn profile list:*)"
+      "Bash(az cdn profile list:*)",
+      "Read(//Users/bryce/Dev/personal/**)"
     ],
     "deny": [],
     "ask": []
