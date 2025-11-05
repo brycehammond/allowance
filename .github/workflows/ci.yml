@@ -37,10 +37,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore AllowanceTracker.sln
 
       - name: Build solution
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build AllowanceTracker.sln --configuration Release --no-restore
 
       - name: Run tests
         run: dotnet test --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
@@ -88,10 +88,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore AllowanceTracker.sln
 
       - name: Build Function
-        run: dotnet build src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --no-restore
+        run: dotnet build AllowanceTracker.sln --configuration Release --no-restore
 
       - name: Publish Function
         run: dotnet publish src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --output ./publish/function --no-build
