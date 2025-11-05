@@ -43,7 +43,7 @@ jobs:
         working-directory: ./web
         run: npm run build
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
@@ -57,7 +57,7 @@ jobs:
     needs: build
     environment:
       name: 'Production'
-      url: 'https://${{ secrets.AZURE_CDN_ENDPOINT }}.azureedge.net'
+      url: 'https://${{ vars.AZURE_CDN_ENDPOINT }}.azureedge.net'
 
     steps:
       - name: Download artifact from build job
@@ -75,14 +75,14 @@ jobs:
         run: |
           # Delete existing files in $web container
           az storage blob delete-batch \
-            --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+            --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
             --source '$web' \
             --pattern '*' \
             --auth-mode login
 
           # Upload new build files
           az storage blob upload-batch \
-            --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+            --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
             --destination '$web' \
             --source ./dist \
             --content-cache-control 'public, max-age=31536000, immutable' \
@@ -90,7 +90,7 @@ jobs:
             --auth-mode login
 
           az storage blob upload-batch \
-            --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+            --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
             --destination '$web' \
             --source ./dist \
             --content-cache-control 'public, max-age=31536000, immutable' \
@@ -98,7 +98,7 @@ jobs:
             --auth-mode login
 
           az storage blob upload-batch \
-            --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+            --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
             --destination '$web' \
             --source ./dist \
             --content-cache-control 'no-cache' \
@@ -106,7 +106,7 @@ jobs:
             --auth-mode login
 
           az storage blob upload-batch \
-            --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+            --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
             --destination '$web' \
             --source ./dist \
             --exclude-pattern '*.js;*.css;*.html' \
@@ -116,18 +116,18 @@ jobs:
         continue-on-error: true
         run: |
           az cdn endpoint purge \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --profile-name ${{ secrets.AZURE_CDN_PROFILE }} \
-            --name ${{ secrets.AZURE_CDN_ENDPOINT }} \
+            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+            --profile-name ${{ vars.AZURE_CDN_PROFILE }} \
+            --name ${{ vars.AZURE_CDN_ENDPOINT }} \
             --content-paths '/*' \
             --no-wait
 
       - name: Verify deployment
         run: |
           echo "React app deployed to Azure Storage"
-          echo "Storage URL: https://${{ secrets.AZURE_STORAGE_ACCOUNT }}.z13.web.core.windows.net"
-          if [ -n "${{ secrets.AZURE_CDN_ENDPOINT }}" ]; then
-            echo "CDN URL: https://${{ secrets.AZURE_CDN_ENDPOINT }}.azureedge.net"
+          echo "Storage URL: https://${{ vars.AZURE_STORAGE_ACCOUNT }}.z13.web.core.windows.net"
+          if [ -n "${{ vars.AZURE_CDN_ENDPOINT }}" ]; then
+            echo "CDN URL: https://${{ vars.AZURE_CDN_ENDPOINT }}.azureedge.net"
           fi
 
       - name: Logout from Azure

@@ -14,7 +14,7 @@ on:
 env:
   DOTNET_VERSION: '8.0.x'
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './publish/function'
-  AZURE_FUNCTIONAPP_NAME: 'allowance-update-function'
+  AZURE_FUNCTIONAPP_NAME: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
 
 jobs:
   build:
