@@ -92,7 +92,8 @@
       "Bash(\"SendGrid__FromEmail=noreply@allowancetracker.com\" )",
       "Bash(\"SendGrid__FromName=Allowance Tracker\" )",
       "Bash(\"App__ResetPasswordUrl=https://allowance-web.azurewebsites.net/reset-password\")",
-      "Bash(\"SendGrid__FromName=Allowance Tracker\")"
+      "Bash(\"SendGrid__FromName=Allowance Tracker\")",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

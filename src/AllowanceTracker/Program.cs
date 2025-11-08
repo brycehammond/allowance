@@ -134,6 +134,7 @@ builder.Services.AddScoped<IChildManagementService, ChildManagementService>();
 builder.Services.AddScoped<IWishListService, WishListService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();

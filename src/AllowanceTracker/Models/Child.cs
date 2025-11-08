@@ -55,4 +55,6 @@ public class Child : IHasCreatedAt
     public virtual ICollection<WishListItem> WishListItems { get; set; } = new List<WishListItem>();
     public virtual ICollection<CategoryBudget> CategoryBudgets { get; set; } = new List<CategoryBudget>();
     public virtual ICollection<SavingsTransaction> SavingsTransactions { get; set; } = new List<SavingsTransaction>();
+    public virtual ICollection<ChoreTask> Tasks { get; set; } = new List<ChoreTask>();
+    public virtual ICollection<TaskCompletion> TaskCompletions { get; set; } = new List<TaskCompletion>();
 }

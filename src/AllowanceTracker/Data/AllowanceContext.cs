@@ -18,6 +18,8 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<WishListItem> WishListItems { get; set; }
     public DbSet<CategoryBudget> CategoryBudgets { get; set; }
     public DbSet<SavingsTransaction> SavingsTransactions { get; set; }
+    public DbSet<ChoreTask> Tasks { get; set; }
+    public DbSet<TaskCompletion> TaskCompletions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -150,6 +152,64 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.HasIndex(e => e.ChildId);
             entity.HasIndex(e => e.CreatedAt);
             entity.HasIndex(e => e.Type);
+        });
+
+        // ChoreTask configuration
+        builder.Entity<ChoreTask>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.RewardAmount).HasPrecision(10, 2).IsRequired();
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.Tasks)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.CreatedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.CreatedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.ChildId);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.CreatedById);
+            entity.HasIndex(e => e.CreatedAt);
+        });
+
+        // TaskCompletion configuration
+        builder.Entity<TaskCompletion>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.Property(e => e.PhotoUrl).HasMaxLength(2048);
+            entity.Property(e => e.RejectionReason).HasMaxLength(500);
+
+            entity.HasOne(e => e.Task)
+                  .WithMany(t => t.Completions)
+                  .HasForeignKey(e => e.TaskId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.TaskCompletions)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.ApprovedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.ApprovedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Transaction)
+                  .WithOne()
+                  .HasForeignKey<TaskCompletion>(e => e.TransactionId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.TaskId);
+            entity.HasIndex(e => e.ChildId);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.CompletedAt);
         });
     }
 

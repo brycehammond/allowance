@@ -10,7 +10,8 @@ public enum TransactionCategory
     Chores = 2,
     Gift = 3,
     BonusReward = 4,
-    OtherIncome = 5,
+    Task = 5,
+    OtherIncome = 6,
 
     // Spending categories (10-29)
     Toys = 10,
