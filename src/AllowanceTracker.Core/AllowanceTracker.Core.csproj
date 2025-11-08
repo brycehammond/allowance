@@ -42,6 +42,7 @@
   <ItemGroup>
     <!-- Reference Abstractions project -->
     <ProjectReference Include="..\AllowanceTracker.Serverless.Abstractions\AllowanceTracker.Serverless.Abstractions.csproj" />
+    <ProjectReference Include="..\AllowanceTracker.Data\AllowanceTracker.Data.csproj" />
   </ItemGroup>
 
 </Project>

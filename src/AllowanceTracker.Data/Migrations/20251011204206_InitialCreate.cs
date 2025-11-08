@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace AllowanceTracker.Migrations
+namespace AllowanceTracker.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

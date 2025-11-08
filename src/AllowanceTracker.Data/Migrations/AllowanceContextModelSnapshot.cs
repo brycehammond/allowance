@@ -4,7 +4,6 @@ using AllowanceTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,11 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AllowanceTracker.Data.Migrations
 {
     [DbContext(typeof(AllowanceContext))]
-    [Migration("20251016231603_AddNotesToTransactions")]
-    partial class AddNotesToTransactions
+    partial class AllowanceContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,6 +21,49 @@ namespace AllowanceTracker.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("AllowanceTracker.Models.AllowanceAdjustment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AdjustedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AdjustmentType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ChildId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("NewAmount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("OldAmount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdjustedById");
+
+                    b.HasIndex("AdjustmentType");
+
+                    b.HasIndex("ChildId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("AllowanceAdjustments", (string)null);
+                });
 
             modelBuilder.Entity("AllowanceTracker.Models.ApplicationUser", b =>
                 {
@@ -150,7 +190,7 @@ namespace AllowanceTracker.Data.Migrations
                     b.HasIndex("ChildId", "Category")
                         .IsUnique();
 
-                    b.ToTable("CategoryBudgets");
+                    b.ToTable("CategoryBudgets", (string)null);
                 });
 
             modelBuilder.Entity("AllowanceTracker.Models.Child", b =>
@@ -158,6 +198,18 @@ namespace AllowanceTracker.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("AllowanceDay")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("AllowancePaused")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("AllowancePausedReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -213,7 +265,66 @@ namespace AllowanceTracker.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Children");
+                    b.ToTable("Children", (string)null);
+                });
+
+            modelBuilder.Entity("AllowanceTracker.Models.ChoreTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ChildId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsRecurring")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("RecurrenceDay")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RecurrenceDayOfMonth")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RecurrenceType")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("RewardAmount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChildId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("AllowanceTracker.Models.Family", b =>
@@ -234,7 +345,7 @@ namespace AllowanceTracker.Data.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Families");
+                    b.ToTable("Families", (string)null);
                 });
 
             modelBuilder.Entity("AllowanceTracker.Models.SavingsTransaction", b =>
@@ -284,7 +395,65 @@ namespace AllowanceTracker.Data.Migrations
 
                     b.HasIndex("Type");
 
-                    b.ToTable("SavingsTransactions");
+                    b.ToTable("SavingsTransactions", (string)null);
+                });
+
+            modelBuilder.Entity("AllowanceTracker.Models.TaskCompletion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ApprovedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChildId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedById");
+
+                    b.HasIndex("ChildId");
+
+                    b.HasIndex("CompletedAt");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique()
+                        .HasFilter("[TransactionId] IS NOT NULL");
+
+                    b.ToTable("TaskCompletions", (string)null);
                 });
 
             modelBuilder.Entity("AllowanceTracker.Models.Transaction", b =>
@@ -321,9 +490,6 @@ namespace AllowanceTracker.Data.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ReceiptImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
@@ -337,7 +503,7 @@ namespace AllowanceTracker.Data.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", (string)null);
                 });
 
             modelBuilder.Entity("AllowanceTracker.Models.WishListItem", b =>
@@ -378,7 +544,7 @@ namespace AllowanceTracker.Data.Migrations
 
                     b.HasIndex("ChildId");
 
-                    b.ToTable("WishListItems");
+                    b.ToTable("WishListItems", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -512,6 +678,25 @@ namespace AllowanceTracker.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("AllowanceTracker.Models.AllowanceAdjustment", b =>
+                {
+                    b.HasOne("AllowanceTracker.Models.ApplicationUser", "AdjustedBy")
+                        .WithMany()
+                        .HasForeignKey("AdjustedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AllowanceTracker.Models.Child", "Child")
+                        .WithMany("AllowanceAdjustments")
+                        .HasForeignKey("ChildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AdjustedBy");
+
+                    b.Navigation("Child");
+                });
+
             modelBuilder.Entity("AllowanceTracker.Models.ApplicationUser", b =>
                 {
                     b.HasOne("AllowanceTracker.Models.Family", "Family")
@@ -560,6 +745,25 @@ namespace AllowanceTracker.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("AllowanceTracker.Models.ChoreTask", b =>
+                {
+                    b.HasOne("AllowanceTracker.Models.Child", "Child")
+                        .WithMany("Tasks")
+                        .HasForeignKey("ChildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AllowanceTracker.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Child");
+
+                    b.Navigation("CreatedBy");
+                });
+
             modelBuilder.Entity("AllowanceTracker.Models.SavingsTransaction", b =>
                 {
                     b.HasOne("AllowanceTracker.Models.Child", "Child")
@@ -577,6 +781,39 @@ namespace AllowanceTracker.Data.Migrations
                     b.Navigation("Child");
 
                     b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("AllowanceTracker.Models.TaskCompletion", b =>
+                {
+                    b.HasOne("AllowanceTracker.Models.ApplicationUser", "ApprovedBy")
+                        .WithMany()
+                        .HasForeignKey("ApprovedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AllowanceTracker.Models.Child", "Child")
+                        .WithMany("TaskCompletions")
+                        .HasForeignKey("ChildId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AllowanceTracker.Models.ChoreTask", "Task")
+                        .WithMany("Completions")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AllowanceTracker.Models.Transaction", "Transaction")
+                        .WithOne()
+                        .HasForeignKey("AllowanceTracker.Models.TaskCompletion", "TransactionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ApprovedBy");
+
+                    b.Navigation("Child");
+
+                    b.Navigation("Task");
+
+                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("AllowanceTracker.Models.Transaction", b =>
@@ -667,13 +904,24 @@ namespace AllowanceTracker.Data.Migrations
 
             modelBuilder.Entity("AllowanceTracker.Models.Child", b =>
                 {
+                    b.Navigation("AllowanceAdjustments");
+
                     b.Navigation("CategoryBudgets");
 
                     b.Navigation("SavingsTransactions");
 
+                    b.Navigation("TaskCompletions");
+
+                    b.Navigation("Tasks");
+
                     b.Navigation("Transactions");
 
                     b.Navigation("WishListItems");
+                });
+
+            modelBuilder.Entity("AllowanceTracker.Models.ChoreTask", b =>
+                {
+                    b.Navigation("Completions");
                 });
 
             modelBuilder.Entity("AllowanceTracker.Models.Family", b =>

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AllowanceTracker.Data.Migrations
 {
     [DbContext(typeof(AllowanceContext))]
-    [Migration("20251016231650_RenameReceiptImageUrlToPath")]
-    partial class RenameReceiptImageUrlToPath
+    [Migration("20251011204206_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -317,12 +317,6 @@ namespace AllowanceTracker.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReceiptImagePath")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
