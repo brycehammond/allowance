@@ -12,10 +12,11 @@ struct ChildCardView: View {
                 HStack {
                     Label {
                         Text(child.fullName)
-                            .font(.headline)
+                            .font(.scalable(.headline, weight: .semibold))
                     } icon: {
                         Image(systemName: "person.circle.fill")
                             .foregroundStyle(.blue)
+                            .accessibilityHidden()
                     }
 
                     Spacer()
@@ -23,62 +24,68 @@ struct ChildCardView: View {
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden()
                 }
 
                 Divider()
+                    .accessibilityHidden()
 
                 // Balance section
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Current Balance")
-                        .font(.caption)
+                        .font(.scalable(.caption))
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden()
 
                     Text(child.formattedBalance)
-                        .font(.title2)
-                        .fontWeight(.bold)
+                        .font(.scalable(.title2, weight: .bold))
                         .fontDesign(.monospaced)
                         .foregroundStyle(balanceColor)
+                        .accessibilityHidden()
                 }
 
                 // Weekly allowance
                 HStack {
                     Text("Weekly Allowance:")
-                        .font(.caption)
+                        .font(.scalable(.caption))
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden()
 
                     Spacer()
 
                     Text(child.weeklyAllowance.currencyFormatted)
-                        .font(.caption)
-                        .fontWeight(.medium)
+                        .font(.scalable(.caption, weight: .medium))
                         .fontDesign(.monospaced)
+                        .accessibilityHidden()
                 }
 
                 // Allowance day
                 HStack {
                     Text("Allowance Schedule:")
-                        .font(.caption)
+                        .font(.scalable(.caption))
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden()
 
                     Spacer()
 
                     Text(child.allowanceDayDisplay)
-                        .font(.caption)
-                        .fontWeight(.medium)
+                        .font(.scalable(.caption, weight: .medium))
+                        .accessibilityHidden()
                 }
 
                 // Last allowance date (if available)
                 if let lastDate = child.lastAllowanceDate {
                     HStack {
                         Text("Last Allowance:")
-                            .font(.caption)
+                            .font(.scalable(.caption))
                             .foregroundStyle(.secondary)
+                            .accessibilityHidden()
 
                         Spacer()
 
                         Text(lastDate.formattedDisplay)
-                            .font(.caption)
-                            .fontWeight(.medium)
+                            .font(.scalable(.caption, weight: .medium))
+                            .accessibilityHidden()
                     }
                 }
             }
@@ -88,6 +95,12 @@ struct ChildCardView: View {
             .shadow(radius: 2)
         }
         .buttonStyle(.plain)
+        .accessibility(
+            label: accessibilityLabel,
+            hint: "Double tap to view details and transactions",
+            traits: .isButton
+        )
+        .accessibilityIdentifier("\(AccessibilityIdentifier.childCard)\(child.id.uuidString)")
     }
 
     // MARK: - Computed Properties
@@ -101,6 +114,37 @@ struct ChildCardView: View {
         } else {
             return .green
         }
+    }
+
+    /// Comprehensive accessibility label combining all information
+    private var accessibilityLabel: String {
+        var parts: [String] = []
+
+        // Name
+        parts.append(child.fullName)
+
+        // Balance with spoken currency
+        let balanceDescription = child.currentBalance.accessibilityCurrencyLabel
+        if child.currentBalance < 0 {
+            parts.append("Balance: negative \(balanceDescription)")
+        } else if child.currentBalance == 0 {
+            parts.append("Balance: zero dollars")
+        } else {
+            parts.append("Balance: \(balanceDescription)")
+        }
+
+        // Weekly allowance
+        parts.append("Weekly allowance: \(child.weeklyAllowance.accessibilityCurrencyLabel)")
+
+        // Allowance schedule
+        parts.append("Allowance schedule: \(child.allowanceDayDisplay)")
+
+        // Last allowance date
+        if let lastDate = child.lastAllowanceDate {
+            parts.append("Last allowance: \(lastDate.accessibilityLabel)")
+        }
+
+        return parts.joined(separator: ". ")
     }
 }
 

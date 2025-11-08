@@ -72,5 +72,11 @@
 	</dict>
 	<key>API_BASE_URL</key>
 	<string>https://api.allowancetracker.com</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.allowancetracker.refresh</string>
+	</array>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Notify you of transaction updates and balance changes</string>
 </dict>
 </plist>

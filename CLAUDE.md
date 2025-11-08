@@ -547,6 +547,7 @@ builder.Services.AddAuthentication()
 - `specs/05-testing-strategy.md` - xUnit approach
 - `specs/06-tdd-best-practices.md` - .NET TDD patterns
 - `specs/08-ios-app-specification.md` - iOS native app (SwiftUI)
+- `specs/10-future-features.md` - Future feature roadmap and ideas
 
 ### Core Implementation Files
 - `Data/AllowanceContext.cs` - EF Core DbContext

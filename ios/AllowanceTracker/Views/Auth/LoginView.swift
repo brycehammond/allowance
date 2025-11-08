@@ -58,14 +58,16 @@ struct LoginView: View {
             Image(systemName: "dollarsign.circle.fill")
                 .font(.system(size: 80))
                 .foregroundStyle(.green)
+                .accessibilityHidden()
 
             Text("Allowance Tracker")
-                .font(.title)
-                .fontWeight(.bold)
+                .font(.scalable(.title, weight: .bold))
+                .accessibleHeader("Allowance Tracker")
 
             Text("Track, Save, Learn")
-                .font(.subheadline)
+                .font(.scalable(.subheadline))
                 .foregroundStyle(.secondary)
+                .accessibilityHidden()
         }
         .padding(.bottom, 20)
     }
@@ -75,8 +77,7 @@ struct LoginView: View {
             // Email field
             VStack(alignment: .leading, spacing: 8) {
                 Text("Email")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.scalable(.subheadline, weight: .medium))
 
                 TextField("Enter your email", text: $email)
                     .textContentType(.emailAddress)
@@ -84,18 +85,23 @@ struct LoginView: View {
                     .autocapitalization(.none)
                     .textFieldStyle(.roundedBorder)
                     .disabled(viewModel.isLoading)
+                    .accessibilityLabel("Email address")
+                    .accessibilityHint("Enter your email address to sign in")
+                    .accessibilityIdentifier(AccessibilityIdentifier.loginEmailField)
             }
 
             // Password field
             VStack(alignment: .leading, spacing: 8) {
                 Text("Password")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.scalable(.subheadline, weight: .medium))
 
                 SecureField("Enter your password", text: $password)
                     .textContentType(.password)
                     .textFieldStyle(.roundedBorder)
                     .disabled(viewModel.isLoading)
+                    .accessibilityLabel("Password")
+                    .accessibilityHint("Enter your password")
+                    .accessibilityIdentifier(AccessibilityIdentifier.loginPasswordField)
             }
         }
     }
@@ -111,9 +117,10 @@ struct LoginView: View {
                     ProgressView()
                         .progressViewStyle(.circular)
                         .tint(.white)
+                        .accessibilityLabel("Signing in")
                 } else {
                     Text("Sign In")
-                        .fontWeight(.semibold)
+                        .font(.scalable(.body, weight: .semibold))
                 }
             }
             .frame(maxWidth: .infinity)
@@ -123,6 +130,9 @@ struct LoginView: View {
             .cornerRadius(12)
         }
         .disabled(viewModel.isLoading)
+        .accessibilityLabel(viewModel.isLoading ? "Signing in" : "Sign in")
+        .accessibilityHint(viewModel.isLoading ? "Please wait while signing in" : "Double tap to sign in with your email and password")
+        .accessibilityIdentifier(AccessibilityIdentifier.loginButton)
     }
 
     private var forgotPasswordLink: some View {
@@ -130,11 +140,12 @@ struct LoginView: View {
             showForgotPassword = true
         } label: {
             Text("Forgot your password?")
-                .font(.subheadline)
-                .fontWeight(.medium)
+                .font(.scalable(.subheadline, weight: .medium))
                 .foregroundStyle(.blue)
         }
         .disabled(viewModel.isLoading)
+        .accessibilityLabel("Forgot password")
+        .accessibilityHint("Double tap to reset your password")
     }
 
     private var registerLink: some View {
@@ -148,18 +159,22 @@ struct LoginView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.blue)
             }
-            .font(.subheadline)
+            .font(.scalable(.subheadline))
         }
         .disabled(viewModel.isLoading)
+        .accessibilityLabel("Don't have an account? Sign up")
+        .accessibilityHint("Double tap to create a new account")
+        .accessibilityIdentifier(AccessibilityIdentifier.registerButton)
     }
 
     private func errorSection(message: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.red)
+                .accessibilityHidden()
 
             Text(message)
-                .font(.subheadline)
+                .font(.scalable(.subheadline))
                 .foregroundStyle(.red)
 
             Spacer()
@@ -170,10 +185,18 @@ struct LoginView: View {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.gray)
             }
+            .accessibilityLabel("Dismiss error")
+            .accessibilityHint("Double tap to dismiss this error message")
         }
         .padding()
         .background(Color.red.opacity(0.1))
         .cornerRadius(12)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Error: \(message)")
+        .onAppear {
+            // Announce error to VoiceOver users
+            AccessibilityAnnouncement.announce("Error: \(message)")
+        }
     }
 }
 

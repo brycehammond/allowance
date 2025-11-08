@@ -10,30 +10,34 @@ struct TransactionRowView: View {
             Image(systemName: transaction.isCredit ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .font(.title2)
                 .foregroundStyle(transaction.isCredit ? .green : .red)
+                .accessibilityHidden()
 
             // Transaction details
             VStack(alignment: .leading, spacing: 4) {
                 Text(transaction.description)
-                    .font(.body)
-                    .fontWeight(.medium)
+                    .font(.scalable(.body, weight: .medium))
+                    .accessibilityHidden()
 
                 HStack(spacing: 8) {
                     Text(transaction.category)
-                        .font(.caption)
+                        .font(.scalable(.caption))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Color.blue.opacity(0.1))
                         .foregroundStyle(.blue)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .accessibilityHidden()
 
                     Text(transaction.createdByName)
-                        .font(.caption)
+                        .font(.scalable(.caption))
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden()
                 }
 
                 Text(transaction.formattedDate)
-                    .font(.caption2)
+                    .font(.scalable(.caption2))
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden()
             }
 
             Spacer()
@@ -41,21 +45,59 @@ struct TransactionRowView: View {
             // Amount and balance
             VStack(alignment: .trailing, spacing: 4) {
                 Text(transaction.formattedAmount)
-                    .font(.body)
-                    .fontWeight(.semibold)
+                    .font(.scalable(.body, weight: .semibold))
                     .fontDesign(.monospaced)
                     .foregroundStyle(transaction.isCredit ? .green : .red)
+                    .accessibilityHidden()
 
                 Text("Balance: \(transaction.balanceAfter.currencyFormatted)")
-                    .font(.caption2)
+                    .font(.scalable(.caption2))
                     .foregroundStyle(.secondary)
                     .fontDesign(.monospaced)
+                    .accessibilityHidden()
             }
         }
         .padding()
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(radius: 1)
+        .accessibility(
+            label: accessibilityLabel,
+            value: accessibilityValue
+        )
+        .accessibilityIdentifier("\(AccessibilityIdentifier.transactionRow)\(transaction.id.uuidString)")
+    }
+
+    // MARK: - Accessibility
+
+    /// Comprehensive accessibility label
+    private var accessibilityLabel: String {
+        var parts: [String] = []
+
+        // Transaction type
+        parts.append(transaction.type.accessibilityLabel)
+
+        // Amount
+        parts.append(transaction.amount.accessibilityCurrencyLabel)
+
+        // Description
+        parts.append(transaction.description)
+
+        // Category
+        parts.append("Category: \(transaction.category)")
+
+        // Created by
+        parts.append("Created by \(transaction.createdByName)")
+
+        // Date
+        parts.append(transaction.createdAt.accessibilityLabel)
+
+        return parts.joined(separator: ". ")
+    }
+
+    /// Accessibility value showing resulting balance
+    private var accessibilityValue: String {
+        "Resulting balance: \(transaction.balanceAfter.accessibilityCurrencyLabel)"
     }
 }
 
