@@ -27,7 +27,8 @@ public class ChildrenControllerTests
             _mockChildManagementService.Object,
             _mockAccountService.Object,
             _mockFamilyService.Object,
-            _mockTransactionService.Object);
+            _mockTransactionService.Object,
+            Mock.Of<IAllowanceService>());
     }
 
     [Fact]

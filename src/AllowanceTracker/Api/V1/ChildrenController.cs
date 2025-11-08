@@ -1,4 +1,5 @@
 using AllowanceTracker.DTOs;
+using AllowanceTracker.DTOs.Allowances;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -15,17 +16,20 @@ public class ChildrenController : ControllerBase
     private readonly IAccountService _accountService;
     private readonly IFamilyService _familyService;
     private readonly ITransactionService _transactionService;
+    private readonly IAllowanceService _allowanceService;
 
     public ChildrenController(
         IChildManagementService childManagementService,
         IAccountService accountService,
         IFamilyService familyService,
-        ITransactionService transactionService)
+        ITransactionService transactionService,
+        IAllowanceService allowanceService)
     {
         _childManagementService = childManagementService;
         _accountService = accountService;
         _familyService = familyService;
         _transactionService = transactionService;
+        _allowanceService = allowanceService;
     }
 
     /// <summary>
@@ -253,5 +257,159 @@ public class ChildrenController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// Pause a child's allowance (Parent only)
+    /// </summary>
+    [HttpPost("{childId}/allowance/pause")]
+    [Authorize(Roles = "Parent")]
+    public async Task<ActionResult> PauseAllowance(Guid childId, [FromBody] PauseAllowanceDto dto)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var child = await _childManagementService.GetChildAsync(childId, currentUser.Id);
+        if (child == null)
+        {
+            return NotFound(new
+            {
+                error = new
+                {
+                    code = "NOT_FOUND",
+                    message = "Child not found or access denied"
+                }
+            });
+        }
+
+        await _allowanceService.PauseAllowanceAsync(childId, dto.Reason);
+
+        return Ok(new
+        {
+            childId,
+            allowancePaused = true,
+            reason = dto.Reason,
+            message = "Allowance paused successfully"
+        });
+    }
+
+    /// <summary>
+    /// Resume a child's allowance (Parent only)
+    /// </summary>
+    [HttpPost("{childId}/allowance/resume")]
+    [Authorize(Roles = "Parent")]
+    public async Task<ActionResult> ResumeAllowance(Guid childId)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var child = await _childManagementService.GetChildAsync(childId, currentUser.Id);
+        if (child == null)
+        {
+            return NotFound(new
+            {
+                error = new
+                {
+                    code = "NOT_FOUND",
+                    message = "Child not found or access denied"
+                }
+            });
+        }
+
+        await _allowanceService.ResumeAllowanceAsync(childId);
+
+        return Ok(new
+        {
+            childId,
+            allowancePaused = false,
+            message = "Allowance resumed successfully"
+        });
+    }
+
+    /// <summary>
+    /// Adjust a child's weekly allowance amount (Parent only)
+    /// </summary>
+    [HttpPut("{childId}/allowance/amount")]
+    [Authorize(Roles = "Parent")]
+    public async Task<ActionResult> AdjustAllowanceAmount(Guid childId, [FromBody] AdjustAllowanceAmountDto dto)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var child = await _childManagementService.GetChildAsync(childId, currentUser.Id);
+        if (child == null)
+        {
+            return NotFound(new
+            {
+                error = new
+                {
+                    code = "NOT_FOUND",
+                    message = "Child not found or access denied"
+                }
+            });
+        }
+
+        try
+        {
+            await _allowanceService.AdjustAllowanceAmountAsync(childId, dto.NewAmount, dto.Reason);
+
+            return Ok(new
+            {
+                childId,
+                oldAmount = child.WeeklyAllowance,
+                newAmount = dto.NewAmount,
+                reason = dto.Reason,
+                message = "Allowance amount adjusted successfully"
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "INVALID_AMOUNT",
+                    message = ex.Message
+                }
+            });
+        }
+    }
+
+    /// <summary>
+    /// Get allowance adjustment history for a child
+    /// </summary>
+    [HttpGet("{childId}/allowance/history")]
+    public async Task<ActionResult<List<AllowanceAdjustmentDto>>> GetAllowanceHistory(Guid childId)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var child = await _childManagementService.GetChildAsync(childId, currentUser.Id);
+        if (child == null)
+        {
+            return NotFound(new
+            {
+                error = new
+                {
+                    code = "NOT_FOUND",
+                    message = "Child not found or access denied"
+                }
+            });
+        }
+
+        var history = await _allowanceService.GetAllowanceAdjustmentHistoryAsync(childId);
+        return Ok(history);
     }
 }

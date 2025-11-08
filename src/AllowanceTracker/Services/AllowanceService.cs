@@ -1,5 +1,6 @@
 using AllowanceTracker.Data;
 using AllowanceTracker.DTOs;
+using AllowanceTracker.DTOs.Allowances;
 using AllowanceTracker.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -35,6 +36,10 @@ public class AllowanceService : IAllowanceService
 
         if (child.WeeklyAllowance <= 0)
             throw new InvalidOperationException("Child has no weekly allowance configured");
+
+        // Check if allowance is paused
+        if (child.AllowancePaused)
+            throw new InvalidOperationException($"Allowance is currently paused{(string.IsNullOrEmpty(child.AllowancePausedReason) ? "" : $": {child.AllowancePausedReason}")}");
 
         // Check if allowance was already paid this week
         if (child.LastAllowanceDate.HasValue)
@@ -96,7 +101,7 @@ public class AllowanceService : IAllowanceService
     public async Task ProcessAllPendingAllowancesAsync()
     {
         var children = await _context.Children
-            .Where(c => c.WeeklyAllowance > 0)
+            .Where(c => c.WeeklyAllowance > 0 && !c.AllowancePaused)
             .ToListAsync();
 
         var processedCount = 0;
@@ -134,5 +139,111 @@ public class AllowanceService : IAllowanceService
             "Processed {ProcessedCount} allowances with {ErrorCount} errors",
             processedCount,
             errorCount);
+    }
+
+    public async Task PauseAllowanceAsync(Guid childId, string? reason)
+    {
+        var child = await _context.Children.FindAsync(childId)
+            ?? throw new InvalidOperationException("Child not found");
+
+        child.AllowancePaused = true;
+        child.AllowancePausedReason = reason;
+
+        // Create adjustment history record
+        var adjustment = new AllowanceAdjustment
+        {
+            ChildId = childId,
+            AdjustmentType = AllowanceAdjustmentType.Paused,
+            Reason = reason,
+            AdjustedById = _currentUser.UserId
+        };
+        _context.AllowanceAdjustments.Add(adjustment);
+
+        await _context.SaveChangesAsync();
+
+        _logger?.LogInformation(
+            "Paused allowance for child {ChildId}. Reason: {Reason}",
+            childId,
+            reason ?? "Not specified");
+    }
+
+    public async Task ResumeAllowanceAsync(Guid childId)
+    {
+        var child = await _context.Children.FindAsync(childId)
+            ?? throw new InvalidOperationException("Child not found");
+
+        child.AllowancePaused = false;
+        child.AllowancePausedReason = null;
+
+        // Create adjustment history record
+        var adjustment = new AllowanceAdjustment
+        {
+            ChildId = childId,
+            AdjustmentType = AllowanceAdjustmentType.Resumed,
+            AdjustedById = _currentUser.UserId
+        };
+        _context.AllowanceAdjustments.Add(adjustment);
+
+        await _context.SaveChangesAsync();
+
+        _logger?.LogInformation(
+            "Resumed allowance for child {ChildId}",
+            childId);
+    }
+
+    public async Task AdjustAllowanceAmountAsync(Guid childId, decimal newAmount, string? reason)
+    {
+        if (newAmount < 0)
+            throw new ArgumentException("Allowance amount cannot be negative", nameof(newAmount));
+
+        var child = await _context.Children.FindAsync(childId)
+            ?? throw new InvalidOperationException("Child not found");
+
+        var oldAmount = child.WeeklyAllowance;
+        child.WeeklyAllowance = newAmount;
+
+        // Create adjustment history record
+        var adjustment = new AllowanceAdjustment
+        {
+            ChildId = childId,
+            AdjustmentType = AllowanceAdjustmentType.AmountChanged,
+            OldAmount = oldAmount,
+            NewAmount = newAmount,
+            Reason = reason,
+            AdjustedById = _currentUser.UserId
+        };
+        _context.AllowanceAdjustments.Add(adjustment);
+
+        await _context.SaveChangesAsync();
+
+        _logger?.LogInformation(
+            "Adjusted allowance for child {ChildId} from {OldAmount} to {NewAmount}. Reason: {Reason}",
+            childId,
+            oldAmount,
+            newAmount,
+            reason ?? "Not specified");
+    }
+
+    public async Task<List<AllowanceAdjustmentDto>> GetAllowanceAdjustmentHistoryAsync(Guid childId)
+    {
+        var adjustments = await (
+            from a in _context.AllowanceAdjustments
+            join u in _context.Users on a.AdjustedById equals u.Id into userJoin
+            from u in userJoin.DefaultIfEmpty()
+            where a.ChildId == childId
+            orderby a.CreatedAt
+            select new AllowanceAdjustmentDto(
+                a.Id,
+                a.ChildId,
+                a.AdjustmentType,
+                a.OldAmount,
+                a.NewAmount,
+                a.Reason,
+                a.AdjustedById,
+                u != null ? $"{u.FirstName} {u.LastName}" : "Unknown",
+                a.CreatedAt)
+        ).ToListAsync();
+
+        return adjustments;
     }
 }

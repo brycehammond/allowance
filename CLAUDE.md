@@ -763,3 +763,4 @@ public async Task CreateTransaction_RequiresAuthentication()
 ```
 
 ## Remember: Read specs first, write tests first, API-first architecture, keep it simple for MVP!
+- Keep a log of what are the next steaps

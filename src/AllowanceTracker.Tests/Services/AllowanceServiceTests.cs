@@ -355,6 +355,216 @@ public class AllowanceServiceTests : IDisposable
             Times.Exactly(2));
     }
 
+    // NEW: Allowance Pause/Resume Tests
+    [Fact]
+    public async Task PauseAllowance_WithValidChild_SetsAllowancePausedToTrue()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowancePaused.Should().BeFalse(); // Default state
+
+        // Act
+        await _allowanceService.PauseAllowanceAsync(child.Id, "Going on vacation");
+
+        // Assert
+        var updatedChild = await _context.Children.FindAsync(child.Id);
+        updatedChild!.AllowancePaused.Should().BeTrue();
+        updatedChild.AllowancePausedReason.Should().Be("Going on vacation");
+    }
+
+    [Fact]
+    public async Task PauseAllowance_WithNoReason_SetsAllowancePausedWithNullReason()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+
+        // Act
+        await _allowanceService.PauseAllowanceAsync(child.Id, null);
+
+        // Assert
+        var updatedChild = await _context.Children.FindAsync(child.Id);
+        updatedChild!.AllowancePaused.Should().BeTrue();
+        updatedChild.AllowancePausedReason.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task PauseAllowance_WhenAlreadyPaused_UpdatesReason()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowancePaused = true;
+        child.AllowancePausedReason = "Original reason";
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.PauseAllowanceAsync(child.Id, "New reason");
+
+        // Assert
+        var updatedChild = await _context.Children.FindAsync(child.Id);
+        updatedChild!.AllowancePausedReason.Should().Be("New reason");
+    }
+
+    [Fact]
+    public async Task ResumeAllowance_WithPausedChild_SetsAllowancePausedToFalse()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowancePaused = true;
+        child.AllowancePausedReason = "Temporary pause";
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.ResumeAllowanceAsync(child.Id);
+
+        // Assert
+        var updatedChild = await _context.Children.FindAsync(child.Id);
+        updatedChild!.AllowancePaused.Should().BeFalse();
+        updatedChild.AllowancePausedReason.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ResumeAllowance_WhenNotPaused_DoesNothing()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowancePaused = false;
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.ResumeAllowanceAsync(child.Id);
+
+        // Assert
+        var updatedChild = await _context.Children.FindAsync(child.Id);
+        updatedChild!.AllowancePaused.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task PayAllowance_WhenPaused_ThrowsException()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowancePaused = true;
+        child.AllowancePausedReason = "Vacation";
+        await _context.SaveChangesAsync();
+
+        // Act
+        var act = () => _allowanceService.PayWeeklyAllowanceAsync(child.Id);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Allowance is currently paused*");
+    }
+
+    [Fact]
+    public async Task ProcessAllPendingAllowances_SkipsPausedChildren()
+    {
+        // Arrange
+        var child1 = await CreateTestChild(weeklyAllowance: 10.00m, firstName: "Child1");
+        child1.LastAllowanceDate = DateTime.UtcNow.AddDays(-8); // Eligible
+        child1.AllowancePaused = false;
+
+        var child2 = await CreateTestChild(weeklyAllowance: 15.00m, firstName: "Child2");
+        child2.LastAllowanceDate = DateTime.UtcNow.AddDays(-8); // Eligible but paused
+        child2.AllowancePaused = true;
+
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.ProcessAllPendingAllowancesAsync();
+
+        // Assert - Should only process child1 (not paused)
+        _mockTransactionService.Verify(
+            x => x.CreateTransactionAsync(It.IsAny<DTOs.CreateTransactionDto>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task AdjustAllowanceAmount_WithValidAmount_UpdatesWeeklyAllowance()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 10.00m);
+
+        // Act
+        await _allowanceService.AdjustAllowanceAmountAsync(child.Id, 20.00m, "Performance improvement");
+
+        // Assert
+        var updatedChild = await _context.Children.FindAsync(child.Id);
+        updatedChild!.WeeklyAllowance.Should().Be(20.00m);
+    }
+
+    [Fact]
+    public async Task AdjustAllowanceAmount_WithZeroAmount_SetsAllowanceToZero()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 10.00m);
+
+        // Act
+        await _allowanceService.AdjustAllowanceAmountAsync(child.Id, 0m, "Suspended allowance");
+
+        // Assert
+        var updatedChild = await _context.Children.FindAsync(child.Id);
+        updatedChild!.WeeklyAllowance.Should().Be(0m);
+    }
+
+    [Fact]
+    public async Task AdjustAllowanceAmount_WithNegativeAmount_ThrowsException()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 10.00m);
+
+        // Act
+        var act = () => _allowanceService.AdjustAllowanceAmountAsync(child.Id, -5.00m, "Invalid");
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*cannot be negative*");
+    }
+
+    [Fact]
+    public async Task PauseAllowance_CreatesAdjustmentHistoryRecord()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 10.00m);
+
+        // Act
+        await _allowanceService.PauseAllowanceAsync(child.Id, "Vacation");
+
+        // Assert - Check directly in context
+        var adjustments = await _context.AllowanceAdjustments
+            .Where(a => a.ChildId == child.Id)
+            .ToListAsync();
+
+        adjustments.Should().HaveCount(1);
+        adjustments[0].AdjustmentType.Should().Be(AllowanceAdjustmentType.Paused);
+        adjustments[0].Reason.Should().Be("Vacation");
+    }
+
+    [Fact]
+    public async Task GetAllowanceAdjustmentHistory_ReturnsAllAdjustments()
+    {
+        // Arrange
+        var child = await CreateTestChild(weeklyAllowance: 10.00m);
+
+        // Make several adjustments
+        await _allowanceService.PauseAllowanceAsync(child.Id, "Vacation");
+        _context.ChangeTracker.Clear(); // Clear tracking to ensure fresh query
+
+        await _allowanceService.ResumeAllowanceAsync(child.Id);
+        _context.ChangeTracker.Clear(); // Clear tracking to ensure fresh query
+
+        await _allowanceService.AdjustAllowanceAmountAsync(child.Id, 15.00m, "Raise");
+        _context.ChangeTracker.Clear(); // Clear tracking to ensure fresh query
+
+        // Act
+        var history = await _allowanceService.GetAllowanceAdjustmentHistoryAsync(child.Id);
+
+        // Assert
+        history.Should().HaveCount(3);
+        history[0].AdjustmentType.Should().Be(AllowanceAdjustmentType.Paused);
+        history[1].AdjustmentType.Should().Be(AllowanceAdjustmentType.Resumed);
+        history[2].AdjustmentType.Should().Be(AllowanceAdjustmentType.AmountChanged);
+    }
+
     private async Task<Child> CreateTestChild(
         decimal balance = 0m,
         decimal weeklyAllowance = 10m,

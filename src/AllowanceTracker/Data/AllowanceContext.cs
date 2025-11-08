@@ -20,6 +20,7 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<SavingsTransaction> SavingsTransactions { get; set; }
     public DbSet<ChoreTask> Tasks { get; set; }
     public DbSet<TaskCompletion> TaskCompletions { get; set; }
+    public DbSet<AllowanceAdjustment> AllowanceAdjustments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -57,6 +58,10 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.Property(e => e.SavingsAccountEnabled).HasDefaultValue(false);
             entity.Property(e => e.SavingsTransferType).HasDefaultValue(SavingsTransferType.None);
             entity.Property(e => e.SavingsTransferPercentage).HasDefaultValue(0);
+
+            // Allowance pause properties
+            entity.Property(e => e.AllowancePaused).HasDefaultValue(false);
+            entity.Property(e => e.AllowancePausedReason).HasMaxLength(500);
 
             entity.HasOne(e => e.User)
                   .WithOne(u => u.ChildProfile)
@@ -210,6 +215,29 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.HasIndex(e => e.ChildId);
             entity.HasIndex(e => e.Status);
             entity.HasIndex(e => e.CompletedAt);
+        });
+
+        // AllowanceAdjustment configuration
+        builder.Entity<AllowanceAdjustment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.OldAmount).HasPrecision(10, 2);
+            entity.Property(e => e.NewAmount).HasPrecision(10, 2);
+            entity.Property(e => e.Reason).HasMaxLength(500);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.AllowanceAdjustments)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.AdjustedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.AdjustedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.ChildId);
+            entity.HasIndex(e => e.AdjustmentType);
+            entity.HasIndex(e => e.CreatedAt);
         });
     }
 

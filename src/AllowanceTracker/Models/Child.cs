@@ -17,6 +17,16 @@ public class Child : IHasCreatedAt
     /// </summary>
     public DayOfWeek? AllowanceDay { get; set; }
 
+    /// <summary>
+    /// Indicates if the allowance is currently paused
+    /// </summary>
+    public bool AllowancePaused { get; set; } = false;
+
+    /// <summary>
+    /// Optional reason for pausing the allowance
+    /// </summary>
+    public string? AllowancePausedReason { get; set; }
+
     // Savings Account Properties
     /// <summary>
     /// Is savings account feature enabled for this child?
@@ -57,4 +67,5 @@ public class Child : IHasCreatedAt
     public virtual ICollection<SavingsTransaction> SavingsTransactions { get; set; } = new List<SavingsTransaction>();
     public virtual ICollection<ChoreTask> Tasks { get; set; } = new List<ChoreTask>();
     public virtual ICollection<TaskCompletion> TaskCompletions { get; set; } = new List<TaskCompletion>();
+    public virtual ICollection<AllowanceAdjustment> AllowanceAdjustments { get; set; } = new List<AllowanceAdjustment>();
 }
