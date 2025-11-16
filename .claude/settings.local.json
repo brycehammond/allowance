@@ -97,7 +97,10 @@
       "Bash(az login:*)",
       "Bash(az ad sp list:*)",
       "Bash(az role assignment create:*)",
-      "Bash(az role assignment list:*)"
+      "Bash(az role assignment list:*)",
+      "Bash(git reset:*)",
+      "Bash(git restore:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

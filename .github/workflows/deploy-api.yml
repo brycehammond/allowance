@@ -37,7 +37,7 @@ jobs:
         run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Publish API
-        run: dotnet publish src/AllowanceTracker/AllowanceTracker.csproj --configuration Release --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        run: dotnet publish src/AllowanceTracker/AllowanceTracker.csproj --configuration Release --runtime linux-x64 --self-contained false --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
@@ -71,12 +71,18 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          clean: true  # Remove old files to prevent BadImageFormatException from lingering assemblies
+
+      - name: Restart Azure Web App
+        run: |
+          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group $(az webapp list --query "[?name=='${{ env.AZURE_WEBAPP_NAME }}'].resourceGroup" -o tsv)
+          echo "App restarted to ensure clean state after deployment"
 
       - name: Verify deployment
         run: |
           echo "API deployed to: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
-          # Wait for app to warm up
-          sleep 10
+          # Wait for app to warm up after restart
+          sleep 30
           # Health check
           curl -f ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health || exit 1
 
