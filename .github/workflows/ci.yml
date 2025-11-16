@@ -46,7 +46,7 @@ jobs:
         run: dotnet test --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
 
       - name: Publish API
-        run: dotnet publish src/AllowanceTracker/AllowanceTracker.csproj --configuration Release --output ./publish/api --no-build
+        run: dotnet publish src/AllowanceTracker/AllowanceTracker.csproj --configuration Release --output ./publish/api
 
       - name: Upload test results
         if: always()
@@ -94,7 +94,7 @@ jobs:
         run: dotnet build AllowanceTracker.sln --configuration Release --no-restore
 
       - name: Publish Function
-        run: dotnet publish src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --output ./publish/function --no-build
+        run: dotnet publish src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --output ./publish/function
 
       - name: Upload Function artifacts
         uses: actions/upload-artifact@v4

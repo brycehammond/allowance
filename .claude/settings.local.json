@@ -93,7 +93,11 @@
       "Bash(\"SendGrid__FromName=Allowance Tracker\" )",
       "Bash(\"App__ResetPasswordUrl=https://allowance-web.azurewebsites.net/reset-password\")",
       "Bash(\"SendGrid__FromName=Allowance Tracker\")",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(az login:*)",
+      "Bash(az ad sp list:*)",
+      "Bash(az role assignment create:*)",
+      "Bash(az role assignment list:*)"
     ],
     "deny": [],
     "ask": []

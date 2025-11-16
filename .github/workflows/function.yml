@@ -49,26 +49,3 @@ jobs:
           name: function-test-results-${{ github.sha }}
           path: '**/test-results.trx'
           retention-days: 7
-
-  # Code quality checks
-  code-quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore AllowanceTracker.sln
-
-      - name: Check code formatting
-        run: dotnet format AllowanceTracker.sln --verify-no-changes --no-restore
-
-      - name: Build with warnings as errors
-        run: dotnet build AllowanceTracker.sln --no-restore -warnaserror

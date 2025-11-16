@@ -40,7 +40,7 @@ jobs:
         run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Publish Function
-        run: dotnet publish src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --output ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }} --no-build
+        run: dotnet publish src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --output ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
