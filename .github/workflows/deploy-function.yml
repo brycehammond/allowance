@@ -47,6 +47,7 @@ jobs:
         with:
           name: function-package
           path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          include-hidden-files: true  # Required for .azurefunctions directory (Flex Consumption)
 
   deploy:
     name: Deploy to Azure Functions
