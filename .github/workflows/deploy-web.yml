@@ -86,13 +86,22 @@ jobs:
             --pattern '*' \
             --account-key "$STORAGE_KEY"
 
-          # Upload new build files
+          # Upload all files first with default caching (for assets like images, fonts, etc.)
+          az storage blob upload-batch \
+            --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
+            --destination '$web' \
+            --source ./dist \
+            --overwrite \
+            --account-key "$STORAGE_KEY"
+
+          # Upload JS/CSS with immutable caching (overwrite)
           az storage blob upload-batch \
             --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
             --destination '$web' \
             --source ./dist \
             --content-cache-control 'public, max-age=31536000, immutable' \
             --pattern '*.js' \
+            --overwrite \
             --account-key "$STORAGE_KEY"
 
           az storage blob upload-batch \
@@ -101,21 +110,17 @@ jobs:
             --source ./dist \
             --content-cache-control 'public, max-age=31536000, immutable' \
             --pattern '*.css' \
+            --overwrite \
             --account-key "$STORAGE_KEY"
 
+          # Upload HTML with no-cache (overwrite)
           az storage blob upload-batch \
             --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
             --destination '$web' \
             --source ./dist \
             --content-cache-control 'no-cache' \
             --pattern '*.html' \
-            --account-key "$STORAGE_KEY"
-
-          az storage blob upload-batch \
-            --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
-            --destination '$web' \
-            --source ./dist \
-            --exclude-pattern '*.js;*.css;*.html' \
+            --overwrite \
             --account-key "$STORAGE_KEY"
 
       - name: Purge CDN endpoint (if exists)
