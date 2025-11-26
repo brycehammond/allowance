@@ -73,12 +73,18 @@ jobs:
 
       - name: Upload to Azure Storage
         run: |
+          # Get storage account key
+          STORAGE_KEY=$(az storage account keys list \
+            --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
+            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+            --query '[0].value' -o tsv)
+
           # Delete existing files in $web container
           az storage blob delete-batch \
             --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
             --source '$web' \
             --pattern '*' \
-            --auth-mode login
+            --account-key "$STORAGE_KEY"
 
           # Upload new build files
           az storage blob upload-batch \
@@ -87,7 +93,7 @@ jobs:
             --source ./dist \
             --content-cache-control 'public, max-age=31536000, immutable' \
             --pattern '*.js' \
-            --auth-mode login
+            --account-key "$STORAGE_KEY"
 
           az storage blob upload-batch \
             --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
@@ -95,7 +101,7 @@ jobs:
             --source ./dist \
             --content-cache-control 'public, max-age=31536000, immutable' \
             --pattern '*.css' \
-            --auth-mode login
+            --account-key "$STORAGE_KEY"
 
           az storage blob upload-batch \
             --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
@@ -103,14 +109,14 @@ jobs:
             --source ./dist \
             --content-cache-control 'no-cache' \
             --pattern '*.html' \
-            --auth-mode login
+            --account-key "$STORAGE_KEY"
 
           az storage blob upload-batch \
             --account-name ${{ vars.AZURE_STORAGE_ACCOUNT }} \
             --destination '$web' \
             --source ./dist \
             --exclude-pattern '*.js;*.css;*.html' \
-            --auth-mode login
+            --account-key "$STORAGE_KEY"
 
       - name: Purge CDN endpoint (if exists)
         continue-on-error: true
