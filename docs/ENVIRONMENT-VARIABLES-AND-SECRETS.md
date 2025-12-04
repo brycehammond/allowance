@@ -187,9 +187,9 @@ Navigate to: **Configuration** → **Application settings** tab
 | `Jwt__ExpiryInDays` | `7` | Token lifetime in days |
 | `AllowedHosts` | `*` | Allowed HTTP hosts |
 | `App__ResetPasswordUrl` | Your frontend reset password URL | Example: `https://yourdomain.com/reset-password` |
-| `SendGrid__ApiKey` | Your SendGrid API key | Optional - for email features |
-| `SendGrid__FromEmail` | `noreply@yourdomain.com` | Optional - sender email |
-| `SendGrid__FromName` | `Allowance Tracker` | Optional - sender name |
+| `SendGrid__ApiKey` | SendGrid API key | For email features |
+| `SendGrid__FromEmail` | `noreply@allowancetracker.com` | Sender email address |
+| `SendGrid__FromName` | `Allowance Tracker` | Sender display name |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | App Insights connection string | Optional - for monitoring |
 
 **Generating JWT Secret Key**:
@@ -362,8 +362,8 @@ Located at: `src/AllowanceTracker/appsettings.Development.json`
     "ExpiryInDays": 1
   },
   "SendGrid": {
-    "ApiKey": "YOUR_SENDGRID_API_KEY_HERE",
-    "FromEmail": "noreply@localhost",
+    "ApiKey": "YOUR_SENDGRID_API_KEY",
+    "FromEmail": "noreply@allowancetracker.com",
     "FromName": "Allowance Tracker Dev"
   },
   "App": {
@@ -597,7 +597,9 @@ Use this checklist to ensure all configuration is complete before deployment.
 - [ ] App Setting: `Jwt__ExpiryInDays` = `7`
 - [ ] App Setting: `AllowedHosts` = `*`
 - [ ] App Setting: `App__ResetPasswordUrl` (frontend URL)
-- [ ] App Setting: `SendGrid__ApiKey` (optional)
+- [ ] App Setting: `SendGrid__ApiKey` (SendGrid API key)
+- [ ] App Setting: `SendGrid__FromEmail` (sender email address)
+- [ ] App Setting: `SendGrid__FromName` (sender display name)
 - [ ] App Setting: `APPLICATIONINSIGHTS_CONNECTION_STRING` (optional)
 
 ### Azure Function App

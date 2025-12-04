@@ -83,10 +83,22 @@ variable "jwt_secret_key" {
 }
 
 variable "sendgrid_api_key" {
-  description = "SendGrid API key for email services"
+  description = "SendGrid API key for email"
   type        = string
   sensitive   = true
   default     = ""
+}
+
+variable "sendgrid_from_email" {
+  description = "SendGrid sender email address"
+  type        = string
+  default     = "noreply@allowancetracker.com"
+}
+
+variable "sendgrid_from_name" {
+  description = "SendGrid sender display name"
+  type        = string
+  default     = "Allowance Tracker"
 }
 
 variable "cors_allowed_origins" {

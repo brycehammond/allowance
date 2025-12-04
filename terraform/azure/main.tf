@@ -148,8 +148,10 @@ resource "azurerm_linux_function_app" "main" {
     "Jwt__Issuer"    = "AllowanceTracker"
     "Jwt__Audience"  = "AllowanceTracker"
 
-    # SendGrid
-    "SendGrid__ApiKey" = var.sendgrid_api_key
+    # SendGrid Email
+    "SendGrid__ApiKey"    = var.sendgrid_api_key
+    "SendGrid__FromEmail" = var.sendgrid_from_email
+    "SendGrid__FromName"  = var.sendgrid_from_name
   }
 
   tags = {

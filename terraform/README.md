@@ -109,10 +109,11 @@ Create a `terraform.tfvars` file in the appropriate directory (DO NOT commit thi
 
 ```hcl
 subscription_id     = "your-azure-subscription-id"
-sql_admin_username  = "sqladmin"
-sql_admin_password  = "YourSecureP@ssw0rd123!"
-jwt_secret_key      = "your-32-character-or-longer-secret-key-here-123456"
-sendgrid_api_key    = "SG.your-sendgrid-api-key"
+sql_admin_username              = "sqladmin"
+sql_admin_password              = "YourSecureP@ssw0rd123!"
+jwt_secret_key                  = "your-32-character-or-longer-secret-key-here-123456"
+sendgrid_api_key                = "SG.your-sendgrid-api-key"
+sendgrid_from_email             = "noreply@allowancetracker.com"
 
 # Optional overrides
 project_name        = "allowancetracker"
@@ -124,10 +125,11 @@ location            = "East US"
 
 ```hcl
 aws_region          = "us-east-1"
-db_username         = "dbadmin"
-db_password         = "YourSecureP@ssw0rd123!"
-jwt_secret_key      = "your-32-character-or-longer-secret-key-here-123456"
-sendgrid_api_key    = "SG.your-sendgrid-api-key"
+db_username                     = "dbadmin"
+db_password                     = "YourSecureP@ssw0rd123!"
+jwt_secret_key                  = "your-32-character-or-longer-secret-key-here-123456"
+sendgrid_api_key                = "SG.your-sendgrid-api-key"
+sendgrid_from_email             = "noreply@allowancetracker.com"
 
 # Optional overrides
 project_name        = "allowancetracker"
@@ -248,6 +250,8 @@ Set in `terraform/azure/main.tf` under `azurerm_linux_function_app.app_settings`
 - `SqlConnectionString` - Database connection string
 - `Jwt__SecretKey` - JWT secret key
 - `SendGrid__ApiKey` - SendGrid API key
+- `SendGrid__FromEmail` - Sender email address
+- `SendGrid__FromName` - Sender display name
 
 ### AWS Lambda
 
@@ -256,6 +260,8 @@ Set in `terraform/aws/main.tf` under `aws_lambda_function.environment.variables`
 - `DATABASE_CONNECTION_STRING` - PostgreSQL connection string
 - `JWT_SECRET_KEY` - JWT secret key
 - `SENDGRID_API_KEY` - SendGrid API key
+- `SENDGRID_FROM_EMAIL` - Sender email address
+- `SENDGRID_FROM_NAME` - Sender display name
 
 ## Monitoring
 

@@ -13,7 +13,7 @@
 - ASPNETCORE_ENVIRONMENT
 - Storage Account connections (AzureWebJobsStorage)
 - Application Insights connection strings
-- Third-party API keys (SendGrid, etc.)
+- SendGrid Email configuration
 - AllowedHosts
 - Custom domains and SSL certificates
 
@@ -50,7 +50,9 @@ This separation ensures:
 | `Jwt__ExpiryInDays` | `7` | Token lifetime |
 | `AllowedHosts` | `*` | CORS hosts |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | App Insights connection string | Optional |
-| `SendGrid__ApiKey` | SendGrid API key | Optional |
+| `SendGrid__ApiKey` | SendGrid API key | For email |
+| `SendGrid__FromEmail` | Sender email address | For email |
+| `SendGrid__FromName` | Sender display name | For email |
 
 ### Function App Configuration
 
@@ -215,7 +217,9 @@ Instead of storing the password directly, reference Azure Key Vault:
 | Setting | Type | Where | Value |
 |---------|------|-------|-------|
 | DefaultConnection | Connection String | Configuration → Connection strings | SQL connection string |
-| SendGrid:ApiKey | App Setting | Configuration → App settings | SendGrid API key (optional) |
+| SendGrid__ApiKey | App Setting | Configuration → App settings | SendGrid API key |
+| SendGrid__FromEmail | App Setting | Configuration → App settings | Sender email address |
+| SendGrid__FromName | App Setting | Configuration → App settings | Sender display name |
 
 ### In Azure Portal - Function App
 
