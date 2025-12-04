@@ -229,15 +229,16 @@ export interface SavingsTransaction {
 export interface SavingsAccountSummary {
   childId: string;
   isEnabled: boolean;
-  currentBalance: number;
+  currentBalance: number | null;
   transferType: 'Percentage' | 'FixedAmount';
   transferAmount: number;
   transferPercentage: number;
-  totalTransactions: number;
-  totalDeposited: number;
-  totalWithdrawn: number;
-  lastTransactionDate?: string;
+  totalTransactions: number | null;
+  totalDeposited: number | null;
+  totalWithdrawn: number | null;
+  lastTransactionDate?: string | null;
   configDescription: string;
+  balanceHidden?: boolean;
 }
 
 export interface DepositToSavingsRequest {

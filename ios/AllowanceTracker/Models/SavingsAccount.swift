@@ -101,6 +101,35 @@ enum SavingsTransferType: String, Codable {
     case goal = "Goal"
 }
 
+// MARK: - Savings Account Summary (matches backend API response)
+
+/// Summary of a child's savings account from the backend
+struct SavingsAccountSummary: Codable {
+    let childId: UUID
+    let isEnabled: Bool
+    let currentBalance: Decimal?
+    let transferType: String
+    let transferAmount: Decimal
+    let transferPercentage: Decimal
+    let totalTransactions: Int?
+    let totalDeposited: Decimal?
+    let totalWithdrawn: Decimal?
+    let lastTransactionDate: Date?
+    let configDescription: String
+    let balanceHidden: Bool?
+
+    /// Whether the balance is hidden from the child
+    var isBalanceHidden: Bool {
+        balanceHidden ?? false
+    }
+
+    /// Formatted current balance or placeholder if hidden
+    var formattedBalance: String {
+        guard let balance = currentBalance else { return "Hidden" }
+        return balance.currencyFormatted
+    }
+}
+
 // MARK: - DTOs for API requests
 
 struct CreateSavingsAccountRequest: Codable {

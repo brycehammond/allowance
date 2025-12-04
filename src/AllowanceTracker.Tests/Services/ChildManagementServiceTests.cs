@@ -1,4 +1,5 @@
 using AllowanceTracker.Data;
+using AllowanceTracker.DTOs;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using FluentAssertions;
@@ -601,4 +602,114 @@ public class ChildManagementServiceTests
         // Assert
         result.Should().BeFalse();
     }
+
+    #region SavingsBalanceVisibleToChild Tests
+
+    [Fact]
+    public async Task UpdateChildSettingsAsync_WithSavingsBalanceVisibleToChild_UpdatesSetting()
+    {
+        // Arrange
+        var family = new Family { Id = Guid.NewGuid(), Name = "Test Family" };
+        var parent = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "parent@test.com",
+            FirstName = "Parent",
+            LastName = "Test",
+            Role = UserRole.Parent,
+            FamilyId = family.Id
+        };
+        var childUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "child@test.com",
+            FirstName = "Child",
+            LastName = "Test",
+            Role = UserRole.Child,
+            FamilyId = family.Id
+        };
+        var child = new Child
+        {
+            Id = Guid.NewGuid(),
+            UserId = childUser.Id,
+            User = childUser,
+            FamilyId = family.Id,
+            WeeklyAllowance = 10m,
+            CurrentBalance = 50m,
+            SavingsBalanceVisibleToChild = true
+        };
+
+        _context.Families.Add(family);
+        _context.Users.AddRange(parent, childUser);
+        _context.Children.Add(child);
+        await _context.SaveChangesAsync();
+
+        var dto = new UpdateChildSettingsDto(
+            WeeklyAllowance: 10m,
+            SavingsBalanceVisibleToChild: false);
+
+        // Act
+        var result = await _service.UpdateChildSettingsAsync(child.Id, dto, parent.Id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.SavingsBalanceVisibleToChild.Should().BeFalse();
+
+        var updated = await _context.Children.FindAsync(child.Id);
+        updated!.SavingsBalanceVisibleToChild.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task UpdateChildSettingsAsync_WithNullSavingsBalanceVisibleToChild_KeepsExistingSetting()
+    {
+        // Arrange
+        var family = new Family { Id = Guid.NewGuid(), Name = "Test Family" };
+        var parent = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "parent@test.com",
+            FirstName = "Parent",
+            LastName = "Test",
+            Role = UserRole.Parent,
+            FamilyId = family.Id
+        };
+        var childUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "child@test.com",
+            FirstName = "Child",
+            LastName = "Test",
+            Role = UserRole.Child,
+            FamilyId = family.Id
+        };
+        var child = new Child
+        {
+            Id = Guid.NewGuid(),
+            UserId = childUser.Id,
+            User = childUser,
+            FamilyId = family.Id,
+            WeeklyAllowance = 10m,
+            CurrentBalance = 50m,
+            SavingsBalanceVisibleToChild = false
+        };
+
+        _context.Families.Add(family);
+        _context.Users.AddRange(parent, childUser);
+        _context.Children.Add(child);
+        await _context.SaveChangesAsync();
+
+        var dto = new UpdateChildSettingsDto(
+            WeeklyAllowance: 15m,
+            SavingsBalanceVisibleToChild: null);  // Not specified
+
+        // Act
+        var result = await _service.UpdateChildSettingsAsync(child.Id, dto, parent.Id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.SavingsBalanceVisibleToChild.Should().BeFalse(); // Unchanged
+        result!.WeeklyAllowance.Should().Be(15m); // Allowance was updated
+    }
+
+    #endregion
 }

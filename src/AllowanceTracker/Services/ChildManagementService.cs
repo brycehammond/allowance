@@ -108,6 +108,12 @@ public class ChildManagementService : IChildManagementService
             child.SavingsTransferAmount = 0;
         }
 
+        // Update savings balance visibility setting (only if provided)
+        if (dto.SavingsBalanceVisibleToChild.HasValue)
+        {
+            child.SavingsBalanceVisibleToChild = dto.SavingsBalanceVisibleToChild.Value;
+        }
+
         await _context.SaveChangesAsync();
 
         return child;

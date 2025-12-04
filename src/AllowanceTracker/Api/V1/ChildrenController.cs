@@ -97,6 +97,9 @@ public class ChildrenController : ControllerBase
 
         var nextAllowanceDate = child.LastAllowanceDate?.AddDays(7);
 
+        // Determine if savings balance should be shown to requesting user
+        var showSavingsBalance = currentUser.Role == UserRole.Parent || child.SavingsBalanceVisibleToChild;
+
         return Ok(new
         {
             id = child.Id,
@@ -111,6 +114,8 @@ public class ChildrenController : ControllerBase
             lastAllowanceDate = child.LastAllowanceDate,
             nextAllowanceDate = nextAllowanceDate,
             savingsAccountEnabled = child.SavingsAccountEnabled,
+            savingsBalance = showSavingsBalance ? child.SavingsBalance : (decimal?)null,
+            savingsBalanceVisibleToChild = child.SavingsBalanceVisibleToChild,
             savingsTransferType = child.SavingsTransferType == SavingsTransferType.Percentage ? "Percentage" : "FixedAmount",
             savingsTransferPercentage = child.SavingsTransferPercentage,
             savingsTransferAmount = child.SavingsTransferAmount,
@@ -222,6 +227,7 @@ public class ChildrenController : ControllerBase
             weeklyAllowance = child.WeeklyAllowance,
             allowanceDay = child.AllowanceDay,
             savingsAccountEnabled = child.SavingsAccountEnabled,
+            savingsBalanceVisibleToChild = child.SavingsBalanceVisibleToChild,
             savingsTransferType = child.SavingsTransferType.ToString(),
             savingsTransferPercentage = child.SavingsTransferPercentage,
             savingsTransferAmount = child.SavingsTransferAmount,

@@ -156,6 +156,11 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
     );
   }
 
+  // Hide savings tab entirely when balance is hidden from child
+  if (summary?.balanceHidden) {
+    return null;
+  }
+
   return (
     <div className="space-y-6">
       {error && (

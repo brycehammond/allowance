@@ -56,6 +56,13 @@ public class Child : IHasCreatedAt
     /// </summary>
     public int SavingsTransferPercentage { get; set; } = 0;
 
+    /// <summary>
+    /// Controls whether the child can see their savings balance.
+    /// When false, the savings balance is hidden from child users at the API level.
+    /// Parents can always see the savings balance regardless of this setting.
+    /// </summary>
+    public bool SavingsBalanceVisibleToChild { get; set; } = true;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties

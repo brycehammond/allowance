@@ -10,8 +10,10 @@ final class SavingsAccountViewModel: ObservableObject {
     @Published private(set) var accounts: [SavingsAccount] = []
     @Published private(set) var selectedAccount: SavingsAccount?
     @Published private(set) var transactions: [SavingsTransaction] = []
+    @Published private(set) var summary: SavingsAccountSummary?
     @Published private(set) var isLoading = false
     @Published private(set) var isProcessing = false
+    @Published private(set) var isBalanceHidden = false
     @Published var errorMessage: String?
 
     // MARK: - Dependencies
@@ -32,10 +34,26 @@ final class SavingsAccountViewModel: ObservableObject {
     func loadAccounts() async {
         // Clear previous errors
         errorMessage = nil
+        isBalanceHidden = false
 
         // Set loading state
         isLoading = true
         defer { isLoading = false }
+
+        // First, check the savings summary to see if balance is hidden
+        do {
+            summary = try await apiService.getSavingsSummary(forChild: childId)
+            if summary?.isBalanceHidden == true {
+                isBalanceHidden = true
+                accounts = []
+                selectedAccount = nil
+                transactions = []
+                return
+            }
+        } catch {
+            // If summary fails, continue to try loading accounts
+            // (may fail for parents who don't have summary endpoint access)
+        }
 
         do {
             accounts = try await apiService.getSavingsAccounts(forChild: childId)

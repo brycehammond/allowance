@@ -9,4 +9,5 @@ public record UpdateChildSettingsDto(
     SavingsTransferType SavingsTransferType = SavingsTransferType.Percentage,
     [Range(0, 100)] decimal? SavingsTransferPercentage = null,
     [Range(0, 10000)] decimal? SavingsTransferAmount = null,
-    DayOfWeek? AllowanceDay = null);
+    DayOfWeek? AllowanceDay = null,
+    bool? SavingsBalanceVisibleToChild = null);

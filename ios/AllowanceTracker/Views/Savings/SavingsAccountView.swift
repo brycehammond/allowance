@@ -26,7 +26,7 @@ struct SavingsAccountView: View {
         ZStack {
             if viewModel.isLoading && !viewModel.hasAccounts {
                 ProgressView("Loading savings accounts...")
-            } else if !viewModel.hasAccounts {
+            } else if viewModel.isBalanceHidden || !viewModel.hasAccounts {
                 emptyStateView
             } else {
                 accountsView

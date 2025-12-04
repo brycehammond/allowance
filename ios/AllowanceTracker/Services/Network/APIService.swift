@@ -380,6 +380,16 @@ final class APIService: APIServiceProtocol {
         return try await performRequest(urlRequest)
     }
 
+    /// Get savings account summary for a child
+    /// - Parameter childId: Child's unique identifier
+    /// - Returns: Savings account summary (includes balanceHidden flag)
+    /// - Throws: APIError if request fails
+    func getSavingsSummary(forChild childId: UUID) async throws -> SavingsAccountSummary {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(childId.uuidString)/summary")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
     // MARK: - Private Helpers
 
     /// Empty response for DELETE requests

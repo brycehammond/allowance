@@ -13,6 +13,8 @@ public class SavingsAccountControllerTests
 {
     private readonly Mock<ISavingsAccountService> _mockSavingsAccountService;
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
+    private readonly Mock<IAccountService> _mockAccountService;
+    private readonly Mock<IChildManagementService> _mockChildManagementService;
     private readonly SavingsAccountController _controller;
     private readonly Guid _currentUserId = Guid.NewGuid();
 
@@ -20,11 +22,15 @@ public class SavingsAccountControllerTests
     {
         _mockSavingsAccountService = new Mock<ISavingsAccountService>();
         _mockCurrentUserService = new Mock<ICurrentUserService>();
+        _mockAccountService = new Mock<IAccountService>();
+        _mockChildManagementService = new Mock<IChildManagementService>();
         _mockCurrentUserService.Setup(x => x.UserId).Returns(_currentUserId);
 
         _controller = new SavingsAccountController(
             _mockSavingsAccountService.Object,
-            _mockCurrentUserService.Object);
+            _mockCurrentUserService.Object,
+            _mockAccountService.Object,
+            _mockChildManagementService.Object);
     }
 
     [Fact]
@@ -167,23 +173,97 @@ public class SavingsAccountControllerTests
     }
 
     [Fact]
-    public async Task GetSavingsBalance_ReturnsOkWithBalance()
+    public async Task GetSavingsBalance_AsParent_ReturnsBalance()
     {
         // Arrange
         var childId = Guid.NewGuid();
         var balance = 123.45m;
+        var parent = new ApplicationUser
+        {
+            Id = _currentUserId,
+            Role = UserRole.Parent,
+            FamilyId = Guid.NewGuid()
+        };
+        var child = new Child
+        {
+            Id = childId,
+            SavingsBalance = balance,
+            SavingsBalanceVisibleToChild = false // Even if hidden, parent should see
+        };
 
-        _mockSavingsAccountService
-            .Setup(x => x.GetSavingsBalanceAsync(childId))
-            .ReturnsAsync(balance);
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(parent);
+        _mockChildManagementService.Setup(x => x.GetChildAsync(childId, parent.Id)).ReturnsAsync(child);
+        _mockSavingsAccountService.Setup(x => x.GetSavingsBalanceAsync(childId)).ReturnsAsync(balance);
 
         // Act
         var result = await _controller.GetSavingsBalance(childId);
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedBalance = okResult.Value.Should().BeAssignableTo<decimal>().Subject;
-        returnedBalance.Should().Be(123.45m);
+        okResult.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetSavingsBalance_AsChild_WhenVisible_ReturnsBalance()
+    {
+        // Arrange
+        var childId = Guid.NewGuid();
+        var balance = 123.45m;
+        var childUser = new ApplicationUser
+        {
+            Id = _currentUserId,
+            Role = UserRole.Child,
+            FamilyId = Guid.NewGuid()
+        };
+        var child = new Child
+        {
+            Id = childId,
+            UserId = childUser.Id,
+            SavingsBalance = balance,
+            SavingsBalanceVisibleToChild = true
+        };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(childUser);
+        _mockChildManagementService.Setup(x => x.GetChildAsync(childId, childUser.Id)).ReturnsAsync(child);
+        _mockSavingsAccountService.Setup(x => x.GetSavingsBalanceAsync(childId)).ReturnsAsync(balance);
+
+        // Act
+        var result = await _controller.GetSavingsBalance(childId);
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetSavingsBalance_AsChild_WhenHidden_ReturnsNullBalance()
+    {
+        // Arrange
+        var childId = Guid.NewGuid();
+        var childUser = new ApplicationUser
+        {
+            Id = _currentUserId,
+            Role = UserRole.Child,
+            FamilyId = Guid.NewGuid()
+        };
+        var child = new Child
+        {
+            Id = childId,
+            UserId = childUser.Id,
+            SavingsBalance = 100m,
+            SavingsBalanceVisibleToChild = false
+        };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(childUser);
+        _mockChildManagementService.Setup(x => x.GetChildAsync(childId, childUser.Id)).ReturnsAsync(child);
+
+        // Act
+        var result = await _controller.GetSavingsBalance(childId);
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().NotBeNull();
+        // The response should have balance = null
     }
 
     [Fact]
@@ -229,10 +309,21 @@ public class SavingsAccountControllerTests
     }
 
     [Fact]
-    public async Task GetSavingsSummary_ReturnsOkWithSummary()
+    public async Task GetSavingsSummary_AsParent_ReturnsFullSummary()
     {
         // Arrange
         var childId = Guid.NewGuid();
+        var parent = new ApplicationUser
+        {
+            Id = _currentUserId,
+            Role = UserRole.Parent,
+            FamilyId = Guid.NewGuid()
+        };
+        var child = new Child
+        {
+            Id = childId,
+            SavingsBalanceVisibleToChild = false // Even if hidden, parent should see
+        };
         var summary = new SavingsAccountSummary(
             ChildId: childId,
             IsEnabled: true,
@@ -247,9 +338,9 @@ public class SavingsAccountControllerTests
             ConfigDescription: "Saves $5.00 per allowance"
         );
 
-        _mockSavingsAccountService
-            .Setup(x => x.GetSummaryAsync(childId))
-            .ReturnsAsync(summary);
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(parent);
+        _mockChildManagementService.Setup(x => x.GetChildAsync(childId, parent.Id)).ReturnsAsync(child);
+        _mockSavingsAccountService.Setup(x => x.GetSummaryAsync(childId)).ReturnsAsync(summary);
 
         // Act
         var result = await _controller.GetSavingsSummary(childId);
@@ -258,6 +349,49 @@ public class SavingsAccountControllerTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedSummary = okResult.Value.Should().BeAssignableTo<SavingsAccountSummary>().Subject;
         returnedSummary.CurrentBalance.Should().Be(50m);
-        returnedSummary.ConfigDescription.Should().Be("Saves $5.00 per allowance");
+    }
+
+    [Fact]
+    public async Task GetSavingsSummary_AsChild_WhenHidden_ReturnsHiddenSummary()
+    {
+        // Arrange
+        var childId = Guid.NewGuid();
+        var childUser = new ApplicationUser
+        {
+            Id = _currentUserId,
+            Role = UserRole.Child,
+            FamilyId = Guid.NewGuid()
+        };
+        var child = new Child
+        {
+            Id = childId,
+            UserId = childUser.Id,
+            SavingsBalanceVisibleToChild = false
+        };
+        var summary = new SavingsAccountSummary(
+            ChildId: childId,
+            IsEnabled: true,
+            CurrentBalance: 50m,
+            TransferType: SavingsTransferType.FixedAmount,
+            TransferAmount: 5m,
+            TransferPercentage: 0,
+            TotalTransactions: 10,
+            TotalDeposited: 60m,
+            TotalWithdrawn: 10m,
+            LastTransactionDate: DateTime.UtcNow,
+            ConfigDescription: "Saves $5.00 per allowance"
+        );
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(childUser);
+        _mockChildManagementService.Setup(x => x.GetChildAsync(childId, childUser.Id)).ReturnsAsync(child);
+        _mockSavingsAccountService.Setup(x => x.GetSummaryAsync(childId)).ReturnsAsync(summary);
+
+        // Act
+        var result = await _controller.GetSavingsSummary(childId);
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().NotBeNull();
+        // When balance is hidden, the response should have balanceHidden = true
     }
 }

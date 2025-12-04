@@ -296,4 +296,42 @@ class MockAPIService: APIServiceProtocol {
     func getChild(id: UUID) async throws -> Child {
         throw APIError.notFound
     }
+
+    func updateChildSettings(childId: UUID, _ request: UpdateChildSettingsRequest) async throws -> UpdateChildSettingsResponse {
+        throw APIError.notFound
+    }
+
+    // MARK: - Savings (stub implementations)
+
+    func getSavingsAccounts(forChild childId: UUID) async throws -> [SavingsAccount] {
+        return []
+    }
+
+    func getSavingsSummary(forChild childId: UUID) async throws -> SavingsAccountSummary {
+        throw APIError.notFound
+    }
+
+    func createSavingsAccount(_ request: CreateSavingsAccountRequest) async throws -> SavingsAccount {
+        throw APIError.notFound
+    }
+
+    func updateSavingsAccount(id: UUID, _ request: UpdateSavingsAccountRequest) async throws -> SavingsAccount {
+        throw APIError.notFound
+    }
+
+    func deleteSavingsAccount(id: UUID) async throws {
+        throw APIError.notFound
+    }
+
+    func depositToSavings(accountId: UUID, _ request: DepositRequest) async throws -> SavingsTransaction {
+        throw APIError.notFound
+    }
+
+    func withdrawFromSavings(accountId: UUID, _ request: WithdrawRequest) async throws -> SavingsTransaction {
+        throw APIError.notFound
+    }
+
+    func getSavingsTransactions(forAccount accountId: UUID) async throws -> [SavingsTransaction] {
+        return []
+    }
 }
