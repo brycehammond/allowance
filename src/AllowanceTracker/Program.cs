@@ -74,11 +74,25 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Add CORS for React frontend
+var allowedOrigins = new List<string>
+{
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:3000"
+};
+
+// Add production origins from configuration
+var productionOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (productionOrigins != null)
+{
+    allowedOrigins.AddRange(productionOrigins);
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:3000") // Vite and CRA default ports
+        policy.WithOrigins(allowedOrigins.ToArray())
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
