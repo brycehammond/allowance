@@ -194,7 +194,7 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
                   <dt className="text-sm font-medium text-gray-500 truncate">Savings Balance</dt>
                   <dd>
                     <div className="text-lg font-medium text-gray-900">
-                      {formatCurrency(summary.currentBalance)}
+                      {formatCurrency(summary.currentBalance ?? 0)}
                     </div>
                   </dd>
                 </dl>
@@ -226,7 +226,7 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
                   <dt className="text-sm font-medium text-gray-500 truncate">Total Deposited</dt>
                   <dd>
                     <div className="text-lg font-medium text-gray-900">
-                      {formatCurrency(summary.totalDeposited)}
+                      {formatCurrency(summary.totalDeposited ?? 0)}
                     </div>
                   </dd>
                 </dl>
@@ -258,7 +258,7 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
                   <dt className="text-sm font-medium text-gray-500 truncate">Total Withdrawn</dt>
                   <dd>
                     <div className="text-lg font-medium text-gray-900">
-                      {formatCurrency(summary.totalWithdrawn)}
+                      {formatCurrency(summary.totalWithdrawn ?? 0)}
                     </div>
                   </dd>
                 </dl>
@@ -412,7 +412,7 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
                   id="withdrawAmount"
                   step="0.01"
                   min="0.01"
-                  max={summary.currentBalance}
+                  max={summary.currentBalance ?? 0}
                   required
                   value={withdrawData.amount || ''}
                   onChange={(e) =>
@@ -422,7 +422,7 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
                 />
               </div>
               <p className="mt-1 text-sm text-gray-500">
-                Available: {formatCurrency(summary.currentBalance)}
+                Available: {formatCurrency(summary.currentBalance ?? 0)}
               </p>
             </div>
 
