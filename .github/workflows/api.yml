@@ -1,23 +1,26 @@
-name: API CI
+name: API
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
-      - 'src/**'
+      - 'src/AllowanceTracker/**'
+      - 'src/AllowanceTracker.Data/**'
+      - 'src/AllowanceTracker.Tests/**'
       - '.github/workflows/api.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
-      - 'src/**'
+      - 'src/AllowanceTracker/**'
+      - 'src/AllowanceTracker.Data/**'
+      - 'src/AllowanceTracker.Tests/**'
 
 env:
   DOTNET_VERSION: '8.0.x'
 
 jobs:
-  # Build and test API
-  build-and-test:
-    name: Build and Test API
+  build:
+    name: Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -42,14 +45,60 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: api-test-results-${{ github.sha }}
+          name: api-test-results
           path: '**/test-results.trx'
           retention-days: 7
 
-      - name: Upload code coverage
-        if: always()
+      - name: Publish API
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: dotnet publish src/AllowanceTracker/AllowanceTracker.csproj --configuration Release --runtime linux-x64 --self-contained false --output ./publish/api
+
+      - name: Upload deployment artifact
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: api-code-coverage-${{ github.sha }}
-          path: '**/coverage.cobertura.xml'
-          retention-days: 7
+          name: api-package
+          path: ./publish/api
+
+  deploy:
+    name: Deploy to Azure
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-package
+          path: ./publish/api
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          package: ./publish/api
+          clean: true
+
+      - name: Restart Azure Web App
+        run: |
+          az webapp restart --name ${{ vars.AZURE_WEBAPP_NAME }} --resource-group $(az webapp list --query "[?name=='${{ vars.AZURE_WEBAPP_NAME }}'].resourceGroup" -o tsv)
+
+      - name: Verify deployment
+        run: |
+          echo "API deployed to: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
+          sleep 30
+          curl -f ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health || exit 1
+
+      - name: Logout from Azure
+        run: az logout
+        if: always()

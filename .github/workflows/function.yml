@@ -1,8 +1,8 @@
-name: Azure Function CI
+name: Function
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - 'src/AllowanceTracker.Functions/**'
       - 'src/AllowanceTracker/Models/**'
@@ -10,18 +10,19 @@ on:
       - 'src/AllowanceTracker/Services/**'
       - '.github/workflows/function.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - 'src/AllowanceTracker.Functions/**'
+      - 'src/AllowanceTracker/Models/**'
+      - 'src/AllowanceTracker/Data/**'
+      - 'src/AllowanceTracker/Services/**'
 
 env:
   DOTNET_VERSION: '8.0.x'
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'src/AllowanceTracker.Functions'
 
 jobs:
-  # Build and test Azure Function
-  build-and-test:
-    name: Build and Test Azure Function
+  build:
+    name: Build & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -46,6 +47,54 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: function-test-results-${{ github.sha }}
+          name: function-test-results
           path: '**/test-results.trx'
           retention-days: 7
+
+      - name: Publish Function
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: dotnet publish src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --output ./publish/function
+
+      - name: Upload deployment artifact
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-package
+          path: ./publish/function
+          include-hidden-files: true
+
+  deploy:
+    name: Deploy to Azure Functions
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: 'Production'
+      url: 'https://${{ vars.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net'
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: function-package
+          path: ./publish/function
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
+          package: ./publish/function
+
+      - name: Verify deployment
+        run: |
+          echo "Function deployed to: https://${{ vars.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net"
+          sleep 15
+
+      - name: Logout from Azure
+        run: az logout
+        if: always()
