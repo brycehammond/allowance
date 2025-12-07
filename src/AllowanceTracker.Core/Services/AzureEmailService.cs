@@ -1,30 +1,28 @@
+using Azure;
+using Azure.Communication.Email;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 
 namespace AllowanceTracker.Services;
 
 /// <summary>
-/// Email service implementation using SendGrid
+/// Email service implementation using Azure Communication Services
 /// </summary>
-public class SendGridEmailService : IEmailService
+public class AzureEmailService : IEmailService
 {
-    private readonly ISendGridClient _sendGridClient;
+    private readonly EmailClient _emailClient;
     private readonly string _fromEmail;
-    private readonly string _fromName;
     private readonly string _resetPasswordUrl;
-    private readonly ILogger<SendGridEmailService> _logger;
+    private readonly ILogger<AzureEmailService> _logger;
 
-    public SendGridEmailService(
-        ISendGridClient sendGridClient,
+    public AzureEmailService(
+        EmailClient emailClient,
         IConfiguration configuration,
-        ILogger<SendGridEmailService> logger)
+        ILogger<AzureEmailService> logger)
     {
-        _sendGridClient = sendGridClient;
+        _emailClient = emailClient;
         _logger = logger;
-        _fromEmail = configuration["SendGrid:FromEmail"] ?? "noreply@allowancetracker.com";
-        _fromName = configuration["SendGrid:FromName"] ?? "Allowance Tracker";
+        _fromEmail = configuration["AzureEmail:FromEmail"] ?? "noreply@allowancetracker.com";
         _resetPasswordUrl = configuration["App:ResetPasswordUrl"] ?? "http://localhost:5173/reset-password";
     }
 
@@ -69,21 +67,25 @@ public class SendGridEmailService : IEmailService
     {
         try
         {
-            var from = new EmailAddress(_fromEmail, _fromName);
-            var toAddress = new EmailAddress(to);
-            var msg = MailHelper.CreateSingleEmail(from, toAddress, subject, plainTextContent, htmlContent);
+            var emailMessage = new EmailMessage(
+                senderAddress: _fromEmail,
+                recipientAddress: to,
+                content: new EmailContent(subject)
+                {
+                    Html = htmlContent,
+                    PlainText = plainTextContent
+                });
 
-            var response = await _sendGridClient.SendEmailAsync(msg);
+            var operation = await _emailClient.SendAsync(WaitUntil.Started, emailMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var body = await response.Body.ReadAsStringAsync();
-                _logger.LogError("SendGrid returned error. Status: {StatusCode}, Body: {Body}",
-                    response.StatusCode, body);
-                throw new Exception($"Failed to send email: {response.StatusCode}");
-            }
-
-            _logger.LogInformation("Email sent successfully to {Email}", to);
+            _logger.LogInformation("Email sent successfully to {Email}, OperationId: {OperationId}",
+                to, operation.Id);
+        }
+        catch (RequestFailedException ex)
+        {
+            _logger.LogError(ex, "Azure Communication Services error sending email to {Email}. Status: {Status}",
+                to, ex.Status);
+            throw;
         }
         catch (Exception ex)
         {

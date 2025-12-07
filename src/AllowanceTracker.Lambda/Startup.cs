@@ -7,7 +7,7 @@ using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using AllowanceTracker.Handlers;
 using AllowanceTracker.Helpers;
-using SendGrid;
+using Azure.Communication.Email;
 
 namespace AllowanceTracker.Lambda;
 
@@ -81,10 +81,10 @@ public class Startup
         services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        // Add SendGrid email service
-        var sendGridApiKey = configuration["SENDGRID_API_KEY"] ?? configuration["SendGrid:ApiKey"] ?? "";
-        services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
-        services.AddScoped<IEmailService, SendGridEmailService>();
+        // Add Azure Communication Services email
+        var acsConnectionString = configuration["AZURE_EMAIL_CONNECTION_STRING"] ?? configuration["AzureEmail:ConnectionString"] ?? "";
+        services.AddSingleton(new EmailClient(acsConnectionString));
+        services.AddScoped<IEmailService, AzureEmailService>();
 
         // Register cloud-agnostic handlers
         services.AddScoped<AuthHandler>();

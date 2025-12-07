@@ -13,7 +13,7 @@
 - ASPNETCORE_ENVIRONMENT
 - Storage Account connections (AzureWebJobsStorage)
 - Application Insights connection strings
-- SendGrid Email configuration
+- Azure Communication Services Email configuration
 - AllowedHosts
 - Custom domains and SSL certificates
 
@@ -50,9 +50,8 @@ This separation ensures:
 | `Jwt__ExpiryInDays` | `7` | Token lifetime |
 | `AllowedHosts` | `*` | CORS hosts |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | App Insights connection string | Optional |
-| `SendGrid__ApiKey` | SendGrid API key | For email |
-| `SendGrid__FromEmail` | Sender email address | For email |
-| `SendGrid__FromName` | Sender display name | For email |
+| `AzureEmail__ConnectionString` | Azure Communication Services connection string | For email |
+| `AzureEmail__FromEmail` | Sender email address (from ACS domain) | For email |
 
 ### Function App Configuration
 
@@ -217,9 +216,8 @@ Instead of storing the password directly, reference Azure Key Vault:
 | Setting | Type | Where | Value |
 |---------|------|-------|-------|
 | DefaultConnection | Connection String | Configuration → Connection strings | SQL connection string |
-| SendGrid__ApiKey | App Setting | Configuration → App settings | SendGrid API key |
-| SendGrid__FromEmail | App Setting | Configuration → App settings | Sender email address |
-| SendGrid__FromName | App Setting | Configuration → App settings | Sender display name |
+| AzureEmail__ConnectionString | App Setting | Configuration → App settings | Azure Communication Services connection string |
+| AzureEmail__FromEmail | App Setting | Configuration → App settings | Sender email address (from ACS domain) |
 
 ### In Azure Portal - Function App
 

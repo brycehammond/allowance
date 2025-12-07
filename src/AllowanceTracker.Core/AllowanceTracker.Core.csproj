@@ -29,8 +29,8 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
 
-    <!-- SendGrid Email -->
-    <PackageReference Include="SendGrid" Version="9.29.3" />
+    <!-- Azure Communication Services Email -->
+    <PackageReference Include="Azure.Communication.Email" Version="1.0.1" />
 
     <!-- Logging -->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />

@@ -37,8 +37,8 @@
     <!-- JWT -->
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
 
-    <!-- SendGrid -->
-    <PackageReference Include="SendGrid" Version="9.29.3" />
+    <!-- Azure Communication Services Email -->
+    <PackageReference Include="Azure.Communication.Email" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
