@@ -4,6 +4,7 @@ import SwiftUI
 struct WishListItemCard: View {
     let item: WishListItem
     let currentBalance: Decimal
+    let isParent: Bool
     let onEdit: () -> Void
     let onDelete: () -> Void
     let onMarkPurchased: () -> Void
@@ -123,7 +124,8 @@ struct WishListItemCard: View {
                     .buttonStyle(.bordered)
                     .controlSize(.small)
 
-                    if item.canAfford {
+                    // Only parents can mark items as purchased
+                    if isParent && item.canAfford {
                         Button(action: onMarkPurchased) {
                             Label("Mark Purchased", systemImage: "checkmark")
                                 .font(.caption)
@@ -153,7 +155,7 @@ struct WishListItemCard: View {
 
 // MARK: - Preview Provider
 
-#Preview("Wish List Item - Affordable") {
+#Preview("Wish List Item - Affordable (Parent)") {
     WishListItemCard(
         item: WishListItem(
             id: UUID(),
@@ -168,6 +170,31 @@ struct WishListItemCard: View {
             canAfford: true
         ),
         currentBalance: 125.50,
+        isParent: true,
+        onEdit: { print("Edit") },
+        onDelete: { print("Delete") },
+        onMarkPurchased: { print("Mark Purchased") }
+    )
+    .padding()
+    .previewLayout(.sizeThatFits)
+}
+
+#Preview("Wish List Item - Affordable (Child)") {
+    WishListItemCard(
+        item: WishListItem(
+            id: UUID(),
+            childId: UUID(),
+            name: "LEGO Star Wars Set",
+            price: 49.99,
+            url: "https://example.com",
+            notes: "The big one with the Millennium Falcon",
+            isPurchased: false,
+            purchasedAt: nil,
+            createdAt: Date(),
+            canAfford: true
+        ),
+        currentBalance: 125.50,
+        isParent: false,
         onEdit: { print("Edit") },
         onDelete: { print("Delete") },
         onMarkPurchased: { print("Mark Purchased") }
@@ -191,6 +218,7 @@ struct WishListItemCard: View {
             canAfford: false
         ),
         currentBalance: 25.00,
+        isParent: true,
         onEdit: { print("Edit") },
         onDelete: { print("Delete") },
         onMarkPurchased: { print("Mark Purchased") }
@@ -214,6 +242,7 @@ struct WishListItemCard: View {
             canAfford: true
         ),
         currentBalance: 95.50,
+        isParent: true,
         onEdit: { print("Edit") },
         onDelete: { print("Delete") },
         onMarkPurchased: { print("Mark Purchased") }

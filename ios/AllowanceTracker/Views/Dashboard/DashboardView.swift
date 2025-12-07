@@ -8,6 +8,12 @@ struct DashboardView: View {
     @StateObject private var viewModel: DashboardViewModel
     @EnvironmentObject private var authViewModel: AuthViewModel
 
+    // MARK: - Computed Properties
+
+    private var isChild: Bool {
+        authViewModel.currentUser?.role == .child
+    }
+
     // MARK: - Initialization
 
     init(apiService: APIServiceProtocol = APIService()) {
@@ -21,16 +27,19 @@ struct DashboardView: View {
             ZStack {
                 if viewModel.isLoading && viewModel.children.isEmpty {
                     // Loading state
-                    ProgressView("Loading children...")
+                    ProgressView("Loading...")
+                } else if isChild, let child = viewModel.children.first {
+                    // Child user: show their own detail view directly
+                    ChildDetailView(child: child)
                 } else if viewModel.children.isEmpty {
-                    // Empty state
+                    // Empty state (parent with no children)
                     emptyStateView
                 } else {
-                    // Children list
+                    // Parent: show children list
                     childrenListView
                 }
             }
-            .navigationTitle("Dashboard")
+            .navigationTitle(isChild ? "" : "Dashboard")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {

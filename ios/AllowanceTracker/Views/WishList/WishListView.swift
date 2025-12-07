@@ -6,10 +6,17 @@ struct WishListView: View {
     // MARK: - Properties
 
     @StateObject private var viewModel: WishListViewModel
+    @EnvironmentObject private var authViewModel: AuthViewModel
     @State private var showingAddItem = false
     @State private var editingItem: WishListItem?
     @State private var deletingItem: WishListItem?
     @State private var selectedFilter: WishListFilter = .active
+
+    // MARK: - Computed Properties
+
+    private var isParent: Bool {
+        authViewModel.currentUser?.isParent ?? false
+    }
 
     // MARK: - Filter enum
 
@@ -115,6 +122,7 @@ struct WishListView: View {
                         WishListItemCard(
                             item: item,
                             currentBalance: viewModel.currentBalance,
+                            isParent: isParent,
                             onEdit: {
                                 editingItem = item
                             },

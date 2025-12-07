@@ -6,7 +6,14 @@ struct TransactionListView: View {
     // MARK: - Properties
 
     @StateObject private var viewModel: TransactionViewModel
+    @EnvironmentObject private var authViewModel: AuthViewModel
     @State private var showingCreateTransaction = false
+
+    // MARK: - Computed Properties
+
+    private var isParent: Bool {
+        authViewModel.currentUser?.isParent ?? false
+    }
 
     // MARK: - Initialization
 
@@ -31,11 +38,13 @@ struct TransactionListView: View {
         }
         .navigationTitle("Transactions")
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingCreateTransaction = true
-                } label: {
-                    Image(systemName: "plus.circle.fill")
+            if isParent {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingCreateTransaction = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                    }
                 }
             }
         }
@@ -106,15 +115,17 @@ struct TransactionListView: View {
 
                 Spacer()
 
-                Button {
-                    showingCreateTransaction = true
-                } label: {
-                    Label("Add Transaction", systemImage: "plus")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                if isParent {
+                    Button {
+                        showingCreateTransaction = true
+                    } label: {
+                        Label("Add Transaction", systemImage: "plus")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
             }
         }
         .padding()
@@ -135,25 +146,27 @@ struct TransactionListView: View {
                     .font(.title2)
                     .fontWeight(.bold)
 
-                Text("Add your first transaction to get started")
+                Text(isParent ? "Add your first transaction to get started" : "No transactions to display yet")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
 
-            Button {
-                showingCreateTransaction = true
-            } label: {
-                Label("Add Transaction", systemImage: "plus.circle.fill")
-                    .fontWeight(.semibold)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            if isParent {
+                Button {
+                    showingCreateTransaction = true
+                } label: {
+                    Label("Add Transaction", systemImage: "plus.circle.fill")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal, 40)
+                .padding(.top)
             }
-            .padding(.horizontal, 40)
-            .padding(.top)
         }
         .padding()
     }
