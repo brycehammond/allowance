@@ -128,7 +128,7 @@ public class SavingsAccountControllerTests
         // Assert
         var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
         createdResult.ActionName.Should().Be(nameof(SavingsAccountController.GetSavingsHistory));
-        var returnedTransaction = createdResult.Value.Should().BeAssignableTo<SavingsTransaction>().Subject;
+        var returnedTransaction = createdResult.Value.Should().BeAssignableTo<SavingsTransactionDto>().Subject;
         returnedTransaction.Amount.Should().Be(25m);
     }
 
@@ -167,9 +167,9 @@ public class SavingsAccountControllerTests
 
         // Assert
         var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-        var returnedTransaction = createdResult.Value.Should().BeAssignableTo<SavingsTransaction>().Subject;
+        var returnedTransaction = createdResult.Value.Should().BeAssignableTo<SavingsTransactionDto>().Subject;
         returnedTransaction.Amount.Should().Be(15m);
-        returnedTransaction.Type.Should().Be(SavingsTransactionType.Withdrawal);
+        returnedTransaction.Type.Should().Be("Withdrawal");
     }
 
     [Fact]
@@ -304,7 +304,7 @@ public class SavingsAccountControllerTests
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedTransactions = okResult.Value.Should().BeAssignableTo<List<SavingsTransaction>>().Subject;
+        var returnedTransactions = okResult.Value.Should().BeAssignableTo<List<SavingsTransactionDto>>().Subject;
         returnedTransactions.Should().HaveCount(2);
     }
 
