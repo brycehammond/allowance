@@ -34,3 +34,14 @@ public record SavingsAccountSummary(
     decimal TotalWithdrawn,
     DateTime? LastTransactionDate,
     string ConfigDescription); // Human-readable: "Saves $5.00 per allowance" or "Saves 20% per allowance"
+
+public record SavingsTransactionDto(
+    Guid Id,
+    Guid ChildId,
+    string Type,
+    decimal Amount,
+    string Description,
+    decimal BalanceAfter,
+    DateTime CreatedAt,
+    Guid CreatedById,
+    string CreatedByName);

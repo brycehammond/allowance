@@ -75,7 +75,7 @@ public class SavingsAccountController : ControllerBase
     /// </summary>
     [HttpPost("deposit")]
     [Authorize(Roles = "Parent")]
-    public async Task<ActionResult<SavingsTransaction>> DepositToSavings([FromBody] DepositToSavingsRequest request)
+    public async Task<ActionResult<SavingsTransactionDto>> DepositToSavings([FromBody] DepositToSavingsRequest request)
     {
         var transaction = await _savingsAccountService.DepositToSavingsAsync(
             request.ChildId,
@@ -83,10 +83,12 @@ public class SavingsAccountController : ControllerBase
             request.Description,
             _currentUserService.UserId);
 
+        var dto = MapToDto(transaction);
+
         return CreatedAtAction(
             nameof(GetSavingsHistory),
             new { childId = request.ChildId },
-            transaction);
+            dto);
     }
 
     /// <summary>
@@ -94,7 +96,7 @@ public class SavingsAccountController : ControllerBase
     /// </summary>
     [HttpPost("withdraw")]
     [Authorize(Roles = "Parent")]
-    public async Task<ActionResult<SavingsTransaction>> WithdrawFromSavings([FromBody] WithdrawFromSavingsRequest request)
+    public async Task<ActionResult<SavingsTransactionDto>> WithdrawFromSavings([FromBody] WithdrawFromSavingsRequest request)
     {
         var transaction = await _savingsAccountService.WithdrawFromSavingsAsync(
             request.ChildId,
@@ -102,10 +104,12 @@ public class SavingsAccountController : ControllerBase
             request.Description,
             _currentUserService.UserId);
 
+        var dto = MapToDto(transaction);
+
         return CreatedAtAction(
             nameof(GetSavingsHistory),
             new { childId = request.ChildId },
-            transaction);
+            dto);
     }
 
     /// <summary>
@@ -149,10 +153,11 @@ public class SavingsAccountController : ControllerBase
     /// Get savings transaction history for a child
     /// </summary>
     [HttpGet("{childId}/history")]
-    public async Task<ActionResult<List<SavingsTransaction>>> GetSavingsHistory(Guid childId, [FromQuery] int limit = 50)
+    public async Task<ActionResult<List<SavingsTransactionDto>>> GetSavingsHistory(Guid childId, [FromQuery] int limit = 50)
     {
         var transactions = await _savingsAccountService.GetSavingsHistoryAsync(childId, limit);
-        return Ok(transactions);
+        var dtos = transactions.Select(MapToDto).ToList();
+        return Ok(dtos);
     }
 
     /// <summary>
@@ -206,5 +211,22 @@ public class SavingsAccountController : ControllerBase
         }
 
         return Ok(summary);
+    }
+
+    private static SavingsTransactionDto MapToDto(SavingsTransaction transaction)
+    {
+        return new SavingsTransactionDto(
+            Id: transaction.Id,
+            ChildId: transaction.ChildId,
+            Type: transaction.Type.ToString(),
+            Amount: transaction.Amount,
+            Description: transaction.Description,
+            BalanceAfter: transaction.BalanceAfter,
+            CreatedAt: transaction.CreatedAt,
+            CreatedById: transaction.CreatedById,
+            CreatedByName: transaction.CreatedBy?.FirstName != null
+                ? $"{transaction.CreatedBy.FirstName} {transaction.CreatedBy.LastName}"
+                : "System"
+        );
     }
 }
