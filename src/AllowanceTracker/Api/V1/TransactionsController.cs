@@ -70,6 +70,7 @@ public class TransactionsController : ControllerBase
     /// - Allowance: Weekly allowance payment (typically automated)
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = "Parent")]
     [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
