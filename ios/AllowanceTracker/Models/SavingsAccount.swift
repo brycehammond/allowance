@@ -53,7 +53,7 @@ struct SavingsTransaction: Codable, Identifiable, Equatable {
     let savingsAccountId: UUID
     let amount: Decimal
     let type: SavingsTransactionType
-    let transferType: SavingsTransferType
+    let transferType: SavingsTransactionSource
     let balanceAfter: Decimal
     let notes: String?
     let createdAt: Date
@@ -95,7 +95,7 @@ enum SavingsTransactionType: String, Codable {
     case withdrawal = "Withdrawal"
 }
 
-enum SavingsTransferType: String, Codable {
+enum SavingsTransactionSource: String, Codable {
     case manual = "Manual"
     case autoTransfer = "AutoTransfer"
     case goal = "Goal"

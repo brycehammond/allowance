@@ -7,8 +7,8 @@ final class AuthViewModel: ObservableObject {
 
     // MARK: - Published Properties
 
-    @Published private(set) var currentUser: User?
-    @Published private(set) var isAuthenticated = false
+    @Published var currentUser: User?
+    @Published var isAuthenticated = false
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
 

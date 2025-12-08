@@ -16,7 +16,7 @@ final class TransactionViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let apiService: APIServiceProtocol
-    private let childId: UUID
+    let childId: UUID
 
     // MARK: - Initialization
 

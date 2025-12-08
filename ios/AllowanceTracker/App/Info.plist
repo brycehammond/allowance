@@ -67,11 +67,11 @@
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
 	</dict>
 	<key>API_BASE_URL</key>
-	<string>https://api.allowancetracker.com</string>
+	<string>http://localhost:5295</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.allowancetracker.refresh</string>

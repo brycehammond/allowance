@@ -10,6 +10,8 @@ enum APIError: Error, Equatable {
     case decodingError
     case invalidURL
     case invalidResponse
+    case validationError(String)
+    case httpError(Int)
     case unknown
 
     var localizedDescription: String {
@@ -30,6 +32,10 @@ enum APIError: Error, Equatable {
             return "Invalid URL configuration."
         case .invalidResponse:
             return "Invalid server response."
+        case .validationError(let message):
+            return message
+        case .httpError(let statusCode):
+            return "HTTP error: \(statusCode)"
         case .unknown:
             return "An unknown error occurred."
         }

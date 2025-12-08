@@ -5,11 +5,11 @@ struct Transaction: Codable, Identifiable {
     let childId: UUID
     let amount: Decimal
     let type: TransactionType
-    let category: String
+    var category: String = "General"
     let description: String
     let balanceAfter: Decimal
     let createdAt: Date
-    let createdByName: String
+    var createdByName: String = ""
 
     var isCredit: Bool {
         type == .credit

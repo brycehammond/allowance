@@ -72,10 +72,3 @@ enum TransactionCategory: String, Codable, CaseIterable, Identifiable {
         allCases.filter { !$0.isIncome }
     }
 }
-
-// MARK: - Transaction Type
-
-enum TransactionType: String, Codable {
-    case credit = "Credit"
-    case debit = "Debit"
-}

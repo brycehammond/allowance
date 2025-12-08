@@ -77,8 +77,16 @@ extension View {
         self
             .accessibilityLabel(label)
             .accessibilityValue(value)
-            .accessibilityAdjustableAction(.increment, increment)
-            .accessibilityAdjustableAction(.decrement, decrement)
+            .accessibilityAdjustableAction { direction in
+                switch direction {
+                case .increment:
+                    increment()
+                case .decrement:
+                    decrement()
+                @unknown default:
+                    break
+                }
+            }
     }
 
     /// Conditional modifier
@@ -98,17 +106,14 @@ extension Decimal {
     /// Format currency for accessibility with spoken pronunciation
     /// Example: $25.50 -> "25 dollars and 50 cents"
     var accessibilityCurrencyLabel: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-
         let dollarAmount = Int(truncating: self as NSNumber)
-        let centsAmount = Int((self.magnitude.remainder(dividingBy: 1) * 100).rounded())
+        let fractionalPart = self - Decimal(dollarAmount)
+        let centsAmount = Int(truncating: (fractionalPart * 100) as NSNumber)
 
         if centsAmount == 0 {
-            return "\(dollarAmount) dollar\(dollarAmount == 1 ? "" : "s")"
+            return "\(abs(dollarAmount)) dollar\(abs(dollarAmount) == 1 ? "" : "s")"
         } else {
-            return "\(dollarAmount) dollar\(dollarAmount == 1 ? "" : "s") and \(centsAmount) cent\(centsAmount == 1 ? "" : "s")"
+            return "\(abs(dollarAmount)) dollar\(abs(dollarAmount) == 1 ? "" : "s") and \(abs(centsAmount)) cent\(abs(centsAmount) == 1 ? "" : "s")"
         }
     }
 }
@@ -193,7 +198,7 @@ enum AccessibilityIdentifier {
 
 struct AccessibilityAnnouncement {
     /// Announce a message to VoiceOver users
-    static func announce(_ message: String, priority: AccessibilityNotification = .announcement) {
+    static func announce(_ message: String, priority: UIAccessibility.Notification = .announcement) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             UIAccessibility.post(notification: priority, argument: message)
         }

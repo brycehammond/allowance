@@ -51,3 +51,11 @@ yarn-error.log*
 
 # Windows
 Thumbs.db
+
+# Local development settings (contains secrets)
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/local.settings.json
+
+# Claude Code local settings
+.claude/settings.local.json

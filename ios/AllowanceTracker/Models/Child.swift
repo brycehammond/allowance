@@ -7,7 +7,7 @@ struct Child: Codable, Identifiable, Equatable {
     let weeklyAllowance: Decimal
     let currentBalance: Decimal
     let lastAllowanceDate: Date?
-    let allowanceDay: Weekday?
+    var allowanceDay: Weekday? = nil
 
     var fullName: String {
         "\(firstName) \(lastName)"

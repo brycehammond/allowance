@@ -127,7 +127,8 @@ private struct BudgetManagementViewPreview: View {
                 lastName: "Johnson",
                 weeklyAllowance: 10.00,
                 currentBalance: 50.00,
-                lastAllowanceDate: Date()
+                lastAllowanceDate: Date(),
+                allowanceDay: .monday
             )
         )
     }

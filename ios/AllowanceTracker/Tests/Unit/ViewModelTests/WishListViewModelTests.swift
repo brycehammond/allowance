@@ -21,7 +21,7 @@ final class WishListViewModelTests: XCTestCase {
 
     // MARK: - Load Items Tests
 
-    func testLoadItems_Success_PopulatesItemsArray() async {
+    func testLoadWishList_Success_PopulatesItemsArray() async {
         // Arrange
         let expectedItems = [
             WishListItem(
@@ -49,10 +49,10 @@ final class WishListViewModelTests: XCTestCase {
                 canAfford: true
             )
         ]
-        mockAPIService.wishListResult = .success(expectedItems)
+        mockAPIService.wishListResponse = .success(expectedItems)
 
         // Act
-        await sut.loadItems()
+        await sut.loadWishList()
 
         // Assert
         XCTAssertEqual(sut.items.count, 2)
@@ -62,12 +62,12 @@ final class WishListViewModelTests: XCTestCase {
         XCTAssertNil(sut.errorMessage)
     }
 
-    func testLoadItems_Failure_SetsErrorMessage() async {
+    func testLoadWishList_Failure_SetsErrorMessage() async {
         // Arrange
-        mockAPIService.wishListResult = .failure(APIError.unauthorized)
+        mockAPIService.wishListResponse = .failure(APIError.unauthorized)
 
         // Act
-        await sut.loadItems()
+        await sut.loadWishList()
 
         // Assert
         XCTAssertTrue(sut.items.isEmpty)
@@ -75,12 +75,12 @@ final class WishListViewModelTests: XCTestCase {
         XCTAssertFalse(sut.isLoading)
     }
 
-    func testLoadItems_EmptyResponse_HandlesGracefully() async {
+    func testLoadWishList_EmptyResponse_HandlesGracefully() async {
         // Arrange
-        mockAPIService.wishListResult = .success([])
+        mockAPIService.wishListResponse = .success([])
 
         // Act
-        await sut.loadItems()
+        await sut.loadWishList()
 
         // Assert
         XCTAssertTrue(sut.items.isEmpty)
@@ -88,11 +88,10 @@ final class WishListViewModelTests: XCTestCase {
         XCTAssertFalse(sut.isLoading)
     }
 
-    // MARK: - Add Item Tests
+    // MARK: - Create Item Tests
 
-    func testAddItem_Success_RefreshesItemList() async {
+    func testCreateItem_Success_AddsToItemList() async {
         // Arrange
-        let initialItems: [WishListItem] = []
         let newItem = WishListItem(
             id: UUID(),
             childId: testChildId,
@@ -106,38 +105,45 @@ final class WishListViewModelTests: XCTestCase {
             canAfford: false
         )
 
-        mockAPIService.wishListResult = .success(initialItems)
-        await sut.loadItems()
-
-        mockAPIService.addWishListItemResult = .success(newItem)
-        mockAPIService.wishListResult = .success([newItem])
+        mockAPIService.createWishListItemResponse = .success(newItem)
 
         // Act
-        await sut.addItem(name: "New Item", price: 50.00, url: nil, notes: nil)
+        let result = await sut.createItem(name: "New Item", price: 50.00, url: nil, notes: nil)
 
         // Assert
+        XCTAssertTrue(result)
         XCTAssertEqual(sut.items.count, 1)
         XCTAssertEqual(sut.items[0].name, "New Item")
         XCTAssertNil(sut.errorMessage)
     }
 
-    func testAddItem_Failure_SetsErrorMessage() async {
-        // Arrange
-        mockAPIService.addWishListItemResult = .failure(APIError.validationError("Invalid price"))
-
+    func testCreateItem_InvalidPrice_SetsErrorMessage() async {
         // Act
-        await sut.addItem(name: "Test", price: -10.00, url: nil, notes: nil)
+        let result = await sut.createItem(name: "Test", price: -10.00, url: nil, notes: nil)
 
         // Assert
+        XCTAssertFalse(result)
         XCTAssertNotNil(sut.errorMessage)
+        XCTAssertEqual(sut.errorMessage, "Price must be greater than zero.")
     }
 
-    // MARK: - Toggle Purchase Tests
+    func testCreateItem_EmptyName_SetsErrorMessage() async {
+        // Act
+        let result = await sut.createItem(name: "", price: 10.00, url: nil, notes: nil)
 
-    func testTogglePurchase_UnpurchasedItem_MarkesAsPurchased() async {
+        // Assert
+        XCTAssertFalse(result)
+        XCTAssertNotNil(sut.errorMessage)
+        XCTAssertEqual(sut.errorMessage, "Please enter an item name.")
+    }
+
+    // MARK: - Mark As Purchased Tests
+
+    func testMarkAsPurchased_Success_UpdatesItem() async {
         // Arrange
+        let itemId = UUID()
         let item = WishListItem(
-            id: UUID(),
+            id: itemId,
             childId: testChildId,
             name: "Bicycle",
             price: 150.00,
@@ -149,7 +155,7 @@ final class WishListViewModelTests: XCTestCase {
             canAfford: true
         )
         let purchasedItem = WishListItem(
-            id: item.id,
+            id: itemId,
             childId: testChildId,
             name: "Bicycle",
             price: 150.00,
@@ -161,98 +167,82 @@ final class WishListViewModelTests: XCTestCase {
             canAfford: true
         )
 
-        mockAPIService.wishListResult = .success([item])
-        await sut.loadItems()
+        mockAPIService.wishListResponse = .success([item])
+        await sut.loadWishList()
 
-        mockAPIService.togglePurchaseResult = .success(purchasedItem)
-        mockAPIService.wishListResult = .success([purchasedItem])
+        mockAPIService.markPurchasedResponse = .success(purchasedItem)
 
         // Act
-        await sut.togglePurchase(item)
+        let result = await sut.markAsPurchased(id: itemId)
 
         // Assert
+        XCTAssertTrue(result)
         XCTAssertEqual(sut.items.count, 1)
         XCTAssertTrue(sut.items[0].isPurchased)
     }
 
-    func testTogglePurchase_PurchasedItem_MarkesAsUnpurchased() async {
+    func testMarkAsPurchased_Failure_SetsErrorMessage() async {
         // Arrange
-        let purchasedItem = WishListItem(
-            id: UUID(),
-            childId: testChildId,
-            name: "Bicycle",
-            price: 150.00,
-            url: nil,
-            notes: nil,
-            isPurchased: true,
-            purchasedAt: Date(),
-            createdAt: Date(),
-            canAfford: true
-        )
-        let unpurchasedItem = WishListItem(
-            id: purchasedItem.id,
-            childId: testChildId,
-            name: "Bicycle",
-            price: 150.00,
-            url: nil,
-            notes: nil,
-            isPurchased: false,
-            purchasedAt: nil,
-            createdAt: Date(),
-            canAfford: true
-        )
-
-        mockAPIService.wishListResult = .success([purchasedItem])
-        await sut.loadItems()
-
-        mockAPIService.togglePurchaseResult = .success(unpurchasedItem)
-        mockAPIService.wishListResult = .success([unpurchasedItem])
+        mockAPIService.markPurchasedResponse = .failure(APIError.notFound)
 
         // Act
-        await sut.togglePurchase(purchasedItem)
+        let result = await sut.markAsPurchased(id: UUID())
 
         // Assert
-        XCTAssertEqual(sut.items.count, 1)
-        XCTAssertFalse(sut.items[0].isPurchased)
+        XCTAssertFalse(result)
+        XCTAssertNotNil(sut.errorMessage)
     }
 
-    // MARK: - Delete Items Tests
+    // MARK: - Delete Item Tests
 
-    func testDeleteItems_Success_RemovesItemsFromList() async {
+    func testDeleteItem_Success_RemovesFromList() async {
         // Arrange
+        let itemId = UUID()
         let items = [
             WishListItem(id: UUID(), childId: testChildId, name: "Item 1", price: 10.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: false),
-            WishListItem(id: UUID(), childId: testChildId, name: "Item 2", price: 20.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: false),
+            WishListItem(id: itemId, childId: testChildId, name: "Item 2", price: 20.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: false),
             WishListItem(id: UUID(), childId: testChildId, name: "Item 3", price: 30.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: false)
         ]
 
-        mockAPIService.wishListResult = .success(items)
-        await sut.loadItems()
+        mockAPIService.wishListResponse = .success(items)
+        await sut.loadWishList()
 
-        mockAPIService.deleteWishListItemResult = .success(())
-        mockAPIService.wishListResult = .success([items[0], items[2]]) // Item at index 1 deleted
+        mockAPIService.deleteWishListItemResponse = .success(())
 
         // Act
-        await sut.deleteItems(at: IndexSet(integer: 1))
+        let result = await sut.deleteItem(id: itemId)
 
         // Assert
+        XCTAssertTrue(result)
         XCTAssertEqual(sut.items.count, 2)
         XCTAssertEqual(sut.items[0].name, "Item 1")
         XCTAssertEqual(sut.items[1].name, "Item 3")
     }
 
+    func testDeleteItem_Failure_SetsErrorMessage() async {
+        // Arrange
+        mockAPIService.deleteWishListItemResponse = .failure(APIError.notFound)
+
+        // Act
+        let result = await sut.deleteItem(id: UUID())
+
+        // Assert
+        XCTAssertFalse(result)
+        XCTAssertNotNil(sut.errorMessage)
+    }
+
     // MARK: - Can Afford Tests
 
-    func testLoadItems_SetsCanAffordCorrectly() async {
+    func testLoadWishList_SetsCanAffordCorrectly() async {
         // Arrange
         let items = [
             WishListItem(id: UUID(), childId: testChildId, name: "Affordable", price: 10.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: true),
             WishListItem(id: UUID(), childId: testChildId, name: "Too Expensive", price: 1000.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: false)
         ]
-        mockAPIService.wishListResult = .success(items)
+        mockAPIService.wishListResponse = .success(items)
 
         // Act
-        await sut.loadItems()
+        await sut.loadWishList()
 
         // Assert
         XCTAssertTrue(sut.items[0].canAfford)
@@ -266,57 +256,64 @@ final class WishListViewModelTests: XCTestCase {
         XCTAssertTrue(sut.items.isEmpty)
         XCTAssertFalse(sut.isLoading)
         XCTAssertNil(sut.errorMessage)
-        XCTAssertFalse(sut.showAddItem)
+        XCTAssertFalse(sut.isProcessing)
     }
 
-    func testShowAddItem_TogglesState() {
+    func testClearError_RemovesErrorMessage() async {
         // Arrange
-        XCTAssertFalse(sut.showAddItem)
+        mockAPIService.wishListResponse = .failure(APIError.networkError)
+        await sut.loadWishList()
+        XCTAssertNotNil(sut.errorMessage)
 
         // Act
-        sut.showAddItem = true
+        sut.clearError()
 
         // Assert
-        XCTAssertTrue(sut.showAddItem)
-    }
-}
-
-// MARK: - Mock API Service Extension for WishList
-
-extension MockAPIService {
-    var wishListResult: Result<[WishListItem], Error>? {
-        get { nil }
-        set {
-            if let result = newValue {
-                wishListResponse = result
-            }
-        }
+        XCTAssertNil(sut.errorMessage)
     }
 
-    var addWishListItemResult: Result<WishListItem, Error>? {
-        get { nil }
-        set {
-            if let result = newValue {
-                addWishListItemResponse = result
-            }
-        }
+    // MARK: - Computed Properties Tests
+
+    func testAffordableItems_ReturnsOnlyAffordableItems() async {
+        // Arrange
+        let items = [
+            WishListItem(id: UUID(), childId: testChildId, name: "Affordable 1", price: 10.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: true),
+            WishListItem(id: UUID(), childId: testChildId, name: "Expensive", price: 1000.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: false),
+            WishListItem(id: UUID(), childId: testChildId, name: "Affordable 2", price: 20.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: true)
+        ]
+        mockAPIService.wishListResponse = .success(items)
+        await sut.loadWishList()
+
+        // Assert
+        XCTAssertEqual(sut.affordableItems.count, 2)
+        XCTAssertTrue(sut.affordableItems.allSatisfy { $0.canAfford })
     }
 
-    var togglePurchaseResult: Result<WishListItem, Error>? {
-        get { nil }
-        set {
-            if let result = newValue {
-                togglePurchaseResponse = result
-            }
-        }
+    func testPurchasedItems_ReturnsOnlyPurchasedItems() async {
+        // Arrange
+        let items = [
+            WishListItem(id: UUID(), childId: testChildId, name: "Purchased", price: 10.00, url: nil, notes: nil, isPurchased: true, purchasedAt: Date(), createdAt: Date(), canAfford: true),
+            WishListItem(id: UUID(), childId: testChildId, name: "Not Purchased", price: 20.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: true)
+        ]
+        mockAPIService.wishListResponse = .success(items)
+        await sut.loadWishList()
+
+        // Assert
+        XCTAssertEqual(sut.purchasedItems.count, 1)
+        XCTAssertEqual(sut.purchasedItems[0].name, "Purchased")
     }
 
-    var deleteWishListItemResult: Result<Void, Error>? {
-        get { nil }
-        set {
-            if let result = newValue {
-                deleteWishListItemResponse = result
-            }
-        }
+    func testActiveItems_ReturnsOnlyUnpurchasedItems() async {
+        // Arrange
+        let items = [
+            WishListItem(id: UUID(), childId: testChildId, name: "Purchased", price: 10.00, url: nil, notes: nil, isPurchased: true, purchasedAt: Date(), createdAt: Date(), canAfford: true),
+            WishListItem(id: UUID(), childId: testChildId, name: "Active", price: 20.00, url: nil, notes: nil, isPurchased: false, purchasedAt: nil, createdAt: Date(), canAfford: true)
+        ]
+        mockAPIService.wishListResponse = .success(items)
+        await sut.loadWishList()
+
+        // Assert
+        XCTAssertEqual(sut.activeItems.count, 1)
+        XCTAssertEqual(sut.activeItems[0].name, "Active")
     }
 }

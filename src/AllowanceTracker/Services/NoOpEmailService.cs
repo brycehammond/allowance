@@ -1,0 +1,30 @@
+namespace AllowanceTracker.Services;
+
+/// <summary>
+/// No-op email service for local development when Azure Communication Services is not configured
+/// </summary>
+public class NoOpEmailService : IEmailService
+{
+    private readonly ILogger<NoOpEmailService> _logger;
+
+    public NoOpEmailService(ILogger<NoOpEmailService> logger)
+    {
+        _logger = logger;
+    }
+
+    public Task SendPasswordResetEmailAsync(string email, string resetToken, string userName)
+    {
+        _logger.LogWarning(
+            "NoOpEmailService: Would have sent password reset email to {Email} for user {UserName}. Token: {Token}",
+            email, userName, resetToken);
+        return Task.CompletedTask;
+    }
+
+    public Task SendEmailAsync(string to, string subject, string htmlContent, string plainTextContent)
+    {
+        _logger.LogWarning(
+            "NoOpEmailService: Would have sent email to {To} with subject '{Subject}'",
+            to, subject);
+        return Task.CompletedTask;
+    }
+}

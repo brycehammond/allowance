@@ -1,7 +1,11 @@
 import Foundation
 
 /// Main API service for backend communication
-final class APIService: APIServiceProtocol {
+final class APIService: APIServiceProtocol, @unchecked Sendable {
+
+    // MARK: - Shared Instance
+
+    static let shared = APIService()
 
     // MARK: - Properties
 
@@ -17,7 +21,24 @@ final class APIService: APIServiceProtocol {
 
     private let jsonDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        // Use custom date formatter to handle ISO 8601 with fractional seconds
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+            // Try with fractional seconds first
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+            // Fallback to standard ISO 8601
+            let fallbackFormatter = ISO8601DateFormatter()
+            fallbackFormatter.formatOptions = [.withInternetDateTime]
+            if let date = fallbackFormatter.date(from: dateString) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
+        }
         return decoder
     }()
 

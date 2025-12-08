@@ -21,11 +21,13 @@ struct MainTabView: View {
 
             // Tab 2: Budget (if parent) or My Money (if child)
             if authViewModel.currentUser?.role == .parent {
-                BudgetManagementView()
-                    .tabItem {
-                        Label("Budgets", systemImage: "chart.pie.fill")
-                    }
-                    .tag(1)
+                NavigationStack {
+                    BudgetTabView()
+                }
+                .tabItem {
+                    Label("Budgets", systemImage: "chart.pie.fill")
+                }
+                .tag(1)
             }
 
             // Tab 3: Analytics
@@ -89,6 +91,56 @@ struct AnalyticsTabView: View {
             }
         }
         .navigationTitle("Analytics")
+        .task {
+            await dashboardViewModel.loadChildren()
+            if selectedChildId == nil {
+                selectedChildId = dashboardViewModel.children.first?.id
+            }
+        }
+    }
+}
+
+// MARK: - Budget Tab View
+
+/// Wrapper view for budget tab to handle child selection
+struct BudgetTabView: View {
+
+    @StateObject private var dashboardViewModel = DashboardViewModel()
+    @State private var selectedChildId: UUID?
+
+    var body: some View {
+        VStack {
+            if dashboardViewModel.children.isEmpty {
+                ContentUnavailableView(
+                    "No Children",
+                    systemImage: "chart.pie.fill",
+                    description: Text("Add children to manage budgets")
+                )
+            } else {
+                // Child selector
+                if dashboardViewModel.children.count > 1 {
+                    Picker("Child", selection: $selectedChildId) {
+                        ForEach(dashboardViewModel.children) { child in
+                            Text(child.fullName).tag(child.id as UUID?)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding()
+                }
+
+                // Budget view for selected child
+                if let selectedChild = dashboardViewModel.children.first(where: { $0.id == selectedChildId }) ?? dashboardViewModel.children.first {
+                    BudgetManagementView(child: selectedChild)
+                } else {
+                    ContentUnavailableView(
+                        "Select a Child",
+                        systemImage: "person.crop.circle.badge.questionmark",
+                        description: Text("Choose a child to manage budgets")
+                    )
+                }
+            }
+        }
+        .navigationTitle("Budgets")
         .task {
             await dashboardViewModel.loadChildren()
             if selectedChildId == nil {

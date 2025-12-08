@@ -16,26 +16,26 @@ struct ProfileView: View {
                 // User Information Section
                 if let user = authViewModel.currentUser {
                     Section("Account") {
-                        InfoRow(
+                        ProfileInfoRow(
                             label: "Name",
                             value: user.fullName,
                             icon: "person.fill"
                         )
 
-                        InfoRow(
+                        ProfileInfoRow(
                             label: "Email",
                             value: user.email,
                             icon: "envelope.fill"
                         )
 
-                        InfoRow(
+                        ProfileInfoRow(
                             label: "Role",
                             value: user.role.rawValue,
                             icon: user.role == .parent ? "person.2.fill" : "person.fill"
                         )
 
                         if let familyId = user.familyId {
-                            InfoRow(
+                            ProfileInfoRow(
                                 label: "Family ID",
                                 value: familyId.uuidString,
                                 icon: "house.fill"
@@ -99,10 +99,10 @@ struct ProfileView: View {
     }
 }
 
-// MARK: - Info Row
+// MARK: - Profile Info Row
 
-/// Reusable row for displaying user information
-struct InfoRow: View {
+/// Reusable row for displaying user information with an icon
+struct ProfileInfoRow: View {
     let label: String
     let value: String
     let icon: String
@@ -183,12 +183,12 @@ struct AboutView: View {
     var body: some View {
         Form {
             Section("App Information") {
-                InfoRow(label: "Version", value: Configuration.appVersion, icon: "app.fill")
-                InfoRow(label: "Build", value: Configuration.buildNumber, icon: "hammer.fill")
+                ProfileInfoRow(label: "Version", value: Configuration.appVersion, icon: "app.fill")
+                ProfileInfoRow(label: "Build", value: Configuration.buildNumber, icon: "hammer.fill")
 
                 #if DEBUG
-                InfoRow(label: "Environment", value: Configuration.environment.rawValue, icon: "server.rack")
-                InfoRow(label: "API URL", value: Configuration.apiBaseURL.host ?? "Unknown", icon: "network")
+                ProfileInfoRow(label: "Environment", value: Configuration.environment.rawValue, icon: "server.rack")
+                ProfileInfoRow(label: "API URL", value: Configuration.apiBaseURL.host ?? "Unknown", icon: "network")
                 #endif
             }
 

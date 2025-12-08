@@ -23,18 +23,17 @@ final class AuthViewModelTests: XCTestCase {
 
     func testLogin_WithValidCredentials_SetsUserAndAuthenticationState() async throws {
         // Arrange
-        let expectedUser = User(
-            id: UUID(),
+        let userId = UUID()
+        mockAPIService.loginResult = .success(AuthResponse(
+            userId: userId,
             email: "test@example.com",
             firstName: "John",
             lastName: "Doe",
-            role: .parent,
-            familyId: nil
-        )
-        mockAPIService.loginResult = .success(AuthResponse(
+            role: "Parent",
+            familyId: nil,
+            familyName: nil,
             token: "valid-token",
-            expiresAt: Date().addingTimeInterval(86400),
-            user: expectedUser
+            expiresAt: Date().addingTimeInterval(86400)
         ))
 
         // Act
@@ -66,9 +65,15 @@ final class AuthViewModelTests: XCTestCase {
     func testLogin_SetsLoadingStateDuringExecution() async throws {
         // Arrange
         mockAPIService.loginResult = .success(AuthResponse(
+            userId: UUID(),
+            email: "test@example.com",
+            firstName: "Test",
+            lastName: "User",
+            role: "Parent",
+            familyId: nil,
+            familyName: nil,
             token: "token",
-            expiresAt: Date().addingTimeInterval(86400),
-            user: User(id: UUID(), email: "test@example.com", firstName: "Test", lastName: "User", role: .parent, familyId: nil)
+            expiresAt: Date().addingTimeInterval(86400)
         ))
         mockAPIService.shouldDelay = true
 
@@ -111,18 +116,16 @@ final class AuthViewModelTests: XCTestCase {
 
     func testRegister_WithValidData_SetsUserAndAuthenticationState() async throws {
         // Arrange
-        let expectedUser = User(
-            id: UUID(),
+        mockAPIService.registerResult = .success(AuthResponse(
+            userId: UUID(),
             email: "new@example.com",
             firstName: "Jane",
             lastName: "Smith",
-            role: .parent,
-            familyId: nil
-        )
-        mockAPIService.registerResult = .success(AuthResponse(
+            role: "Parent",
+            familyId: nil,
+            familyName: nil,
             token: "new-token",
-            expiresAt: Date().addingTimeInterval(86400),
-            user: expectedUser
+            expiresAt: Date().addingTimeInterval(86400)
         ))
 
         // Act
@@ -199,9 +202,15 @@ final class AuthViewModelTests: XCTestCase {
     func testLogout_ClearsUserAndAuthenticationState() async throws {
         // Arrange - first login
         mockAPIService.loginResult = .success(AuthResponse(
+            userId: UUID(),
+            email: "test@example.com",
+            firstName: "Test",
+            lastName: "User",
+            role: "Parent",
+            familyId: nil,
+            familyName: nil,
             token: "token",
-            expiresAt: Date().addingTimeInterval(86400),
-            user: User(id: UUID(), email: "test@example.com", firstName: "Test", lastName: "User", role: .parent, familyId: nil)
+            expiresAt: Date().addingTimeInterval(86400)
         ))
         await sut.login(email: "test@example.com", password: "password")
 
@@ -253,6 +262,16 @@ final class AuthViewModelTests: XCTestCase {
 class MockAPIService: APIServiceProtocol {
     var loginResult: Result<AuthResponse, APIError>?
     var registerResult: Result<AuthResponse, APIError>?
+    var changePasswordResult: Result<PasswordMessageResponse, APIError>?
+    var forgotPasswordResult: Result<PasswordMessageResponse, APIError>?
+    var resetPasswordResult: Result<PasswordMessageResponse, APIError>?
+    var childrenResponse: Result<[Child], Error> = .success([])
+    var transactionsResponse: Result<[Transaction], Error>?
+    var createTransactionResponse: Result<Transaction, Error>?
+    var wishListResponse: Result<[WishListItem], Error> = .success([])
+    var createWishListItemResponse: Result<WishListItem, Error>?
+    var markPurchasedResponse: Result<WishListItem, Error>?
+    var deleteWishListItemResponse: Result<Void, Error>?
     var shouldDelay = false
 
     func login(_ request: LoginRequest) async throws -> AuthResponse {
@@ -289,8 +308,46 @@ class MockAPIService: APIServiceProtocol {
         // Mock implementation - do nothing
     }
 
+    func changePassword(_ request: ChangePasswordRequest) async throws -> PasswordMessageResponse {
+        switch changePasswordResult {
+        case .success(let response):
+            return response
+        case .failure(let error):
+            throw error
+        case .none:
+            return PasswordMessageResponse(message: "Password changed")
+        }
+    }
+
+    func forgotPassword(_ request: ForgotPasswordRequest) async throws -> PasswordMessageResponse {
+        switch forgotPasswordResult {
+        case .success(let response):
+            return response
+        case .failure(let error):
+            throw error
+        case .none:
+            return PasswordMessageResponse(message: "Reset email sent")
+        }
+    }
+
+    func resetPassword(_ request: ResetPasswordRequest) async throws -> PasswordMessageResponse {
+        switch resetPasswordResult {
+        case .success(let response):
+            return response
+        case .failure(let error):
+            throw error
+        case .none:
+            return PasswordMessageResponse(message: "Password reset successful")
+        }
+    }
+
     func getChildren() async throws -> [Child] {
-        return []
+        switch childrenResponse {
+        case .success(let children):
+            return children
+        case .failure(let error):
+            throw error
+        }
     }
 
     func getChild(id: UUID) async throws -> Child {
@@ -332,6 +389,100 @@ class MockAPIService: APIServiceProtocol {
     }
 
     func getSavingsTransactions(forAccount accountId: UUID) async throws -> [SavingsTransaction] {
+        return []
+    }
+
+    // MARK: - Transactions
+
+    func getTransactions(forChild childId: UUID, limit: Int) async throws -> [Transaction] {
+        switch transactionsResponse {
+        case .success(let transactions):
+            return transactions
+        case .failure(let error):
+            throw error
+        case .none:
+            return []
+        }
+    }
+
+    func createTransaction(_ request: CreateTransactionRequest) async throws -> Transaction {
+        switch createTransactionResponse {
+        case .success(let transaction):
+            return transaction
+        case .failure(let error):
+            throw error
+        case .none:
+            throw APIError.notFound
+        }
+    }
+
+    func getBalance(forChild childId: UUID) async throws -> Decimal {
+        return 0
+    }
+
+    // MARK: - Wish List
+
+    func getWishList(forChild childId: UUID) async throws -> [WishListItem] {
+        switch wishListResponse {
+        case .success(let items):
+            return items
+        case .failure(let error):
+            throw error
+        }
+    }
+
+    func createWishListItem(_ request: CreateWishListItemRequest) async throws -> WishListItem {
+        switch createWishListItemResponse {
+        case .success(let item):
+            return item
+        case .failure(let error):
+            throw error
+        case .none:
+            throw APIError.notFound
+        }
+    }
+
+    func updateWishListItem(id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem {
+        throw APIError.notFound
+    }
+
+    func deleteWishListItem(id: UUID) async throws {
+        switch deleteWishListItemResponse {
+        case .success:
+            return
+        case .failure(let error):
+            throw error
+        case .none:
+            throw APIError.notFound
+        }
+    }
+
+    func markWishListItemAsPurchased(id: UUID) async throws -> WishListItem {
+        switch markPurchasedResponse {
+        case .success(let item):
+            return item
+        case .failure(let error):
+            throw error
+        case .none:
+            throw APIError.notFound
+        }
+    }
+
+    // MARK: - Analytics (stub implementations)
+
+    func getBalanceHistory(forChild childId: UUID, days: Int) async throws -> [BalancePoint] {
+        return []
+    }
+
+    func getIncomeVsSpending(forChild childId: UUID) async throws -> IncomeSpendingSummary {
+        return IncomeSpendingSummary(totalIncome: 0, totalSpending: 0, netSavings: 0, incomeTransactionCount: 0, spendingTransactionCount: 0, savingsRate: 0)
+    }
+
+    func getSpendingBreakdown(forChild childId: UUID) async throws -> [CategoryBreakdown] {
+        return []
+    }
+
+    func getMonthlyComparison(forChild childId: UUID, months: Int) async throws -> [MonthlyComparison] {
         return []
     }
 }

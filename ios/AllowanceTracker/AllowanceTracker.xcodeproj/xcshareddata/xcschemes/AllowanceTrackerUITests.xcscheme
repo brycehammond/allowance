@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "210C8DE349F66D2F314168FF"
-               BuildableName = "AllowanceTracker.app"
-               BlueprintName = "AllowanceTracker"
+               BlueprintIdentifier = "849439CD2835C88EAFE036DF"
+               BuildableName = "AllowanceTrackerUITests.xctest"
+               BlueprintName = "AllowanceTrackerUITests"
                ReferencedContainer = "container:AllowanceTracker.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -33,35 +33,13 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "210C8DE349F66D2F314168FF"
-            BuildableName = "AllowanceTracker.app"
-            BlueprintName = "AllowanceTracker"
+            BlueprintIdentifier = "849439CD2835C88EAFE036DF"
+            BuildableName = "AllowanceTrackerUITests.xctest"
+            BlueprintName = "AllowanceTrackerUITests"
             ReferencedContainer = "container:AllowanceTracker.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "81C1BD9286706B5FEE76C781"
-               BuildableName = "AllowanceTrackerTests.xctest"
-               BlueprintName = "AllowanceTrackerTests"
-               ReferencedContainer = "container:AllowanceTracker.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "849439CD2835C88EAFE036DF"
-               BuildableName = "AllowanceTrackerUITests.xctest"
-               BlueprintName = "AllowanceTrackerUITests"
-               ReferencedContainer = "container:AllowanceTracker.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
@@ -76,16 +54,15 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "210C8DE349F66D2F314168FF"
-            BuildableName = "AllowanceTracker.app"
-            BlueprintName = "AllowanceTracker"
+            BlueprintIdentifier = "849439CD2835C88EAFE036DF"
+            BuildableName = "AllowanceTrackerUITests.xctest"
+            BlueprintName = "AllowanceTrackerUITests"
             ReferencedContainer = "container:AllowanceTracker.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <CommandLineArguments>
       </CommandLineArguments>
    </LaunchAction>
@@ -95,18 +72,17 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "210C8DE349F66D2F314168FF"
-            BuildableName = "AllowanceTracker.app"
-            BlueprintName = "AllowanceTracker"
-            ReferencedContainer = "container:AllowanceTracker.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
       <CommandLineArguments>
       </CommandLineArguments>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "849439CD2835C88EAFE036DF"
+            BuildableName = "AllowanceTrackerUITests.xctest"
+            BlueprintName = "AllowanceTrackerUITests"
+            ReferencedContainer = "container:AllowanceTracker.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

@@ -153,10 +153,18 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();
 
-// Add Azure Communication Services email
+// Add Azure Communication Services email (optional for local development)
 var acsConnectionString = builder.Configuration["AzureEmail:ConnectionString"] ?? "";
-builder.Services.AddSingleton(new EmailClient(acsConnectionString));
-builder.Services.AddScoped<IEmailService, AzureEmailService>();
+if (!string.IsNullOrEmpty(acsConnectionString))
+{
+    builder.Services.AddSingleton(new EmailClient(acsConnectionString));
+    builder.Services.AddScoped<IEmailService, AzureEmailService>();
+}
+else
+{
+    // Use a no-op email service for local development
+    builder.Services.AddScoped<IEmailService, NoOpEmailService>();
+}
 
 // Add Health Checks
 builder.Services.AddHealthChecks()

@@ -10,6 +10,7 @@ final class DashboardViewModel: ObservableObject {
     @Published private(set) var children: [Child] = []
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
+    @Published var showAddChild = false
 
     // MARK: - Dependencies
 

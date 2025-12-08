@@ -194,17 +194,8 @@ final class DashboardViewModelTests: XCTestCase {
 // MARK: - Mock API Service Extension
 
 extension MockAPIService {
-    var childrenResult: Result<[Child], Error>? {
-        get { nil }
-        set {
-            if let result = newValue {
-                childrenResponse = result
-            }
-        }
-    }
-
-    var shouldDelay: Bool {
-        get { false }
-        set { /* Store if needed */ }
+    var childrenResult: Result<[Child], Error> {
+        get { childrenResponse }
+        set { childrenResponse = newValue }
     }
 }

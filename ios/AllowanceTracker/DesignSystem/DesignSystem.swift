@@ -8,6 +8,26 @@
 
 import SwiftUI
 
+// MARK: - DesignSystem Namespace
+
+/// Design system namespace for accessing design tokens
+enum DesignSystem {
+    /// Color palette
+    enum Colors {
+        static let primary = Color(hex: "2da370")
+        static let primaryHover = Color(hex: "248c5f")
+        static let primaryActive = Color(hex: "1c6e4a")
+
+        static let secondary = Color(hex: "f59e0b")
+        static let secondaryHover = Color(hex: "d97706")
+
+        static let success = Color(hex: "2da370")
+        static let warning = Color(hex: "f59e0b")
+        static let error = Color(hex: "dc2626")
+        static let info = Color(hex: "3b82f6")
+    }
+}
+
 // MARK: - Color Extensions
 
 extension Color {
@@ -155,51 +175,38 @@ extension CGFloat {
 // MARK: - Button Styles
 
 struct PrimaryButtonStyle: ButtonStyle {
-    var size: ButtonSize = .medium
-
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
-            .font(size.font)
-            .fontWeight(.medium)
+            .font(.system(size: 14, weight: .medium))
             .foregroundColor(.white)
-            .padding(.horizontal, size.horizontalPadding)
-            .padding(.vertical, size.verticalPadding)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.green700 : Color.green500)
             .cornerRadius(8)
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
-            .shadow(color: configuration.isPressed ? .clear : .black.opacity(0.1),
-                   radius: 4, y: 2)
     }
 }
 
 struct SecondaryButtonStyle: ButtonStyle {
-    var size: ButtonSize = .medium
-
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
-            .font(size.font)
-            .fontWeight(.medium)
+            .font(.system(size: 14, weight: .medium))
             .foregroundColor(.white)
-            .padding(.horizontal, size.horizontalPadding)
-            .padding(.vertical, size.verticalPadding)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.amber700 : Color.amber500)
             .cornerRadius(8)
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
-            .shadow(color: configuration.isPressed ? .clear : .black.opacity(0.1),
-                   radius: 4, y: 2)
     }
 }
 
 struct OutlineButtonStyle: ButtonStyle {
-    var size: ButtonSize = .medium
-
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
-            .font(size.font)
-            .fontWeight(.medium)
-            .foregroundColor(.green600)
-            .padding(.horizontal, size.horizontalPadding)
-            .padding(.vertical, size.verticalPadding)
+            .font(.system(size: 14, weight: .medium))
+            .foregroundColor(Color.green600)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.green50 : Color.clear)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
@@ -209,15 +216,12 @@ struct OutlineButtonStyle: ButtonStyle {
 }
 
 struct DangerButtonStyle: ButtonStyle {
-    var size: ButtonSize = .medium
-
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
-            .font(size.font)
-            .fontWeight(.medium)
+            .font(.system(size: 14, weight: .medium))
             .foregroundColor(.white)
-            .padding(.horizontal, size.horizontalPadding)
-            .padding(.vertical, size.verticalPadding)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.errorDark : Color.error)
             .cornerRadius(8)
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
@@ -225,47 +229,14 @@ struct DangerButtonStyle: ButtonStyle {
 }
 
 struct GhostButtonStyle: ButtonStyle {
-    var size: ButtonSize = .medium
-
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
-            .font(size.font)
-            .fontWeight(.medium)
-            .foregroundColor(.gray700)
-            .padding(.horizontal, size.horizontalPadding)
-            .padding(.vertical, size.verticalPadding)
+            .font(.system(size: 14, weight: .medium))
+            .foregroundColor(Color.gray700)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.gray100 : Color.clear)
             .cornerRadius(8)
-    }
-}
-
-enum ButtonSize {
-    case small
-    case medium
-    case large
-
-    var font: Font {
-        switch self {
-        case .small: return .bodySmall
-        case .medium: return .bodyMedium
-        case .large: return .bodyLarge
-        }
-    }
-
-    var horizontalPadding: CGFloat {
-        switch self {
-        case .small: return 16
-        case .medium: return 24
-        case .large: return 32
-        }
-    }
-
-    var verticalPadding: CGFloat {
-        switch self {
-        case .small: return 8
-        case .medium: return 12
-        case .large: return 16
-        }
     }
 }
 
@@ -319,16 +290,7 @@ extension View {
     }
 }
 
-// MARK: - Helper Extensions
-
-extension Decimal {
-    var currencyFormatted: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        return formatter.string(from: self as NSDecimalNumber) ?? "$0.00"
-    }
-}
+// MARK: - Helper Extensions (Double only - Decimal extension is in Extensions.swift)
 
 extension Double {
     var currencyFormatted: String {

@@ -30,6 +30,7 @@ extension Decimal {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.currencyCode = "USD"
+        formatter.locale = Locale(identifier: "en_US")
         return formatter.string(from: self as NSDecimalNumber) ?? "$0.00"
     }
 
@@ -39,6 +40,10 @@ extension Decimal {
         formatter.minimumFractionDigits = 1
         formatter.maximumFractionDigits = 1
         return formatter.string(from: (self / 100) as NSDecimalNumber) ?? "0%"
+    }
+
+    var doubleValue: Double {
+        NSDecimalNumber(decimal: self).doubleValue
     }
 }
 

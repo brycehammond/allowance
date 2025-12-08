@@ -31,16 +31,15 @@ final class APIServiceTests: XCTestCase {
         // Arrange
         let loginRequest = LoginRequest(email: "test@example.com", password: "password123")
         let expectedResponse = AuthResponse(
+            userId: UUID(),
+            email: "test@example.com",
+            firstName: "John",
+            lastName: "Doe",
+            role: "Parent",
+            familyId: nil,
+            familyName: nil,
             token: "valid-jwt-token",
-            expiresAt: Date().addingTimeInterval(86400),
-            user: User(
-                id: UUID(),
-                email: "test@example.com",
-                firstName: "John",
-                lastName: "Doe",
-                role: .parent,
-                familyId: nil
-            )
+            expiresAt: Date().addingTimeInterval(86400)
         )
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -91,16 +90,15 @@ final class APIServiceTests: XCTestCase {
             role: .parent
         )
         let expectedResponse = AuthResponse(
+            userId: UUID(),
+            email: "new@example.com",
+            firstName: "Jane",
+            lastName: "Smith",
+            role: "Parent",
+            familyId: nil,
+            familyName: nil,
             token: "new-user-token",
-            expiresAt: Date().addingTimeInterval(86400),
-            user: User(
-                id: UUID(),
-                email: "new@example.com",
-                firstName: "Jane",
-                lastName: "Smith",
-                role: .parent,
-                familyId: nil
-            )
+            expiresAt: Date().addingTimeInterval(86400)
         )
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601

@@ -110,12 +110,7 @@ final class BackgroundRefreshManager {
         logger.info("Starting data refresh...")
 
         // Fetch children data
-        let endpoint = Endpoint.children
-        let children: [Child] = try await apiService.request(
-            endpoint: endpoint,
-            method: .get,
-            body: nil as String?
-        )
+        let children = try await apiService.getChildren()
 
         // Update cache
         await cacheService.cacheChildren(children)
@@ -126,12 +121,7 @@ final class BackgroundRefreshManager {
         // This could be resource-intensive, so consider doing it selectively
         for child in children.prefix(3) { // Limit to first 3 children to avoid timeout
             do {
-                let transactionEndpoint = Endpoint.childTransactions(child.id)
-                let transactions: [Transaction] = try await apiService.request(
-                    endpoint: transactionEndpoint,
-                    method: .get,
-                    body: nil as String?
-                )
+                let transactions = try await apiService.getTransactions(forChild: child.id, limit: 50)
 
                 await cacheService.cacheTransactions(transactions, for: child.id)
                 logger.debug("Refreshed \(transactions.count) transactions for child \(child.id)")
@@ -166,14 +156,3 @@ final class BackgroundRefreshManager {
     }
 }
 
-// MARK: - Endpoint Extension
-
-extension Endpoint {
-    static var children: Endpoint {
-        return .children
-    }
-
-    static func childTransactions(_ childId: UUID) -> Endpoint {
-        return .childTransactions(childId)
-    }
-}
