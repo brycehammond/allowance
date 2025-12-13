@@ -51,6 +51,7 @@ public class ChildrenHandler
                 c.LastName,
                 c.WeeklyAllowance,
                 c.CurrentBalance,
+                c.SavingsBalance,
                 c.LastAllowanceDate,
                 c.AllowanceDay)).ToList();
 

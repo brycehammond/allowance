@@ -42,6 +42,7 @@ export interface Child {
   fullName: string;
   weeklyAllowance: number;
   currentBalance: number;
+  savingsBalance: number;
   lastAllowanceDate: string;
   savingsAccountEnabled: boolean;
   savingsTransferType: 'Percentage' | 'FixedAmount';

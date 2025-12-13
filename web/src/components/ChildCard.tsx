@@ -33,14 +33,31 @@ export const ChildCard: React.FC<ChildCardProps> = ({ child }) => {
           </div>
         </div>
 
-        {/* Balance */}
-        <div className="mb-4">
-          <div className="flex items-baseline">
+        {/* Balances */}
+        <div className="mb-4 space-y-3">
+          {/* Total Balance - Prominent */}
+          <div>
             <p className="text-3xl font-semibold text-gray-900">
-              {formatCurrency(child.currentBalance)}
+              {formatCurrency(child.currentBalance + child.savingsBalance)}
             </p>
+            <p className="text-sm text-gray-600">Total Balance</p>
           </div>
-          <p className="text-sm text-gray-600 mt-1">Current Balance</p>
+
+          {/* Spending & Savings - Side by Side */}
+          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+            <div>
+              <p className="text-lg font-medium text-gray-900">
+                {formatCurrency(child.currentBalance)}
+              </p>
+              <p className="text-xs text-gray-500">Spending</p>
+            </div>
+            <div>
+              <p className="text-lg font-medium text-primary-600">
+                {formatCurrency(child.savingsBalance)}
+              </p>
+              <p className="text-xs text-gray-500">Savings</p>
+            </div>
+          </div>
         </div>
 
         {/* Actions */}

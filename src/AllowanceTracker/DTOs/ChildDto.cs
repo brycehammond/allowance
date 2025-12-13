@@ -10,6 +10,7 @@ namespace AllowanceTracker.DTOs;
 /// <param name="LastName">Child's last name</param>
 /// <param name="WeeklyAllowance">Amount of allowance the child receives each week</param>
 /// <param name="CurrentBalance">Child's current balance available to spend</param>
+/// <param name="SavingsBalance">Child's current savings balance</param>
 /// <param name="LastAllowanceDate">Date when the child last received their allowance (null if never received)</param>
 /// <param name="AllowanceDay">Optional day of week for scheduled allowance payments (null for rolling 7-day window)</param>
 public record ChildDto(
@@ -18,6 +19,7 @@ public record ChildDto(
     string LastName,
     decimal WeeklyAllowance,
     decimal CurrentBalance,
+    decimal SavingsBalance,
     DateTime? LastAllowanceDate,
     DayOfWeek? AllowanceDay)
 {
@@ -32,6 +34,7 @@ public record ChildDto(
             user.LastName,
             child.WeeklyAllowance,
             child.CurrentBalance,
+            child.SavingsBalance,
             child.LastAllowanceDate,
             child.AllowanceDay);
     }

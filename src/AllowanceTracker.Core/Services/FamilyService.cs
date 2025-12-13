@@ -123,6 +123,7 @@ public class FamilyService : IFamilyService
             c.User.LastName,
             c.User.Email!,
             c.CurrentBalance,
+            c.SavingsBalance,
             c.WeeklyAllowance,
             c.LastAllowanceDate,
             c.LastAllowanceDate?.AddDays(7),

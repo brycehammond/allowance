@@ -12,6 +12,7 @@ public record ChildDetailDto(
     string LastName,
     string Email,
     decimal CurrentBalance,
+    decimal SavingsBalance,
     decimal WeeklyAllowance,
     DateTime? LastAllowanceDate,
     DateTime? NextAllowanceDate,
