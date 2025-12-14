@@ -135,10 +135,20 @@ export const ChildDetail: React.FC = () => {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-4xl font-bold text-primary-600">
-                  {formatCurrency(child.currentBalance)}
+                <div className="text-4xl font-bold text-gray-900">
+                  {formatCurrency(child.currentBalance + child.savingsBalance)}
                 </div>
-                <p className="text-sm text-gray-600 mt-1">Current Balance</p>
+                <p className="text-sm text-gray-600 mb-3">Total Balance</p>
+                <div className="flex gap-6 justify-end">
+                  <div>
+                    <p className="text-lg font-semibold text-gray-900">{formatCurrency(child.currentBalance)}</p>
+                    <p className="text-xs text-gray-500">Spending</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold text-primary-600">{formatCurrency(child.savingsBalance)}</p>
+                    <p className="text-xs text-gray-500">Savings</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
