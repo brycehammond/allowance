@@ -16,4 +16,5 @@ public record ChildDetailDto(
     decimal WeeklyAllowance,
     DateTime? LastAllowanceDate,
     DateTime? NextAllowanceDate,
-    DayOfWeek? AllowanceDay);
+    DayOfWeek? AllowanceDay,
+    bool SavingsBalanceVisibleToChild);

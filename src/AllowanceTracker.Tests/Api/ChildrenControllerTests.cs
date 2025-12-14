@@ -279,8 +279,8 @@ public class ChildrenControllerTests
             "Test Family",
             new List<ChildDetailDto>
             {
-                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Alice", "Smith", "alice@test.com", 100m, 0m, 10m, null, null, DayOfWeek.Friday),
-                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Bob", "Smith", "bob@test.com", 150m, 0m, 15m, DateTime.UtcNow.AddDays(-3), DateTime.UtcNow.AddDays(4), null)
+                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Alice", "Smith", "alice@test.com", 100m, 0m, 10m, null, null, DayOfWeek.Friday, true),
+                new ChildDetailDto(Guid.NewGuid(), Guid.NewGuid(), "Bob", "Smith", "bob@test.com", 150m, 0m, 15m, DateTime.UtcNow.AddDays(-3), DateTime.UtcNow.AddDays(4), null, true)
             });
 
         _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(currentUser);

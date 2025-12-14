@@ -13,6 +13,7 @@ namespace AllowanceTracker.DTOs;
 /// <param name="SavingsBalance">Child's current savings balance</param>
 /// <param name="LastAllowanceDate">Date when the child last received their allowance (null if never received)</param>
 /// <param name="AllowanceDay">Optional day of week for scheduled allowance payments (null for rolling 7-day window)</param>
+/// <param name="SavingsBalanceVisibleToChild">Whether the child can see their savings balance</param>
 public record ChildDto(
     Guid Id,
     string FirstName,
@@ -21,7 +22,8 @@ public record ChildDto(
     decimal CurrentBalance,
     decimal SavingsBalance,
     DateTime? LastAllowanceDate,
-    DayOfWeek? AllowanceDay)
+    DayOfWeek? AllowanceDay,
+    bool SavingsBalanceVisibleToChild)
 {
     /// <summary>
     /// Creates a ChildDto from a Child entity and associated ApplicationUser
@@ -36,6 +38,7 @@ public record ChildDto(
             child.CurrentBalance,
             child.SavingsBalance,
             child.LastAllowanceDate,
-            child.AllowanceDay);
+            child.AllowanceDay,
+            child.SavingsBalanceVisibleToChild);
     }
 }

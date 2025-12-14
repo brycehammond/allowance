@@ -65,7 +65,8 @@ public class ChildrenController : ControllerBase
             c.CurrentBalance,
             c.SavingsBalance,
             c.LastAllowanceDate,
-            c.AllowanceDay)).ToList();
+            c.AllowanceDay,
+            c.SavingsBalanceVisibleToChild)).ToList();
 
         return Ok(children);
     }
