@@ -322,7 +322,7 @@ public class SavingsAccountService : ISavingsAccountService
 
         var configDescription = child.SavingsTransferType switch
         {
-            SavingsTransferType.FixedAmount => $"Saves {child.SavingsTransferAmount:C} per allowance",
+            SavingsTransferType.FixedAmount => $"Saves ${child.SavingsTransferAmount:F2} per allowance",
             SavingsTransferType.Percentage => $"Saves {child.SavingsTransferPercentage}% per allowance",
             _ => "No automatic transfer configured"
         };
