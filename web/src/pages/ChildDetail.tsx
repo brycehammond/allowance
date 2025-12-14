@@ -7,10 +7,11 @@ import { TransactionsTab } from '../components/tabs/TransactionsTab';
 import { WishListTab } from '../components/tabs/WishListTab';
 import { AnalyticsTab } from '../components/tabs/AnalyticsTab';
 import { SavingsTab } from '../components/tabs/SavingsTab';
+import { SettingsTab } from '../components/tabs/SettingsTab';
 import { Layout } from '../components/Layout';
-import { ArrowLeft, Receipt, Star, TrendingUp, Wallet } from 'lucide-react';
+import { ArrowLeft, Receipt, Star, TrendingUp, Wallet, Settings } from 'lucide-react';
 
-type TabType = 'transactions' | 'wishlist' | 'analytics' | 'savings';
+type TabType = 'transactions' | 'wishlist' | 'analytics' | 'savings' | 'settings';
 
 export const ChildDetail: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
@@ -92,9 +93,10 @@ export const ChildDetail: React.FC = () => {
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
   ];
 
-  // Only show savings tab to parents
+  // Only show savings and settings tabs to parents
   if (isParent) {
     tabs.push({ id: 'savings', label: 'Savings', icon: Wallet });
+    tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
   }
 
   return (
@@ -166,6 +168,9 @@ export const ChildDetail: React.FC = () => {
           {activeTab === 'wishlist' && <WishListTab childId={child.id} />}
           {activeTab === 'analytics' && <AnalyticsTab childId={child.id} />}
           {activeTab === 'savings' && isParent && <SavingsTab childId={child.id} />}
+          {activeTab === 'settings' && isParent && (
+            <SettingsTab childId={child.id} child={child} onUpdate={loadChild} />
+          )}
         </div>
       </div>
     </Layout>
