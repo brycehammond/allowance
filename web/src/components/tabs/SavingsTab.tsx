@@ -9,9 +9,10 @@ import type {
 
 interface SavingsTabProps {
   childId: string;
+  onBalanceChange?: () => void;
 }
 
-export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
+export const SavingsTab: React.FC<SavingsTabProps> = ({ childId, onBalanceChange }) => {
   const [summary, setSummary] = useState<SavingsAccountSummary | null>(null);
   const [transactions, setTransactions] = useState<SavingsTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +70,7 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
       setShowDepositForm(false);
       setDepositData({ childId, amount: 0, description: '' });
       await loadSavingsData();
+      onBalanceChange?.();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error && 'response' in err
         ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
@@ -95,6 +97,7 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId }) => {
       setShowWithdrawForm(false);
       setWithdrawData({ childId, amount: 0, description: '' });
       await loadSavingsData();
+      onBalanceChange?.();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error && 'response' in err
         ? (err as { response?: { data?: { message?: string } } }).response?.data?.message

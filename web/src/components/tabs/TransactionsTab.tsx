@@ -5,9 +5,10 @@ import { TransactionType, TransactionCategory, type Transaction, type CreateTran
 
 interface TransactionsTabProps {
   childId: string;
+  onBalanceChange?: () => void;
 }
 
-export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => {
+export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId, onBalanceChange }) => {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,6 +68,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId }) => 
         notes: '',
       });
       await loadTransactions();
+      onBalanceChange?.();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error && 'response' in err
         ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
