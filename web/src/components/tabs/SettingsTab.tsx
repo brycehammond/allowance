@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { childrenApi } from '../../services/api';
-import type { Child, UpdateChildSettingsRequest } from '../../types';
-import { Save, DollarSign, PiggyBank, Percent } from 'lucide-react';
+import type { Child, UpdateChildSettingsRequest, DayOfWeek } from '../../types';
+import { Save, DollarSign, PiggyBank, Percent, Calendar } from 'lucide-react';
+
+const DAYS_OF_WEEK: { value: DayOfWeek; label: string }[] = [
+  { value: 'Sunday', label: 'Sunday' },
+  { value: 'Monday', label: 'Monday' },
+  { value: 'Tuesday', label: 'Tuesday' },
+  { value: 'Wednesday', label: 'Wednesday' },
+  { value: 'Thursday', label: 'Thursday' },
+  { value: 'Friday', label: 'Friday' },
+  { value: 'Saturday', label: 'Saturday' },
+];
 
 interface SettingsTabProps {
   childId: string;
@@ -16,6 +26,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
 
   // Form state
   const [weeklyAllowance, setWeeklyAllowance] = useState(child.weeklyAllowance.toString());
+  const [allowanceDay, setAllowanceDay] = useState<DayOfWeek | ''>(child.allowanceDay || '');
   const [savingsEnabled, setSavingsEnabled] = useState(child.savingsAccountEnabled);
   const [transferType, setTransferType] = useState<'Percentage' | 'FixedAmount'>(
     child.savingsTransferType || 'Percentage'
@@ -30,6 +41,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
   // Reset form when child changes
   useEffect(() => {
     setWeeklyAllowance(child.weeklyAllowance.toString());
+    setAllowanceDay(child.allowanceDay || '');
     setSavingsEnabled(child.savingsAccountEnabled);
     setTransferType(child.savingsTransferType || 'Percentage');
     setTransferPercentage((child.savingsTransferPercentage ?? 20).toString());
@@ -52,6 +64,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
 
       const data: UpdateChildSettingsRequest = {
         weeklyAllowance: allowanceValue,
+        allowanceDay: allowanceDay || null,
         savingsAccountEnabled: savingsEnabled,
       };
 
@@ -151,8 +164,35 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
               placeholder="0.00"
             />
           </div>
+        </div>
+
+        {/* Allowance Day */}
+        <div>
+          <label htmlFor="allowanceDay" className="block text-sm font-medium text-gray-700 mb-1">
+            Allowance Day
+          </label>
+          <div className="relative rounded-md shadow-sm">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              id="allowanceDay"
+              value={allowanceDay}
+              onChange={(e) => setAllowanceDay(e.target.value as DayOfWeek | '')}
+              className="block w-full rounded-md border-gray-300 pl-10 pr-3 py-2 focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+            >
+              <option value="">Any day (rolling 7-day window)</option>
+              {DAYS_OF_WEEK.map((day) => (
+                <option key={day.value} value={day.value}>
+                  {day.label}
+                </option>
+              ))}
+            </select>
+          </div>
           <p className="mt-1 text-sm text-gray-500">
-            Amount paid each week on allowance day
+            {allowanceDay
+              ? `Allowance is paid every ${allowanceDay}`
+              : 'Allowance is paid 7 days after the last payment'}
           </p>
         </div>
 

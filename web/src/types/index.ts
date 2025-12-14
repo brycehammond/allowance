@@ -35,6 +35,8 @@ export interface AuthResponse {
 }
 
 // Child
+export type DayOfWeek = 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday';
+
 export interface Child {
   id: string;
   firstName: string;
@@ -44,6 +46,7 @@ export interface Child {
   currentBalance: number;
   savingsBalance: number;
   lastAllowanceDate: string;
+  allowanceDay?: DayOfWeek | null;
   savingsAccountEnabled: boolean;
   savingsTransferType: 'Percentage' | 'FixedAmount';
   savingsTransferPercentage?: number;
@@ -67,6 +70,7 @@ export interface CreateChildRequest {
 
 export interface UpdateChildSettingsRequest {
   weeklyAllowance: number;
+  allowanceDay?: DayOfWeek | null;
   savingsAccountEnabled?: boolean;
   savingsTransferType?: 'Percentage' | 'FixedAmount';
   savingsTransferPercentage?: number;
