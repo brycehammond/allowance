@@ -33,6 +33,18 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
             entity.HasIndex(e => e.Name);
+
+            // Owner relationship - the parent who owns/controls the family
+            entity.HasOne(e => e.Owner)
+                  .WithMany()
+                  .HasForeignKey(e => e.OwnerId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            // Invitations relationship
+            entity.HasMany(e => e.Invitations)
+                  .WithOne(i => i.Family)
+                  .HasForeignKey(i => i.FamilyId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         // User configuration
@@ -250,10 +262,7 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.Property(e => e.LastName).IsRequired().HasMaxLength(50);
             entity.Property(e => e.Token).IsRequired().HasMaxLength(256);
 
-            entity.HasOne(e => e.Family)
-                  .WithMany()
-                  .HasForeignKey(e => e.FamilyId)
-                  .OnDelete(DeleteBehavior.Cascade);
+            // Family relationship is configured in Family entity
 
             entity.HasOne(e => e.InvitedBy)
                   .WithMany()

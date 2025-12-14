@@ -40,4 +40,13 @@ public interface IEmailService
     /// <param name="inviterName">Name of the person sending the invite</param>
     /// <param name="familyName">Name of the family being invited to</param>
     Task SendJoinFamilyRequestEmailAsync(string email, string token, string inviterName, string familyName);
+
+    /// <summary>
+    /// Send notification email when a parent is removed from a family
+    /// </summary>
+    /// <param name="email">Recipient email address</param>
+    /// <param name="parentFirstName">First name of the removed parent</param>
+    /// <param name="familyName">Name of the family they were removed from</param>
+    /// <param name="ownerName">Name of the family owner who removed them</param>
+    Task SendParentRemovedFromFamilyEmailAsync(string email, string parentFirstName, string familyName, string ownerName);
 }

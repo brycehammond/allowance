@@ -1,3 +1,4 @@
+using AllowanceTracker.DTOs;
 using AllowanceTracker.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +49,9 @@ public class FamiliesController : ControllerBase
             id = familyInfo.Id,
             name = familyInfo.Name,
             createdAt = familyInfo.CreatedAt,
+            ownerId = familyInfo.OwnerId,
+            ownerName = familyInfo.OwnerName,
+            isCurrentUserOwner = familyInfo.OwnerId == currentUser.Id,
             memberCount = familyInfo.MemberCount,
             childrenCount = familyInfo.ChildrenCount
         });
@@ -88,7 +92,8 @@ public class FamiliesController : ControllerBase
                 email = m.Email,
                 firstName = m.FirstName,
                 lastName = m.LastName,
-                role = m.Role
+                role = m.Role,
+                isOwner = m.IsOwner
             })
         });
     }
@@ -135,5 +140,136 @@ public class FamiliesController : ControllerBase
                 nextAllowanceDate = c.NextAllowanceDate
             })
         });
+    }
+
+    /// <summary>
+    /// Remove a co-parent from the family (owner only)
+    /// </summary>
+    /// <param name="userId">ID of the parent to remove</param>
+    /// <returns>No content on success</returns>
+    [HttpDelete("current/members/{userId:guid}")]
+    [Authorize(Roles = "Parent")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> RemoveParent(Guid userId)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            await _familyService.RemoveParentAsync(userId, currentUser.Id);
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = new
+                {
+                    code = "NOT_OWNER",
+                    message = ex.Message
+                }
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "REMOVE_FAILED",
+                    message = ex.Message
+                }
+            });
+        }
+    }
+
+    /// <summary>
+    /// Transfer family ownership to another parent (owner only)
+    /// </summary>
+    /// <param name="dto">Contains the ID of the new owner</param>
+    /// <returns>Updated family info</returns>
+    [HttpPost("current/transfer-ownership")]
+    [Authorize(Roles = "Parent")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<FamilyInfoDto>> TransferOwnership([FromBody] TransferOwnershipDto dto)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            var result = await _familyService.TransferOwnershipAsync(dto.NewOwnerId, currentUser.Id);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = new
+                {
+                    code = "NOT_OWNER",
+                    message = ex.Message
+                }
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "TRANSFER_FAILED",
+                    message = ex.Message
+                }
+            });
+        }
+    }
+
+    /// <summary>
+    /// Leave the family (non-owners only)
+    /// </summary>
+    /// <returns>No content on success</returns>
+    [HttpPost("current/leave")]
+    [Authorize(Roles = "Parent")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> LeaveFamily()
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            await _familyService.LeaveFamilyAsync(currentUser.Id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "LEAVE_FAILED",
+                    message = ex.Message
+                }
+            });
+        }
     }
 }

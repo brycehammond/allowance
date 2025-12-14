@@ -351,6 +351,31 @@ public class ParentInviteService : IParentInviteService
             $"{i.InvitedBy.FirstName} {i.InvitedBy.LastName}")).ToList();
     }
 
+    public async Task<int> ExpireOldInvitesAsync()
+    {
+        var expiredInvites = await _context.ParentInvites
+            .Where(i => i.Status == InviteStatus.Pending && i.ExpiresAt < DateTime.UtcNow)
+            .ToListAsync();
+
+        foreach (var invite in expiredInvites)
+        {
+            invite.Status = InviteStatus.Expired;
+
+            // If this was a new user invite, delete the placeholder user
+            if (!invite.IsExistingUser)
+            {
+                var placeholderUser = await _userManager.FindByEmailAsync(invite.InvitedEmail);
+                if (placeholderUser != null && !placeholderUser.EmailConfirmed)
+                {
+                    await _userManager.DeleteAsync(placeholderUser);
+                }
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        return expiredInvites.Count;
+    }
+
     private static string GenerateSecureToken()
     {
         var bytes = new byte[32];

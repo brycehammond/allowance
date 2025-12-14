@@ -182,4 +182,36 @@ public class AzureEmailService : IEmailService
 
         await SendEmailAsync(email, $"{inviterName} invited you to join {familyName}", htmlContent, plainTextContent);
     }
+
+    public async Task SendParentRemovedFromFamilyEmailAsync(string email, string parentFirstName, string familyName, string ownerName)
+    {
+        var htmlContent = $@"
+            <html>
+            <body>
+                <h2>You've Been Removed from {familyName}</h2>
+                <p>Hi {parentFirstName},</p>
+                <p>{ownerName} has removed you from the {familyName} family on Earn & Learn.</p>
+                <p>You will no longer have access to the family's allowance tracking data.</p>
+                <p>If you believe this was a mistake, please contact {ownerName} directly.</p>
+                <br/>
+                <p>Thanks,<br/>The Earn & Learn Team</p>
+            </body>
+            </html>";
+
+        var plainTextContent = $@"
+            You've Been Removed from {familyName}
+
+            Hi {parentFirstName},
+
+            {ownerName} has removed you from the {familyName} family on Earn & Learn.
+
+            You will no longer have access to the family's allowance tracking data.
+
+            If you believe this was a mistake, please contact {ownerName} directly.
+
+            Thanks,
+            The Earn & Learn Team";
+
+        await SendEmailAsync(email, $"You've been removed from {familyName}", htmlContent, plainTextContent);
+    }
 }

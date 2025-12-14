@@ -53,4 +53,10 @@ public interface IParentInviteService
     /// <param name="familyId">Family ID</param>
     /// <returns>List of pending invites</returns>
     Task<List<ParentInviteDto>> GetPendingInvitesAsync(Guid familyId);
+
+    /// <summary>
+    /// Mark expired invites as expired (for background job)
+    /// </summary>
+    /// <returns>Number of invites that were expired</returns>
+    Task<int> ExpireOldInvitesAsync();
 }

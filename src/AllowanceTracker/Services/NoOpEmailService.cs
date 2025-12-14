@@ -43,4 +43,12 @@ public class NoOpEmailService : IEmailService
             email, inviterName, familyName, token);
         return Task.CompletedTask;
     }
+
+    public Task SendParentRemovedFromFamilyEmailAsync(string email, string parentFirstName, string familyName, string ownerName)
+    {
+        _logger.LogWarning(
+            "NoOpEmailService: Would have sent removal notification email to {Email} ({Name}) from family {Family} by {Owner}",
+            email, parentFirstName, familyName, ownerName);
+        return Task.CompletedTask;
+    }
 }

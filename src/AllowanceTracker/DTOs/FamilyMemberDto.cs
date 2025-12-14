@@ -5,4 +5,5 @@ public record FamilyMemberDto(
     string Email,
     string FirstName,
     string LastName,
-    string Role);
+    string Role,
+    bool IsOwner);

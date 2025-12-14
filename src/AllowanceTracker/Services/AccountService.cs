@@ -34,32 +34,38 @@ public class AccountService : IAccountService
 
         try
         {
-            // Create family
+            // Create parent user first (to get the user Id for OwnerId)
+            var userId = Guid.NewGuid();
+            var familyId = Guid.NewGuid();
+
+            // Create family with owner set to the new user
             var family = new Family
             {
-                Id = Guid.NewGuid(),
+                Id = familyId,
                 Name = dto.FamilyName,
+                OwnerId = userId,
                 CreatedAt = DateTime.UtcNow
             };
-            _context.Families.Add(family);
-            await _context.SaveChangesAsync();
 
             // Create parent user
             var user = new ApplicationUser
             {
-                Id = Guid.NewGuid(),
+                Id = userId,
                 Email = dto.Email,
                 UserName = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Role = UserRole.Parent,
-                FamilyId = family.Id
+                FamilyId = familyId
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
 
             if (result.Succeeded)
             {
+                // Add family after user is created to satisfy FK constraint
+                _context.Families.Add(family);
+                await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
             else
