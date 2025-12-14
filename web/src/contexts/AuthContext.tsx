@@ -7,9 +7,10 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: LoginRequest) => Promise<void>;
+  login: (credentials: LoginRequest | AuthResponse) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,8 +57,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async (credentials: LoginRequest) => {
-    const response: AuthResponse = await authApi.login(credentials);
+  const login = async (credentials: LoginRequest | AuthResponse) => {
+    // Check if this is already an AuthResponse (has token property)
+    const response: AuthResponse = 'token' in credentials
+      ? credentials
+      : await authApi.login(credentials);
+
     const user: User = {
       id: response.userId,
       email: response.email,
@@ -69,6 +74,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.setItem('token', response.token);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
+  };
+
+  const refreshUser = async () => {
+    try {
+      const currentUser = await authApi.getCurrentUser();
+      setUser(currentUser);
+      localStorage.setItem('user', JSON.stringify(currentUser));
+    } catch {
+      // Token is invalid, clear auth
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+    }
   };
 
   const register = async (data: RegisterRequest) => {
@@ -99,6 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

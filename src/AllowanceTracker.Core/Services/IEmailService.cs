@@ -21,4 +21,23 @@ public interface IEmailService
     /// <param name="htmlContent">HTML email body</param>
     /// <param name="plainTextContent">Plain text email body</param>
     Task SendEmailAsync(string to, string subject, string htmlContent, string plainTextContent);
+
+    /// <summary>
+    /// Send a parent invite email to a new user
+    /// </summary>
+    /// <param name="email">Recipient email address</param>
+    /// <param name="token">Invite token</param>
+    /// <param name="inviterName">Name of the person sending the invite</param>
+    /// <param name="familyName">Name of the family being invited to</param>
+    /// <param name="recipientFirstName">First name of the recipient</param>
+    Task SendParentInviteEmailAsync(string email, string token, string inviterName, string familyName, string recipientFirstName);
+
+    /// <summary>
+    /// Send a join family request email to an existing user
+    /// </summary>
+    /// <param name="email">Recipient email address</param>
+    /// <param name="token">Invite token</param>
+    /// <param name="inviterName">Name of the person sending the invite</param>
+    /// <param name="familyName">Name of the family being invited to</param>
+    Task SendJoinFamilyRequestEmailAsync(string email, string token, string inviterName, string familyName);
 }

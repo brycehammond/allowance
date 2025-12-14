@@ -25,6 +25,13 @@ import {
   type WithdrawFromSavingsRequest,
   type UpdateSavingsConfigRequest,
   type CategoryInfo,
+  type SendParentInviteRequest,
+  type ParentInviteResponse,
+  type ValidateInviteResponse,
+  type AcceptInviteRequest,
+  type AcceptJoinRequest,
+  type AcceptJoinResponse,
+  type PendingInvite,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7071';
@@ -293,6 +300,40 @@ export const categoriesApi = {
     const response = await apiClient.get<CategoryInfo[]>('/api/v1/categories', {
       params: { type },
     });
+    return response.data;
+  },
+};
+
+// Parent Invites API
+export const invitesApi = {
+  sendInvite: async (data: SendParentInviteRequest): Promise<ParentInviteResponse> => {
+    const response = await apiClient.post<ParentInviteResponse>('/api/v1/invites/parent', data);
+    return response.data;
+  },
+
+  validateToken: async (token: string, email: string): Promise<ValidateInviteResponse> => {
+    const response = await apiClient.get<ValidateInviteResponse>('/api/v1/invites/validate', {
+      params: { token, email },
+    });
+    return response.data;
+  },
+
+  acceptInvite: async (data: AcceptInviteRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/api/v1/invites/accept', data);
+    return response.data;
+  },
+
+  acceptJoinRequest: async (data: AcceptJoinRequest): Promise<AcceptJoinResponse> => {
+    const response = await apiClient.post<AcceptJoinResponse>('/api/v1/invites/accept-join', data);
+    return response.data;
+  },
+
+  cancelInvite: async (inviteId: string): Promise<void> => {
+    await apiClient.delete(`/api/v1/invites/${inviteId}`);
+  },
+
+  getPendingInvites: async (): Promise<PendingInvite[]> => {
+    const response = await apiClient.get<PendingInvite[]>('/api/v1/invites');
     return response.data;
   },
 };

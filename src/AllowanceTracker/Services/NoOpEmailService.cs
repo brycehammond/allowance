@@ -27,4 +27,20 @@ public class NoOpEmailService : IEmailService
             to, subject);
         return Task.CompletedTask;
     }
+
+    public Task SendParentInviteEmailAsync(string email, string token, string inviterName, string familyName, string recipientFirstName)
+    {
+        _logger.LogWarning(
+            "NoOpEmailService: Would have sent parent invite email to {Email} from {Inviter} for family {Family}. Token: {Token}",
+            email, inviterName, familyName, token);
+        return Task.CompletedTask;
+    }
+
+    public Task SendJoinFamilyRequestEmailAsync(string email, string token, string inviterName, string familyName)
+    {
+        _logger.LogWarning(
+            "NoOpEmailService: Would have sent join family request email to {Email} from {Inviter} for family {Family}. Token: {Token}",
+            email, inviterName, familyName, token);
+        return Task.CompletedTask;
+    }
 }

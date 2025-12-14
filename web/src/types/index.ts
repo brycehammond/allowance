@@ -266,3 +266,57 @@ export interface CategoryInfo {
   displayName: string;
   transactionType: 'Credit' | 'Debit';
 }
+
+// Parent Invites
+export interface SendParentInviteRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface ParentInviteResponse {
+  inviteId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isExistingUser: boolean;
+  expiresAt: string;
+  message: string;
+}
+
+export interface ValidateInviteResponse {
+  isValid: boolean;
+  isExistingUser: boolean;
+  firstName: string | null;
+  lastName: string | null;
+  familyName: string | null;
+  inviterName: string | null;
+  errorMessage: string | null;
+}
+
+export interface AcceptInviteRequest {
+  token: string;
+  email: string;
+  password: string;
+}
+
+export interface AcceptJoinRequest {
+  token: string;
+}
+
+export interface AcceptJoinResponse {
+  familyId: string;
+  familyName: string;
+  message: string;
+}
+
+export interface PendingInvite {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isExistingUser: boolean;
+  status: 'Pending' | 'Accepted' | 'Expired' | 'Cancelled';
+  expiresAt: string;
+  createdAt: string;
+}

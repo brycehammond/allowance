@@ -21,6 +21,7 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<ChoreTask> Tasks { get; set; }
     public DbSet<TaskCompletion> TaskCompletions { get; set; }
     public DbSet<AllowanceAdjustment> AllowanceAdjustments { get; set; }
+    public DbSet<ParentInvite> ParentInvites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -238,6 +239,36 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.HasIndex(e => e.ChildId);
             entity.HasIndex(e => e.AdjustmentType);
             entity.HasIndex(e => e.CreatedAt);
+        });
+
+        // ParentInvite configuration
+        builder.Entity<ParentInvite>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.InvitedEmail).IsRequired().HasMaxLength(256);
+            entity.Property(e => e.FirstName).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.LastName).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Token).IsRequired().HasMaxLength(256);
+
+            entity.HasOne(e => e.Family)
+                  .WithMany()
+                  .HasForeignKey(e => e.FamilyId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.InvitedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.InvitedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.ExistingUser)
+                  .WithMany()
+                  .HasForeignKey(e => e.ExistingUserId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasIndex(e => e.Token).IsUnique();
+            entity.HasIndex(e => new { e.InvitedEmail, e.FamilyId });
+            entity.HasIndex(e => e.ExpiresAt);
+            entity.HasIndex(e => e.Status);
         });
     }
 

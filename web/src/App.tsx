@@ -10,6 +10,8 @@ import { ChildDetail } from './pages/ChildDetail';
 import { ChangePassword } from './pages/ChangePassword';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
+import { AcceptInvite } from './pages/AcceptInvite';
+import { AcceptJoinRequest } from './pages/AcceptJoinRequest';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/accept-invite" element={<AcceptInvite />} />
+          <Route path="/accept-join" element={<AcceptJoinRequest />} />
           <Route
             path="/dashboard"
             element={
