@@ -51,6 +51,7 @@ export interface Child {
   savingsTransferType: 'Percentage' | 'FixedAmount';
   savingsTransferPercentage?: number;
   savingsTransferAmount?: number;
+  savingsBalanceVisibleToChild: boolean;
 }
 
 export interface CreateChildRequest {
@@ -75,6 +76,7 @@ export interface UpdateChildSettingsRequest {
   savingsTransferType?: 'Percentage' | 'FixedAmount';
   savingsTransferPercentage?: number;
   savingsTransferAmount?: number;
+  savingsBalanceVisibleToChild?: boolean;
 }
 
 // Transaction

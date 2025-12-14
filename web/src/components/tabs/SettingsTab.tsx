@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { childrenApi } from '../../services/api';
 import type { Child, UpdateChildSettingsRequest, DayOfWeek } from '../../types';
-import { Save, DollarSign, PiggyBank, Percent, Calendar } from 'lucide-react';
+import { Save, DollarSign, PiggyBank, Percent, Calendar, Eye, EyeOff } from 'lucide-react';
 
 const DAYS_OF_WEEK: { value: DayOfWeek; label: string }[] = [
   { value: 'Sunday', label: 'Sunday' },
@@ -37,6 +37,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
   const [transferAmount, setTransferAmount] = useState(
     (child.savingsTransferAmount ?? 0).toString()
   );
+  const [savingsBalanceVisible, setSavingsBalanceVisible] = useState(
+    child.savingsBalanceVisibleToChild
+  );
 
   // Reset form when child changes
   useEffect(() => {
@@ -46,6 +49,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
     setTransferType(child.savingsTransferType || 'Percentage');
     setTransferPercentage((child.savingsTransferPercentage ?? 20).toString());
     setTransferAmount((child.savingsTransferAmount ?? 0).toString());
+    setSavingsBalanceVisible(child.savingsBalanceVisibleToChild);
   }, [child]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,6 +70,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
         weeklyAllowance: allowanceValue,
         allowanceDay: allowanceDay || null,
         savingsAccountEnabled: savingsEnabled,
+        savingsBalanceVisibleToChild: savingsBalanceVisible,
       };
 
       if (savingsEnabled) {
@@ -324,6 +329,40 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
                   <p className="text-lg font-semibold text-primary-600">{formatCurrency(exampleSavings)}</p>
                 </div>
               </div>
+            </div>
+
+            {/* Savings Balance Visibility Toggle */}
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center">
+                {savingsBalanceVisible ? (
+                  <Eye className="h-5 w-5 text-primary-500 mr-2" />
+                ) : (
+                  <EyeOff className="h-5 w-5 text-gray-400 mr-2" />
+                )}
+                <div>
+                  <label htmlFor="savingsBalanceVisible" className="text-sm font-medium text-gray-700">
+                    Show Savings Balance to Child
+                  </label>
+                  <p className="text-sm text-gray-500">
+                    {savingsBalanceVisible
+                      ? 'Child can see their savings balance'
+                      : 'Savings balance is hidden from child'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSavingsBalanceVisible(!savingsBalanceVisible)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                  savingsBalanceVisible ? 'bg-primary-600' : 'bg-gray-200'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    savingsBalanceVisible ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
           </div>
         )}
