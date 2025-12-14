@@ -332,6 +332,11 @@ export const invitesApi = {
     await apiClient.delete(`/api/v1/invites/${inviteId}`);
   },
 
+  resendInvite: async (inviteId: string): Promise<ParentInviteResponse> => {
+    const response = await apiClient.post<ParentInviteResponse>(`/api/v1/invites/${inviteId}/resend`);
+    return response.data;
+  },
+
   getPendingInvites: async (): Promise<PendingInvite[]> => {
     const response = await apiClient.get<PendingInvite[]>('/api/v1/invites');
     return response.data;

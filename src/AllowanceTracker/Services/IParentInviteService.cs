@@ -59,4 +59,12 @@ public interface IParentInviteService
     /// </summary>
     /// <returns>Number of invites that were expired</returns>
     Task<int> ExpireOldInvitesAsync();
+
+    /// <summary>
+    /// Resend an existing invite with a new token and extended expiration
+    /// </summary>
+    /// <param name="inviteId">ID of the invite to resend</param>
+    /// <param name="userId">ID of the user requesting the resend</param>
+    /// <returns>Updated invite response</returns>
+    Task<ParentInviteResponseDto> ResendInviteAsync(Guid inviteId, Guid userId);
 }

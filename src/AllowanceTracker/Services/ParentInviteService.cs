@@ -376,6 +376,63 @@ public class ParentInviteService : IParentInviteService
         return expiredInvites.Count;
     }
 
+    public async Task<ParentInviteResponseDto> ResendInviteAsync(Guid inviteId, Guid userId)
+    {
+        var invite = await _context.ParentInvites
+            .Include(i => i.Family)
+            .Include(i => i.InvitedBy)
+            .FirstOrDefaultAsync(i => i.Id == inviteId);
+
+        if (invite == null)
+        {
+            throw new InvalidOperationException("Invite not found.");
+        }
+
+        // Verify the user is from the same family
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null || user.FamilyId != invite.FamilyId)
+        {
+            throw new InvalidOperationException("You don't have permission to resend this invite.");
+        }
+
+        // Only allow resending pending or expired invites
+        if (invite.Status != InviteStatus.Pending && invite.Status != InviteStatus.Expired)
+        {
+            throw new InvalidOperationException("This invite cannot be resent.");
+        }
+
+        // Generate new token and extend expiration
+        invite.Token = GenerateSecureToken();
+        invite.ExpiresAt = DateTime.UtcNow.AddDays(InviteExpirationDays);
+        invite.Status = InviteStatus.Pending; // Reset to pending if it was expired
+
+        await _context.SaveChangesAsync();
+
+        // Resend the email
+        var inviterName = $"{invite.InvitedBy.FirstName} {invite.InvitedBy.LastName}";
+        if (invite.IsExistingUser)
+        {
+            await _emailService.SendJoinFamilyRequestEmailAsync(invite.InvitedEmail, invite.Token, inviterName, invite.Family.Name);
+        }
+        else
+        {
+            await _emailService.SendParentInviteEmailAsync(invite.InvitedEmail, invite.Token, inviterName, invite.Family.Name, invite.FirstName);
+        }
+
+        var message = invite.IsExistingUser
+            ? $"A new join request has been sent to {invite.InvitedEmail}."
+            : $"A new invitation has been sent to {invite.InvitedEmail}.";
+
+        return new ParentInviteResponseDto(
+            invite.Id,
+            invite.InvitedEmail,
+            invite.FirstName,
+            invite.LastName,
+            invite.IsExistingUser,
+            invite.ExpiresAt,
+            message);
+    }
+
     private static string GenerateSecureToken()
     {
         var bytes = new byte[32];

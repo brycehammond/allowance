@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { invitesApi } from '../services/api';
 import { Layout } from '../components/Layout';
-import { ArrowLeft, Mail, Clock, X, UserPlus } from 'lucide-react';
+import { ArrowLeft, Mail, Clock, X, UserPlus, RefreshCw } from 'lucide-react';
 import type { PendingInvite } from '../types';
 
 interface AddParentForm {
@@ -23,6 +23,7 @@ export const AddParent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(true);
+  const [resendingInviteId, setResendingInviteId] = useState<string | null>(null);
 
   useEffect(() => {
     loadPendingInvites();
@@ -80,6 +81,20 @@ export const AddParent: React.FC = () => {
       setPendingInvites(pendingInvites.filter(inv => inv.id !== inviteId));
     } catch (err) {
       console.error('Failed to cancel invite:', err);
+    }
+  };
+
+  const handleResendInvite = async (inviteId: string) => {
+    setResendingInviteId(inviteId);
+    try {
+      const result = await invitesApi.resendInvite(inviteId);
+      setSuccess(result.message);
+      loadPendingInvites(); // Reload to get updated expiration
+    } catch (err) {
+      console.error('Failed to resend invite:', err);
+      setError('Failed to resend invite. Please try again.');
+    } finally {
+      setResendingInviteId(null);
     }
   };
 
@@ -225,13 +240,23 @@ export const AddParent: React.FC = () => {
                       )}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleCancelInvite(invite.id)}
-                    className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                    title="Cancel invitation"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={() => handleResendInvite(invite.id)}
+                      disabled={resendingInviteId === invite.id}
+                      className="p-2 text-gray-400 hover:text-primary-600 transition-colors disabled:opacity-50"
+                      title="Resend invitation"
+                    >
+                      <RefreshCw className={`w-5 h-5 ${resendingInviteId === invite.id ? 'animate-spin' : ''}`} />
+                    </button>
+                    <button
+                      onClick={() => handleCancelInvite(invite.id)}
+                      className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                      title="Cancel invitation"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -149,6 +149,43 @@ public class ParentInviteController : ControllerBase
     }
 
     /// <summary>
+    /// Resend an existing invite with a new token and extended expiration
+    /// </summary>
+    /// <param name="inviteId">ID of the invite to resend</param>
+    /// <returns>Updated invite response</returns>
+    [HttpPost("{inviteId:guid}/resend")]
+    [Authorize(Roles = "Parent")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ParentInviteResponseDto>> ResendInvite(Guid inviteId)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            var result = await _inviteService.ResendInviteAsync(inviteId, currentUser.Id);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "RESEND_FAILED",
+                    message = ex.Message
+                }
+            });
+        }
+    }
+
+    /// <summary>
     /// Cancel a pending invite
     /// </summary>
     /// <param name="inviteId">ID of the invite to cancel</param>
