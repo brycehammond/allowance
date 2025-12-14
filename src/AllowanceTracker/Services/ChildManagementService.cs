@@ -69,7 +69,9 @@ public class ChildManagementService : IChildManagementService
             return null;
         }
 
-        var child = await _context.Children.FindAsync(childId);
+        var child = await _context.Children
+            .Include(c => c.User)
+            .FirstOrDefaultAsync(c => c.Id == childId);
         if (child == null)
         {
             return null;
