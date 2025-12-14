@@ -28,7 +28,6 @@
 		3A040680B290B051179F3A29 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5506D64405103E5E580665B /* APIService.swift */; };
 		3D4132A32423DA826EA367C0 /* EditWishListItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10C80566D753CD427E04E3E /* EditWishListItemView.swift */; };
 		3EE8FA585DB0D9BD8F62EB2A /* SavingsAccountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7890189081FC5ED1DB116247 /* SavingsAccountViewModel.swift */; };
-		3F525C67414880055B77747D /* AllowanceTracker.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = "TEMP_26B03E58-0748-4F35-B37E-A8A56D418135" /* AllowanceTracker.xcodeproj */; };
 		48B5B2A6A150AB2E5EE54776 /* CacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A4E4AD74BDB7D6EA81FB1E /* CacheService.swift */; };
 		497F30F6DC26460BA120E05B /* WishListItemModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3F09A5D7FEF92E37BC8985 /* WishListItemModelTests.swift */; };
 		4C5639B480606C92AB00F5F8 /* AnalyticsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701106D997975C68D9EFCB11 /* AnalyticsModels.swift */; };
@@ -36,7 +35,9 @@
 		52217E7D711D1DFB94B34125 /* CategoryBudget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0D765448D63F943EAAF4E7A /* CategoryBudget.swift */; };
 		53138129CB75D6856015BD6A /* WishListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B9C76F31A78298F467E9FB /* WishListViewModel.swift */; };
 		5347190EB1710AF34A8EC557 /* BudgetManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E5CF3F2866A2B5CA8664AD /* BudgetManagementView.swift */; };
+		553D5CA9D207C4E210BC84E8 /* AddChildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1299EFAD191CADB769E2D0FD /* AddChildView.swift */; };
 		5C47E70308B479B7C6DC33B1 /* CreateTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56440BE9A09B7564C8C3D1E /* CreateTransactionView.swift */; };
+		5E5D2D99D2AF257C110EBA81 /* ParentInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E1881BD7AEEFC3A9138793 /* ParentInvite.swift */; };
 		60A5EE98A3678AE99994268D /* WishListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFF4A42641FE66DE0A2062 /* WishListView.swift */; };
 		62FF61B6C0BAA96C618028D7 /* BudgetService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 327985BF8318900994DF769F /* BudgetService.swift */; };
 		64C8BB0E6B0CDC9B443F0A0F /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E12A204B1320B4DEBFFDCD /* DashboardViewModel.swift */; };
@@ -52,6 +53,7 @@
 		87A0D0ACEF546800F2EDCD18 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B36D34D38F4D2601399C065 /* RegisterView.swift */; };
 		89C348EDCE74FB93B214329B /* APIServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC41A25AD2CBF028E0A5366 /* APIServiceTests.swift */; };
 		9063EA56E65FC82507D28E5B /* SavingsAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EB8C0DB38054C6A4D517660 /* SavingsAccountView.swift */; };
+		93085AE6C0D90262EB38BABE /* InviteParentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F582FDE2583DFE20EC30A5 /* InviteParentView.swift */; };
 		9480B8B3FEBA7DBE61B571ED /* TransactionCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81833015C67E6DCDDA56F83F /* TransactionCategory.swift */; };
 		98A8681444ECB2AAC9CA249A /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8DB3551673BE9FED7F5484 /* DesignSystem.swift */; };
 		996CC3E277C691E34334D759 /* TransactionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8E1F5D6642E0FD57E90078 /* TransactionListView.swift */; };
@@ -86,6 +88,7 @@
 		EDBDC730CEFD37CFEFDB9D39 /* WishListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4605F2EC6F3B323BCF3719 /* WishListItem.swift */; };
 		EFAAA8B957184341801AA350 /* DashboardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59FD92769EDEBB1EF2D5C96 /* DashboardUITests.swift */; };
 		F06974BCEE86E50AB798D08D /* ResetPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9485050A48C7AC03338E32 /* ResetPasswordView.swift */; };
+		F2B164A06800478DC54AB56F /* AllowanceTracker.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = "TEMP_FDEDC21F-4426-48AB-B003-F0F62E0FE9F2" /* AllowanceTracker.xcodeproj */; };
 		F4E45E82B72406A2F999324E /* CategoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37170C845EF4D52B10190B0 /* CategoryPicker.swift */; };
 /* End PBXBuildFile section */
 
@@ -108,8 +111,10 @@
 
 /* Begin PBXFileReference section */
 		008DAC706AD778A64C7E9301 /* UserModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModelTests.swift; sourceTree = "<group>"; };
+		02F582FDE2583DFE20EC30A5 /* InviteParentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParentView.swift; sourceTree = "<group>"; };
 		068A8E9C3B125C83F4D800C7 /* AllowanceTracker.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AllowanceTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CB99FE810BEE0019FD17684 /* BudgetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetViewModel.swift; sourceTree = "<group>"; };
+		1299EFAD191CADB769E2D0FD /* AddChildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddChildView.swift; sourceTree = "<group>"; };
 		167E4898E383738FEAA76751 /* AccessibilityExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityExtensionsTests.swift; sourceTree = "<group>"; };
 		183103031CF1E4F14E054C56 /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 		1D7084DC5F7830E8EF884FEE /* TransactionModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModelTests.swift; sourceTree = "<group>"; };
@@ -138,6 +143,7 @@
 		6CD137FFBBE6D0B5CBB5A1D7 /* BudgetCheckResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCheckResult.swift; sourceTree = "<group>"; };
 		701106D997975C68D9EFCB11 /* AnalyticsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsModels.swift; sourceTree = "<group>"; };
 		72B36C73C8311CE858218313 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		73E1881BD7AEEFC3A9138793 /* ParentInvite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentInvite.swift; sourceTree = "<group>"; };
 		7890189081FC5ED1DB116247 /* SavingsAccountViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsAccountViewModel.swift; sourceTree = "<group>"; };
 		7B36D34D38F4D2601399C065 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		7C18B43B2A2B3149F5E8F6DE /* LoginUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginUITests.swift; sourceTree = "<group>"; };
@@ -191,8 +197,8 @@
 		F236DDAE8B3A3139A01EDE14 /* AllowanceTrackerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AllowanceTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F45D1965078A6166B2675BA0 /* CategorySpendingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySpendingChart.swift; sourceTree = "<group>"; };
 		F88034558BD809F2C0DCCE5E /* AllowanceTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowanceTrackerUITests.swift; sourceTree = "<group>"; };
-		"TEMP_26B03E58-0748-4F35-B37E-A8A56D418135" /* AllowanceTracker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AllowanceTracker.xcodeproj; sourceTree = "<group>"; };
-		"TEMP_CAEAD28C-6FC1-45BF-A1EC-3A732056B98E" /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
+		"TEMP_DF3FC2AA-C527-4F1C-90D2-B7D450ADA511" /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
+		"TEMP_FDEDC21F-4426-48AB-B003-F0F62E0FE9F2" /* AllowanceTracker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AllowanceTracker.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -213,6 +219,7 @@
 		0D75775C3E3206F8E1238D35 /* Dashboard */ = {
 			isa = PBXGroup;
 			children = (
+				1299EFAD191CADB769E2D0FD /* AddChildView.swift */,
 				A3FD252CEF73A9F38D75FD79 /* ChildSettingsView.swift */,
 				3155BFEE8DA052B565C203A5 /* DashboardView.swift */,
 			);
@@ -260,6 +267,7 @@
 				897D65145AE16FC2B360CE37 /* Budget */,
 				0021B78C9AF1A283B7BEFE65 /* Components */,
 				0D75775C3E3206F8E1238D35 /* Dashboard */,
+				A246821B7344388A84E6E06F /* Profile */,
 				FA2475A4D2AD3961B6D8FCA5 /* Savings */,
 				F250324F929A427D09E736C3 /* Transactions */,
 				57CCA6D1A036D57E548482E1 /* WishList */,
@@ -442,6 +450,14 @@
 			path = AccessibilityTests;
 			sourceTree = "<group>";
 		};
+		A246821B7344388A84E6E06F /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				02F582FDE2583DFE20EC30A5 /* InviteParentView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
 		BB1CD8C101BCF29887ADE586 /* Network */ = {
 			isa = PBXGroup;
 			children = (
@@ -482,6 +498,7 @@
 				E0D765448D63F943EAAF4E7A /* CategoryBudget.swift */,
 				44AB75FD1281D4DCF728BEBE /* CategorySpending.swift */,
 				BD55683925400343BF99664F /* Child.swift */,
+				73E1881BD7AEEFC3A9138793 /* ParentInvite.swift */,
 				AEFC1247011C4421DB4A8BE9 /* SavingsAccount.swift */,
 				A8B64E88012242818DF6F545 /* Transaction.swift */,
 				81833015C67E6DCDDA56F83F /* TransactionCategory.swift */,
@@ -518,11 +535,11 @@
 			path = Analytics;
 			sourceTree = "<group>";
 		};
-		"TEMP_9B853331-15FE-4209-AD78-E2BFA7B79990" /* AllowanceTracker */ = {
+		"TEMP_5B09575C-71E4-45C2-A364-3B639F0E7579" /* AllowanceTracker */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_26B03E58-0748-4F35-B37E-A8A56D418135" /* AllowanceTracker.xcodeproj */,
-				"TEMP_CAEAD28C-6FC1-45BF-A1EC-3A732056B98E" /* .gitignore */,
+				"TEMP_FDEDC21F-4426-48AB-B003-F0F62E0FE9F2" /* AllowanceTracker.xcodeproj */,
+				"TEMP_DF3FC2AA-C527-4F1C-90D2-B7D450ADA511" /* .gitignore */,
 				82EF93D3E39C4015F68E6008 /* ViewModels */,
 				8E54C771B9AA88A28FC8EC3E /* DesignSystem */,
 				DBA727681DCAEBD4000F973F /* App */,
@@ -635,7 +652,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3F525C67414880055B77747D /* AllowanceTracker.xcodeproj in Resources */,
+				F2B164A06800478DC54AB56F /* AllowanceTracker.xcodeproj in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -670,6 +687,7 @@
 				3A040680B290B051179F3A29 /* APIService.swift in Sources */,
 				06BE24FED9B62E323CE2EA21 /* APIServiceProtocol.swift in Sources */,
 				355060DED677074C60F22D78 /* AddBudgetSheet.swift in Sources */,
+				553D5CA9D207C4E210BC84E8 /* AddChildView.swift in Sources */,
 				2DF05441F262D2E24FCFB649 /* AddWishListItemView.swift in Sources */,
 				330A2BC98A9A87C441D1285E /* AllowanceTrackerApp.swift in Sources */,
 				4C5639B480606C92AB00F5F8 /* AnalyticsModels.swift in Sources */,
@@ -706,10 +724,12 @@
 				3D4132A32423DA826EA367C0 /* EditWishListItemView.swift in Sources */,
 				B621444A0E49605D7B961BB9 /* Extensions.swift in Sources */,
 				10BE0F019ADB320165C1FF7D /* ForgotPasswordView.swift in Sources */,
+				93085AE6C0D90262EB38BABE /* InviteParentView.swift in Sources */,
 				24528A8EDD7DE83C89A2C53C /* KeychainService.swift in Sources */,
 				B92DB03EE6F791F788C2372A /* KeychainServiceProtocol.swift in Sources */,
 				99B0A025057959EF842E1A2A /* LoginView.swift in Sources */,
 				B7B65044BB8C798BB9684F99 /* MainTabView.swift in Sources */,
+				5E5D2D99D2AF257C110EBA81 /* ParentInvite.swift in Sources */,
 				B374C06FF93E8F0BBC2774A6 /* ProfileView.swift in Sources */,
 				87A0D0ACEF546800F2EDCD18 /* RegisterView.swift in Sources */,
 				F06974BCEE86E50AB798D08D /* ResetPasswordView.swift in Sources */,

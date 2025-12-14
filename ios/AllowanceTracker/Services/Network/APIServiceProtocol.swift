@@ -13,6 +13,7 @@ protocol APIServiceProtocol {
     // MARK: - Children
     func getChildren() async throws -> [Child]
     func getChild(id: UUID) async throws -> Child
+    func createChild(_ request: CreateChildRequest) async throws -> Child
     func updateChildSettings(childId: UUID, _ request: UpdateChildSettingsRequest) async throws -> UpdateChildSettingsResponse
 
     // MARK: - Transactions
@@ -42,4 +43,9 @@ protocol APIServiceProtocol {
     func depositToSavings(accountId: UUID, _ request: DepositRequest) async throws -> SavingsTransaction
     func withdrawFromSavings(accountId: UUID, _ request: WithdrawRequest) async throws -> SavingsTransaction
     func getSavingsTransactions(forAccount accountId: UUID) async throws -> [SavingsTransaction]
+
+    // MARK: - Parent Invites
+    func sendParentInvite(_ request: SendParentInviteRequest) async throws -> ParentInviteResponse
+    func getPendingInvites() async throws -> [PendingInvite]
+    func cancelInvite(inviteId: String) async throws
 }

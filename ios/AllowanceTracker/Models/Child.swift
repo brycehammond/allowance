@@ -6,8 +6,14 @@ struct Child: Codable, Identifiable, Equatable {
     let lastName: String
     let weeklyAllowance: Decimal
     let currentBalance: Decimal
+    let savingsBalance: Decimal
     let lastAllowanceDate: Date?
     var allowanceDay: Weekday? = nil
+    let savingsAccountEnabled: Bool
+    let savingsTransferType: SavingsTransferType
+    let savingsTransferPercentage: Decimal?
+    let savingsTransferAmount: Decimal?
+    let savingsBalanceVisibleToChild: Bool
 
     var fullName: String {
         "\(firstName) \(lastName)"
@@ -17,11 +23,43 @@ struct Child: Codable, Identifiable, Equatable {
         currentBalance.currencyFormatted
     }
 
+    var formattedSavingsBalance: String {
+        savingsBalance.currencyFormatted
+    }
+
+    var formattedTotalBalance: String {
+        (currentBalance + savingsBalance).currencyFormatted
+    }
+
+    var totalBalance: Decimal {
+        currentBalance + savingsBalance
+    }
+
     var allowanceDayDisplay: String {
         guard let day = allowanceDay else {
             return "Rolling 7-day window"
         }
         return "Every \(day.rawValue)"
+    }
+
+    /// Calculate example savings amount based on current configuration
+    var exampleSavingsAmount: Decimal {
+        guard savingsAccountEnabled else { return 0 }
+        switch savingsTransferType {
+        case .percentage:
+            let percentage = savingsTransferPercentage ?? 0
+            return weeklyAllowance * percentage / 100
+        case .fixedAmount:
+            let amount = savingsTransferAmount ?? 0
+            return min(amount, weeklyAllowance)
+        case .none:
+            return 0
+        }
+    }
+
+    /// Calculate example spending amount based on current configuration
+    var exampleSpendingAmount: Decimal {
+        weeklyAllowance - exampleSavingsAmount
     }
 }
 
@@ -45,6 +83,7 @@ struct UpdateChildSettingsRequest: Codable {
     let savingsTransferPercentage: Decimal?
     let savingsTransferAmount: Decimal?
     let allowanceDay: Weekday?
+    let savingsBalanceVisibleToChild: Bool?
 
     init(
         weeklyAllowance: Decimal,
@@ -52,7 +91,8 @@ struct UpdateChildSettingsRequest: Codable {
         savingsTransferType: SavingsTransferType = .percentage,
         savingsTransferPercentage: Decimal? = nil,
         savingsTransferAmount: Decimal? = nil,
-        allowanceDay: Weekday? = nil
+        allowanceDay: Weekday? = nil,
+        savingsBalanceVisibleToChild: Bool? = nil
     ) {
         self.weeklyAllowance = weeklyAllowance
         self.savingsAccountEnabled = savingsAccountEnabled
@@ -60,7 +100,23 @@ struct UpdateChildSettingsRequest: Codable {
         self.savingsTransferPercentage = savingsTransferPercentage
         self.savingsTransferAmount = savingsTransferAmount
         self.allowanceDay = allowanceDay
+        self.savingsBalanceVisibleToChild = savingsBalanceVisibleToChild
     }
+}
+
+/// Request to create a new child account
+struct CreateChildRequest: Codable {
+    let email: String
+    let password: String
+    let firstName: String
+    let lastName: String
+    let weeklyAllowance: Decimal
+    let savingsAccountEnabled: Bool
+    let savingsTransferType: SavingsTransferType
+    let savingsTransferPercentage: Decimal?
+    let savingsTransferAmount: Decimal?
+    let initialBalance: Decimal?
+    let initialSavingsBalance: Decimal?
 }
 
 enum SavingsTransferType: String, Codable {

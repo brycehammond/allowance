@@ -7,11 +7,16 @@ struct DashboardView: View {
 
     @StateObject private var viewModel: DashboardViewModel
     @EnvironmentObject private var authViewModel: AuthViewModel
+    @State private var showingAddChild = false
 
     // MARK: - Computed Properties
 
     private var isChild: Bool {
         authViewModel.currentUser?.role == .child
+    }
+
+    private var isParent: Bool {
+        authViewModel.currentUser?.role == .parent
     }
 
     // MARK: - Initialization
@@ -41,6 +46,16 @@ struct DashboardView: View {
             }
             .navigationTitle(isChild ? "" : "Dashboard")
             .toolbar {
+                if isParent && !viewModel.children.isEmpty {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            showingAddChild = true
+                        } label: {
+                            Label("Add Child", systemImage: "plus")
+                        }
+                    }
+                }
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         Task {
@@ -48,6 +63,17 @@ struct DashboardView: View {
                         }
                     } label: {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAddChild) {
+                AddChildView()
+            }
+            .onChange(of: showingAddChild) { _, isShowing in
+                if !isShowing {
+                    // Refresh children list when sheet is dismissed
+                    Task {
+                        await viewModel.refresh()
                     }
                 }
             }
@@ -125,13 +151,13 @@ struct DashboardView: View {
             }
 
             Button {
-                // TODO: Navigate to add child screen
+                showingAddChild = true
             } label: {
                 Label("Add Child", systemImage: "plus.circle.fill")
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
+                    .background(DesignSystem.Colors.primary)
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
@@ -148,49 +174,138 @@ struct DashboardView: View {
 struct ChildDetailView: View {
     let child: Child
     @EnvironmentObject private var authViewModel: AuthViewModel
+    @State private var selectedTab = 0
 
     private var isParent: Bool {
         authViewModel.currentUser?.isParent ?? false
     }
 
     var body: some View {
-        TabView {
-            // Transactions tab
-            TransactionListView(childId: child.id)
-                .tabItem {
-                    Label("Transactions", systemImage: "list.bullet")
-                }
+        VStack(spacing: 0) {
+            // Header with balance breakdown
+            childHeaderView
 
-            // Savings tab (Parent only)
-            if isParent {
-                SavingsAccountView(childId: child.id)
+            // Tab view
+            TabView(selection: $selectedTab) {
+                // Transactions tab
+                TransactionListView(childId: child.id)
                     .tabItem {
-                        Label("Savings", systemImage: "banknote")
+                        Label("Transactions", systemImage: "receipt")
                     }
-            }
+                    .tag(0)
 
-            // Wish List tab
-            WishListView(childId: child.id)
-                .tabItem {
-                    Label("Wish List", systemImage: "star")
-                }
-
-            // Analytics tab
-            AnalyticsView(childId: child.id)
-                .tabItem {
-                    Label("Analytics", systemImage: "chart.bar")
-                }
-
-            // Settings tab (Parent only)
-            if isParent {
-                ChildSettingsView(childId: child.id, apiService: APIService())
+                // Wish List tab
+                WishListView(childId: child.id)
                     .tabItem {
-                        Label("Settings", systemImage: "gearshape")
+                        Label("Wish List", systemImage: "star")
                     }
+                    .tag(1)
+
+                // Analytics tab
+                AnalyticsView(childId: child.id)
+                    .tabItem {
+                        Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
+                    }
+                    .tag(2)
+
+                // Savings tab (Parent only)
+                if isParent {
+                    SavingsAccountView(childId: child.id)
+                        .tabItem {
+                            Label("Savings", systemImage: "banknote")
+                        }
+                        .tag(3)
+                }
+
+                // Settings tab (Parent only)
+                if isParent {
+                    ChildSettingsView(childId: child.id, apiService: APIService())
+                        .tabItem {
+                            Label("Settings", systemImage: "gearshape")
+                        }
+                        .tag(4)
+                }
             }
+            .tint(DesignSystem.Colors.primary)
         }
         .navigationTitle(child.fullName)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // MARK: - Child Header View
+
+    private var childHeaderView: some View {
+        VStack(spacing: 12) {
+            HStack(alignment: .center, spacing: 16) {
+                // Avatar
+                ZStack {
+                    Circle()
+                        .fill(DesignSystem.Colors.primary.opacity(0.15))
+                        .frame(width: 56, height: 56)
+                    Text(String(child.firstName.prefix(1)))
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(DesignSystem.Colors.primary)
+                }
+
+                // Name and allowance
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(child.fullName)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                    Text("Weekly: \(child.weeklyAllowance.currencyFormatted)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                // Total balance
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(child.formattedTotalBalance)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .fontDesign(.monospaced)
+                    Text("Total Balance")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            // Balance breakdown
+            HStack(spacing: 24) {
+                Spacer()
+
+                // Spending balance
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(child.formattedBalance)
+                        .font(.headline)
+                        .fontDesign(.monospaced)
+                    Text("Spending")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                // Savings balance
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(child.formattedSavingsBalance)
+                        .font(.headline)
+                        .fontDesign(.monospaced)
+                        .foregroundStyle(DesignSystem.Colors.primary)
+                    Text("Savings")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .overlay(
+            Rectangle()
+                .frame(height: 1)
+                .foregroundStyle(Color(.separator)),
+            alignment: .bottom
+        )
     }
 }
 
@@ -235,8 +350,14 @@ struct ChildDetailView: View {
                 lastName: "Smith",
                 weeklyAllowance: 10.00,
                 currentBalance: 125.50,
+                savingsBalance: 45.00,
                 lastAllowanceDate: Date(),
-                allowanceDay: .friday
+                allowanceDay: .friday,
+                savingsAccountEnabled: true,
+                savingsTransferType: .percentage,
+                savingsTransferPercentage: 20,
+                savingsTransferAmount: nil,
+                savingsBalanceVisibleToChild: true
             )
         )
         .environmentObject({
@@ -264,8 +385,14 @@ struct ChildDetailView: View {
                 lastName: "Smith",
                 weeklyAllowance: 10.00,
                 currentBalance: 125.50,
+                savingsBalance: 30.00,
                 lastAllowanceDate: Date(),
-                allowanceDay: nil
+                allowanceDay: nil,
+                savingsAccountEnabled: true,
+                savingsTransferType: .percentage,
+                savingsTransferPercentage: 20,
+                savingsTransferAmount: nil,
+                savingsBalanceVisibleToChild: true
             )
         )
         .environmentObject({

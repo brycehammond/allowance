@@ -7,6 +7,12 @@ struct ProfileView: View {
 
     @EnvironmentObject private var authViewModel: AuthViewModel
     @State private var showingLogoutConfirmation = false
+    @State private var showingAddChild = false
+    @State private var showingInviteParent = false
+
+    private var isParent: Bool {
+        authViewModel.currentUser?.role == .parent
+    }
 
     // MARK: - Body
 
@@ -40,6 +46,23 @@ struct ProfileView: View {
                                 value: familyId.uuidString,
                                 icon: "house.fill"
                             )
+                        }
+                    }
+                }
+
+                // Family Management Section (Parent only)
+                if isParent {
+                    Section("Family Management") {
+                        Button {
+                            showingAddChild = true
+                        } label: {
+                            Label("Add Child", systemImage: "person.badge.plus")
+                        }
+
+                        Button {
+                            showingInviteParent = true
+                        } label: {
+                            Label("Invite Co-Parent", systemImage: "person.2.badge.gearshape")
                         }
                     }
                 }
@@ -94,6 +117,12 @@ struct ProfileView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Are you sure you want to sign out?")
+            }
+            .sheet(isPresented: $showingAddChild) {
+                AddChildView()
+            }
+            .sheet(isPresented: $showingInviteParent) {
+                InviteParentView()
             }
         }
     }

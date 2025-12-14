@@ -14,10 +14,17 @@ struct ChildSettingsView: View {
     @State private var errorMessage: String?
     @State private var showSuccessAlert = false
 
-    // Form fields
+    // Allowance form fields
     @State private var weeklyAllowance: String = ""
     @State private var selectedAllowanceDay: Weekday? = nil
     @State private var useScheduledDay: Bool = false
+
+    // Savings form fields
+    @State private var savingsAccountEnabled: Bool = false
+    @State private var savingsTransferType: SavingsTransferType = .percentage
+    @State private var savingsTransferPercentage: String = "20"
+    @State private var savingsTransferAmount: String = "2.00"
+    @State private var savingsBalanceVisibleToChild: Bool = true
 
     // MARK: - Body
 
@@ -33,96 +40,24 @@ struct ChildSettingsView: View {
                 }
             } else if let child = child {
                 // Allowance section
-                Section("Allowance Settings") {
-                    // Weekly allowance amount
-                    HStack {
-                        Text("Weekly Allowance")
-                        Spacer()
-                        TextField("Amount", text: $weeklyAllowance)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 100)
-                    }
+                allowanceSettingsSection
 
-                    // Allowance day toggle
-                    Toggle("Schedule Specific Day", isOn: $useScheduledDay)
-                        .onChange(of: useScheduledDay) { oldValue, newValue in
-                            if !newValue {
-                                selectedAllowanceDay = nil
-                            } else if selectedAllowanceDay == nil {
-                                selectedAllowanceDay = .friday
-                            }
-                        }
+                // Savings section
+                savingsSettingsSection
 
-                    // Day picker (only shown if toggle is on)
-                    if useScheduledDay {
-                        Picker("Allowance Day", selection: $selectedAllowanceDay) {
-                            ForEach(Weekday.allCases, id: \.self) { day in
-                                Text(day.rawValue).tag(day as Weekday?)
-                            }
-                        }
-                        .pickerStyle(.menu)
-
-                        Text("Allowance will be paid every \(selectedAllowanceDay?.rawValue ?? ""). If disabled, allowance is paid 7 days after the last payment.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text("Allowance will be paid 7 days after the last payment (rolling window).")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                // Savings transfer settings
+                if savingsAccountEnabled {
+                    savingsTransferSection
                 }
 
                 // Current status section
-                Section("Current Status") {
-                    HStack {
-                        Text("Current Balance")
-                        Spacer()
-                        Text(child.formattedBalance)
-                            .fontDesign(.monospaced)
-                            .fontWeight(.semibold)
-                    }
-
-                    if let lastDate = child.lastAllowanceDate {
-                        HStack {
-                            Text("Last Allowance")
-                            Spacer()
-                            Text(lastDate.formattedDisplay)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
-                    HStack {
-                        Text("Current Schedule")
-                        Spacer()
-                        Text(child.allowanceDayDisplay)
-                            .foregroundStyle(.secondary)
-                    }
-                }
+                currentStatusSection(child: child)
 
                 // Save button
-                Section {
-                    Button {
-                        Task {
-                            await saveSettings()
-                        }
-                    } label: {
-                        HStack {
-                            Spacer()
-                            if isSaving {
-                                ProgressView()
-                                    .padding(.trailing, 8)
-                            }
-                            Text("Save Changes")
-                                .fontWeight(.semibold)
-                            Spacer()
-                        }
-                    }
-                    .disabled(isSaving || !isFormValid)
-                }
+                saveButtonSection
             }
         }
-        .navigationTitle("Child Settings")
+        .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await loadChild()
@@ -143,6 +78,213 @@ struct ChildSettingsView: View {
         }
     }
 
+    // MARK: - View Components
+
+    private var allowanceSettingsSection: some View {
+        Section("Allowance Settings") {
+            // Weekly allowance amount
+            HStack {
+                Text("Weekly Allowance")
+                Spacer()
+                Text("$")
+                    .foregroundStyle(.secondary)
+                TextField("Amount", text: $weeklyAllowance)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 80)
+            }
+
+            // Allowance day toggle
+            Toggle("Schedule Specific Day", isOn: $useScheduledDay)
+                .onChange(of: useScheduledDay) { _, newValue in
+                    if !newValue {
+                        selectedAllowanceDay = nil
+                    } else if selectedAllowanceDay == nil {
+                        selectedAllowanceDay = .friday
+                    }
+                }
+
+            // Day picker (only shown if toggle is on)
+            if useScheduledDay {
+                Picker("Allowance Day", selection: $selectedAllowanceDay) {
+                    ForEach(Weekday.allCases, id: \.self) { day in
+                        Text(day.rawValue).tag(day as Weekday?)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+
+            Text(useScheduledDay
+                 ? "Allowance will be paid every \(selectedAllowanceDay?.rawValue ?? "Friday")"
+                 : "Allowance is paid 7 days after the last payment")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var savingsSettingsSection: some View {
+        Section {
+            Toggle(isOn: $savingsAccountEnabled) {
+                HStack {
+                    Image(systemName: "banknote")
+                        .foregroundStyle(DesignSystem.Colors.primary)
+                    VStack(alignment: .leading) {
+                        Text("Automatic Savings")
+                            .font(.body)
+                        Text("Transfer part of each allowance to savings")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        } header: {
+            Text("Savings Account")
+        }
+    }
+
+    private var savingsTransferSection: some View {
+        Section("Transfer Settings") {
+            // Transfer type picker
+            Picker("Transfer Type", selection: $savingsTransferType) {
+                Text("Percentage").tag(SavingsTransferType.percentage)
+                Text("Fixed Amount").tag(SavingsTransferType.fixedAmount)
+            }
+            .pickerStyle(.segmented)
+
+            // Percentage input
+            if savingsTransferType == .percentage {
+                HStack {
+                    Text("Savings Percentage")
+                    Spacer()
+                    TextField("", text: $savingsTransferPercentage)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 60)
+                    Text("%")
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                // Fixed amount input
+                HStack {
+                    Text("Savings Amount")
+                    Spacer()
+                    Text("$")
+                        .foregroundStyle(.secondary)
+                    TextField("", text: $savingsTransferAmount)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 80)
+                }
+            }
+
+            // Weekly breakdown preview
+            if let preview = weeklyBreakdownPreview {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Weekly Breakdown Preview")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("To Spending")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(preview.spending)
+                                .font(.headline)
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing) {
+                            Text("To Savings")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(preview.savings)
+                                .font(.headline)
+                                .foregroundStyle(DesignSystem.Colors.primary)
+                        }
+                    }
+                }
+                .padding(.vertical, 8)
+            }
+
+            // Visibility toggle
+            Toggle(isOn: $savingsBalanceVisibleToChild) {
+                HStack {
+                    Image(systemName: savingsBalanceVisibleToChild ? "eye" : "eye.slash")
+                        .foregroundStyle(savingsBalanceVisibleToChild ? DesignSystem.Colors.primary : .secondary)
+                    VStack(alignment: .leading) {
+                        Text("Show Savings to Child")
+                            .font(.body)
+                        Text(savingsBalanceVisibleToChild
+                             ? "Child can see their savings balance"
+                             : "Savings balance is hidden from child")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private func currentStatusSection(child: Child) -> some View {
+        Section("Current Status") {
+            HStack {
+                Text("Spending Balance")
+                Spacer()
+                Text(child.formattedBalance)
+                    .fontDesign(.monospaced)
+                    .fontWeight(.semibold)
+            }
+
+            HStack {
+                Text("Savings Balance")
+                Spacer()
+                Text(child.formattedSavingsBalance)
+                    .fontDesign(.monospaced)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(DesignSystem.Colors.primary)
+            }
+
+            HStack {
+                Text("Total Balance")
+                Spacer()
+                Text(child.formattedTotalBalance)
+                    .fontDesign(.monospaced)
+                    .fontWeight(.bold)
+            }
+
+            if let lastDate = child.lastAllowanceDate {
+                HStack {
+                    Text("Last Allowance")
+                    Spacer()
+                    Text(lastDate.formattedDisplay)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private var saveButtonSection: some View {
+        Section {
+            Button {
+                Task {
+                    await saveSettings()
+                }
+            } label: {
+                HStack {
+                    Spacer()
+                    if isSaving {
+                        ProgressView()
+                            .padding(.trailing, 8)
+                    }
+                    Text("Save Changes")
+                        .fontWeight(.semibold)
+                    Spacer()
+                }
+            }
+            .disabled(isSaving || !isFormValid)
+        }
+    }
+
     // MARK: - Computed Properties
 
     private var isFormValid: Bool {
@@ -150,6 +292,28 @@ struct ChildSettingsView: View {
             return false
         }
         return amount >= 0 && amount <= 10000
+    }
+
+    private var weeklyBreakdownPreview: (spending: String, savings: String)? {
+        guard let allowance = Decimal(string: weeklyAllowance), allowance > 0 else {
+            return nil
+        }
+
+        let savingsAmount: Decimal
+        if savingsTransferType == .percentage {
+            let percentage = Decimal(string: savingsTransferPercentage) ?? 0
+            savingsAmount = allowance * percentage / 100
+        } else {
+            let amount = Decimal(string: savingsTransferAmount) ?? 0
+            savingsAmount = min(amount, allowance)
+        }
+
+        let spendingAmount = allowance - savingsAmount
+
+        return (
+            spending: spendingAmount.currencyFormatted,
+            savings: savingsAmount.currencyFormatted
+        )
     }
 
     // MARK: - Methods
@@ -162,10 +326,21 @@ struct ChildSettingsView: View {
             let loadedChild = try await apiService.getChild(id: childId)
             child = loadedChild
 
-            // Initialize form fields
+            // Initialize allowance form fields
             weeklyAllowance = String(describing: loadedChild.weeklyAllowance)
             selectedAllowanceDay = loadedChild.allowanceDay
             useScheduledDay = loadedChild.allowanceDay != nil
+
+            // Initialize savings form fields
+            savingsAccountEnabled = loadedChild.savingsAccountEnabled
+            savingsTransferType = loadedChild.savingsTransferType
+            if let percentage = loadedChild.savingsTransferPercentage {
+                savingsTransferPercentage = String(describing: percentage)
+            }
+            if let amount = loadedChild.savingsTransferAmount {
+                savingsTransferAmount = String(describing: amount)
+            }
+            savingsBalanceVisibleToChild = loadedChild.savingsBalanceVisibleToChild
         } catch {
             errorMessage = "Failed to load child settings"
         }
@@ -185,11 +360,12 @@ struct ChildSettingsView: View {
         do {
             let request = UpdateChildSettingsRequest(
                 weeklyAllowance: amount,
-                savingsAccountEnabled: false,
-                savingsTransferType: .none,
-                savingsTransferPercentage: nil,
-                savingsTransferAmount: nil,
-                allowanceDay: useScheduledDay ? selectedAllowanceDay : nil
+                savingsAccountEnabled: savingsAccountEnabled,
+                savingsTransferType: savingsAccountEnabled ? savingsTransferType : .none,
+                savingsTransferPercentage: savingsTransferType == .percentage ? Decimal(string: savingsTransferPercentage) : nil,
+                savingsTransferAmount: savingsTransferType == .fixedAmount ? Decimal(string: savingsTransferAmount) : nil,
+                allowanceDay: useScheduledDay ? selectedAllowanceDay : nil,
+                savingsBalanceVisibleToChild: savingsBalanceVisibleToChild
             )
 
             _ = try await apiService.updateChildSettings(childId: childId, request)

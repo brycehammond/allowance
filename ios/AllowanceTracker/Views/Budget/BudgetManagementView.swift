@@ -127,8 +127,14 @@ private struct BudgetManagementViewPreview: View {
                 lastName: "Johnson",
                 weeklyAllowance: 10.00,
                 currentBalance: 50.00,
+                savingsBalance: 25.00,
                 lastAllowanceDate: Date(),
-                allowanceDay: .monday
+                allowanceDay: .monday,
+                savingsAccountEnabled: true,
+                savingsTransferType: .percentage,
+                savingsTransferPercentage: 20,
+                savingsTransferAmount: nil,
+                savingsBalanceVisibleToChild: true
             )
         )
     }

@@ -170,6 +170,17 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         return try await performRequest(urlRequest)
     }
 
+    /// Create a new child account
+    /// - Parameter request: Child creation request with account and settings details
+    /// - Returns: Created child object
+    /// - Throws: APIError if request fails
+    func createChild(_ request: CreateChildRequest) async throws -> Child {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/auth/register/child")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
     /// Update child settings including allowance, allowanceDay, and savings configuration
     /// - Parameters:
     ///   - childId: Child's unique identifier
@@ -409,6 +420,37 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(childId.uuidString)/summary")
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         return try await performRequest(urlRequest)
+    }
+
+    // MARK: - Parent Invites
+
+    /// Send an invite to a co-parent
+    /// - Parameter request: Invite request with email and name
+    /// - Returns: Invite response with details
+    /// - Throws: APIError if request fails
+    func sendParentInvite(_ request: SendParentInviteRequest) async throws -> ParentInviteResponse {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/invites/parent")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get all pending invites for the current family
+    /// - Returns: Array of pending invites
+    /// - Throws: APIError if request fails
+    func getPendingInvites() async throws -> [PendingInvite] {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/invites")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Cancel a pending invite
+    /// - Parameter inviteId: Invite identifier to cancel
+    /// - Throws: APIError if request fails
+    func cancelInvite(inviteId: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/invites/\(inviteId)")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "DELETE")
+        let _: EmptyResponse = try await performRequest(urlRequest)
     }
 
     // MARK: - Private Helpers
