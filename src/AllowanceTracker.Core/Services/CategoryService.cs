@@ -198,6 +198,7 @@ public class CategoryService : ICategoryService
                 TransactionCategory.Entertainment,
                 TransactionCategory.Sports,
                 TransactionCategory.Crafts,
+                TransactionCategory.Gift,
                 TransactionCategory.Savings,
                 TransactionCategory.Charity,
                 TransactionCategory.OtherSpending
