@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { childrenApi } from '../services/api';
 import type { Child } from '../types';
@@ -16,9 +16,16 @@ type TabType = 'transactions' | 'wishlist' | 'analytics' | 'savings' | 'settings
 export const ChildDetail: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [child, setChild] = useState<Child | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>('transactions');
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['transactions', 'wishlist', 'analytics', 'savings', 'settings'].includes(tabParam)) {
+      return tabParam as TabType;
+    }
+    return 'transactions';
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
 

@@ -69,7 +69,7 @@ export const ChildCard: React.FC<ChildCardProps> = ({ child }) => {
             View Details
           </button>
           <button
-            onClick={() => navigate(`/children/${child.id}`)}
+            onClick={() => navigate(`/children/${child.id}?tab=transactions`)}
             className="flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
             Transactions
