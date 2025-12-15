@@ -1,0 +1,12 @@
+# App Identifier (Bundle ID)
+app_identifier("com.fludivisiondesign.earnandlearn")
+
+# Apple Developer Portal Team ID
+# You can find this at https://developer.apple.com/account/#/membership
+# team_id("YOUR_TEAM_ID")
+
+# App Store Connect Team ID (may be different from Developer Portal Team ID)
+# itc_team_id("YOUR_ITC_TEAM_ID")
+
+# For more information about the Appfile, see:
+# https://docs.fastlane.tools/advanced/#appfile

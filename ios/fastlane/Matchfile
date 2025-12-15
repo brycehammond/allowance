@@ -1,0 +1,31 @@
+# Matchfile - Certificate and Profile Management
+# https://docs.fastlane.tools/actions/match/
+
+# Git repository to store certificates and profiles
+# IMPORTANT: This should be a PRIVATE repository!
+# Create a new private repo like: github.com/yourusername/certificates
+git_url("https://github.com/brycehammond/certificates.git")
+
+# Storage mode (git is recommended for teams)
+storage_mode("git")
+
+# App identifier(s)
+app_identifier(["com.fludivisiondesign.earnandlearn"])
+
+# Your Apple Developer Portal username (email)
+# username("your@email.com")
+
+# Team ID (optional, will prompt if multiple teams)
+# team_id("YOUR_TEAM_ID")
+
+# Certificate types to manage
+type("appstore") # Can be: appstore, adhoc, development, enterprise
+
+# Readonly mode in CI to prevent accidental certificate regeneration
+readonly(true) if ENV["CI"]
+
+# Clone via HTTPS (set to false for SSH)
+clone_branch_directly(true)
+
+# Platform
+platform("ios")

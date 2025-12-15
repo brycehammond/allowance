@@ -1,0 +1,167 @@
+# Fastfile for Earn & Learn iOS App
+# https://docs.fastlane.tools
+
+default_platform(:ios)
+
+platform :ios do
+  # ==========================================
+  # Setup & Configuration
+  # ==========================================
+
+  before_all do
+    # Ensure we're using the correct Xcode version
+    xcodes(version: "16", select_for_current_build_only: true) if is_ci
+
+    # Generate Xcode project from project.yml
+    Dir.chdir("../AllowanceTracker") do
+      sh("xcodegen", "generate") if File.exist?("project.yml")
+    end
+  end
+
+  # ==========================================
+  # Code Signing with Match
+  # ==========================================
+
+  desc "Sync development certificates and profiles"
+  lane :sync_dev_certs do
+    match(type: "development", readonly: is_ci)
+  end
+
+  desc "Sync App Store certificates and profiles"
+  lane :sync_appstore_certs do
+    match(type: "appstore", readonly: is_ci)
+  end
+
+  desc "Sync all certificates and profiles"
+  lane :sync_certs do
+    sync_dev_certs
+    sync_appstore_certs
+  end
+
+  # ==========================================
+  # Build Lanes
+  # ==========================================
+
+  desc "Build the app for development"
+  lane :build_dev do
+    sync_dev_certs
+
+    build_app(
+      project: "./AllowanceTracker/AllowanceTracker.xcodeproj",
+      scheme: "AllowanceTracker",
+      configuration: "Debug",
+      export_method: "development",
+      output_directory: "./build",
+      output_name: "AllowanceTracker-Dev.ipa"
+    )
+  end
+
+  desc "Build the app for App Store / TestFlight"
+  lane :build_release do
+    sync_appstore_certs
+
+    # Increment build number based on TestFlight
+    increment_build_number(
+      xcodeproj: "./AllowanceTracker/AllowanceTracker.xcodeproj",
+      build_number: latest_testflight_build_number + 1
+    )
+
+    build_app(
+      project: "./AllowanceTracker/AllowanceTracker.xcodeproj",
+      scheme: "AllowanceTracker",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "AllowanceTracker.ipa"
+    )
+  end
+
+  # ==========================================
+  # Deploy Lanes
+  # ==========================================
+
+  desc "Submit a new build to TestFlight"
+  lane :beta do
+    # Ensure we have the latest certificates
+    sync_appstore_certs
+
+    # Increment build number
+    increment_build_number(
+      xcodeproj: "./AllowanceTracker/AllowanceTracker.xcodeproj",
+      build_number: latest_testflight_build_number + 1
+    )
+
+    # Build the app
+    build_app(
+      project: "./AllowanceTracker/AllowanceTracker.xcodeproj",
+      scheme: "AllowanceTracker",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "AllowanceTracker.ipa"
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+
+    # Clean up
+    clean_build_artifacts
+  end
+
+  desc "Submit to TestFlight and distribute to external testers"
+  lane :beta_external do
+    beta
+
+    # Distribute to external testers (requires app review)
+    upload_to_testflight(
+      distribute_external: true,
+      groups: ["External Testers"],
+      changelog: "Bug fixes and improvements"
+    )
+  end
+
+  # ==========================================
+  # Utility Lanes
+  # ==========================================
+
+  desc "Run tests"
+  lane :test do
+    run_tests(
+      project: "./AllowanceTracker/AllowanceTracker.xcodeproj",
+      scheme: "AllowanceTracker",
+      device: "iPhone 16 Pro",
+      clean: true
+    )
+  end
+
+  desc "Increment version number"
+  lane :bump_version do |options|
+    increment_version_number(
+      xcodeproj: "./AllowanceTracker/AllowanceTracker.xcodeproj",
+      bump_type: options[:type] || "patch" # major, minor, patch
+    )
+  end
+
+  desc "Create a new app on App Store Connect"
+  lane :create_app do
+    produce(
+      app_identifier: "com.fludivisiondesign.earnandlearn",
+      app_name: "Earn & Learn",
+      language: "English",
+      app_version: "1.0.0",
+      sku: "earnandlearn001"
+    )
+  end
+
+  # ==========================================
+  # Error Handling
+  # ==========================================
+
+  error do |lane, exception|
+    # Notify on failure (can integrate with Slack, etc.)
+    UI.error("Lane #{lane} failed with error: #{exception.message}")
+  end
+end

@@ -59,3 +59,31 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# iOS / Fastlane
+ios/fastlane/.env
+ios/fastlane/.env.*
+!ios/fastlane/.env.default
+ios/fastlane/report.xml
+ios/fastlane/Preview.html
+ios/fastlane/screenshots/**/*.png
+ios/fastlane/test_output/
+ios/fastlane/README.md
+ios/build/
+ios/*.ipa
+ios/*.dSYM.zip
+ios/fastlane/AuthKey*.p8
+ios/Gemfile.lock
+
+# Xcode
+ios/**/*.xcuserstate
+ios/**/xcuserdata/
+ios/**/*.xccheckout
+ios/**/*.moved-aside
+ios/**/*.xcworkspace
+!ios/**/*.xcworkspace/contents.xcworkspacedata
+ios/**/DerivedData/
+ios/**/*.hmap
+ios/**/*.ipa
+ios/**/*.dSYM.zip
+ios/**/*.dSYM
