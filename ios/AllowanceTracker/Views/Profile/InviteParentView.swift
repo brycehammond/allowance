@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// View for inviting co-parents to join the family (Parent only)
+@MainActor
 struct InviteParentView: View {
 
     // MARK: - Properties

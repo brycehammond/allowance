@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Form for creating a new transaction
+@MainActor
 struct CreateTransactionView: View {
 
     // MARK: - Properties

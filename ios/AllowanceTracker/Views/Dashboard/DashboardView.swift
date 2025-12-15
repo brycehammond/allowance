@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Main dashboard view displaying all family children
+@MainActor
 struct DashboardView: View {
 
     // MARK: - Properties
@@ -171,6 +172,7 @@ struct DashboardView: View {
 // MARK: - Child Detail View
 
 /// Detail view for a specific child
+@MainActor
 struct ChildDetailView: View {
     let child: Child
     @Environment(AuthViewModel.self) private var authViewModel
