@@ -6,12 +6,12 @@ struct AnalyticsView: View {
 
     // MARK: - Properties
 
-    @StateObject private var viewModel: AnalyticsViewModel
+    @State private var viewModel: AnalyticsViewModel
 
     // MARK: - Initialization
 
     init(childId: UUID, apiService: APIServiceProtocol = APIService()) {
-        _viewModel = StateObject(wrappedValue: AnalyticsViewModel(childId: childId, apiService: apiService))
+        _viewModel = State(wrappedValue: AnalyticsViewModel(childId: childId, apiService: apiService))
     }
 
     // MARK: - Body

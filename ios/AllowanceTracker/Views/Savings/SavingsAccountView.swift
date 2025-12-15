@@ -5,7 +5,7 @@ struct SavingsAccountView: View {
 
     // MARK: - Properties
 
-    @StateObject private var viewModel: SavingsAccountViewModel
+    @State private var viewModel: SavingsAccountViewModel
     @State private var showingAddAccount = false
     @State private var showingDeposit = false
     @State private var showingWithdraw = false
@@ -17,7 +17,7 @@ struct SavingsAccountView: View {
 
     init(childId: UUID) {
         self.childId = childId
-        _viewModel = StateObject(wrappedValue: SavingsAccountViewModel(childId: childId))
+        _viewModel = State(wrappedValue: SavingsAccountViewModel(childId: childId))
     }
 
     // MARK: - Body

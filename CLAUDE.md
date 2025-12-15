@@ -618,6 +618,63 @@ dotnet watch test
 4. **Mock sparingly** - Only external dependencies
 5. **Test data builders** - For complex objects
 
+### iOS App Best Practices (SwiftUI)
+
+The iOS app targets iOS 17+ and uses the modern **Observable framework** (not the legacy ObservableObject pattern).
+
+#### Observable Framework Pattern
+```swift
+// ViewModels use @Observable macro (NOT ObservableObject)
+@Observable
+@MainActor
+final class MyViewModel {
+    var items: [Item] = []           // No @Published needed
+    private(set) var isLoading = false
+    var errorMessage: String?
+
+    private let apiService: APIServiceProtocol
+
+    init(apiService: APIServiceProtocol = APIService()) {
+        self.apiService = apiService
+    }
+}
+
+// Views use @State for owned view models (NOT @StateObject)
+struct MyView: View {
+    @State private var viewModel = MyViewModel()
+
+    var body: some View {
+        // viewModel changes automatically trigger view updates
+    }
+}
+
+// Views use @Environment for shared view models (NOT @EnvironmentObject)
+struct ChildView: View {
+    @Environment(AuthViewModel.self) private var authViewModel
+}
+
+// Pass view models through environment (NOT .environmentObject)
+ContentView()
+    .environment(authViewModel)
+```
+
+#### Key Migration Rules
+| Old (ObservableObject) | New (Observable) |
+|------------------------|------------------|
+| `class VM: ObservableObject` | `@Observable class VM` |
+| `@Published var` | `var` (no wrapper needed) |
+| `@StateObject` | `@State` |
+| `@ObservedObject` | Remove wrapper entirely |
+| `@EnvironmentObject var vm: T` | `@Environment(T.self) var vm` |
+| `.environmentObject(vm)` | `.environment(vm)` |
+
+#### SwiftUI Coding Standards
+1. **Use @Observable** - For all view models (iOS 17+)
+2. **@MainActor** - All view models for thread safety
+3. **Dependency injection** - Pass services via initializer
+4. **private(set)** - For read-only computed state
+5. **async/await** - For all network operations
+
 ## 🔗 Useful Resources
 
 ### .NET & C#

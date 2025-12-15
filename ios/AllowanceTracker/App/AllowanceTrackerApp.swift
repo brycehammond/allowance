@@ -5,7 +5,7 @@ struct AllowanceTrackerApp: App {
 
     // MARK: - Properties
 
-    @StateObject private var authViewModel = AuthViewModel()
+    @State private var authViewModel = AuthViewModel()
 
     // MARK: - Initialization
 
@@ -26,7 +26,7 @@ struct AllowanceTrackerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(authViewModel)
+                .environment(authViewModel)
         }
     }
 }

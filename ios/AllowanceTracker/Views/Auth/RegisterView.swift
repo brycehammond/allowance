@@ -5,7 +5,7 @@ struct RegisterView: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = AuthViewModel()
+    @State private var viewModel = AuthViewModel()
 
     @State private var email = ""
     @State private var password = ""

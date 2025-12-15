@@ -4,7 +4,7 @@ struct LoginView: View {
 
     // MARK: - Properties
 
-    @StateObject private var viewModel = AuthViewModel()
+    @State private var viewModel = AuthViewModel()
     @State private var email = ""
     @State private var password = ""
     @State private var showRegister = false
@@ -46,7 +46,7 @@ struct LoginView: View {
             }
             .sheet(isPresented: $showForgotPassword) {
                 ForgotPasswordView()
-                    .environmentObject(viewModel)
+                    .environment(viewModel)
             }
         }
     }

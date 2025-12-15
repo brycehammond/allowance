@@ -5,8 +5,8 @@ struct TransactionListView: View {
 
     // MARK: - Properties
 
-    @StateObject private var viewModel: TransactionViewModel
-    @EnvironmentObject private var authViewModel: AuthViewModel
+    @State private var viewModel: TransactionViewModel
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var showingCreateTransaction = false
 
     // Child settings passed from parent view
@@ -29,7 +29,7 @@ struct TransactionListView: View {
     ) {
         self.initialSavingsBalance = savingsBalance
         self.initialAllowDebt = allowDebt
-        _viewModel = StateObject(wrappedValue: TransactionViewModel(
+        _viewModel = State(wrappedValue: TransactionViewModel(
             childId: childId,
             savingsBalance: savingsBalance,
             allowDebt: allowDebt,

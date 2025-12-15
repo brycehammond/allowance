@@ -2,15 +2,16 @@ import Foundation
 import SwiftUI
 
 /// ViewModel for authentication flow
+@Observable
 @MainActor
-final class AuthViewModel: ObservableObject {
+final class AuthViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
-    @Published var currentUser: User?
-    @Published var isAuthenticated = false
-    @Published private(set) var isLoading = false
-    @Published var errorMessage: String?
+    var currentUser: User?
+    var isAuthenticated = false
+    private(set) var isLoading = false
+    var errorMessage: String?
 
     // MARK: - Dependencies
 

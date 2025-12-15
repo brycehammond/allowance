@@ -5,7 +5,7 @@ struct ProfileView: View {
 
     // MARK: - Properties
 
-    @EnvironmentObject private var authViewModel: AuthViewModel
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var showingLogoutConfirmation = false
     @State private var showingAddChild = false
     @State private var showingInviteParent = false
@@ -341,20 +341,19 @@ struct TermsOfServiceView: View {
 // MARK: - Preview Provider
 
 #Preview("Profile View") {
-    ProfileView()
-        .environmentObject({
-            let vm = AuthViewModel()
-            vm.currentUser = User(
-                id: UUID(),
-                email: "parent@test.com",
-                firstName: "John",
-                lastName: "Doe",
-                role: .parent,
-                familyId: UUID()
-            )
-            vm.isAuthenticated = true
-            return vm
-        }())
+    let authViewModel = AuthViewModel()
+    authViewModel.currentUser = User(
+        id: UUID(),
+        email: "parent@test.com",
+        firstName: "John",
+        lastName: "Doe",
+        role: .parent,
+        familyId: UUID()
+    )
+    authViewModel.isAuthenticated = true
+
+    return ProfileView()
+        .environment(authViewModel)
 }
 
 #Preview("Notifications Settings") {

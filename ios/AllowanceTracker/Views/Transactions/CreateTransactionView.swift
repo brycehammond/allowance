@@ -6,7 +6,7 @@ struct CreateTransactionView: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var viewModel: TransactionViewModel
+    var viewModel: TransactionViewModel
 
     @State private var amount: String = ""
     @State private var transactionType: TransactionType = .credit

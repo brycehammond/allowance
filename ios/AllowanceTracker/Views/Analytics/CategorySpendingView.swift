@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Screen displaying spending analytics by category
 struct CategorySpendingView: View {
-    @StateObject private var viewModel = CategorySpendingViewModel()
+    @State private var viewModel = CategorySpendingViewModel()
 
     let childId: UUID
     let childName: String

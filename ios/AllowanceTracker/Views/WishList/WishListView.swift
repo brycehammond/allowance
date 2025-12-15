@@ -5,8 +5,8 @@ struct WishListView: View {
 
     // MARK: - Properties
 
-    @StateObject private var viewModel: WishListViewModel
-    @EnvironmentObject private var authViewModel: AuthViewModel
+    @State private var viewModel: WishListViewModel
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var showingAddItem = false
     @State private var editingItem: WishListItem?
     @State private var deletingItem: WishListItem?
@@ -29,7 +29,7 @@ struct WishListView: View {
     // MARK: - Initialization
 
     init(childId: UUID, apiService: APIServiceProtocol = APIService()) {
-        _viewModel = StateObject(wrappedValue: WishListViewModel(childId: childId, apiService: apiService))
+        _viewModel = State(wrappedValue: WishListViewModel(childId: childId, apiService: apiService))
     }
 
     // MARK: - Body

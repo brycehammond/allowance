@@ -5,7 +5,7 @@ struct MainTabView: View {
 
     // MARK: - Properties
 
-    @EnvironmentObject private var authViewModel: AuthViewModel
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var selectedTab = 0
 
     // MARK: - Body
@@ -55,7 +55,7 @@ struct MainTabView: View {
 /// Wrapper view for analytics tab to handle child selection
 struct AnalyticsTabView: View {
 
-    @StateObject private var dashboardViewModel = DashboardViewModel()
+    @State private var dashboardViewModel = DashboardViewModel()
     @State private var selectedChildId: UUID?
 
     var body: some View {
@@ -105,7 +105,7 @@ struct AnalyticsTabView: View {
 /// Wrapper view for budget tab to handle child selection
 struct BudgetTabView: View {
 
-    @StateObject private var dashboardViewModel = DashboardViewModel()
+    @State private var dashboardViewModel = DashboardViewModel()
     @State private var selectedChildId: UUID?
 
     var body: some View {
@@ -154,7 +154,7 @@ struct BudgetTabView: View {
 
 #Preview("Main Tab View - Parent") {
     MainTabView()
-        .environmentObject({
+        .environment({
             let vm = AuthViewModel()
             vm.currentUser = User(
                 id: UUID(),
@@ -171,7 +171,7 @@ struct BudgetTabView: View {
 
 #Preview("Main Tab View - Child") {
     MainTabView()
-        .environmentObject({
+        .environment({
             let vm = AuthViewModel()
             vm.currentUser = User(
                 id: UUID(),

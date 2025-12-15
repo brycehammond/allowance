@@ -2,16 +2,17 @@ import Foundation
 import SwiftUI
 
 /// View model for managing budgets and budget-related state
+@Observable
 @MainActor
-final class BudgetViewModel: ObservableObject {
+final class BudgetViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
-    @Published var budgets: [CategoryBudget] = []
-    @Published var budgetStatuses: [CategoryBudgetStatus] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    @Published var showAddBudget = false
+    var budgets: [CategoryBudget] = []
+    var budgetStatuses: [CategoryBudgetStatus] = []
+    var isLoading = false
+    var errorMessage: String?
+    var showAddBudget = false
 
     // MARK: - Services
 

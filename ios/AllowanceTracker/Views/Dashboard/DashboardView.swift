@@ -5,8 +5,8 @@ struct DashboardView: View {
 
     // MARK: - Properties
 
-    @StateObject private var viewModel: DashboardViewModel
-    @EnvironmentObject private var authViewModel: AuthViewModel
+    @State private var viewModel: DashboardViewModel
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var showingAddChild = false
 
     // MARK: - Computed Properties
@@ -22,7 +22,7 @@ struct DashboardView: View {
     // MARK: - Initialization
 
     init(apiService: APIServiceProtocol = APIService()) {
-        _viewModel = StateObject(wrappedValue: DashboardViewModel(apiService: apiService))
+        _viewModel = State(wrappedValue: DashboardViewModel(apiService: apiService))
     }
 
     // MARK: - Body
@@ -173,7 +173,7 @@ struct DashboardView: View {
 /// Detail view for a specific child
 struct ChildDetailView: View {
     let child: Child
-    @EnvironmentObject private var authViewModel: AuthViewModel
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var selectedTab = 0
 
     private var isParent: Bool {
@@ -318,7 +318,7 @@ struct ChildDetailView: View {
 #Preview("Dashboard - With Children") {
     NavigationStack {
         DashboardView()
-            .environmentObject({
+            .environment({
                 let vm = AuthViewModel()
                 vm.currentUser = User(
                     id: UUID(),
@@ -337,7 +337,7 @@ struct ChildDetailView: View {
 #Preview("Dashboard - Loading") {
     NavigationStack {
         DashboardView()
-            .environmentObject({
+            .environment({
                 let vm = AuthViewModel()
                 vm.isAuthenticated = true
                 return vm
@@ -365,7 +365,7 @@ struct ChildDetailView: View {
                 allowDebt: false
             )
         )
-        .environmentObject({
+        .environment({
             let vm = AuthViewModel()
             vm.currentUser = User(
                 id: UUID(),
@@ -401,7 +401,7 @@ struct ChildDetailView: View {
                 allowDebt: false
             )
         )
-        .environmentObject({
+        .environment({
             let vm = AuthViewModel()
             vm.currentUser = User(
                 id: UUID(),

@@ -2,15 +2,16 @@ import Foundation
 import SwiftUI
 
 /// ViewModel for the dashboard that displays family children
+@Observable
 @MainActor
-final class DashboardViewModel: ObservableObject {
+final class DashboardViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
-    @Published private(set) var children: [Child] = []
-    @Published private(set) var isLoading = false
-    @Published var errorMessage: String?
-    @Published var showAddChild = false
+    private(set) var children: [Child] = []
+    private(set) var isLoading = false
+    var errorMessage: String?
+    var showAddChild = false
 
     // MARK: - Dependencies
 

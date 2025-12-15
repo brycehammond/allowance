@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Add Savings Account Sheet
 
 struct AddSavingsAccountSheet: View {
-    @ObservedObject var viewModel: SavingsAccountViewModel
+    var viewModel: SavingsAccountViewModel
     @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""
@@ -93,7 +93,7 @@ struct AddSavingsAccountSheet: View {
 // MARK: - Edit Savings Account Sheet
 
 struct EditSavingsAccountSheet: View {
-    @ObservedObject var viewModel: SavingsAccountViewModel
+    var viewModel: SavingsAccountViewModel
     let account: SavingsAccount
     @Environment(\.dismiss) private var dismiss
 
@@ -230,7 +230,7 @@ struct EditSavingsAccountSheet: View {
 // MARK: - Deposit Sheet
 
 struct DepositSheet: View {
-    @ObservedObject var viewModel: SavingsAccountViewModel
+    var viewModel: SavingsAccountViewModel
     let account: SavingsAccount
     @Environment(\.dismiss) private var dismiss
 
@@ -340,7 +340,7 @@ struct DepositSheet: View {
 // MARK: - Withdraw Sheet
 
 struct WithdrawSheet: View {
-    @ObservedObject var viewModel: SavingsAccountViewModel
+    var viewModel: SavingsAccountViewModel
     let account: SavingsAccount
     @Environment(\.dismiss) private var dismiss
 

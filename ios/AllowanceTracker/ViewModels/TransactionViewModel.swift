@@ -2,18 +2,19 @@ import Foundation
 import SwiftUI
 
 /// ViewModel for transaction management and history
+@Observable
 @MainActor
-final class TransactionViewModel: ObservableObject {
+final class TransactionViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
-    @Published private(set) var transactions: [Transaction] = []
-    @Published private(set) var currentBalance: Decimal = 0
-    @Published private(set) var savingsBalance: Decimal = 0
-    @Published private(set) var allowDebt: Bool = false
-    @Published private(set) var isLoading = false
-    @Published private(set) var isCreatingTransaction = false
-    @Published var errorMessage: String?
+    private(set) var transactions: [Transaction] = []
+    private(set) var currentBalance: Decimal = 0
+    private(set) var savingsBalance: Decimal = 0
+    private(set) var allowDebt: Bool = false
+    private(set) var isLoading = false
+    private(set) var isCreatingTransaction = false
+    var errorMessage: String?
 
     // MARK: - Dependencies
 

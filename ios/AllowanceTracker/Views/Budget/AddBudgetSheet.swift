@@ -3,7 +3,7 @@ import SwiftUI
 /// Sheet for creating or editing a budget
 struct AddBudgetSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = BudgetViewModel()
+    @State private var viewModel = BudgetViewModel()
 
     let childId: UUID
     var existingBudget: CategoryBudget?

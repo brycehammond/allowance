@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Screen for managing category budgets for a child
 struct BudgetManagementView: View {
-    @StateObject private var viewModel = BudgetViewModel()
+    @State private var viewModel = BudgetViewModel()
     @State private var budgetToEdit: CategoryBudget?
     @State private var showDeleteConfirmation = false
     @State private var budgetToDelete: CategoryBudget?

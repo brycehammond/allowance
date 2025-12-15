@@ -6,7 +6,7 @@ struct EditWishListItemView: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var viewModel: WishListViewModel
+    var viewModel: WishListViewModel
     let item: WishListItem
 
     @State private var name: String

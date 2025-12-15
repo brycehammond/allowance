@@ -2,16 +2,17 @@ import Foundation
 import SwiftUI
 
 /// ViewModel for wish list management
+@Observable
 @MainActor
-final class WishListViewModel: ObservableObject {
+final class WishListViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
-    @Published private(set) var items: [WishListItem] = []
-    @Published private(set) var currentBalance: Decimal = 0
-    @Published private(set) var isLoading = false
-    @Published private(set) var isProcessing = false
-    @Published var errorMessage: String?
+    private(set) var items: [WishListItem] = []
+    private(set) var currentBalance: Decimal = 0
+    private(set) var isLoading = false
+    private(set) var isProcessing = false
+    var errorMessage: String?
 
     // MARK: - Dependencies
 

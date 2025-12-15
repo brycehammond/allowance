@@ -2,19 +2,20 @@ import Foundation
 import SwiftUI
 
 /// ViewModel for savings account management
+@Observable
 @MainActor
-final class SavingsAccountViewModel: ObservableObject {
+final class SavingsAccountViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
-    @Published private(set) var accounts: [SavingsAccount] = []
-    @Published private(set) var selectedAccount: SavingsAccount?
-    @Published private(set) var transactions: [SavingsTransaction] = []
-    @Published private(set) var summary: SavingsAccountSummary?
-    @Published private(set) var isLoading = false
-    @Published private(set) var isProcessing = false
-    @Published private(set) var isBalanceHidden = false
-    @Published var errorMessage: String?
+    private(set) var accounts: [SavingsAccount] = []
+    private(set) var selectedAccount: SavingsAccount?
+    private(set) var transactions: [SavingsTransaction] = []
+    private(set) var summary: SavingsAccountSummary?
+    private(set) var isLoading = false
+    private(set) var isProcessing = false
+    private(set) var isBalanceHidden = false
+    var errorMessage: String?
 
     // MARK: - Dependencies
 

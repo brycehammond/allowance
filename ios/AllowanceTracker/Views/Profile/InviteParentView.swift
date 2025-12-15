@@ -6,12 +6,12 @@ struct InviteParentView: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel: InviteParentViewModel
+    @State private var viewModel: InviteParentViewModel
 
     // MARK: - Initialization
 
     init(apiService: APIServiceProtocol = APIService.shared) {
-        _viewModel = StateObject(wrappedValue: InviteParentViewModel(apiService: apiService))
+        _viewModel = State(wrappedValue: InviteParentViewModel(apiService: apiService))
     }
 
     // MARK: - Body
@@ -191,23 +191,24 @@ struct PendingInviteRow: View {
 
 // MARK: - ViewModel
 
+@Observable
 @MainActor
-final class InviteParentViewModel: ObservableObject {
+final class InviteParentViewModel {
 
     // MARK: - Form Fields
 
-    @Published var firstName = ""
-    @Published var lastName = ""
-    @Published var email = ""
+    var firstName = ""
+    var lastName = ""
+    var email = ""
 
     // MARK: - State
 
-    @Published var isSending = false
-    @Published var isLoadingInvites = false
-    @Published var resendingInviteId: String?
-    @Published var successMessage: String?
-    @Published var errorMessage: String?
-    @Published var pendingInvites: [PendingInvite] = []
+    var isSending = false
+    var isLoadingInvites = false
+    var resendingInviteId: String?
+    var successMessage: String?
+    var errorMessage: String?
+    var pendingInvites: [PendingInvite] = []
 
     // MARK: - Dependencies
 

@@ -2,22 +2,23 @@ import Foundation
 import SwiftUI
 
 /// ViewModel for analytics and financial insights
+@Observable
 @MainActor
-final class AnalyticsViewModel: ObservableObject {
+final class AnalyticsViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
-    @Published private(set) var balanceHistory: [BalancePoint] = []
-    @Published private(set) var incomeSpendingSummary: IncomeSpendingSummary?
-    @Published private(set) var spendingBreakdown: [CategoryBreakdown] = []
-    @Published private(set) var monthlyComparison: [MonthlyComparison] = []
+    private(set) var balanceHistory: [BalancePoint] = []
+    private(set) var incomeSpendingSummary: IncomeSpendingSummary?
+    private(set) var spendingBreakdown: [CategoryBreakdown] = []
+    private(set) var monthlyComparison: [MonthlyComparison] = []
 
-    @Published private(set) var isLoadingHistory = false
-    @Published private(set) var isLoadingSummary = false
-    @Published private(set) var isLoadingBreakdown = false
-    @Published private(set) var isLoadingComparison = false
+    private(set) var isLoadingHistory = false
+    private(set) var isLoadingSummary = false
+    private(set) var isLoadingBreakdown = false
+    private(set) var isLoadingComparison = false
 
-    @Published var errorMessage: String?
+    var errorMessage: String?
 
     // MARK: - Dependencies
 

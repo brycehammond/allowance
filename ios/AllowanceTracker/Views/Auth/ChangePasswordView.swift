@@ -5,7 +5,7 @@ struct ChangePasswordView: View {
 
     // MARK: - Properties
 
-    @EnvironmentObject private var authViewModel: AuthViewModel
+    @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.dismiss) private var dismiss
 
     @State private var currentPassword = ""
@@ -137,5 +137,5 @@ struct ChangePasswordView: View {
 
 #Preview {
     ChangePasswordView()
-        .environmentObject(AuthViewModel())
+        .environment(AuthViewModel())
 }

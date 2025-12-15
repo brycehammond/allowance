@@ -6,12 +6,12 @@ struct AddChildView: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel: AddChildViewModel
+    @State private var viewModel: AddChildViewModel
 
     // MARK: - Initialization
 
     init(apiService: APIServiceProtocol = APIService.shared) {
-        _viewModel = StateObject(wrappedValue: AddChildViewModel(apiService: apiService))
+        _viewModel = State(wrappedValue: AddChildViewModel(apiService: apiService))
     }
 
     // MARK: - Body
