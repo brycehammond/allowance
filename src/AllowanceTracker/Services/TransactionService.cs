@@ -31,30 +31,43 @@ public class TransactionService : ITransactionService
             var child = await _context.Children.FindAsync(dto.ChildId)
                 ?? throw new InvalidOperationException("Child not found");
 
-            decimal amountFromSavings = 0;
-
-            // Validate balance for debits
+            // Handle insufficient spending balance for debits
             if (dto.Type == TransactionType.Debit && child.CurrentBalance < dto.Amount)
             {
+                var shortfall = dto.Amount - child.CurrentBalance;
+                var totalAvailable = child.CurrentBalance + child.SavingsBalance;
+
                 if (dto.DrawFromSavings)
                 {
-                    // Calculate how much we need from savings
-                    amountFromSavings = dto.Amount - child.CurrentBalance;
-
-                    // Check if savings has enough
-                    if (child.SavingsBalance < amountFromSavings)
+                    // User explicitly chose to draw from savings
+                    if (child.SavingsBalance >= shortfall)
                     {
-                        var totalAvailable = child.CurrentBalance + child.SavingsBalance;
+                        // Savings covers the shortfall
+                        child.SavingsBalance -= shortfall;
+                        child.CurrentBalance += shortfall;
+                    }
+                    else if (child.AllowDebt)
+                    {
+                        // Drain all savings, then allow going into debt
+                        child.CurrentBalance += child.SavingsBalance;
+                        child.SavingsBalance = 0;
+                    }
+                    else
+                    {
                         throw new InvalidOperationException($"Insufficient funds. Total available (spending + savings): {totalAvailable:C}");
                     }
-
-                    // Transfer from savings to spending first
-                    child.SavingsBalance -= amountFromSavings;
-                    child.CurrentBalance += amountFromSavings;
                 }
                 else
                 {
-                    throw new InvalidOperationException("Insufficient funds");
+                    // User didn't explicitly choose to draw from savings
+                    if (child.AllowDebt)
+                    {
+                        // AllowDebt is enabled - proceed (will go negative)
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Insufficient funds");
+                    }
                 }
             }
 

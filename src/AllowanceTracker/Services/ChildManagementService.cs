@@ -116,6 +116,12 @@ public class ChildManagementService : IChildManagementService
             child.SavingsBalanceVisibleToChild = dto.SavingsBalanceVisibleToChild.Value;
         }
 
+        // Update allow debt setting (only if provided)
+        if (dto.AllowDebt.HasValue)
+        {
+            child.AllowDebt = dto.AllowDebt.Value;
+        }
+
         await _context.SaveChangesAsync();
 
         return child;

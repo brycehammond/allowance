@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { childrenApi } from '../../services/api';
 import type { Child, UpdateChildSettingsRequest, DayOfWeek } from '../../types';
-import { Save, DollarSign, PiggyBank, Percent, Calendar, Eye, EyeOff } from 'lucide-react';
+import { Save, DollarSign, PiggyBank, Percent, Calendar, Eye, EyeOff, CreditCard } from 'lucide-react';
 
 const DAYS_OF_WEEK: { value: DayOfWeek; label: string }[] = [
   { value: 'Sunday', label: 'Sunday' },
@@ -40,6 +40,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
   const [savingsBalanceVisible, setSavingsBalanceVisible] = useState(
     child.savingsBalanceVisibleToChild
   );
+  const [allowDebt, setAllowDebt] = useState(child.allowDebt);
 
   // Reset form when child changes
   useEffect(() => {
@@ -50,6 +51,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
     setTransferPercentage((child.savingsTransferPercentage ?? 20).toString());
     setTransferAmount((child.savingsTransferAmount ?? 0).toString());
     setSavingsBalanceVisible(child.savingsBalanceVisibleToChild);
+    setAllowDebt(child.allowDebt);
   }, [child]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,6 +73,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
         allowanceDay: allowanceDay || null,
         savingsAccountEnabled: savingsEnabled,
         savingsBalanceVisibleToChild: savingsBalanceVisible,
+        allowDebt: allowDebt,
       };
 
       if (savingsEnabled) {
@@ -366,6 +369,43 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
             </div>
           </div>
         )}
+
+        {/* Allow Debt Toggle */}
+        <div className="border-t border-gray-200 pt-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <CreditCard className="h-5 w-5 text-amber-500 mr-2" />
+              <div>
+                <label htmlFor="allowDebt" className="text-sm font-medium text-gray-700">
+                  Allow Debt
+                </label>
+                <p className="text-sm text-gray-500">
+                  {allowDebt
+                    ? 'Child can spend more than their balance (goes negative)'
+                    : 'Transactions are blocked if balance is insufficient'}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAllowDebt(!allowDebt)}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                allowDebt ? 'bg-amber-500' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  allowDebt ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+          {allowDebt && (
+            <p className="mt-2 text-sm text-amber-600 bg-amber-50 rounded-md p-3">
+              When spending exceeds available funds, savings will be used first before going into debt.
+            </p>
+          )}
+        </div>
 
         {/* Submit Button */}
         <div className="pt-4">

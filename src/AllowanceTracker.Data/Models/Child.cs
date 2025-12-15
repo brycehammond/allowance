@@ -63,6 +63,12 @@ public class Child : IHasCreatedAt
     /// </summary>
     public bool SavingsBalanceVisibleToChild { get; set; } = true;
 
+    /// <summary>
+    /// When true, allows the child's spending balance to go negative (into debt).
+    /// When false (default), transactions that would result in a negative balance are rejected.
+    /// </summary>
+    public bool AllowDebt { get; set; } = false;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties

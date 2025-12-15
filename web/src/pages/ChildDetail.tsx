@@ -181,7 +181,7 @@ export const ChildDetail: React.FC = () => {
 
         {/* Tab Content */}
         <div>
-          {activeTab === 'transactions' && <TransactionsTab childId={child.id} currentBalance={child.currentBalance} savingsBalance={child.savingsBalance} onBalanceChange={loadChild} />}
+          {activeTab === 'transactions' && <TransactionsTab childId={child.id} currentBalance={child.currentBalance} savingsBalance={child.savingsBalance} allowDebt={child.allowDebt} onBalanceChange={loadChild} />}
           {activeTab === 'wishlist' && <WishListTab childId={child.id} />}
           {activeTab === 'analytics' && <AnalyticsTab childId={child.id} />}
           {activeTab === 'savings' && isParent && <SavingsTab childId={child.id} onBalanceChange={loadChild} />}

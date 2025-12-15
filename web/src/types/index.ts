@@ -52,6 +52,7 @@ export interface Child {
   savingsTransferPercentage?: number;
   savingsTransferAmount?: number;
   savingsBalanceVisibleToChild: boolean;
+  allowDebt: boolean;
 }
 
 export interface CreateChildRequest {
@@ -77,6 +78,7 @@ export interface UpdateChildSettingsRequest {
   savingsTransferPercentage?: number;
   savingsTransferAmount?: number;
   savingsBalanceVisibleToChild?: boolean;
+  allowDebt?: boolean;
 }
 
 // Transaction

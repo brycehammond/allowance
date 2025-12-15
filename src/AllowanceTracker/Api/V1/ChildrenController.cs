@@ -121,6 +121,7 @@ public class ChildrenController : ControllerBase
             savingsTransferType = child.SavingsTransferType == SavingsTransferType.Percentage ? "Percentage" : "FixedAmount",
             savingsTransferPercentage = child.SavingsTransferPercentage,
             savingsTransferAmount = child.SavingsTransferAmount,
+            allowDebt = child.AllowDebt,
             createdAt = child.CreatedAt
         });
     }
@@ -233,6 +234,7 @@ public class ChildrenController : ControllerBase
             savingsTransferType = child.SavingsTransferType.ToString(),
             savingsTransferPercentage = child.SavingsTransferPercentage,
             savingsTransferAmount = child.SavingsTransferAmount,
+            allowDebt = child.AllowDebt,
             message = "Child settings updated successfully"
         });
     }
