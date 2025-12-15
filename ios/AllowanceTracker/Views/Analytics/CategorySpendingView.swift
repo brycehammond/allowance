@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Screen displaying spending analytics by category
+@MainActor
 struct CategorySpendingView: View {
     @State private var viewModel = CategorySpendingViewModel()
 
@@ -210,13 +211,14 @@ private struct SummaryCard: View {
 
 // MARK: - View Model
 
+@Observable
 @MainActor
-final class CategorySpendingViewModel: ObservableObject {
-    @Published var spending: [CategorySpending] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    @Published var startDate: Date?
-    @Published var endDate: Date?
+final class CategorySpendingViewModel {
+    var spending: [CategorySpending] = []
+    var isLoading = false
+    var errorMessage: String?
+    var startDate: Date?
+    var endDate: Date?
 
     private let categoryService: CategoryServiceProtocol
 

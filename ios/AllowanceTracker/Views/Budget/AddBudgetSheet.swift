@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Sheet for creating or editing a budget
+@MainActor
 struct AddBudgetSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = BudgetViewModel()

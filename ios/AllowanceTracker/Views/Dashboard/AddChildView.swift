@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// View for adding a new child account (Parent only)
+@MainActor
 struct AddChildView: View {
 
     // MARK: - Properties
@@ -197,29 +198,30 @@ struct AddChildView: View {
 
 // MARK: - ViewModel
 
+@Observable
 @MainActor
-final class AddChildViewModel: ObservableObject {
+final class AddChildViewModel {
 
     // MARK: - Form Fields
 
-    @Published var firstName = ""
-    @Published var lastName = ""
-    @Published var email = ""
-    @Published var password = ""
-    @Published var confirmPassword = ""
-    @Published var weeklyAllowance = "10.00"
-    @Published var initialBalance = "0.00"
-    @Published var savingsAccountEnabled = false
-    @Published var initialSavingsBalance = "0.00"
-    @Published var savingsTransferType: SavingsTransferType = .percentage
-    @Published var savingsTransferPercentage = "20"
-    @Published var savingsTransferAmount = "2.00"
+    var firstName = ""
+    var lastName = ""
+    var email = ""
+    var password = ""
+    var confirmPassword = ""
+    var weeklyAllowance = "10.00"
+    var initialBalance = "0.00"
+    var savingsAccountEnabled = false
+    var initialSavingsBalance = "0.00"
+    var savingsTransferType: SavingsTransferType = .percentage
+    var savingsTransferPercentage = "20"
+    var savingsTransferAmount = "2.00"
 
     // MARK: - State
 
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    @Published var isSuccess = false
+    var isLoading = false
+    var errorMessage: String?
+    var isSuccess = false
 
     // MARK: - Dependencies
 

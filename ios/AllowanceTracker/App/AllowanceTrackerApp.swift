@@ -1,6 +1,7 @@
 import SwiftUI
 
 @main
+@MainActor
 struct AllowanceTrackerApp: App {
 
     // MARK: - Properties

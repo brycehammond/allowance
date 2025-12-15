@@ -2,6 +2,7 @@ import SwiftUI
 import Charts
 
 /// View displaying financial analytics and insights for a child
+@MainActor
 struct AnalyticsView: View {
 
     // MARK: - Properties

@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Screen for managing category budgets for a child
+@MainActor
 struct BudgetManagementView: View {
     @State private var viewModel = BudgetViewModel()
     @State private var budgetToEdit: CategoryBudget?
@@ -110,6 +111,7 @@ struct BudgetManagementView: View {
     }
 }
 
+@MainActor
 private struct BudgetManagementViewPreview: View {
     let hasBudgets: Bool
     let isLoading: Bool

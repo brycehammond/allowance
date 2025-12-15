@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Main tab-based navigation structure for the app
+@MainActor
 struct MainTabView: View {
 
     // MARK: - Properties
@@ -53,6 +54,7 @@ struct MainTabView: View {
 // MARK: - Analytics Tab View
 
 /// Wrapper view for analytics tab to handle child selection
+@MainActor
 struct AnalyticsTabView: View {
 
     @State private var dashboardViewModel = DashboardViewModel()
@@ -103,6 +105,7 @@ struct AnalyticsTabView: View {
 // MARK: - Budget Tab View
 
 /// Wrapper view for budget tab to handle child selection
+@MainActor
 struct BudgetTabView: View {
 
     @State private var dashboardViewModel = DashboardViewModel()
