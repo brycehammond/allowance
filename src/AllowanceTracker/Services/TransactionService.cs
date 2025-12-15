@@ -31,9 +31,32 @@ public class TransactionService : ITransactionService
             var child = await _context.Children.FindAsync(dto.ChildId)
                 ?? throw new InvalidOperationException("Child not found");
 
+            decimal amountFromSavings = 0;
+
             // Validate balance for debits
             if (dto.Type == TransactionType.Debit && child.CurrentBalance < dto.Amount)
-                throw new InvalidOperationException("Insufficient funds");
+            {
+                if (dto.DrawFromSavings)
+                {
+                    // Calculate how much we need from savings
+                    amountFromSavings = dto.Amount - child.CurrentBalance;
+
+                    // Check if savings has enough
+                    if (child.SavingsBalance < amountFromSavings)
+                    {
+                        var totalAvailable = child.CurrentBalance + child.SavingsBalance;
+                        throw new InvalidOperationException($"Insufficient funds. Total available (spending + savings): {totalAvailable:C}");
+                    }
+
+                    // Transfer from savings to spending first
+                    child.SavingsBalance -= amountFromSavings;
+                    child.CurrentBalance += amountFromSavings;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Insufficient funds");
+                }
+            }
 
             // Check budget limits for debits (if CategoryService is available)
             if (dto.Type == TransactionType.Debit && _categoryService != null)

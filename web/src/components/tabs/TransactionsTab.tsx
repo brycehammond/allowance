@@ -5,10 +5,12 @@ import { TransactionType, TransactionCategory, type Transaction, type CreateTran
 
 interface TransactionsTabProps {
   childId: string;
+  currentBalance: number;
+  savingsBalance: number;
   onBalanceChange?: () => void;
 }
 
-export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId, onBalanceChange }) => {
+export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId, currentBalance, savingsBalance, onBalanceChange }) => {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,6 +25,8 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId, onBal
     notes: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSavingsConfirm, setShowSavingsConfirm] = useState(false);
+  const [pendingTransaction, setPendingTransaction] = useState<CreateTransactionRequest | null>(null);
 
   const isParent = user?.role === 'Parent';
 
@@ -45,20 +49,13 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId, onBal
     loadTransactions();
   }, [loadTransactions]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (formData.amount <= 0) {
-      setError('Amount must be greater than 0');
-      return;
-    }
-
+  const submitTransaction = async (transaction: CreateTransactionRequest) => {
     setIsSubmitting(true);
-
     try {
-      await transactionsApi.create(formData);
+      await transactionsApi.create(transaction);
       setShowAddForm(false);
+      setShowSavingsConfirm(false);
+      setPendingTransaction(null);
       setFormData({
         childId,
         amount: 0,
@@ -77,6 +74,44 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId, onBal
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (formData.amount <= 0) {
+      setError('Amount must be greater than 0');
+      return;
+    }
+
+    // Check if this is a debit that exceeds spending balance
+    if (formData.type === TransactionType.Debit && formData.amount > currentBalance) {
+      const shortfall = formData.amount - currentBalance;
+      const totalAvailable = currentBalance + savingsBalance;
+
+      if (formData.amount > totalAvailable) {
+        setError(`Insufficient funds. Total available (spending + savings): ${formatCurrency(totalAvailable)}`);
+        return;
+      }
+
+      // Show confirmation dialog to draw from savings
+      setPendingTransaction(formData);
+      setShowSavingsConfirm(true);
+      return;
+    }
+
+    await submitTransaction(formData);
+  };
+
+  const handleConfirmDrawFromSavings = async () => {
+    if (!pendingTransaction) return;
+    await submitTransaction({ ...pendingTransaction, drawFromSavings: true });
+  };
+
+  const handleCancelDrawFromSavings = () => {
+    setShowSavingsConfirm(false);
+    setPendingTransaction(null);
   };
 
   const formatCurrency = (amount: number) => {
@@ -106,6 +141,53 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId, onBal
 
   return (
     <div className="space-y-6">
+      {/* Savings Confirmation Dialog */}
+      {showSavingsConfirm && pendingTransaction && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+          <div className="relative mx-auto p-6 border w-full max-w-md shadow-lg rounded-lg bg-white">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Draw from Savings?</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              The spending balance ({formatCurrency(currentBalance)}) is not enough for this {formatCurrency(pendingTransaction.amount)} transaction.
+            </p>
+            <p className="text-sm text-gray-600 mb-4">
+              Would you like to draw {formatCurrency(pendingTransaction.amount - currentBalance)} from savings to complete this transaction?
+            </p>
+            <div className="bg-gray-50 rounded-md p-3 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Spending balance:</span>
+                <span className="font-medium">{formatCurrency(currentBalance)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">From savings:</span>
+                <span className="font-medium text-amber-600">{formatCurrency(pendingTransaction.amount - currentBalance)}</span>
+              </div>
+              <div className="flex justify-between text-sm border-t border-gray-200 mt-2 pt-2">
+                <span className="text-gray-600">Total:</span>
+                <span className="font-medium">{formatCurrency(pendingTransaction.amount)}</span>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={handleCancelDrawFromSavings}
+                disabled={isSubmitting}
+                className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDrawFromSavings}
+                disabled={isSubmitting}
+                className="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+              >
+                {isSubmitting ? 'Processing...' : 'Yes, Draw from Savings'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header with Add Transaction Button */}
       {isParent && (
         <div className="flex justify-between items-center">

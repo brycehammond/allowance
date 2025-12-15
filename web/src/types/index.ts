@@ -131,6 +131,7 @@ export interface CreateTransactionRequest {
   category: TransactionCategory;
   description: string;
   notes?: string;
+  drawFromSavings?: boolean;
 }
 
 // Wish List

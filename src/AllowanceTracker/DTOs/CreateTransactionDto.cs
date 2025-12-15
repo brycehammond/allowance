@@ -11,10 +11,12 @@ namespace AllowanceTracker.DTOs;
 /// <param name="Category">Category for the transaction (Allowance, Chore, Gift, Purchase, Savings, Other)</param>
 /// <param name="Description">Description or note for the transaction</param>
 /// <param name="Notes">Optional additional notes or details about the transaction</param>
+/// <param name="DrawFromSavings">If true and spending balance is insufficient, draw the difference from savings</param>
 public record CreateTransactionDto(
     Guid ChildId,
     decimal Amount,
     TransactionType Type,
     TransactionCategory Category,
     string Description,
-    string? Notes = null);
+    string? Notes = null,
+    bool DrawFromSavings = false);
