@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Profile and settings view
+@MainActor
 struct ProfileView: View {
 
     // MARK: - Properties

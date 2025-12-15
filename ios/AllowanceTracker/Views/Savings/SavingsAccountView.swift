@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Main savings account view showing accounts and transactions
+@MainActor
 struct SavingsAccountView: View {
 
     // MARK: - Properties

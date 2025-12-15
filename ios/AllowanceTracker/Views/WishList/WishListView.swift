@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// View displaying wish list items for a child
+@MainActor
 struct WishListView: View {
 
     // MARK: - Properties

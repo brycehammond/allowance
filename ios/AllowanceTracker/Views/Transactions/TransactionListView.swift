@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// View displaying transaction history for a child
+@MainActor
 struct TransactionListView: View {
 
     // MARK: - Properties
