@@ -26,6 +26,9 @@ struct ChildSettingsView: View {
     @State private var savingsTransferAmount: String = "2.00"
     @State private var savingsBalanceVisibleToChild: Bool = true
 
+    // Spending form fields
+    @State private var allowDebt: Bool = false
+
     // MARK: - Body
 
     var body: some View {
@@ -49,6 +52,9 @@ struct ChildSettingsView: View {
                 if savingsAccountEnabled {
                     savingsTransferSection
                 }
+
+                // Spending settings section
+                spendingSettingsSection
 
                 // Current status section
                 currentStatusSection(child: child)
@@ -225,6 +231,36 @@ struct ChildSettingsView: View {
         }
     }
 
+    private var spendingSettingsSection: some View {
+        Section {
+            Toggle(isOn: $allowDebt) {
+                HStack {
+                    Image(systemName: "creditcard")
+                        .foregroundStyle(allowDebt ? DesignSystem.Colors.secondary : .secondary)
+                    VStack(alignment: .leading) {
+                        Text("Allow Debt")
+                            .font(.body)
+                        Text(allowDebt
+                             ? "Child can spend more than their balance"
+                             : "Transactions blocked if balance is insufficient")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .tint(DesignSystem.Colors.secondary)
+
+            if allowDebt {
+                Text("When spending exceeds available funds, savings will be used first before going into debt.")
+                    .font(.caption)
+                    .foregroundStyle(DesignSystem.Colors.secondary)
+                    .padding(.vertical, 4)
+            }
+        } header: {
+            Text("Spending Settings")
+        }
+    }
+
     private func currentStatusSection(child: Child) -> some View {
         Section("Current Status") {
             HStack {
@@ -341,6 +377,7 @@ struct ChildSettingsView: View {
                 savingsTransferAmount = String(describing: amount)
             }
             savingsBalanceVisibleToChild = loadedChild.savingsBalanceVisibleToChild
+            allowDebt = loadedChild.allowDebt
         } catch {
             errorMessage = "Failed to load child settings"
         }
@@ -365,7 +402,8 @@ struct ChildSettingsView: View {
                 savingsTransferPercentage: savingsTransferType == .percentage ? Decimal(string: savingsTransferPercentage) : nil,
                 savingsTransferAmount: savingsTransferType == .fixedAmount ? Decimal(string: savingsTransferAmount) : nil,
                 allowanceDay: useScheduledDay ? selectedAllowanceDay : nil,
-                savingsBalanceVisibleToChild: savingsBalanceVisibleToChild
+                savingsBalanceVisibleToChild: savingsBalanceVisibleToChild,
+                allowDebt: allowDebt
             )
 
             _ = try await apiService.updateChildSettings(childId: childId, request)

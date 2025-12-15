@@ -41,4 +41,21 @@ struct CreateTransactionRequest: Codable {
     let type: TransactionType
     let category: String
     let description: String
+    let drawFromSavings: Bool
+
+    init(
+        childId: UUID,
+        amount: Decimal,
+        type: TransactionType,
+        category: String,
+        description: String,
+        drawFromSavings: Bool = false
+    ) {
+        self.childId = childId
+        self.amount = amount
+        self.type = type
+        self.category = category
+        self.description = description
+        self.drawFromSavings = drawFromSavings
+    }
 }

@@ -9,6 +9,10 @@ struct TransactionListView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
     @State private var showingCreateTransaction = false
 
+    // Child settings passed from parent view
+    private let initialSavingsBalance: Decimal
+    private let initialAllowDebt: Bool
+
     // MARK: - Computed Properties
 
     private var isParent: Bool {
@@ -17,8 +21,25 @@ struct TransactionListView: View {
 
     // MARK: - Initialization
 
-    init(childId: UUID, apiService: APIServiceProtocol = APIService()) {
-        _viewModel = StateObject(wrappedValue: TransactionViewModel(childId: childId, apiService: apiService))
+    init(
+        childId: UUID,
+        savingsBalance: Decimal = 0,
+        allowDebt: Bool = false,
+        apiService: APIServiceProtocol = APIService()
+    ) {
+        self.initialSavingsBalance = savingsBalance
+        self.initialAllowDebt = allowDebt
+        _viewModel = StateObject(wrappedValue: TransactionViewModel(
+            childId: childId,
+            savingsBalance: savingsBalance,
+            allowDebt: allowDebt,
+            apiService: apiService
+        ))
+    }
+
+    /// Update view model with new child settings
+    func updateChildSettings(savingsBalance: Decimal, allowDebt: Bool) {
+        viewModel.updateChildSettings(savingsBalance: savingsBalance, allowDebt: allowDebt)
     }
 
     // MARK: - Body

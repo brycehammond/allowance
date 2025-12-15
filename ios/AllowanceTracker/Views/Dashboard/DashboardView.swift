@@ -188,7 +188,11 @@ struct ChildDetailView: View {
             // Tab view
             TabView(selection: $selectedTab) {
                 // Transactions tab
-                TransactionListView(childId: child.id)
+                TransactionListView(
+                    childId: child.id,
+                    savingsBalance: child.savingsBalance,
+                    allowDebt: child.allowDebt
+                )
                     .tabItem {
                         Label("Transactions", systemImage: "receipt")
                     }
@@ -357,7 +361,8 @@ struct ChildDetailView: View {
                 savingsTransferType: .percentage,
                 savingsTransferPercentage: 20,
                 savingsTransferAmount: nil,
-                savingsBalanceVisibleToChild: true
+                savingsBalanceVisibleToChild: true,
+                allowDebt: false
             )
         )
         .environmentObject({
@@ -392,7 +397,8 @@ struct ChildDetailView: View {
                 savingsTransferType: .percentage,
                 savingsTransferPercentage: 20,
                 savingsTransferAmount: nil,
-                savingsBalanceVisibleToChild: true
+                savingsBalanceVisibleToChild: true,
+                allowDebt: false
             )
         )
         .environmentObject({

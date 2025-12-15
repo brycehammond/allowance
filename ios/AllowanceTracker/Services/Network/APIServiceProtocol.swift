@@ -48,4 +48,5 @@ protocol APIServiceProtocol {
     func sendParentInvite(_ request: SendParentInviteRequest) async throws -> ParentInviteResponse
     func getPendingInvites() async throws -> [PendingInvite]
     func cancelInvite(inviteId: String) async throws
+    func resendInvite(inviteId: String) async throws -> ParentInviteResponse
 }

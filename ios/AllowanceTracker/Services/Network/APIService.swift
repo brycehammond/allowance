@@ -453,6 +453,16 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         let _: EmptyResponse = try await performRequest(urlRequest)
     }
 
+    /// Resend a pending invite
+    /// - Parameter inviteId: Invite identifier to resend
+    /// - Returns: Updated invite response
+    /// - Throws: APIError if request fails
+    func resendInvite(inviteId: String) async throws -> ParentInviteResponse {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/invites/\(inviteId)/resend")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        return try await performRequest(urlRequest)
+    }
+
     // MARK: - Private Helpers
 
     /// Empty response for DELETE requests

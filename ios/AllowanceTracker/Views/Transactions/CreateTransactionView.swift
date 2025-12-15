@@ -12,12 +12,26 @@ struct CreateTransactionView: View {
     @State private var transactionType: TransactionType = .credit
     @State private var category: TransactionCategory = .allowance
     @State private var description: String = ""
+    @State private var showingConfirmation = false
+    @State private var pendingTransaction: PendingTransaction?
     @FocusState private var focusedField: Field?
 
     // MARK: - Field enum
 
     private enum Field {
         case amount, description
+    }
+
+    // MARK: - Pending Transaction
+
+    private struct PendingTransaction {
+        let amount: Decimal
+        let type: TransactionType
+        let category: String
+        let description: String
+        let fromSpending: Decimal
+        let fromSavings: Decimal
+        let intoDebt: Decimal
     }
 
     // MARK: - Body
@@ -151,7 +165,40 @@ struct CreateTransactionView: View {
                         .shadow(radius: 4)
                 }
             }
+            .alert("Confirm Transaction", isPresented: $showingConfirmation, presenting: pendingTransaction) { pending in
+                Button("Cancel", role: .cancel) {
+                    pendingTransaction = nil
+                }
+                Button("Confirm", role: .destructive) {
+                    Task {
+                        await confirmTransaction(pending)
+                    }
+                }
+            } message: { pending in
+                Text(confirmationMessage(for: pending))
+            }
         }
+    }
+
+    // MARK: - Confirmation Message
+
+    private func confirmationMessage(for pending: PendingTransaction) -> String {
+        var lines: [String] = []
+        lines.append("This transaction will:")
+
+        if pending.fromSpending > 0 {
+            lines.append("• Use \(pending.fromSpending.currencyFormatted) from spending")
+        }
+
+        if pending.fromSavings > 0 {
+            lines.append("• Use \(pending.fromSavings.currencyFormatted) from savings")
+        }
+
+        if pending.intoDebt > 0 {
+            lines.append("• Go \(pending.intoDebt.currencyFormatted) into debt")
+        }
+
+        return lines.joined(separator: "\n")
     }
 
     // MARK: - Computed Properties
@@ -177,16 +224,62 @@ struct CreateTransactionView: View {
 
     // MARK: - Methods
 
-    /// Save the transaction
+    /// Save the transaction (checks if confirmation is needed for debits)
     private func saveTransaction() async {
         guard let amountValue = amountDecimal else { return }
 
+        // For debit transactions, check if we need to draw from savings or go into debt
+        if transactionType == .debit {
+            let impact = viewModel.checkDebitImpact(amount: amountValue)
+
+            if impact.needsConfirmation {
+                // Check if transaction is possible
+                let totalAvailable = viewModel.currentBalance + viewModel.savingsBalance
+                if amountValue > totalAvailable && !viewModel.allowDebt {
+                    viewModel.errorMessage = "Insufficient funds. This child has \(totalAvailable.currencyFormatted) available and debt is not allowed."
+                    return
+                }
+
+                // Store pending transaction and show confirmation
+                pendingTransaction = PendingTransaction(
+                    amount: amountValue,
+                    type: transactionType,
+                    category: category.rawValue,
+                    description: description,
+                    fromSpending: impact.fromSpending,
+                    fromSavings: impact.fromSavings,
+                    intoDebt: impact.intoDebt
+                )
+                showingConfirmation = true
+                return
+            }
+        }
+
+        // No confirmation needed, proceed directly
         let success = await viewModel.createTransaction(
             amount: amountValue,
             type: transactionType,
             category: category.rawValue,
-            description: description
+            description: description,
+            drawFromSavings: false
         )
+
+        if success {
+            dismiss()
+        }
+    }
+
+    /// Confirm and execute a pending transaction that requires drawing from savings
+    private func confirmTransaction(_ pending: PendingTransaction) async {
+        let success = await viewModel.createTransaction(
+            amount: pending.amount,
+            type: pending.type,
+            category: pending.category,
+            description: pending.description,
+            drawFromSavings: true
+        )
+
+        pendingTransaction = nil
 
         if success {
             dismiss()

@@ -14,6 +14,7 @@ struct Child: Codable, Identifiable, Equatable {
     let savingsTransferPercentage: Decimal?
     let savingsTransferAmount: Decimal?
     let savingsBalanceVisibleToChild: Bool
+    let allowDebt: Bool
 
     var fullName: String {
         "\(firstName) \(lastName)"
@@ -84,6 +85,7 @@ struct UpdateChildSettingsRequest: Codable {
     let savingsTransferAmount: Decimal?
     let allowanceDay: Weekday?
     let savingsBalanceVisibleToChild: Bool?
+    let allowDebt: Bool?
 
     init(
         weeklyAllowance: Decimal,
@@ -92,7 +94,8 @@ struct UpdateChildSettingsRequest: Codable {
         savingsTransferPercentage: Decimal? = nil,
         savingsTransferAmount: Decimal? = nil,
         allowanceDay: Weekday? = nil,
-        savingsBalanceVisibleToChild: Bool? = nil
+        savingsBalanceVisibleToChild: Bool? = nil,
+        allowDebt: Bool? = nil
     ) {
         self.weeklyAllowance = weeklyAllowance
         self.savingsAccountEnabled = savingsAccountEnabled
@@ -101,6 +104,7 @@ struct UpdateChildSettingsRequest: Codable {
         self.savingsTransferAmount = savingsTransferAmount
         self.allowanceDay = allowanceDay
         self.savingsBalanceVisibleToChild = savingsBalanceVisibleToChild
+        self.allowDebt = allowDebt
     }
 }
 
@@ -135,5 +139,6 @@ struct UpdateChildSettingsResponse: Codable {
     let savingsTransferType: String
     let savingsTransferPercentage: Int
     let savingsTransferAmount: Decimal
+    let allowDebt: Bool
     let message: String
 }

@@ -9,6 +9,8 @@ final class TransactionViewModel: ObservableObject {
 
     @Published private(set) var transactions: [Transaction] = []
     @Published private(set) var currentBalance: Decimal = 0
+    @Published private(set) var savingsBalance: Decimal = 0
+    @Published private(set) var allowDebt: Bool = false
     @Published private(set) var isLoading = false
     @Published private(set) var isCreatingTransaction = false
     @Published var errorMessage: String?
@@ -20,9 +22,22 @@ final class TransactionViewModel: ObservableObject {
 
     // MARK: - Initialization
 
-    init(childId: UUID, apiService: APIServiceProtocol = APIService()) {
+    init(
+        childId: UUID,
+        savingsBalance: Decimal = 0,
+        allowDebt: Bool = false,
+        apiService: APIServiceProtocol = APIService()
+    ) {
         self.childId = childId
+        self.savingsBalance = savingsBalance
+        self.allowDebt = allowDebt
         self.apiService = apiService
+    }
+
+    /// Update child settings (savings balance and allow debt)
+    func updateChildSettings(savingsBalance: Decimal, allowDebt: Bool) {
+        self.savingsBalance = savingsBalance
+        self.allowDebt = allowDebt
     }
 
     // MARK: - Public Methods
@@ -66,11 +81,13 @@ final class TransactionViewModel: ObservableObject {
     ///   - type: Credit or Debit
     ///   - category: Transaction category
     ///   - description: Transaction description
+    ///   - drawFromSavings: Whether to draw from savings if spending balance is insufficient
     func createTransaction(
         amount: Decimal,
         type: TransactionType,
         category: String,
-        description: String
+        description: String,
+        drawFromSavings: Bool = false
     ) async -> Bool {
         // Clear previous errors
         errorMessage = nil
@@ -101,7 +118,8 @@ final class TransactionViewModel: ObservableObject {
                 amount: amount,
                 type: type,
                 category: category,
-                description: description
+                description: description,
+                drawFromSavings: drawFromSavings
             )
 
             let newTransaction = try await apiService.createTransaction(request)
@@ -118,6 +136,32 @@ final class TransactionViewModel: ObservableObject {
         } catch {
             errorMessage = "Failed to create transaction. Please try again."
             return false
+        }
+    }
+
+    /// Check if a debit transaction would require drawing from savings or going into debt
+    /// - Parameters:
+    ///   - amount: The transaction amount
+    /// - Returns: Tuple with (needsConfirmation, fromSpending, fromSavings, intoDebt)
+    func checkDebitImpact(amount: Decimal) -> (needsConfirmation: Bool, fromSpending: Decimal, fromSavings: Decimal, intoDebt: Decimal) {
+        guard amount > currentBalance else {
+            // Transaction fits within spending balance
+            return (false, amount, 0, 0)
+        }
+
+        let shortfall = amount - currentBalance
+        let totalAvailable = currentBalance + savingsBalance
+
+        if amount <= totalAvailable {
+            // Can cover with savings
+            return (true, currentBalance, shortfall, 0)
+        } else if allowDebt {
+            // Will need to go into debt
+            let debtAmount = amount - totalAvailable
+            return (true, currentBalance, savingsBalance, debtAmount)
+        } else {
+            // Not enough funds and debt not allowed
+            return (true, currentBalance, savingsBalance, 0)
         }
     }
 

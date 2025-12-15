@@ -86,6 +86,12 @@ struct InviteParentView: View {
                         ForEach(viewModel.pendingInvites) { invite in
                             PendingInviteRow(
                                 invite: invite,
+                                isResending: viewModel.resendingInviteId == invite.id,
+                                onResend: {
+                                    Task {
+                                        await viewModel.resendInvite(inviteId: invite.id)
+                                    }
+                                },
                                 onCancel: {
                                     Task {
                                         await viewModel.cancelInvite(inviteId: invite.id)
@@ -116,6 +122,8 @@ struct InviteParentView: View {
 
 struct PendingInviteRow: View {
     let invite: PendingInvite
+    let isResending: Bool
+    let onResend: () -> Void
     let onCancel: () -> Void
 
     var body: some View {
@@ -150,6 +158,23 @@ struct PendingInviteRow: View {
 
             Spacer()
 
+            // Resend button
+            Button {
+                onResend()
+            } label: {
+                if isResending {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                } else {
+                    Image(systemName: "arrow.clockwise.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(DesignSystem.Colors.primary)
+                }
+            }
+            .buttonStyle(.plain)
+            .disabled(isResending)
+
+            // Cancel button
             Button {
                 onCancel()
             } label: {
@@ -158,6 +183,7 @@ struct PendingInviteRow: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .disabled(isResending)
         }
         .padding(.vertical, 4)
     }
@@ -178,6 +204,7 @@ final class InviteParentViewModel: ObservableObject {
 
     @Published var isSending = false
     @Published var isLoadingInvites = false
+    @Published var resendingInviteId: String?
     @Published var successMessage: String?
     @Published var errorMessage: String?
     @Published var pendingInvites: [PendingInvite] = []
@@ -255,6 +282,26 @@ final class InviteParentViewModel: ObservableObject {
         } catch {
             errorMessage = "Failed to cancel invitation"
         }
+    }
+
+    func resendInvite(inviteId: String) async {
+        resendingInviteId = inviteId
+        successMessage = nil
+        errorMessage = nil
+
+        do {
+            let response = try await apiService.resendInvite(inviteId: inviteId)
+            successMessage = response.message
+
+            // Refresh pending invites to get updated expiration
+            await loadPendingInvites()
+        } catch let error as APIError {
+            errorMessage = error.localizedDescription
+        } catch {
+            errorMessage = "Failed to resend invitation. Please try again."
+        }
+
+        resendingInviteId = nil
     }
 
     private func isValidEmail(_ email: String) -> Bool {

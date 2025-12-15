@@ -167,7 +167,8 @@ private extension Child {
             savingsTransferType: .percentage,
             savingsTransferPercentage: 20,
             savingsTransferAmount: nil,
-            savingsBalanceVisibleToChild: true
+            savingsBalanceVisibleToChild: true,
+            allowDebt: false
         )
     }
 }
