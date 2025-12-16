@@ -17,7 +17,7 @@ struct TransactionListView: View {
     // MARK: - Computed Properties
 
     private var isParent: Bool {
-        authViewModel.currentUser?.isParent ?? false
+        authViewModel.effectiveIsParent
     }
 
     // MARK: - Initialization

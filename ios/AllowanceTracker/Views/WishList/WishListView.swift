@@ -16,7 +16,7 @@ struct WishListView: View {
     // MARK: - Computed Properties
 
     private var isParent: Bool {
-        authViewModel.currentUser?.isParent ?? false
+        authViewModel.effectiveIsParent
     }
 
     // MARK: - Filter enum
