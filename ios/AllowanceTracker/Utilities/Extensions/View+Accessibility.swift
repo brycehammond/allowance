@@ -169,6 +169,17 @@ enum AccessibilityIdentifier {
     static let loginPasswordField = "login_password_field"
     static let loginButton = "login_button"
     static let registerButton = "register_button"
+    static let forgotPasswordButton = "forgot_password_button"
+
+    // Registration
+    static let registerFirstNameField = "register_first_name_field"
+    static let registerLastNameField = "register_last_name_field"
+    static let registerEmailField = "register_email_field"
+    static let registerPasswordField = "register_password_field"
+    static let registerConfirmPasswordField = "register_confirm_password_field"
+    static let registerRolePicker = "register_role_picker"
+    static let registerSubmitButton = "register_submit_button"
+    static let registerCancelButton = "register_cancel_button"
 
     // Dashboard
     static let childCard = "child_card_"
@@ -180,11 +191,48 @@ enum AccessibilityIdentifier {
     static let createTransactionButton = "create_transaction_button"
     static let transactionAmountField = "transaction_amount_field"
     static let transactionDescriptionField = "transaction_description_field"
+    static let transactionTypePicker = "transaction_type_picker"
+    static let transactionCategoryPicker = "transaction_category_picker"
+    static let transactionSaveButton = "transaction_save_button"
+    static let transactionCancelButton = "transaction_cancel_button"
+    static let transactionBalanceLabel = "transaction_balance_label"
 
     // Wish List
     static let wishListItem = "wish_list_item_"
     static let addWishListButton = "add_wish_list_button"
     static let purchaseButton = "purchase_button_"
+    static let wishListNameField = "wish_list_name_field"
+    static let wishListPriceField = "wish_list_price_field"
+    static let wishListUrlField = "wish_list_url_field"
+    static let wishListNotesField = "wish_list_notes_field"
+    static let wishListSaveButton = "wish_list_save_button"
+    static let wishListFilter = "wish_list_filter_"
+
+    // Savings
+    static let savingsAccountCard = "savings_account_card_"
+    static let addSavingsAccountButton = "add_savings_account_button"
+    static let depositButton = "deposit_button"
+    static let withdrawButton = "withdraw_button"
+    static let savingsNameField = "savings_name_field"
+    static let savingsTargetField = "savings_target_field"
+    static let savingsAmountField = "savings_amount_field"
+    static let savingsTransaction = "savings_transaction_"
+
+    // Profile
+    static let profileNameLabel = "profile_name_label"
+    static let profileEmailLabel = "profile_email_label"
+    static let profileRoleLabel = "profile_role_label"
+    static let changePasswordButton = "change_password_button"
+    static let notificationsButton = "notifications_button"
+    static let appearanceButton = "appearance_button"
+    static let aboutButton = "about_button"
+    static let signOutButton = "sign_out_button"
+    static let signOutConfirmButton = "sign_out_confirm_button"
+
+    // Settings
+    static let currentPasswordField = "current_password_field"
+    static let newPasswordField = "new_password_field"
+    static let confirmNewPasswordField = "confirm_new_password_field"
 
     // Common
     static let logoutButton = "logout_button"
@@ -192,6 +240,8 @@ enum AccessibilityIdentifier {
     static let cancelButton = "cancel_button"
     static let saveButton = "save_button"
     static let deleteButton = "delete_button"
+    static let errorMessage = "error_message"
+    static let loadingIndicator = "loading_indicator"
 }
 
 // MARK: - Accessibility Announcements
