@@ -50,6 +50,7 @@ struct CreateTransactionView: View {
                             .tag(TransactionType.debit)
                     }
                     .pickerStyle(.segmented)
+                    .accessibilityIdentifier(AccessibilityIdentifier.transactionTypePicker)
                     .onChange(of: transactionType) { oldValue, newValue in
                         // Reset category when type changes
                         category = newValue == .credit ? .allowance : .toys
@@ -70,6 +71,7 @@ struct CreateTransactionView: View {
                             .font(.title3)
                             .fontDesign(.monospaced)
                             .focused($focusedField, equals: .amount)
+                            .accessibilityIdentifier(AccessibilityIdentifier.transactionAmountField)
                     }
                 } header: {
                     Text("Amount")
@@ -95,6 +97,7 @@ struct CreateTransactionView: View {
                     TextField("Enter description", text: $description, axis: .vertical)
                         .lineLimit(3...6)
                         .focused($focusedField, equals: .description)
+                        .accessibilityIdentifier(AccessibilityIdentifier.transactionDescriptionField)
                 } header: {
                     Text("Description")
                 } footer: {
@@ -139,6 +142,7 @@ struct CreateTransactionView: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .accessibilityIdentifier(AccessibilityIdentifier.transactionCancelButton)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -148,6 +152,7 @@ struct CreateTransactionView: View {
                         }
                     }
                     .disabled(!isValid)
+                    .accessibilityIdentifier(AccessibilityIdentifier.transactionSaveButton)
                 }
 
                 ToolbarItem(placement: .keyboard) {

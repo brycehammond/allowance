@@ -83,6 +83,7 @@ struct RegisterView: View {
                         .textContentType(.givenName)
                         .textFieldStyle(.roundedBorder)
                         .disabled(viewModel.isLoading)
+                        .accessibilityIdentifier(AccessibilityIdentifier.registerFirstNameField)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -94,6 +95,7 @@ struct RegisterView: View {
                         .textContentType(.familyName)
                         .textFieldStyle(.roundedBorder)
                         .disabled(viewModel.isLoading)
+                        .accessibilityIdentifier(AccessibilityIdentifier.registerLastNameField)
                 }
             }
 
@@ -109,6 +111,7 @@ struct RegisterView: View {
                     .autocapitalization(.none)
                     .textFieldStyle(.roundedBorder)
                     .disabled(viewModel.isLoading)
+                    .accessibilityIdentifier(AccessibilityIdentifier.registerEmailField)
             }
 
             // Password fields
@@ -121,6 +124,7 @@ struct RegisterView: View {
                     .textContentType(.newPassword)
                     .textFieldStyle(.roundedBorder)
                     .disabled(viewModel.isLoading)
+                    .accessibilityIdentifier(AccessibilityIdentifier.registerPasswordField)
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -132,6 +136,7 @@ struct RegisterView: View {
                     .textContentType(.newPassword)
                     .textFieldStyle(.roundedBorder)
                     .disabled(viewModel.isLoading)
+                    .accessibilityIdentifier(AccessibilityIdentifier.registerConfirmPasswordField)
 
                 if !confirmPassword.isEmpty && password != confirmPassword {
                     Text("Passwords do not match")
@@ -152,6 +157,7 @@ struct RegisterView: View {
                 }
                 .pickerStyle(.segmented)
                 .disabled(viewModel.isLoading)
+                .accessibilityIdentifier(AccessibilityIdentifier.registerRolePicker)
             }
         }
     }
@@ -195,6 +201,7 @@ struct RegisterView: View {
             .cornerRadius(12)
         }
         .disabled(viewModel.isLoading || password != confirmPassword)
+        .accessibilityIdentifier(AccessibilityIdentifier.registerSubmitButton)
     }
 
     private func errorSection(message: String) -> some View {

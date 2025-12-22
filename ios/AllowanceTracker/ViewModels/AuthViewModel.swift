@@ -13,6 +13,27 @@ final class AuthViewModel {
     private(set) var isLoading = false
     var errorMessage: String?
 
+    // MARK: - Child View Mode
+
+    /// The child currently being viewed as (nil = normal parent mode)
+    @Published var viewingAsChild: Child?
+
+    /// Returns true if user is a parent AND not currently viewing as a child
+    var effectiveIsParent: Bool {
+        guard viewingAsChild == nil else { return false }
+        return currentUser?.isParent ?? false
+    }
+
+    /// Returns true if viewing as a child OR the actual user is a child
+    var effectiveIsChild: Bool {
+        viewingAsChild != nil || currentUser?.role == .child
+    }
+
+    /// Whether child view mode is currently active
+    var isViewingAsChild: Bool {
+        viewingAsChild != nil
+    }
+
     // MARK: - Dependencies
 
     private let apiService: APIServiceProtocol
@@ -136,6 +157,7 @@ final class AuthViewModel {
             try await apiService.logout()
 
             // Clear state on success
+            viewingAsChild = nil
             currentUser = nil
             isAuthenticated = false
 
@@ -149,6 +171,19 @@ final class AuthViewModel {
     /// Clear error message
     func clearError() {
         errorMessage = nil
+    }
+
+    // MARK: - Child View Mode Methods
+
+    /// Enter child view mode to see app as a specific child
+    /// - Parameter child: The child to view as
+    func enterChildViewMode(child: Child) {
+        viewingAsChild = child
+    }
+
+    /// Exit child view mode and return to parent view
+    func exitChildViewMode() {
+        viewingAsChild = nil
     }
 
     /// Change password for current user

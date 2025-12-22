@@ -13,7 +13,7 @@ struct DashboardView: View {
     // MARK: - Computed Properties
 
     private var isChild: Bool {
-        authViewModel.currentUser?.role == .child
+        authViewModel.effectiveIsChild
     }
 
     private var isParent: Bool {
@@ -179,7 +179,12 @@ struct ChildDetailView: View {
     @State private var selectedTab = 0
 
     private var isParent: Bool {
-        authViewModel.currentUser?.isParent ?? false
+        authViewModel.effectiveIsParent
+    }
+
+    /// Whether the parent can enter child view mode (only when not already in child view mode)
+    private var canEnterChildViewMode: Bool {
+        authViewModel.currentUser?.isParent == true && !authViewModel.isViewingAsChild
     }
 
     var body: some View {
@@ -234,8 +239,43 @@ struct ChildDetailView: View {
             }
             .tint(DesignSystem.Colors.primary)
         }
-        .navigationTitle(child.fullName)
+        .navigationTitle(authViewModel.isViewingAsChild ? "" : child.fullName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // View as child button (only for parents, not already in child view mode)
+            if canEnterChildViewMode {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            authViewModel.enterChildViewMode(child: child)
+                        }
+                    } label: {
+                        Label("View as Child", systemImage: "eye")
+                    }
+                }
+            }
+
+            // Child view mode indicator with exit button
+            if authViewModel.isViewingAsChild {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "eye.fill")
+                            .foregroundStyle(.orange)
+                        Text("Viewing as \(child.firstName)")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Button("Exit") {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                authViewModel.exitChildViewMode()
+                            }
+                        }
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.orange)
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Child Header View

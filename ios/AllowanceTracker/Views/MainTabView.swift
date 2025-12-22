@@ -20,8 +20,8 @@ struct MainTabView: View {
                 }
                 .tag(0)
 
-            // Tab 2: Budget (if parent) or My Money (if child)
-            if authViewModel.currentUser?.role == .parent {
+            // Tab 2: Budget (if parent and not viewing as child)
+            if authViewModel.effectiveIsParent {
                 NavigationStack {
                     BudgetTabView()
                 }

@@ -75,24 +75,28 @@ struct ProfileView: View {
                     } label: {
                         Label("Change Password", systemImage: "key.fill")
                     }
+                    .accessibilityIdentifier(AccessibilityIdentifier.changePasswordButton)
 
                     NavigationLink {
                         NotificationsSettingsView()
                     } label: {
                         Label("Notifications", systemImage: "bell.fill")
                     }
+                    .accessibilityIdentifier(AccessibilityIdentifier.notificationsButton)
 
                     NavigationLink {
                         AppearanceSettingsView()
                     } label: {
                         Label("Appearance", systemImage: "paintbrush.fill")
                     }
+                    .accessibilityIdentifier(AccessibilityIdentifier.appearanceButton)
 
                     NavigationLink {
                         AboutView()
                     } label: {
                         Label("About", systemImage: "info.circle.fill")
                     }
+                    .accessibilityIdentifier(AccessibilityIdentifier.aboutButton)
                 }
 
                 // Account Actions Section
@@ -102,6 +106,7 @@ struct ProfileView: View {
                     } label: {
                         Label("Sign Out", systemImage: "arrow.right.square")
                     }
+                    .accessibilityIdentifier(AccessibilityIdentifier.signOutButton)
                 }
             }
             .navigationTitle("Profile")
