@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -112,7 +112,7 @@
 /* Begin PBXFileReference section */
 		008DAC706AD778A64C7E9301 /* UserModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModelTests.swift; sourceTree = "<group>"; };
 		02F582FDE2583DFE20EC30A5 /* InviteParentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParentView.swift; sourceTree = "<group>"; };
-		068A8E9C3B125C83F4D800C7 /* AllowanceTracker.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AllowanceTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		068A8E9C3B125C83F4D800C7 /* AllowanceTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AllowanceTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CB99FE810BEE0019FD17684 /* BudgetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetViewModel.swift; sourceTree = "<group>"; };
 		1299EFAD191CADB769E2D0FD /* AddChildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddChildView.swift; sourceTree = "<group>"; };
 		167E4898E383738FEAA76751 /* AccessibilityExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityExtensionsTests.swift; sourceTree = "<group>"; };
@@ -197,7 +197,6 @@
 		F236DDAE8B3A3139A01EDE14 /* AllowanceTrackerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AllowanceTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F45D1965078A6166B2675BA0 /* CategorySpendingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySpendingChart.swift; sourceTree = "<group>"; };
 		F88034558BD809F2C0DCCE5E /* AllowanceTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowanceTrackerUITests.swift; sourceTree = "<group>"; };
-		"TEMP_7C19A995-8A43-44A8-8D5F-5038C2F7A74C" /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
 		"TEMP_7DD3C1DF-A440-4692-B12D-0CE38F7A6300" /* AllowanceTracker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AllowanceTracker.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -214,6 +213,19 @@
 				9C527099EAE7A0E507219D87 /* WishListItemCard.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		0287B4E72EF8E41100314D66 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				"TEMP_7DD3C1DF-A440-4692-B12D-0CE38F7A6300" /* AllowanceTracker.xcodeproj */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		0287B4E82EF8E41300314D66 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
 			sourceTree = "<group>";
 		};
 		0D75775C3E3206F8E1238D35 /* Dashboard */ = {
@@ -348,6 +360,7 @@
 				82EF93D3E39C4015F68E6008 /* ViewModels */,
 				407023F9E2ECCA37E6FEB70C /* Views */,
 				34619E48D893B711CDB6C054 /* Products */,
+				0287B4E72EF8E41100314D66 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -535,22 +548,6 @@
 			path = Analytics;
 			sourceTree = "<group>";
 		};
-		"TEMP_77AB9D20-55CD-4E8C-A53C-3A1C9F469D15" /* AllowanceTracker */ = {
-			isa = PBXGroup;
-			children = (
-				"TEMP_7DD3C1DF-A440-4692-B12D-0CE38F7A6300" /* AllowanceTracker.xcodeproj */,
-				"TEMP_7C19A995-8A43-44A8-8D5F-5038C2F7A74C" /* .gitignore */,
-				82EF93D3E39C4015F68E6008 /* ViewModels */,
-				8E54C771B9AA88A28FC8EC3E /* DesignSystem */,
-				DBA727681DCAEBD4000F973F /* App */,
-				EF1720C3B9179CFCB0481AE3 /* Models */,
-				840A784D3A663523ECB6196B /* Utilities */,
-				407023F9E2ECCA37E6FEB70C /* Views */,
-				3AFA4BCB420BC8EAE3362C3A /* Services */,
-			);
-			path = AllowanceTracker;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -617,10 +614,6 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
-					210C8DE349F66D2F314168FF = {
-						DevelopmentTeam = "$(DEVELOPMENT_TEAM)";
-						ProvisioningStyle = Manual;
-					};
 					849439CD2835C88EAFE036DF = {
 						TestTargetID = 210C8DE349F66D2F314168FF;
 					};
@@ -636,8 +629,13 @@
 			);
 			mainGroup = 7C1DD20F7DA46F175719B9B7;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 0287B4E82EF8E41300314D66 /* Products */;
+					ProjectRef = "TEMP_7DD3C1DF-A440-4692-B12D-0CE38F7A6300" /* AllowanceTracker.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				210C8DE349F66D2F314168FF /* AllowanceTracker */,
@@ -974,17 +972,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/AllowanceTracker.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 8MW535NRK9;
 				ENABLE_TESTABILITY = YES;
 				INFOPLIST_FILE = App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.fludivisiondesign.earnandlearn;
-				PROVISIONING_PROFILE_SPECIFIER = "$(sigh_com.fludivisiondesign.earnandlearn_appstore)";
+				PRODUCT_BUNDLE_IDENTIFIER = app.earnandlearn.ios;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -996,17 +994,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/AllowanceTracker.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 8MW535NRK9;
 				ENABLE_TESTABILITY = YES;
 				INFOPLIST_FILE = App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.fludivisiondesign.earnandlearn;
-				PROVISIONING_PROFILE_SPECIFIER = "$(sigh_com.fludivisiondesign.earnandlearn_appstore)";
+				PRODUCT_BUNDLE_IDENTIFIER = app.earnandlearn.ios;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = "1,2";
