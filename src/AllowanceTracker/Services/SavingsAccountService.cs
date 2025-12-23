@@ -246,11 +246,11 @@ public class SavingsAccountService : ISavingsAccountService
                 ChildId = childId,
                 Amount = transferAmount,
                 Type = SavingsTransactionType.AutoTransfer,
-                Description = $"Automatic transfer from allowance ({child.SavingsTransferType})",
+                Description = "Automatic savings from allowance",
                 BalanceAfter = child.SavingsBalance,
                 IsAutomatic = true,
                 SourceAllowanceTransactionId = allowanceTransactionId,
-                CreatedById = child.UserId, // System created, but associated with child
+                CreatedById = Data.Constants.SystemUserId,
                 CreatedAt = DateTime.UtcNow
             };
 

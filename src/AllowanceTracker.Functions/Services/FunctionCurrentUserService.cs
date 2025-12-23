@@ -16,7 +16,7 @@ public class FunctionCurrentUserService : ICurrentUserService
     /// Well-known system user ID for automated/scheduled operations.
     /// This user must exist in the AspNetUsers table.
     /// </summary>
-    public static readonly Guid SystemUserId = new("00000000-0000-0000-0000-000000000001");
+    public static readonly Guid SystemUserId = Data.Constants.SystemUserId;
 
     public FunctionCurrentUserService(IHttpContextAccessor httpContextAccessor)
     {

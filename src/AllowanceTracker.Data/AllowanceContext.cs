@@ -60,9 +60,9 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             // Seed system user for automated/scheduled operations (e.g., weekly allowance)
             entity.HasData(new ApplicationUser
             {
-                Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                FirstName = "System",
-                LastName = "Automated",
+                Id = Constants.SystemUserId,
+                FirstName = "Earn",
+                LastName = "& Learn",
                 Email = "system@allowancetracker.local",
                 NormalizedEmail = "SYSTEM@ALLOWANCETRACKER.LOCAL",
                 UserName = "system@allowancetracker.local",
