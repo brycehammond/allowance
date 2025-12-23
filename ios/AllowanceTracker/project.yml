@@ -1,7 +1,7 @@
 name: AllowanceTracker
 
 options:
-  bundleIdPrefix: com.fludivisiondesign
+  bundleIdPrefix: app.earnandlearn
   deploymentTarget:
     iOS: "17.0"
   developmentLanguage: en
@@ -31,15 +31,13 @@ targets:
       - path: Resources/Assets.xcassets
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.fludivisiondesign.earnandlearn
+        PRODUCT_BUNDLE_IDENTIFIER: app.earnandlearn.ios
         INFOPLIST_FILE: App/Info.plist
         TARGETED_DEVICE_FAMILY: "1,2"
         SWIFT_OPTIMIZATION_LEVEL: "-Onone"
         ENABLE_TESTABILITY: true
-        CODE_SIGN_STYLE: Manual
-        DEVELOPMENT_TEAM: $(DEVELOPMENT_TEAM)
-        CODE_SIGN_IDENTITY: "iPhone Distribution"
-        PROVISIONING_PROFILE_SPECIFIER: $(sigh_com.fludivisiondesign.earnandlearn_appstore)
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 5L2J3MYB5N
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     entitlements:
       path: App/AllowanceTracker.entitlements
@@ -58,7 +56,7 @@ targets:
       - target: AllowanceTracker
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.fludivisiondesign.earnandlearn.tests
+        PRODUCT_BUNDLE_IDENTIFIER: app.earnandlearn.ios.tests
         TARGETED_DEVICE_FAMILY: "1,2"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/AllowanceTracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AllowanceTracker"
         BUNDLE_LOADER: "$(TEST_HOST)"
@@ -75,7 +73,7 @@ targets:
       - target: AllowanceTracker
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.fludivisiondesign.earnandlearn.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: app.earnandlearn.ios.uitests
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: AllowanceTracker
