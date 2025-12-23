@@ -4,14 +4,15 @@ import SwiftUI
 // MARK: - Transaction Category Enum
 
 enum TransactionCategory: String, Codable, CaseIterable, Identifiable {
-    // Income Categories
+    // Income Categories (1-9)
     case allowance = "Allowance"
     case chores = "Chores"
     case gift = "Gift"
     case bonusReward = "BonusReward"
+    case task = "Task"
     case otherIncome = "OtherIncome"
 
-    // Spending Categories
+    // Spending Categories (10-29)
     case toys = "Toys"
     case games = "Games"
     case books = "Books"
@@ -22,9 +23,12 @@ enum TransactionCategory: String, Codable, CaseIterable, Identifiable {
     case entertainment = "Entertainment"
     case sports = "Sports"
     case crafts = "Crafts"
+    case otherSpending = "OtherSpending"
+
+    // Savings & Giving Categories (30-39)
     case savings = "Savings"
     case charity = "Charity"
-    case otherSpending = "OtherSpending"
+    case investment = "Investment"
 
     var id: String { rawValue }
 
@@ -43,6 +47,7 @@ enum TransactionCategory: String, Codable, CaseIterable, Identifiable {
         case .chores: return "list.bullet.clipboard.fill"
         case .gift: return "gift.fill"
         case .bonusReward: return "star.fill"
+        case .task: return "checkmark.circle.fill"
         case .otherIncome: return "plus.circle.fill"
         case .toys: return "teddybear.fill"
         case .games: return "gamecontroller.fill"
@@ -54,14 +59,15 @@ enum TransactionCategory: String, Codable, CaseIterable, Identifiable {
         case .entertainment: return "tv.fill"
         case .sports: return "sportscourt.fill"
         case .crafts: return "paintbrush.fill"
+        case .otherSpending: return "minus.circle.fill"
         case .savings: return "banknote.fill"
         case .charity: return "heart.fill"
-        case .otherSpending: return "minus.circle.fill"
+        case .investment: return "chart.line.uptrend.xyaxis"
         }
     }
 
     var isIncome: Bool {
-        [.allowance, .chores, .gift, .bonusReward, .otherIncome].contains(self)
+        [.allowance, .chores, .gift, .bonusReward, .task, .otherIncome].contains(self)
     }
 
     static var incomeCategories: [TransactionCategory] {

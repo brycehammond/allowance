@@ -307,20 +307,26 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ childId, curre
                     <option value={TransactionCategory.Allowance}>Allowance</option>
                     <option value={TransactionCategory.Chores}>Chores</option>
                     <option value={TransactionCategory.Gift}>Gift</option>
-                    <option value={TransactionCategory.Other}>Other</option>
+                    <option value={TransactionCategory.BonusReward}>Bonus/Reward</option>
+                    <option value={TransactionCategory.Task}>Task</option>
+                    <option value={TransactionCategory.OtherIncome}>Other Income</option>
                   </>
                 ) : (
                   <>
                     <option value={TransactionCategory.Toys}>Toys</option>
                     <option value={TransactionCategory.Games}>Games</option>
-                    <option value={TransactionCategory.Candy}>Candy</option>
                     <option value={TransactionCategory.Books}>Books</option>
                     <option value={TransactionCategory.Clothes}>Clothes</option>
+                    <option value={TransactionCategory.Snacks}>Snacks</option>
+                    <option value={TransactionCategory.Candy}>Candy</option>
                     <option value={TransactionCategory.Electronics}>Electronics</option>
-                    <option value={TransactionCategory.Food}>Food</option>
                     <option value={TransactionCategory.Entertainment}>Entertainment</option>
+                    <option value={TransactionCategory.Sports}>Sports</option>
+                    <option value={TransactionCategory.Crafts}>Crafts</option>
                     <option value={TransactionCategory.Savings}>Savings</option>
                     <option value={TransactionCategory.Charity}>Charity</option>
+                    <option value={TransactionCategory.Investment}>Investment</option>
+                    <option value={TransactionCategory.OtherSpending}>Other</option>
                   </>
                 )}
               </select>

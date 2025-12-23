@@ -91,23 +91,31 @@ export type TransactionType = typeof TransactionType[keyof typeof TransactionTyp
 
 // Categories (defined early since Transaction uses it)
 export const TransactionCategory = {
-  // Income categories
+  // Income categories (1-9)
   Allowance: 'Allowance',
   Chores: 'Chores',
   Gift: 'Gift',
-  Other: 'Other',
+  BonusReward: 'BonusReward',
+  Task: 'Task',
+  OtherIncome: 'OtherIncome',
 
-  // Expense categories
+  // Spending categories (10-29)
   Toys: 'Toys',
   Games: 'Games',
-  Candy: 'Candy',
   Books: 'Books',
   Clothes: 'Clothes',
+  Snacks: 'Snacks',
+  Candy: 'Candy',
   Electronics: 'Electronics',
-  Food: 'Food',
   Entertainment: 'Entertainment',
+  Sports: 'Sports',
+  Crafts: 'Crafts',
+  OtherSpending: 'OtherSpending',
+
+  // Savings & Giving categories (30-39)
   Savings: 'Savings',
   Charity: 'Charity',
+  Investment: 'Investment',
 } as const;
 
 export type TransactionCategory = typeof TransactionCategory[keyof typeof TransactionCategory];
