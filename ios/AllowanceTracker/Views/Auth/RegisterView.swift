@@ -68,7 +68,7 @@ struct RegisterView: View {
                 .font(.system(size: 60))
                 .foregroundStyle(.blue)
 
-            Text("Join Allowance Tracker")
+            Text("Join Earn & Learn")
                 .font(.title3)
                 .fontWeight(.semibold)
 

@@ -37,7 +37,7 @@ enum Configuration {
 
     /// App display name from Info.plist
     static var appName: String {
-        infoPlistValue(for: "CFBundleDisplayName") as? String ?? "Allowance Tracker"
+        infoPlistValue(for: "CFBundleDisplayName") as? String ?? "Earn & Learn"
     }
 
     /// Bundle identifier from Info.plist
@@ -109,7 +109,7 @@ extension Configuration {
     static func printConfiguration() {
         print("""
         ╔══════════════════════════════════════════════════════════╗
-        ║               ALLOWANCE TRACKER CONFIG                   ║
+        ║                 EARN & LEARN CONFIG                      ║
         ╠══════════════════════════════════════════════════════════╣
         ║ App Name:         \(appName.padding(toLength: 35, withPad: " ", startingAt: 0))║
         ║ Version:          \(fullVersionString.padding(toLength: 35, withPad: " ", startingAt: 0))║

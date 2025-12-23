@@ -106,7 +106,7 @@ enum AppConstants {
 
     enum App {
         /// App name
-        static let name = "Allowance Tracker"
+        static let name = "Earn & Learn"
 
         /// App version from bundle
         static var version: String {

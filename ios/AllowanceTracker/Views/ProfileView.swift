@@ -270,7 +270,7 @@ struct PrivacyPolicyView: View {
                     .foregroundStyle(.secondary)
 
                 Text("""
-                Your privacy is important to us. This privacy policy explains how Allowance Tracker collects, uses, and protects your personal information.
+                Your privacy is important to us. This privacy policy explains how Earn & Learn collects, uses, and protects your personal information.
 
                 **Information We Collect**
                 - Account information (name, email)
@@ -288,7 +288,7 @@ struct PrivacyPolicyView: View {
                 **Your Rights**
                 You have the right to access, update, or delete your personal information.
 
-                For questions, contact us at privacy@allowancetracker.com
+                For questions, contact us at privacy@earnandlearn.app
                 """)
                 .font(.body)
             }
@@ -314,7 +314,7 @@ struct TermsOfServiceView: View {
 
                 Text("""
                 **1. Acceptance of Terms**
-                By using Allowance Tracker, you agree to these terms of service.
+                By using Earn & Learn, you agree to these terms of service.
 
                 **2. User Accounts**
                 You are responsible for maintaining the security of your account.
@@ -328,12 +328,12 @@ struct TermsOfServiceView: View {
                 - Respect other users' privacy
 
                 **5. Limitation of Liability**
-                Allowance Tracker is provided "as is" without warranties.
+                Earn & Learn is provided "as is" without warranties.
 
                 **6. Changes to Terms**
                 We may update these terms at any time. Continued use constitutes acceptance.
 
-                For questions, contact us at legal@allowancetracker.com
+                For questions, contact us at legal@earnandlearn.app
                 """)
                 .font(.body)
             }

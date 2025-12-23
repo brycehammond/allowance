@@ -10,7 +10,7 @@ final class LoginUITests: AllowanceTrackerUITests {
         assertLoginScreenDisplayed()
 
         // Check for logo/title
-        let titleText = app.staticTexts["Allowance Tracker"]
+        let titleText = app.staticTexts["Earn & Learn"]
         XCTAssertTrue(waitForElement(titleText), "App title should be visible")
 
         // Check for email field

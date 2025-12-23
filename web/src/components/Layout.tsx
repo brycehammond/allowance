@@ -48,7 +48,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="flex items-center">
                 <DollarSign className="h-8 w-8 text-white" />
                 <h1 className="ml-2 text-2xl font-bold text-white">
-                  Allowance Tracker
+                  Earn &amp; Learn
                 </h1>
               </div>
             </div>
@@ -110,7 +110,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between bg-primary-700 px-4 py-3 shadow-lg">
           <div className="flex items-center">
             <DollarSign className="h-6 w-6 text-white" />
-            <h1 className="ml-2 text-lg font-bold text-white">Allowance</h1>
+            <h1 className="ml-2 text-lg font-bold text-white">Earn &amp; Learn</h1>
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -140,7 +140,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="flex items-center px-4 py-4">
               <DollarSign className="h-8 w-8 text-white" />
               <h1 className="ml-2 text-xl font-bold text-white">
-                Allowance Tracker
+                Earn &amp; Learn
               </h1>
             </div>
             <nav className="mt-4 flex-1 space-y-1 px-2">

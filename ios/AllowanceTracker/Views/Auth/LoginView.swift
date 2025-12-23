@@ -70,9 +70,9 @@ struct LoginView: View {
                 .foregroundStyle(.green)
                 .accessibilityHidden()
 
-            Text("Allowance Tracker")
+            Text("Earn & Learn")
                 .font(.scalable(.title, weight: .bold))
-                .accessibleHeader("Allowance Tracker")
+                .accessibleHeader("Earn & Learn")
 
             Text("Track, Save, Learn")
                 .font(.scalable(.subheadline))
