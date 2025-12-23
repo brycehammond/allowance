@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using AllowanceTracker.Data;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
+using AllowanceTracker.Functions.Services;
 using AllowanceTracker.Handlers;
 using AllowanceTracker.Helpers;
 using Azure.Communication.Email;
@@ -50,7 +51,8 @@ builder.Services.AddScoped<IChildManagementService, ChildManagementService>();
 builder.Services.AddScoped<IWishListService, WishListService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+// Use FunctionCurrentUserService which falls back to system user for timer-triggered functions
+builder.Services.AddScoped<ICurrentUserService, FunctionCurrentUserService>();
 
 // Add Azure Communication Services email
 var acsConnectionString = builder.Configuration["AzureEmail:ConnectionString"] ?? "";
