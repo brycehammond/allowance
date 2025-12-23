@@ -113,6 +113,12 @@ export const Login: React.FC = () => {
             >
               Don't have an account? Register here
             </Link>
+            <Link
+              to="/privacy"
+              className="block text-sm text-gray-500 hover:text-gray-700"
+            >
+              Privacy Policy
+            </Link>
           </div>
         </form>
       </div>

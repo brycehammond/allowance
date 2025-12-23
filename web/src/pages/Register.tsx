@@ -173,13 +173,19 @@ export const Register: React.FC = () => {
             </button>
           </div>
 
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <Link
               to="/login"
-              className="font-medium text-primary-600 hover:text-primary-500"
+              className="block font-medium text-primary-600 hover:text-primary-500"
             >
               Already have an account? Sign in here
             </Link>
+            <p className="text-sm text-gray-500">
+              By registering, you agree to our{' '}
+              <Link to="/privacy" className="text-primary-600 hover:text-primary-500">
+                Privacy Policy
+              </Link>
+            </p>
           </div>
         </form>
       </div>

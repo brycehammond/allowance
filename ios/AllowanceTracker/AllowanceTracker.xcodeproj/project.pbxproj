@@ -119,7 +119,7 @@
 /* Begin PBXFileReference section */
 		008DAC706AD778A64C7E9301 /* UserModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModelTests.swift; sourceTree = "<group>"; };
 		02F582FDE2583DFE20EC30A5 /* InviteParentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParentView.swift; sourceTree = "<group>"; };
-		068A8E9C3B125C83F4D800C7 /* AllowanceTracker.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AllowanceTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		068A8E9C3B125C83F4D800C7 /* AllowanceTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AllowanceTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CB99FE810BEE0019FD17684 /* BudgetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetViewModel.swift; sourceTree = "<group>"; };
 		1299EFAD191CADB769E2D0FD /* AddChildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddChildView.swift; sourceTree = "<group>"; };
 		167E4898E383738FEAA76751 /* AccessibilityExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityExtensionsTests.swift; sourceTree = "<group>"; };
@@ -644,7 +644,6 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					210C8DE349F66D2F314168FF = {
-						DevelopmentTeam = 5L2J3MYB5N;
 						ProvisioningStyle = Automatic;
 					};
 					849439CD2835C88EAFE036DF = {
@@ -1014,7 +1013,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/AllowanceTracker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 5L2J3MYB5N;
+				DEVELOPMENT_TEAM = 8MW535NRK9;
 				ENABLE_TESTABILITY = YES;
 				INFOPLIST_FILE = App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1035,7 +1034,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/AllowanceTracker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 5L2J3MYB5N;
+				DEVELOPMENT_TEAM = 8MW535NRK9;
 				ENABLE_TESTABILITY = YES;
 				INFOPLIST_FILE = App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
