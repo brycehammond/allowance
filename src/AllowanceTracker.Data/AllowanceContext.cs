@@ -56,6 +56,22 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
                   .WithMany(f => f.Members)
                   .HasForeignKey(e => e.FamilyId)
                   .OnDelete(DeleteBehavior.SetNull);
+
+            // Seed system user for automated/scheduled operations (e.g., weekly allowance)
+            entity.HasData(new ApplicationUser
+            {
+                Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                FirstName = "System",
+                LastName = "Automated",
+                Email = "system@allowancetracker.local",
+                NormalizedEmail = "SYSTEM@ALLOWANCETRACKER.LOCAL",
+                UserName = "system@allowancetracker.local",
+                NormalizedUserName = "SYSTEM@ALLOWANCETRACKER.LOCAL",
+                EmailConfirmed = true,
+                SecurityStamp = "SYSTEM-SECURITY-STAMP",
+                ConcurrencyStamp = "SYSTEM-CONCURRENCY-STAMP",
+                Role = UserRole.Parent
+            });
         });
 
         // Child configuration
