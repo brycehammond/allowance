@@ -6,6 +6,7 @@ struct AddWishListItemView: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var viewModel: WishListViewModel
 
     @State private var name: String = ""
@@ -13,6 +14,12 @@ struct AddWishListItemView: View {
     @State private var url: String = ""
     @State private var notes: String = ""
     @FocusState private var focusedField: Field?
+
+    // MARK: - Computed Properties
+
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
 
     // MARK: - Field enum
 
@@ -147,6 +154,8 @@ struct AddWishListItemView: View {
                         .shadow(radius: 4)
                 }
             }
+            .presentationDetents(isRegularWidth ? [.medium, .large] : [.large])
+            .presentationDragIndicator(.visible)
         }
     }
 

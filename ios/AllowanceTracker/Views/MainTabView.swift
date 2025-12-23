@@ -1,12 +1,14 @@
 import SwiftUI
 
 /// Main tab-based navigation structure for the app
+/// Optimized for both iPhone and iPad with adaptive layouts
 @MainActor
 struct MainTabView: View {
 
     // MARK: - Properties
 
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selectedTab = 0
 
     // MARK: - Body

@@ -6,6 +6,7 @@ struct RegisterView: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var viewModel = AuthViewModel()
 
     @State private var email = ""
@@ -14,6 +15,12 @@ struct RegisterView: View {
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var selectedRole: UserRole = .parent
+
+    // MARK: - Computed Properties
+
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
 
     // MARK: - Body
 
@@ -35,8 +42,10 @@ struct RegisterView: View {
                         errorSection(message: errorMessage)
                     }
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, isRegularWidth ? 40 : 24)
                 .padding(.top, 20)
+                .frame(maxWidth: isRegularWidth ? 500 : .infinity)
+                .frame(maxWidth: .infinity)
             }
             .navigationTitle("Create Account")
             .navigationBarTitleDisplayMode(.inline)

@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Main dashboard view displaying all family children
+/// Optimized for iPhone (single column) and iPad (multi-column grid)
 @MainActor
 struct DashboardView: View {
 
@@ -8,6 +9,7 @@ struct DashboardView: View {
 
     @State private var viewModel: DashboardViewModel
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var showingAddChild = false
 
     // MARK: - Computed Properties
@@ -18,6 +20,22 @@ struct DashboardView: View {
 
     private var isParent: Bool {
         authViewModel.currentUser?.role == .parent
+    }
+
+    /// True when on iPad in regular width mode
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
+
+    /// Grid columns for adaptive layout
+    private var gridColumns: [GridItem] {
+        if isRegularWidth {
+            return [
+                GridItem(.adaptive(minimum: 320, maximum: 450), spacing: 16)
+            ]
+        } else {
+            return [GridItem(.flexible())]
+        }
     }
 
     // MARK: - Initialization
@@ -98,7 +116,7 @@ struct DashboardView: View {
 
     // MARK: - Subviews
 
-    /// List of children cards
+    /// List of children cards - uses adaptive grid on iPad
     private var childrenListView: some View {
         ScrollView {
             VStack(spacing: 16) {
@@ -109,31 +127,35 @@ struct DashboardView: View {
                             .font(.title2)
                             .fontWeight(.bold)
 
-                        Text("Tap a child to view details")
+                        Text(isRegularWidth
+                            ? "Select a child to view details"
+                            : "Tap a child to view details")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
+                    .padding(.horizontal, isRegularWidth ? 24 : 16)
                     .padding(.top)
                 }
 
-                // Children cards
-                ForEach(viewModel.children) { child in
-                    NavigationLink {
-                        ChildDetailView(child: child)
-                    } label: {
-                        ChildCardView(child: child, onTap: {})
+                // Children cards - grid on iPad, list on iPhone
+                LazyVGrid(columns: gridColumns, spacing: 16) {
+                    ForEach(viewModel.children) { child in
+                        NavigationLink {
+                            ChildDetailView(child: child)
+                        } label: {
+                            ChildCardView(child: child, onTap: {})
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal)
                 }
+                .padding(.horizontal, isRegularWidth ? 24 : 16)
             }
             .padding(.bottom)
         }
     }
 
-    /// Empty state when no children exist
+    /// Empty state when no children exist - centered and constrained on iPad
     private var emptyStateView: some View {
         VStack(spacing: 24) {
             Image(systemName: "person.2.slash")
@@ -165,6 +187,7 @@ struct DashboardView: View {
             .padding(.horizontal, 40)
             .padding(.top)
         }
+        .frame(maxWidth: isRegularWidth ? 500 : .infinity)
         .padding()
     }
 }
@@ -172,10 +195,12 @@ struct DashboardView: View {
 // MARK: - Child Detail View
 
 /// Detail view for a specific child
+/// Uses TabView on iPhone, optimized layout on iPad
 @MainActor
 struct ChildDetailView: View {
     let child: Child
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selectedTab = 0
 
     private var isParent: Bool {
@@ -187,12 +212,17 @@ struct ChildDetailView: View {
         authViewModel.currentUser?.isParent == true && !authViewModel.isViewingAsChild
     }
 
+    /// True when on iPad in regular width mode
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Header with balance breakdown
             childHeaderView
 
-            // Tab view
+            // Tab view - same structure works well on both platforms
             TabView(selection: $selectedTab) {
                 // Transactions tab
                 TransactionListView(

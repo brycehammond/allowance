@@ -10,6 +10,13 @@ struct LoginView: View {
     @State private var password = ""
     @State private var showRegister = false
     @State private var showForgotPassword = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    // MARK: - Computed Properties
+
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
 
     // MARK: - Body
 
@@ -37,8 +44,10 @@ struct LoginView: View {
                         errorSection(message: errorMessage)
                     }
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, isRegularWidth ? 40 : 24)
                 .padding(.top, 40)
+                .frame(maxWidth: isRegularWidth ? 500 : .infinity)
+                .frame(maxWidth: .infinity)
             }
             .navigationTitle("Login")
             .navigationBarTitleDisplayMode(.inline)

@@ -7,102 +7,113 @@ struct ForgotPasswordView: View {
 
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var email = ""
     @State private var showingSuccessAlert = false
 
     @FocusState private var emailFieldFocused: Bool
 
+    // MARK: - Computed Properties
+
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
+
     // MARK: - Body
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                // Header
-                VStack(spacing: 12) {
-                    Image(systemName: "envelope.fill")
-                        .font(.system(size: 64))
-                        .foregroundStyle(DesignSystem.Colors.primary)
-                        .padding(.top, 40)
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header
+                    VStack(spacing: 12) {
+                        Image(systemName: "envelope.fill")
+                            .font(.system(size: 64))
+                            .foregroundStyle(DesignSystem.Colors.primary)
+                            .padding(.top, 40)
 
-                    Text("Forgot Password?")
-                        .font(.title)
-                        .fontWeight(.bold)
+                        Text("Forgot Password?")
+                            .font(.title)
+                            .fontWeight(.bold)
 
-                    Text("Enter your email address and we'll send you a link to reset your password.")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
-                // Form
-                VStack(spacing: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Email Address")
-                            .font(.caption)
+                        Text("Enter your email address and we'll send you a link to reset your password.")
+                            .font(.body)
                             .foregroundStyle(.secondary)
-
-                        TextField("Email", text: $email)
-                            .textContentType(.emailAddress)
-                            .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
-                            .focused($emailFieldFocused)
-                            .submitLabel(.send)
-                            .onSubmit { handleForgotPassword() }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
                     }
 
-                    if let errorMessage = authViewModel.errorMessage {
-                        Text(errorMessage)
-                            .font(.caption)
-                            .foregroundStyle(.red)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-
-                    Button {
-                        handleForgotPassword()
-                    } label: {
-                        if authViewModel.isLoading {
-                            ProgressView()
-                                .tint(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                        } else {
-                            Text("Send Reset Link")
-                                .fontWeight(.semibold)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                        }
-                    }
-                    .disabled(authViewModel.isLoading || !isFormValid)
-                    .background(
-                        (authViewModel.isLoading || !isFormValid)
-                        ? DesignSystem.Colors.primary.opacity(0.5)
-                        : DesignSystem.Colors.primary
-                    )
-                    .foregroundStyle(.white)
-                    .cornerRadius(10)
-                    .padding(.top, 8)
-
-                    Button {
-                        dismiss()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.left")
+                    // Form
+                    VStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Email Address")
                                 .font(.caption)
-                            Text("Back to Login")
-                        }
-                        .font(.body)
-                        .foregroundStyle(DesignSystem.Colors.primary)
-                    }
-                    .padding(.top, 8)
-                }
-                .padding(.horizontal)
+                                .foregroundStyle(.secondary)
 
-                Spacer()
+                            TextField("Email", text: $email)
+                                .textContentType(.emailAddress)
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
+                                .focused($emailFieldFocused)
+                                .submitLabel(.send)
+                                .onSubmit { handleForgotPassword() }
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                        }
+
+                        if let errorMessage = authViewModel.errorMessage {
+                            Text(errorMessage)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+
+                        Button {
+                            handleForgotPassword()
+                        } label: {
+                            if authViewModel.isLoading {
+                                ProgressView()
+                                    .tint(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                            } else {
+                                Text("Send Reset Link")
+                                    .fontWeight(.semibold)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                            }
+                        }
+                        .disabled(authViewModel.isLoading || !isFormValid)
+                        .background(
+                            (authViewModel.isLoading || !isFormValid)
+                            ? DesignSystem.Colors.primary.opacity(0.5)
+                            : DesignSystem.Colors.primary
+                        )
+                        .foregroundStyle(.white)
+                        .cornerRadius(10)
+                        .padding(.top, 8)
+
+                        Button {
+                            dismiss()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.left")
+                                    .font(.caption)
+                                Text("Back to Login")
+                            }
+                            .font(.body)
+                            .foregroundStyle(DesignSystem.Colors.primary)
+                        }
+                        .padding(.top, 8)
+                    }
+                    .padding(.horizontal, isRegularWidth ? 40 : 16)
+
+                    Spacer()
+                }
+                .frame(maxWidth: isRegularWidth ? 500 : .infinity)
+                .frame(maxWidth: .infinity)
             }
             .navigationBarHidden(true)
             .onAppear {

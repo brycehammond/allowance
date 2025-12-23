@@ -16,7 +16,7 @@ final class AuthViewModel {
     // MARK: - Child View Mode
 
     /// The child currently being viewed as (nil = normal parent mode)
-    @Published var viewingAsChild: Child?
+    var viewingAsChild: Child?
 
     /// Returns true if user is a parent AND not currently viewing as a child
     var effectiveIsParent: Bool {

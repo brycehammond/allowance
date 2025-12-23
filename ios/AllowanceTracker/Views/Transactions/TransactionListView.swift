@@ -8,6 +8,7 @@ struct TransactionListView: View {
 
     @State private var viewModel: TransactionViewModel
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var showingCreateTransaction = false
 
     // Child settings passed from parent view
@@ -18,6 +19,10 @@ struct TransactionListView: View {
 
     private var isParent: Bool {
         authViewModel.effectiveIsParent
+    }
+
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
     }
 
     // MARK: - Initialization
@@ -107,7 +112,9 @@ struct TransactionListView: View {
                     }
                 }
             }
-            .padding()
+            .padding(isRegularWidth ? 24 : 16)
+            .frame(maxWidth: isRegularWidth ? 700 : .infinity)
+            .frame(maxWidth: .infinity)
         }
     }
 
@@ -190,6 +197,7 @@ struct TransactionListView: View {
                 .padding(.top)
             }
         }
+        .frame(maxWidth: isRegularWidth ? 500 : .infinity)
         .padding()
     }
 

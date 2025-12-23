@@ -7,6 +7,7 @@ struct CreateTransactionView: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var viewModel: TransactionViewModel
 
     @State private var amount: String = ""
@@ -16,6 +17,12 @@ struct CreateTransactionView: View {
     @State private var showingConfirmation = false
     @State private var pendingTransaction: PendingTransaction?
     @FocusState private var focusedField: Field?
+
+    // MARK: - Computed Properties
+
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
 
     // MARK: - Field enum
 
@@ -183,6 +190,8 @@ struct CreateTransactionView: View {
             } message: { pending in
                 Text(confirmationMessage(for: pending))
             }
+            .presentationDetents(isRegularWidth ? [.medium, .large] : [.large])
+            .presentationDragIndicator(.visible)
         }
     }
 

@@ -7,7 +7,14 @@ struct AddChildView: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var viewModel: AddChildViewModel
+
+    // MARK: - Computed Properties
+
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
 
     // MARK: - Initialization
 
@@ -192,6 +199,8 @@ struct AddChildView: View {
                 }
             }
             .disabled(viewModel.isLoading)
+            .presentationDetents(isRegularWidth ? [.large] : [.large])
+            .presentationDragIndicator(.visible)
         }
     }
 }

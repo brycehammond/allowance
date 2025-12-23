@@ -8,6 +8,7 @@ struct WishListView: View {
 
     @State private var viewModel: WishListViewModel
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var showingAddItem = false
     @State private var editingItem: WishListItem?
     @State private var deletingItem: WishListItem?
@@ -17,6 +18,10 @@ struct WishListView: View {
 
     private var isParent: Bool {
         authViewModel.effectiveIsParent
+    }
+
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
     }
 
     // MARK: - Filter enum
@@ -108,13 +113,13 @@ struct WishListView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .padding(.horizontal)
+                .padding(.horizontal, isRegularWidth ? 24 : 16)
                 .padding(.top)
 
                 // Summary card (for active items)
                 if selectedFilter == .active {
                     summaryCard
-                        .padding(.horizontal)
+                        .padding(.horizontal, isRegularWidth ? 24 : 16)
                 }
 
                 // Items
@@ -136,11 +141,13 @@ struct WishListView: View {
                                 }
                             }
                         )
-                        .padding(.horizontal)
+                        .padding(.horizontal, isRegularWidth ? 24 : 16)
                     }
                 }
             }
             .padding(.bottom)
+            .frame(maxWidth: isRegularWidth ? 700 : .infinity)
+            .frame(maxWidth: .infinity)
         }
     }
 
@@ -234,6 +241,7 @@ struct WishListView: View {
                 .padding(.top)
             }
         }
+        .frame(maxWidth: isRegularWidth ? 500 : .infinity)
         .padding()
     }
 
