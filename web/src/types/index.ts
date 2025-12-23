@@ -235,7 +235,7 @@ export type TimePeriod = typeof TimePeriod[keyof typeof TimePeriod];
 export interface SavingsTransaction {
   id: string;
   childId: string;
-  type: 'Deposit' | 'Withdrawal' | 'AutomaticTransfer';
+  type: 'Deposit' | 'Withdrawal' | 'AutoTransfer';
   amount: number;
   description: string;
   balanceAfter: number;

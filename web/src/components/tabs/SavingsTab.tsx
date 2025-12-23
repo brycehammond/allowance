@@ -485,12 +485,12 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId, onBalanceChange
                     <div className="flex items-center min-w-0 flex-1">
                       <div
                         className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${
-                          transaction.type === 'Deposit' || transaction.type === 'AutomaticTransfer'
+                          transaction.type === 'Deposit' || transaction.type === 'AutoTransfer'
                             ? 'bg-green-100'
                             : 'bg-red-100'
                         }`}
                       >
-                        {transaction.type === 'Deposit' || transaction.type === 'AutomaticTransfer' ? (
+                        {transaction.type === 'Deposit' || transaction.type === 'AutoTransfer' ? (
                           <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
                           </svg>
@@ -506,19 +506,19 @@ export const SavingsTab: React.FC<SavingsTabProps> = ({ childId, onBalanceChange
                         </p>
                         <p className="text-sm text-gray-500">
                           {formatDate(transaction.createdAt)} •{' '}
-                          {transaction.type === 'AutomaticTransfer' ? 'Automatic' : transaction.createdByName}
+                          {transaction.createdByName}
                         </p>
                       </div>
                     </div>
                     <div className="ml-4 flex-shrink-0 text-right">
                       <p
                         className={`text-lg font-semibold ${
-                          transaction.type === 'Deposit' || transaction.type === 'AutomaticTransfer'
+                          transaction.type === 'Deposit' || transaction.type === 'AutoTransfer'
                             ? 'text-green-600'
                             : 'text-red-600'
                         }`}
                       >
-                        {transaction.type === 'Deposit' || transaction.type === 'AutomaticTransfer' ? '+' : '-'}
+                        {transaction.type === 'Deposit' || transaction.type === 'AutoTransfer' ? '+' : '-'}
                         {formatCurrency(transaction.amount)}
                       </p>
                       <p className="text-sm text-gray-500">
