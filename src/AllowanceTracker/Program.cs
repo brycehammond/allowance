@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using AllowanceTracker;
 using AllowanceTracker.Data;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
@@ -174,6 +175,15 @@ builder.Services.AddHealthChecks()
         tags: new[] { "db", "sql" });
 
 var app = builder.Build();
+
+// Check for seed command
+if (args.Contains("--seed"))
+{
+    Console.WriteLine("Running database seed...");
+    await SeedData.InitializeAsync(app.Services);
+    Console.WriteLine("Seed complete. Exiting.");
+    return;
+}
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();

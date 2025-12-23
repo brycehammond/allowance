@@ -50,18 +50,19 @@ struct SavingsAccount: Codable, Identifiable, Equatable {
 
 struct SavingsTransaction: Codable, Identifiable, Equatable {
     let id: UUID
-    let savingsAccountId: UUID
-    let amount: Decimal
+    let childId: UUID
     let type: SavingsTransactionType
-    let transferType: SavingsTransactionSource
+    let amount: Decimal
+    let description: String
     let balanceAfter: Decimal
-    let notes: String?
     let createdAt: Date
+    let createdById: UUID
+    let createdByName: String
 
     // MARK: - Computed Properties
 
     var isDeposit: Bool {
-        type == .deposit
+        type == .deposit || type == .autoTransfer
     }
 
     var formattedAmount: String {
@@ -77,13 +78,13 @@ struct SavingsTransaction: Codable, Identifiable, Equatable {
     }
 
     var typeDescription: String {
-        switch transferType {
-        case .manual:
-            return isDeposit ? "Manual Deposit" : "Manual Withdrawal"
+        switch type {
+        case .deposit:
+            return "Deposit"
+        case .withdrawal:
+            return "Withdrawal"
         case .autoTransfer:
             return "Auto Transfer"
-        case .goal:
-            return "Goal Transfer"
         }
     }
 }
@@ -93,12 +94,7 @@ struct SavingsTransaction: Codable, Identifiable, Equatable {
 enum SavingsTransactionType: String, Codable {
     case deposit = "Deposit"
     case withdrawal = "Withdrawal"
-}
-
-enum SavingsTransactionSource: String, Codable {
-    case manual = "Manual"
     case autoTransfer = "AutoTransfer"
-    case goal = "Goal"
 }
 
 // MARK: - Savings Account Summary (matches backend API response)

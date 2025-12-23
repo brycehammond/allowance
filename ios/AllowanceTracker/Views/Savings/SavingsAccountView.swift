@@ -318,14 +318,14 @@ struct SavingsTransactionRow: View {
                 Text(transaction.typeDescription)
                     .font(.headline)
 
-                if let notes = transaction.notes, !notes.isEmpty {
-                    Text(notes)
+                if !transaction.description.isEmpty {
+                    Text(transaction.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
 
-                Text(transaction.formattedDate)
+                Text("\(transaction.formattedDate) • \(transaction.createdByName)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
