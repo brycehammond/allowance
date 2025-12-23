@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -49,11 +49,13 @@
 		7D37C69EA127E5A585D0843B /* ChildSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3FD252CEF73A9F38D75FD79 /* ChildSettingsView.swift */; };
 		7EAA5C6438A17A7549914EDE /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D839C9C6F3E18CA915FF01 /* AuthViewModel.swift */; };
 		818C8BBF4CECC8AAB6397C6E /* WishListItemCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C527099EAE7A0E507219D87 /* WishListItemCard.swift */; };
+		81D4B0D8481B085D31091D2A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B690EC6291EC064B316D0870 /* Assets.xcassets */; };
 		821B55191AD1497D8EBC8683 /* CategorySpending.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44AB75FD1281D4DCF728BEBE /* CategorySpending.swift */; };
 		8223E44055758570A773E6BE /* SavingsAccountSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82471B7C9BEEF9DCB92C68BB /* SavingsAccountSheets.swift */; };
 		87A0D0ACEF546800F2EDCD18 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B36D34D38F4D2601399C065 /* RegisterView.swift */; };
 		89C348EDCE74FB93B214329B /* APIServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC41A25AD2CBF028E0A5366 /* APIServiceTests.swift */; };
 		9063EA56E65FC82507D28E5B /* SavingsAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EB8C0DB38054C6A4D517660 /* SavingsAccountView.swift */; };
+		91E9B5DE22660EFC0D61B987 /* AllowanceTracker.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = "TEMP_60F96BD3-A346-4818-AA7F-7C22BCD0E4A7" /* AllowanceTracker.xcodeproj */; };
 		93085AE6C0D90262EB38BABE /* InviteParentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F582FDE2583DFE20EC30A5 /* InviteParentView.swift */; };
 		9480B8B3FEBA7DBE61B571ED /* TransactionCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81833015C67E6DCDDA56F83F /* TransactionCategory.swift */; };
 		98A8681444ECB2AAC9CA249A /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8DB3551673BE9FED7F5484 /* DesignSystem.swift */; };
@@ -179,6 +181,7 @@
 		AEFC1247011C4421DB4A8BE9 /* SavingsAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsAccount.swift; sourceTree = "<group>"; };
 		B3B9C76F31A78298F467E9FB /* WishListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishListViewModel.swift; sourceTree = "<group>"; };
 		B3C29B24C99E4AD48ABC5E43 /* CategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
+		B690EC6291EC064B316D0870 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BAEFF4A42641FE66DE0A2062 /* WishListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishListView.swift; sourceTree = "<group>"; };
 		BD55683925400343BF99664F /* Child.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Child.swift; sourceTree = "<group>"; };
 		BF6CDEAE773B0CEA9FDE7698 /* ChildModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChildModelTests.swift; sourceTree = "<group>"; };
@@ -208,7 +211,7 @@
 		F236DDAE8B3A3139A01EDE14 /* AllowanceTrackerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AllowanceTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F45D1965078A6166B2675BA0 /* CategorySpendingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySpendingChart.swift; sourceTree = "<group>"; };
 		F88034558BD809F2C0DCCE5E /* AllowanceTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowanceTrackerUITests.swift; sourceTree = "<group>"; };
-		"TEMP_0D2AB14D-1869-4668-A269-8236AD959A08" /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
+		"TEMP_60F96BD3-A346-4818-AA7F-7C22BCD0E4A7" /* AllowanceTracker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AllowanceTracker.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -224,6 +227,19 @@
 				9C527099EAE7A0E507219D87 /* WishListItemCard.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		02245B502EFB302B002B48DE /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				"TEMP_60F96BD3-A346-4818-AA7F-7C22BCD0E4A7" /* AllowanceTracker.xcodeproj */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		02245B512EFB302B002B48DE /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
 			sourceTree = "<group>";
 		};
 		0D75775C3E3206F8E1238D35 /* Dashboard */ = {
@@ -297,6 +313,14 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		53300D9FA1272649C768D84A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B690EC6291EC064B316D0870 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		57CCA6D1A036D57E548482E1 /* WishList */ = {
 			isa = PBXGroup;
 			children = (
@@ -356,6 +380,7 @@
 				DBA727681DCAEBD4000F973F /* App */,
 				8E54C771B9AA88A28FC8EC3E /* DesignSystem */,
 				EF1720C3B9179CFCB0481AE3 /* Models */,
+				53300D9FA1272649C768D84A /* Resources */,
 				3AFA4BCB420BC8EAE3362C3A /* Services */,
 				5BB5BCF3286ED1276B386F2D /* Tests */,
 				5C3516E3B28543C5A174734D /* UITests */,
@@ -363,6 +388,7 @@
 				82EF93D3E39C4015F68E6008 /* ViewModels */,
 				407023F9E2ECCA37E6FEB70C /* Views */,
 				34619E48D893B711CDB6C054 /* Products */,
+				02245B502EFB302B002B48DE /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -551,21 +577,6 @@
 			path = Analytics;
 			sourceTree = "<group>";
 		};
-		"TEMP_006E8A5D-8C74-4A79-96C0-17BE929A4A8B" /* AllowanceTracker */ = {
-			isa = PBXGroup;
-			children = (
-				"TEMP_0D2AB14D-1869-4668-A269-8236AD959A08" /* .gitignore */,
-				82EF93D3E39C4015F68E6008 /* ViewModels */,
-				8E54C771B9AA88A28FC8EC3E /* DesignSystem */,
-				DBA727681DCAEBD4000F973F /* App */,
-				EF1720C3B9179CFCB0481AE3 /* Models */,
-				840A784D3A663523ECB6196B /* Utilities */,
-				407023F9E2ECCA37E6FEB70C /* Views */,
-				3AFA4BCB420BC8EAE3362C3A /* Services */,
-			);
-			path = AllowanceTracker;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -574,6 +585,7 @@
 			buildConfigurationList = FF1C700CF4F5FA54C3415001 /* Build configuration list for PBXNativeTarget "AllowanceTracker" */;
 			buildPhases = (
 				CE375E243D4D190BAC237FFB /* Sources */,
+				A20BF9698A1762082D74F060 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -650,8 +662,13 @@
 			);
 			mainGroup = 7C1DD20F7DA46F175719B9B7;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 02245B512EFB302B002B48DE /* Products */;
+					ProjectRef = "TEMP_60F96BD3-A346-4818-AA7F-7C22BCD0E4A7" /* AllowanceTracker.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				210C8DE349F66D2F314168FF /* AllowanceTracker */,
@@ -660,6 +677,18 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A20BF9698A1762082D74F060 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				91E9B5DE22660EFC0D61B987 /* AllowanceTracker.xcodeproj in Resources */,
+				81D4B0D8481B085D31091D2A /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		044467F040BC0DAEA16E16EE /* Sources */ = {

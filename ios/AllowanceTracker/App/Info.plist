@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>API_BASE_URL</key>
-	<string>http://localhost:5295</string>
+	<string>https://api.earnandlearn.app</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.allowancetracker.refresh</string>

@@ -1,5 +1,5 @@
 # App Identifier (Bundle ID)
-app_identifier("com.fludivisiondesign.earnandlearn")
+app_identifier("app.earnandlearn.ios")
 
 # Apple Developer Portal Team ID
 # You can find this at https://developer.apple.com/account/#/membership

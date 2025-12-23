@@ -10,7 +10,7 @@ git_url("https://github.com/brycehammond/certificates.git")
 storage_mode("git")
 
 # App identifier(s)
-app_identifier(["com.fludivisiondesign.earnandlearn"])
+app_identifier(["app.earnandlearn.ios"])
 
 # Your Apple Developer Portal username (email)
 # username("your@email.com")
