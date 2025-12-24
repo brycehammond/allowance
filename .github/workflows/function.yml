@@ -4,18 +4,18 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'src/AllowanceTracker.Functions/**'
-      - 'src/AllowanceTracker/Models/**'
-      - 'src/AllowanceTracker/Data/**'
-      - 'src/AllowanceTracker/Services/**'
+      - 'api/src/AllowanceTracker.Functions/**'
+      - 'api/src/AllowanceTracker/Models/**'
+      - 'api/src/AllowanceTracker/Data/**'
+      - 'api/src/AllowanceTracker/Services/**'
       - '.github/workflows/function.yml'
   pull_request:
     branches: [main, develop]
     paths:
-      - 'src/AllowanceTracker.Functions/**'
-      - 'src/AllowanceTracker/Models/**'
-      - 'src/AllowanceTracker/Data/**'
-      - 'src/AllowanceTracker/Services/**'
+      - 'api/src/AllowanceTracker.Functions/**'
+      - 'api/src/AllowanceTracker/Models/**'
+      - 'api/src/AllowanceTracker/Data/**'
+      - 'api/src/AllowanceTracker/Services/**'
 
 env:
   DOTNET_VERSION: '8.0.x'
@@ -35,13 +35,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore AllowanceTracker.sln
+        run: dotnet restore api/AllowanceTracker.sln
 
       - name: Build solution
-        run: dotnet build AllowanceTracker.sln --configuration Release --no-restore
+        run: dotnet build api/AllowanceTracker.sln --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test AllowanceTracker.sln --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test api/AllowanceTracker.sln --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
         if: always()
@@ -53,7 +53,7 @@ jobs:
 
       - name: Publish Function
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: dotnet publish src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --output ./publish/function
+        run: dotnet publish api/src/AllowanceTracker.Functions/AllowanceTracker.Functions.csproj --configuration Release --output ./publish/function
 
       - name: Upload deployment artifact
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'

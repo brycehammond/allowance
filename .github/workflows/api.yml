@@ -4,16 +4,16 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'src/AllowanceTracker/**'
-      - 'src/AllowanceTracker.Data/**'
-      - 'src/AllowanceTracker.Tests/**'
+      - 'api/src/AllowanceTracker/**'
+      - 'api/src/AllowanceTracker.Data/**'
+      - 'api/src/AllowanceTracker.Tests/**'
       - '.github/workflows/api.yml'
   pull_request:
     branches: [main, develop]
     paths:
-      - 'src/AllowanceTracker/**'
-      - 'src/AllowanceTracker.Data/**'
-      - 'src/AllowanceTracker.Tests/**'
+      - 'api/src/AllowanceTracker/**'
+      - 'api/src/AllowanceTracker.Data/**'
+      - 'api/src/AllowanceTracker.Tests/**'
 
 env:
   DOTNET_VERSION: '8.0.x'
@@ -33,13 +33,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore AllowanceTracker.sln
+        run: dotnet restore api/AllowanceTracker.sln
 
       - name: Build solution
-        run: dotnet build AllowanceTracker.sln --configuration Release --no-restore
+        run: dotnet build api/AllowanceTracker.sln --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+        run: dotnet test api/AllowanceTracker.sln --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
 
       - name: Upload test results
         if: always()
@@ -51,7 +51,7 @@ jobs:
 
       - name: Publish API
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: dotnet publish src/AllowanceTracker/AllowanceTracker.csproj --configuration Release --runtime linux-x64 --self-contained false --output ./publish/api
+        run: dotnet publish api/src/AllowanceTracker/AllowanceTracker.csproj --configuration Release --runtime linux-x64 --self-contained false --output ./publish/api
 
       - name: Upload deployment artifact
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'

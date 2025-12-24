@@ -24,48 +24,34 @@ A simple MVP allowance tracking application built with ASP.NET Core 8.0 Web API 
 4. **SQL Server**: Works great with EF Core, Azure integration
 5. **Minimal dependencies**: Faster to build, easier to maintain
 
-## 📁 Project Structure (API-Only)
+## 📁 Project Structure
 
 ```
-AllowanceTracker/
-├── specs/                        # Detailed specifications (READ THESE FIRST!)
-│   ├── 01-overview.md           # System overview and goals
-│   ├── 02-database-schema.md    # EF Core entity models
-│   ├── 03-api-specification.md  # API endpoints documentation
-│   ├── 04-implementation-phases.md # TDD development roadmap
-│   ├── 05-testing-strategy.md   # xUnit testing approach
-│   ├── 06-tdd-best-practices.md # TDD patterns for .NET
-│   └── 08-ios-app-specification.md # iOS native app (SwiftUI)
-├── Data/                        # EF Core DbContext
-│   ├── AllowanceContext.cs
-│   └── Migrations/
-├── Models/                      # Domain entities
-│   ├── ApplicationUser.cs
-│   ├── Family.cs
-│   ├── Child.cs
-│   └── Transaction.cs
-├── DTOs/                        # Data Transfer Objects
-│   ├── Auth/
-│   ├── Children/
-│   ├── Transactions/
-│   └── Analytics/
-├── Services/                    # Business logic
-│   ├── FamilyService.cs
-│   ├── TransactionService.cs
-│   ├── AllowanceService.cs
-│   ├── JwtService.cs
-│   └── AccountService.cs
-├── Controllers/                 # API controllers
-│   ├── AuthController.cs
-│   ├── ChildrenController.cs
-│   ├── TransactionsController.cs
-│   ├── WishListController.cs
-│   └── AnalyticsController.cs
-├── Program.cs                  # Startup, DI, and middleware
-└── AllowanceTracker.Tests/    # xUnit tests
-    ├── Models/
-    ├── Services/
-    └── Api/
+allowance/
+├── api/                          # .NET Core API (backend)
+│   ├── AllowanceTracker.sln      # Solution file
+│   ├── Dockerfile                # Docker build for API
+│   ├── docker-compose.yml        # Local development with SQL Server
+│   └── src/
+│       ├── AllowanceTracker/     # Main API project
+│       │   ├── Controllers/
+│       │   ├── DTOs/
+│       │   ├── Services/
+│       │   └── Program.cs
+│       ├── AllowanceTracker.Core/
+│       ├── AllowanceTracker.Data/
+│       ├── AllowanceTracker.Functions/  # Azure Functions
+│       └── AllowanceTracker.Tests/
+├── ios/                          # iOS native app (SwiftUI)
+│   └── AllowanceTracker/
+├── web/                          # React frontend
+├── specs/                        # Detailed specifications
+│   ├── 01-overview.md
+│   ├── 02-database-schema.md
+│   ├── 03-api-specification.md
+│   └── ...
+├── terraform/                    # Infrastructure as code
+└── docs/                         # Documentation
 ```
 
 ## 🚀 Quick Start
@@ -570,22 +556,22 @@ When working on this project:
 
 ### Quick Commands
 ```bash
-# Run app
-dotnet run
+# Run API (from api/ directory)
+cd api && dotnet run --project src/AllowanceTracker
 
 # Run tests
-dotnet test
+dotnet test api/AllowanceTracker.sln
 
-# Add package
-dotnet add package PackageName
+# Add package (from project directory)
+cd api/src/AllowanceTracker && dotnet add package PackageName
 
 # EF migrations
-dotnet ef migrations add MigrationName
-dotnet ef database update
+cd api/src/AllowanceTracker && dotnet ef migrations add MigrationName
+cd api/src/AllowanceTracker && dotnet ef database update
 
 # Watch mode
-dotnet watch run
-dotnet watch test
+cd api && dotnet watch run --project src/AllowanceTracker
+cd api && dotnet watch test
 ```
 
 ## 💡 Best Practices

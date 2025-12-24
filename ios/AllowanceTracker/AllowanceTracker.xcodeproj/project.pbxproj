@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -215,7 +215,6 @@
 		F236DDAE8B3A3139A01EDE14 /* AllowanceTrackerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AllowanceTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F45D1965078A6166B2675BA0 /* CategorySpendingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySpendingChart.swift; sourceTree = "<group>"; };
 		F88034558BD809F2C0DCCE5E /* AllowanceTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowanceTrackerUITests.swift; sourceTree = "<group>"; };
-		"TEMP_E2402424-353E-45D4-9E5A-8B4CDC17D833" /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
 		"TEMP_EBA49C22-4E49-4A10-90A1-4DB6DECA808E" /* AllowanceTracker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AllowanceTracker.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -232,6 +231,19 @@
 				9C527099EAE7A0E507219D87 /* WishListItemCard.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		0287B4F32EFC4CB500314D66 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				"TEMP_EBA49C22-4E49-4A10-90A1-4DB6DECA808E" /* AllowanceTracker.xcodeproj */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		0287B4F42EFC4CB500314D66 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
 			sourceTree = "<group>";
 		};
 		0D75775C3E3206F8E1238D35 /* Dashboard */ = {
@@ -382,6 +394,7 @@
 				82EF93D3E39C4015F68E6008 /* ViewModels */,
 				407023F9E2ECCA37E6FEB70C /* Views */,
 				34619E48D893B711CDB6C054 /* Products */,
+				0287B4F32EFC4CB500314D66 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -570,23 +583,6 @@
 			path = Analytics;
 			sourceTree = "<group>";
 		};
-		"TEMP_5EE82D03-D043-4C32-AF1B-6E0EDE4451B1" /* AllowanceTracker */ = {
-			isa = PBXGroup;
-			children = (
-				"TEMP_EBA49C22-4E49-4A10-90A1-4DB6DECA808E" /* AllowanceTracker.xcodeproj */,
-				"TEMP_E2402424-353E-45D4-9E5A-8B4CDC17D833" /* .gitignore */,
-				82EF93D3E39C4015F68E6008 /* ViewModels */,
-				8E54C771B9AA88A28FC8EC3E /* DesignSystem */,
-				DBA727681DCAEBD4000F973F /* App */,
-				53300D9FA1272649C768D84A /* Resources */,
-				EF1720C3B9179CFCB0481AE3 /* Models */,
-				840A784D3A663523ECB6196B /* Utilities */,
-				407023F9E2ECCA37E6FEB70C /* Views */,
-				3AFA4BCB420BC8EAE3362C3A /* Services */,
-			);
-			path = AllowanceTracker;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -672,8 +668,13 @@
 			);
 			mainGroup = 7C1DD20F7DA46F175719B9B7;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 0287B4F42EFC4CB500314D66 /* Products */;
+					ProjectRef = "TEMP_EBA49C22-4E49-4A10-90A1-4DB6DECA808E" /* AllowanceTracker.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				210C8DE349F66D2F314168FF /* AllowanceTracker */,
