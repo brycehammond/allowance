@@ -1,51 +1,5 @@
 import Foundation
 
-// MARK: - Savings Account
-
-struct SavingsAccount: Codable, Identifiable, Equatable {
-    let id: UUID
-    let childId: UUID
-    let name: String
-    let targetAmount: Decimal?
-    let currentBalance: Decimal
-    let autoTransferEnabled: Bool
-    let autoTransferPercentage: Decimal?
-    let createdAt: Date
-
-    // MARK: - Computed Properties
-
-    var hasTarget: Bool {
-        targetAmount != nil
-    }
-
-    var targetProgress: Double? {
-        guard let target = targetAmount, target > 0 else { return nil }
-        let progress = Double(truncating: currentBalance as NSDecimalNumber) /
-                      Double(truncating: target as NSDecimalNumber)
-        return min(progress, 1.0)
-    }
-
-    var isGoalReached: Bool {
-        guard let target = targetAmount else { return false }
-        return currentBalance >= target
-    }
-
-    var formattedBalance: String {
-        currentBalance.currencyFormatted
-    }
-
-    var formattedTargetAmount: String {
-        targetAmount?.currencyFormatted ?? "No target"
-    }
-
-    var formattedAutoTransfer: String {
-        guard autoTransferEnabled, let percentage = autoTransferPercentage else {
-            return "Disabled"
-        }
-        return "\(percentage)% of allowance"
-    }
-}
-
 // MARK: - Savings Transaction
 
 struct SavingsTransaction: Codable, Identifiable, Equatable {
@@ -128,27 +82,16 @@ struct SavingsAccountSummary: Codable {
 
 // MARK: - DTOs for API requests
 
-struct CreateSavingsAccountRequest: Codable {
+/// Request to deposit to savings from main balance
+struct DepositToSavingsRequest: Codable {
     let childId: UUID
-    let name: String
-    let targetAmount: Decimal?
-    let autoTransferEnabled: Bool
-    let autoTransferPercentage: Decimal?
-}
-
-struct UpdateSavingsAccountRequest: Codable {
-    let name: String
-    let targetAmount: Decimal?
-    let autoTransferEnabled: Bool
-    let autoTransferPercentage: Decimal?
-}
-
-struct DepositRequest: Codable {
     let amount: Decimal
-    let notes: String?
+    let description: String
 }
 
-struct WithdrawRequest: Codable {
+/// Request to withdraw from savings to main balance
+struct WithdrawFromSavingsRequest: Codable {
+    let childId: UUID
     let amount: Decimal
-    let notes: String?
+    let description: String
 }

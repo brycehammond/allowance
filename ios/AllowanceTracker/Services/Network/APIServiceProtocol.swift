@@ -35,14 +35,10 @@ protocol APIServiceProtocol {
     func getMonthlyComparison(forChild childId: UUID, months: Int) async throws -> [MonthlyComparison]
 
     // MARK: - Savings
-    func getSavingsAccounts(forChild childId: UUID) async throws -> [SavingsAccount]
     func getSavingsSummary(forChild childId: UUID) async throws -> SavingsAccountSummary
-    func createSavingsAccount(_ request: CreateSavingsAccountRequest) async throws -> SavingsAccount
-    func updateSavingsAccount(id: UUID, _ request: UpdateSavingsAccountRequest) async throws -> SavingsAccount
-    func deleteSavingsAccount(id: UUID) async throws
-    func depositToSavings(accountId: UUID, _ request: DepositRequest) async throws -> SavingsTransaction
-    func withdrawFromSavings(accountId: UUID, _ request: WithdrawRequest) async throws -> SavingsTransaction
-    func getSavingsTransactions(forAccount accountId: UUID) async throws -> [SavingsTransaction]
+    func getSavingsHistory(forChild childId: UUID, limit: Int) async throws -> [SavingsTransaction]
+    func depositToSavings(_ request: DepositToSavingsRequest) async throws -> SavingsTransaction
+    func withdrawFromSavings(_ request: WithdrawFromSavingsRequest) async throws -> SavingsTransaction
 
     // MARK: - Parent Invites
     func sendParentInvite(_ request: SendParentInviteRequest) async throws -> ParentInviteResponse

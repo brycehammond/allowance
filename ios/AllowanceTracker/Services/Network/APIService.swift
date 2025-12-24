@@ -348,86 +348,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         return try await performRequest(urlRequest)
     }
 
-    // MARK: - Savings Accounts
-
-    /// Get savings accounts for a child
-    /// - Parameter childId: Child's unique identifier
-    /// - Returns: Array of savings accounts
-    /// - Throws: APIError if request fails
-    func getSavingsAccounts(forChild childId: UUID) async throws -> [SavingsAccount] {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/children/\(childId.uuidString)")
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
-        return try await performRequest(urlRequest)
-    }
-
-    /// Create a new savings account
-    /// - Parameter request: Savings account creation request
-    /// - Returns: Created savings account
-    /// - Throws: APIError if request fails
-    func createSavingsAccount(_ request: CreateSavingsAccountRequest) async throws -> SavingsAccount {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings")
-        let body = try jsonEncoder.encode(request)
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
-        return try await performRequest(urlRequest)
-    }
-
-    /// Update a savings account
-    /// - Parameters:
-    ///   - id: Savings account identifier
-    ///   - request: Update request
-    /// - Returns: Updated savings account
-    /// - Throws: APIError if request fails
-    func updateSavingsAccount(id: UUID, _ request: UpdateSavingsAccountRequest) async throws -> SavingsAccount {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(id.uuidString)")
-        let body = try jsonEncoder.encode(request)
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
-        return try await performRequest(urlRequest)
-    }
-
-    /// Delete a savings account
-    /// - Parameter id: Savings account identifier
-    /// - Throws: APIError if request fails
-    func deleteSavingsAccount(id: UUID) async throws {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(id.uuidString)")
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "DELETE")
-        let _: EmptyResponse = try await performRequest(urlRequest)
-    }
-
-    /// Deposit into a savings account
-    /// - Parameters:
-    ///   - accountId: Savings account identifier
-    ///   - request: Deposit request
-    /// - Returns: Created savings transaction
-    /// - Throws: APIError if request fails
-    func depositToSavings(accountId: UUID, _ request: DepositRequest) async throws -> SavingsTransaction {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(accountId.uuidString)/deposit")
-        let body = try jsonEncoder.encode(request)
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
-        return try await performRequest(urlRequest)
-    }
-
-    /// Withdraw from a savings account
-    /// - Parameters:
-    ///   - accountId: Savings account identifier
-    ///   - request: Withdraw request
-    /// - Returns: Created savings transaction
-    /// - Throws: APIError if request fails
-    func withdrawFromSavings(accountId: UUID, _ request: WithdrawRequest) async throws -> SavingsTransaction {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(accountId.uuidString)/withdraw")
-        let body = try jsonEncoder.encode(request)
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
-        return try await performRequest(urlRequest)
-    }
-
-    /// Get transactions for a savings account
-    /// - Parameter accountId: Savings account identifier
-    /// - Returns: Array of savings transactions
-    /// - Throws: APIError if request fails
-    func getSavingsTransactions(forAccount accountId: UUID) async throws -> [SavingsTransaction] {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(accountId.uuidString)/transactions")
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
-        return try await performRequest(urlRequest)
-    }
+    // MARK: - Savings
 
     /// Get savings account summary for a child
     /// - Parameter childId: Child's unique identifier
@@ -436,6 +357,42 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     func getSavingsSummary(forChild childId: UUID) async throws -> SavingsAccountSummary {
         let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(childId.uuidString)/summary")
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get savings transaction history for a child
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - limit: Maximum number of transactions to return
+    /// - Returns: Array of savings transactions
+    /// - Throws: APIError if request fails
+    func getSavingsHistory(forChild childId: UUID, limit: Int = 50) async throws -> [SavingsTransaction] {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(childId.uuidString)/history")
+        var urlComponents = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
+        urlComponents.queryItems = [URLQueryItem(name: "limit", value: String(limit))]
+        let urlRequest = try await createAuthenticatedRequest(url: urlComponents.url!, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Deposit to savings from main balance
+    /// - Parameter request: Deposit request with childId, amount, and description
+    /// - Returns: Created savings transaction
+    /// - Throws: APIError if request fails
+    func depositToSavings(_ request: DepositToSavingsRequest) async throws -> SavingsTransaction {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/deposit")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Withdraw from savings to main balance
+    /// - Parameter request: Withdraw request with childId, amount, and description
+    /// - Returns: Created savings transaction
+    /// - Throws: APIError if request fails
+    func withdrawFromSavings(_ request: WithdrawFromSavingsRequest) async throws -> SavingsTransaction {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/withdraw")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
         return try await performRequest(urlRequest)
     }
 

@@ -123,7 +123,7 @@ public class ChildrenController : ControllerBase
             savingsAccountEnabled = child.SavingsAccountEnabled,
             savingsBalance = showSavingsBalance ? child.SavingsBalance : (decimal?)null,
             savingsBalanceVisibleToChild = child.SavingsBalanceVisibleToChild,
-            savingsTransferType = child.SavingsTransferType == SavingsTransferType.Percentage ? "Percentage" : "FixedAmount",
+            savingsTransferType = child.SavingsTransferType.ToString(),
             savingsTransferPercentage = child.SavingsTransferPercentage,
             savingsTransferAmount = child.SavingsTransferAmount,
             allowDebt = child.AllowDebt,

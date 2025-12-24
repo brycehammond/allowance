@@ -1,16 +1,19 @@
 import SwiftUI
 
-/// Main savings account view showing accounts and transactions
+/// Main savings view showing balance, summary cards, and transaction history
+/// Uses single-balance-per-child model matching the API
 @MainActor
 struct SavingsAccountView: View {
 
     // MARK: - Properties
 
     @State private var viewModel: SavingsAccountViewModel
-    @State private var showingAddAccount = false
     @State private var showingDeposit = false
     @State private var showingWithdraw = false
-    @State private var showingEditAccount = false
+    @State private var depositAmount: String = ""
+    @State private var depositDescription: String = ""
+    @State private var withdrawAmount: String = ""
+    @State private var withdrawDescription: String = ""
 
     let childId: UUID
 
@@ -25,42 +28,17 @@ struct SavingsAccountView: View {
 
     var body: some View {
         ZStack {
-            if viewModel.isLoading && !viewModel.hasAccounts {
-                ProgressView("Loading savings accounts...")
-            } else if viewModel.isBalanceHidden || !viewModel.hasAccounts {
-                emptyStateView
+            if viewModel.isLoading && viewModel.summary == nil {
+                ProgressView("Loading savings...")
+            } else if viewModel.isBalanceHidden {
+                balanceHiddenView
+            } else if !viewModel.isEnabled {
+                savingsNotEnabledView
             } else {
-                accountsView
+                savingsContentView
             }
         }
         .navigationTitle("Savings")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingAddAccount = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-            }
-        }
-        .sheet(isPresented: $showingAddAccount) {
-            AddSavingsAccountSheet(viewModel: viewModel)
-        }
-        .sheet(isPresented: $showingDeposit) {
-            if let account = viewModel.selectedAccount {
-                DepositSheet(viewModel: viewModel, account: account)
-            }
-        }
-        .sheet(isPresented: $showingWithdraw) {
-            if let account = viewModel.selectedAccount {
-                WithdrawSheet(viewModel: viewModel, account: account)
-            }
-        }
-        .sheet(isPresented: $showingEditAccount) {
-            if let account = viewModel.selectedAccount {
-                EditSavingsAccountSheet(viewModel: viewModel, account: account)
-            }
-        }
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") {
                 viewModel.clearError()
@@ -74,231 +52,259 @@ struct SavingsAccountView: View {
             await viewModel.refresh()
         }
         .task {
-            await viewModel.loadAccounts()
+            await viewModel.loadSavingsData()
+        }
+        .sheet(isPresented: $showingDeposit) {
+            depositSheet
+        }
+        .sheet(isPresented: $showingWithdraw) {
+            withdrawSheet
         }
     }
 
-    // MARK: - Subviews
+    // MARK: - Main Content View
 
-    /// Main accounts view with account selector and transactions
-    private var accountsView: some View {
-        VStack(spacing: 0) {
-            // Account summary cards
-            if viewModel.accounts.count > 1 {
-                accountSelectorSection
-            } else if let account = viewModel.selectedAccount {
-                singleAccountHeader(account)
-            }
-
-            Divider()
-
-            // Transactions list
-            transactionsList
-        }
-    }
-
-    /// Account selector for multiple accounts
-    private var accountSelectorSection: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
-                ForEach(viewModel.accounts) { account in
-                    AccountCard(
-                        account: account,
-                        isSelected: viewModel.selectedAccount?.id == account.id,
-                        onTap: {
-                            Task {
-                                await viewModel.selectAccount(account)
-                            }
-                        }
-                    )
-                }
-            }
-            .padding()
-        }
-        .background(Color(.systemGroupedBackground))
-    }
-
-    /// Single account header when only one account exists
-    private func singleAccountHeader(_ account: SavingsAccount) -> some View {
-        VStack(spacing: 16) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(account.name)
-                        .font(.headline)
-
-                    if account.hasTarget, let progress = account.targetProgress {
-                        HStack(spacing: 4) {
-                            Text("\(Int(progress * 100))% of goal")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-
-                            if account.isGoalReached {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.caption)
-                                    .foregroundStyle(.green)
-                            }
-                        }
-                    }
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(account.formattedBalance)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .fontDesign(.monospaced)
-                        .foregroundStyle(DesignSystem.Colors.primary)
-
-                    if account.hasTarget {
-                        Text("of \(account.formattedTargetAmount)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-
-            // Progress bar
-            if account.hasTarget, let progress = account.targetProgress {
-                ProgressView(value: progress)
-                    .tint(account.isGoalReached ? .green : DesignSystem.Colors.primary)
+    private var savingsContentView: some View {
+        List {
+            // Summary section
+            Section {
+                summaryHeader
             }
 
             // Action buttons
-            actionButtons
+            Section {
+                actionButtons
+            }
+
+            // Transaction history
+            Section {
+                if viewModel.hasTransactions {
+                    ForEach(viewModel.transactions) { transaction in
+                        SavingsTransactionRow(transaction: transaction)
+                    }
+                } else {
+                    ContentUnavailableView(
+                        "No Transactions",
+                        systemImage: "list.bullet.rectangle",
+                        description: Text("Deposits and withdrawals will appear here")
+                    )
+                }
+            } header: {
+                Text("Transaction History")
+            }
         }
-        .padding()
-        .background(Color(.systemGroupedBackground))
+        .listStyle(.insetGrouped)
     }
 
-    /// Action buttons for deposit/withdraw
+    // MARK: - Summary Header
+
+    private var summaryHeader: some View {
+        VStack(spacing: 16) {
+            // Current balance
+            VStack(spacing: 4) {
+                Text("Savings Balance")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Text(viewModel.formattedBalance)
+                    .font(.system(size: 36, weight: .bold))
+                    .fontDesign(.monospaced)
+                    .foregroundStyle(DesignSystem.Colors.primary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical)
+
+            // Stats row
+            HStack(spacing: 24) {
+                VStack(spacing: 4) {
+                    Text(viewModel.totalDeposited.currencyFormatted)
+                        .font(.headline)
+                        .fontDesign(.monospaced)
+                        .foregroundStyle(.green)
+                    Text("Deposited")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Divider()
+                    .frame(height: 30)
+
+                VStack(spacing: 4) {
+                    Text(viewModel.totalWithdrawn.currencyFormatted)
+                        .font(.headline)
+                        .fontDesign(.monospaced)
+                        .foregroundStyle(.orange)
+                    Text("Withdrawn")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Divider()
+                    .frame(height: 30)
+
+                VStack(spacing: 4) {
+                    Text(viewModel.configDescription)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Text("Auto Transfer")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    // MARK: - Action Buttons
+
     private var actionButtons: some View {
         HStack(spacing: 12) {
             Button {
+                depositAmount = ""
+                depositDescription = ""
                 showingDeposit = true
             } label: {
                 Label("Deposit", systemImage: "plus.circle.fill")
                     .font(.subheadline)
+                    .fontWeight(.medium)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
             }
             .buttonStyle(.borderedProminent)
+            .tint(.green)
 
             Button {
+                withdrawAmount = ""
+                withdrawDescription = ""
                 showingWithdraw = true
             } label: {
                 Label("Withdraw", systemImage: "minus.circle.fill")
                     .font(.subheadline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-            }
-            .buttonStyle(.bordered)
-
-            Button {
-                showingEditAccount = true
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .font(.title3)
-                    .padding(.vertical, 12)
-            }
-            .buttonStyle(.bordered)
-        }
-    }
-
-    /// Transactions list
-    private var transactionsList: some View {
-        List {
-            if viewModel.transactions.isEmpty {
-                ContentUnavailableView(
-                    "No Transactions",
-                    systemImage: "list.bullet.rectangle",
-                    description: Text("Deposits and withdrawals will appear here")
-                )
-            } else {
-                ForEach(viewModel.transactions) { transaction in
-                    SavingsTransactionRow(transaction: transaction)
-                }
-            }
-        }
-        .listStyle(.plain)
-    }
-
-    /// Empty state when no accounts exist
-    private var emptyStateView: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "banknote")
-                .font(.system(size: 60))
-                .foregroundStyle(.secondary)
-
-            VStack(spacing: 8) {
-                Text("No Savings Accounts")
-                    .font(.title2)
-                    .fontWeight(.bold)
-
-                Text("Create a savings account to start saving for goals")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-
-            Button {
-                showingAddAccount = true
-            } label: {
-                Label("Create Savings Account", systemImage: "plus.circle.fill")
-                    .fontWeight(.semibold)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(DesignSystem.Colors.primary)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .padding(.horizontal, 40)
-        }
-        .padding()
-    }
-}
-
-// MARK: - Account Card
-
-/// Compact account card for selector
-struct AccountCard: View {
-    let account: SavingsAccount
-    let isSelected: Bool
-    let onTap: () -> Void
-
-    var body: some View {
-        Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(account.name)
-                    .font(.subheadline)
                     .fontWeight(.medium)
-                    .lineLimit(1)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.orange)
+        }
+        .listRowInsets(EdgeInsets())
+        .listRowBackground(Color.clear)
+    }
 
-                Text(account.formattedBalance)
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .fontDesign(.monospaced)
-                    .foregroundStyle(isSelected ? .white : DesignSystem.Colors.primary)
+    // MARK: - Deposit Sheet
 
-                if account.hasTarget, let progress = account.targetProgress {
-                    ProgressView(value: progress)
-                        .tint(isSelected ? .white : DesignSystem.Colors.primary)
-                        .scaleEffect(x: 1, y: 0.8)
+    private var depositSheet: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Amount", text: $depositAmount)
+                        .keyboardType(.decimalPad)
+                } header: {
+                    Text("Amount")
+                } footer: {
+                    Text("Enter the amount to transfer from spending to savings")
+                }
+
+                Section {
+                    TextField("Description", text: $depositDescription)
+                } header: {
+                    Text("Description")
                 }
             }
-            .frame(width: 140)
-            .padding()
-            .background(isSelected ? DesignSystem.Colors.primary : Color(.systemBackground))
-            .foregroundStyle(isSelected ? .white : .primary)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.clear : Color(.separator), lineWidth: 1)
-            )
-            .shadow(color: isSelected ? DesignSystem.Colors.primary.opacity(0.3) : .clear,
-                   radius: 8, x: 0, y: 4)
+            .navigationTitle("Deposit to Savings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        showingDeposit = false
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Deposit") {
+                        Task {
+                            if let amount = Decimal(string: depositAmount) {
+                                let success = await viewModel.deposit(
+                                    amount: amount,
+                                    description: depositDescription
+                                )
+                                if success {
+                                    showingDeposit = false
+                                }
+                            }
+                        }
+                    }
+                    .disabled(depositAmount.isEmpty || depositDescription.isEmpty || viewModel.isProcessing)
+                }
+            }
         }
-        .buttonStyle(.plain)
+        .presentationDetents([.medium])
+    }
+
+    // MARK: - Withdraw Sheet
+
+    private var withdrawSheet: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Amount", text: $withdrawAmount)
+                        .keyboardType(.decimalPad)
+                } header: {
+                    Text("Amount")
+                } footer: {
+                    Text("Available: \(viewModel.formattedBalance)")
+                }
+
+                Section {
+                    TextField("Description", text: $withdrawDescription)
+                } header: {
+                    Text("Description")
+                }
+            }
+            .navigationTitle("Withdraw from Savings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        showingWithdraw = false
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Withdraw") {
+                        Task {
+                            if let amount = Decimal(string: withdrawAmount) {
+                                let success = await viewModel.withdraw(
+                                    amount: amount,
+                                    description: withdrawDescription
+                                )
+                                if success {
+                                    showingWithdraw = false
+                                }
+                            }
+                        }
+                    }
+                    .disabled(withdrawAmount.isEmpty || withdrawDescription.isEmpty || viewModel.isProcessing)
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+
+    // MARK: - Empty States
+
+    private var savingsNotEnabledView: some View {
+        ContentUnavailableView(
+            "Savings Not Enabled",
+            systemImage: "banknote",
+            description: Text("Savings account is not enabled for this child. Enable it in Settings.")
+        )
+    }
+
+    private var balanceHiddenView: some View {
+        ContentUnavailableView(
+            "Balance Hidden",
+            systemImage: "eye.slash",
+            description: Text("The savings balance is hidden from this view.")
+        )
     }
 }
 
@@ -325,7 +331,7 @@ struct SavingsTransactionRow: View {
                         .lineLimit(1)
                 }
 
-                Text("\(transaction.formattedDate) • \(transaction.createdByName)")
+                Text("\(transaction.formattedDate) - \(transaction.createdByName)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -338,7 +344,7 @@ struct SavingsTransactionRow: View {
                     .fontDesign(.monospaced)
                     .foregroundStyle(transaction.isDeposit ? .green : .orange)
 
-                Text("Balance: \(transaction.balanceAfter.currencyFormatted)")
+                Text("Bal: \(transaction.balanceAfter.currencyFormatted)")
                     .font(.caption)
                     .fontDesign(.monospaced)
                     .foregroundStyle(.secondary)
