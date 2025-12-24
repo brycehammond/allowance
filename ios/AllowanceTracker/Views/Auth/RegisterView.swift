@@ -7,7 +7,7 @@ struct RegisterView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @State private var viewModel = AuthViewModel()
+    @Environment(AuthViewModel.self) private var viewModel
 
     @State private var email = ""
     @State private var password = ""
@@ -241,4 +241,5 @@ struct RegisterView: View {
 
 #Preview {
     RegisterView()
+        .environment(AuthViewModel())
 }

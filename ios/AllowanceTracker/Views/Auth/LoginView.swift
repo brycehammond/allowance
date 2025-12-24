@@ -5,7 +5,7 @@ struct LoginView: View {
 
     // MARK: - Properties
 
-    @State private var viewModel = AuthViewModel()
+    @Environment(AuthViewModel.self) private var viewModel
     @State private var email = ""
     @State private var password = ""
     @State private var showRegister = false
@@ -53,6 +53,7 @@ struct LoginView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showRegister) {
                 RegisterView()
+                    .environment(viewModel)
             }
             .sheet(isPresented: $showForgotPassword) {
                 ForgotPasswordView()
@@ -214,4 +215,5 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
+        .environment(AuthViewModel())
 }
