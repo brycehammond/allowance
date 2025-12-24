@@ -66,7 +66,12 @@ public class ChildrenController : ControllerBase
             c.SavingsBalance,
             c.LastAllowanceDate,
             c.AllowanceDay,
-            c.SavingsBalanceVisibleToChild)).ToList();
+            c.SavingsAccountEnabled,
+            c.SavingsTransferType,
+            c.SavingsTransferPercentage,
+            c.SavingsTransferAmount,
+            c.SavingsBalanceVisibleToChild,
+            c.AllowDebt)).ToList();
 
         return Ok(children);
     }

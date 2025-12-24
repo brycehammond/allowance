@@ -134,7 +134,12 @@ public class FamilyService : IFamilyService
             c.LastAllowanceDate,
             c.LastAllowanceDate?.AddDays(7),
             c.AllowanceDay,
-            c.SavingsBalanceVisibleToChild)).ToList();
+            c.SavingsAccountEnabled,
+            c.SavingsTransferType,
+            c.SavingsTransferPercentage,
+            c.SavingsTransferAmount,
+            c.SavingsBalanceVisibleToChild,
+            c.AllowDebt)).ToList();
 
         return new FamilyChildrenDto(family.Id, family.Name, children);
     }

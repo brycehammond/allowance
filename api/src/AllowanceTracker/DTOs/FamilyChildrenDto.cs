@@ -1,3 +1,5 @@
+using AllowanceTracker.Models;
+
 namespace AllowanceTracker.DTOs;
 
 public record FamilyChildrenDto(
@@ -17,4 +19,9 @@ public record ChildDetailDto(
     DateTime? LastAllowanceDate,
     DateTime? NextAllowanceDate,
     DayOfWeek? AllowanceDay,
-    bool SavingsBalanceVisibleToChild);
+    bool SavingsAccountEnabled,
+    SavingsTransferType SavingsTransferType,
+    decimal? SavingsTransferPercentage,
+    decimal? SavingsTransferAmount,
+    bool SavingsBalanceVisibleToChild,
+    bool AllowDebt);
