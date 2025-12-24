@@ -21,22 +21,39 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
 
     private let jsonDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
-        // Use custom date formatter to handle ISO 8601 with fractional seconds
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        // Use custom date formatter to handle various ISO 8601 formats
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
             let dateString = try container.decode(String.self)
-            // Try with fractional seconds first
-            if let date = formatter.date(from: dateString) {
+
+            // Try ISO 8601 with fractional seconds and timezone
+            let formatterWithFractional = ISO8601DateFormatter()
+            formatterWithFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = formatterWithFractional.date(from: dateString) {
                 return date
             }
-            // Fallback to standard ISO 8601
-            let fallbackFormatter = ISO8601DateFormatter()
-            fallbackFormatter.formatOptions = [.withInternetDateTime]
-            if let date = fallbackFormatter.date(from: dateString) {
+
+            // Try standard ISO 8601 with timezone
+            let formatterStandard = ISO8601DateFormatter()
+            formatterStandard.formatOptions = [.withInternetDateTime]
+            if let date = formatterStandard.date(from: dateString) {
                 return date
             }
+
+            // Try ISO 8601 without timezone (assume UTC)
+            let formatterNoTimezone = DateFormatter()
+            formatterNoTimezone.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            formatterNoTimezone.timeZone = TimeZone(identifier: "UTC")
+            if let date = formatterNoTimezone.date(from: dateString) {
+                return date
+            }
+
+            // Try with fractional seconds but no timezone
+            formatterNoTimezone.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+            if let date = formatterNoTimezone.date(from: dateString) {
+                return date
+            }
+
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date: \(dateString)")
         }
         return decoder
@@ -516,7 +533,13 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
                 // Success - decode response
                 do {
                     return try jsonDecoder.decode(T.self, from: data)
-                } catch {
+                } catch let decodingError {
+                    #if DEBUG
+                    print("🔴 Decoding error: \(decodingError)")
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("🔴 Raw response: \(jsonString)")
+                    }
+                    #endif
                     throw APIError.decodingError
                 }
 

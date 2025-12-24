@@ -9,6 +9,8 @@ using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Azure.Communication.Email;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +19,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        // Serialize all DateTime values as ISO 8601 with UTC timezone
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -224,3 +228,20 @@ app.MapHealthChecks("/health/ready");
 app.MapControllers();
 
 app.Run();
+
+/// <summary>
+/// Custom JSON converter that ensures DateTime values are serialized as ISO 8601 with UTC timezone
+/// </summary>
+public class UtcDateTimeConverter : JsonConverter<DateTime>
+{
+    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return DateTime.Parse(reader.GetString()!).ToUniversalTime();
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+    {
+        // Ensure UTC and write with Z suffix
+        writer.WriteStringValue(value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"));
+    }
+}
