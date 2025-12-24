@@ -87,3 +87,6 @@ ios/**/*.hmap
 ios/**/*.ipa
 ios/**/*.dSYM.zip
 ios/**/*.dSYM
+
+# Playwright MCP screenshots
+.playwright-mcp/
