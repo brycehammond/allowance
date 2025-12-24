@@ -43,8 +43,7 @@ final class BudgetService: ObservableObject, BudgetServiceProtocol {
         urlSession: URLSessionProtocol = URLSession.shared,
         keychainService: KeychainServiceProtocol = KeychainService.shared
     ) {
-        // TODO: Load from configuration
-        self.baseURL = baseURL ?? URL(string: "https://api.allowancetracker.com")!
+        self.baseURL = baseURL ?? Configuration.apiBaseURL
         self.urlSession = urlSession
         self.keychainService = keychainService
     }

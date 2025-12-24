@@ -3,94 +3,92 @@ import SwiftUI
 /// A card view displaying child profile with balance breakdown and quick actions
 struct ChildCardView: View {
     let child: Child
-    let onTap: () -> Void
+    var onTap: (() -> Void)? = nil
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 12) {
-                // Header with avatar and name
-                HStack(spacing: 12) {
-                    // Avatar
-                    ZStack {
-                        Circle()
-                            .fill(DesignSystem.Colors.primary.opacity(0.15))
-                            .frame(width: 44, height: 44)
-                        Text(String(child.firstName.prefix(1)))
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(DesignSystem.Colors.primary)
-                    }
-                    .accessibilityHidden(true)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(child.fullName)
-                            .font(.scalable(.headline, weight: .semibold))
-                        Text("Weekly: \(child.weeklyAllowance.currencyFormatted)")
-                            .font(.scalable(.caption))
-                            .foregroundStyle(.secondary)
-                            .accessibilityHidden(true)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 12) {
+            // Header with avatar and name
+            HStack(spacing: 12) {
+                // Avatar
+                ZStack {
+                    Circle()
+                        .fill(DesignSystem.Colors.primary.opacity(0.15))
+                        .frame(width: 44, height: 44)
+                    Text(String(child.firstName.prefix(1)))
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(DesignSystem.Colors.primary)
                 }
+                .accessibilityHidden(true)
 
-                Divider()
-                    .accessibilityHidden(true)
-
-                // Total Balance
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Total Balance")
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(child.fullName)
+                        .font(.scalable(.headline, weight: .semibold))
+                    Text("Weekly: \(child.weeklyAllowance.currencyFormatted)")
                         .font(.scalable(.caption))
                         .foregroundStyle(.secondary)
                         .accessibilityHidden(true)
-
-                    Text(child.formattedTotalBalance)
-                        .font(.scalable(.title2, weight: .bold))
-                        .fontDesign(.monospaced)
-                        .foregroundStyle(totalBalanceColor)
-                        .accessibilityHidden(true)
                 }
 
-                // Balance breakdown
-                HStack(spacing: 16) {
-                    // Spending balance
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(child.formattedBalance)
-                            .font(.scalable(.subheadline, weight: .semibold))
-                            .fontDesign(.monospaced)
-                            .foregroundStyle(.primary)
-                        Text("Spending")
-                            .font(.scalable(.caption2))
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityHidden(true)
+                Spacer()
 
-                    // Savings balance
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(child.formattedSavingsBalance)
-                            .font(.scalable(.subheadline, weight: .semibold))
-                            .fontDesign(.monospaced)
-                            .foregroundStyle(DesignSystem.Colors.primary)
-                        Text("Savings")
-                            .font(.scalable(.caption2))
-                            .foregroundStyle(.secondary)
-                    }
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                     .accessibilityHidden(true)
-
-                    Spacer()
-                }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .shadow(radius: 2)
+
+            Divider()
+                .accessibilityHidden(true)
+
+            // Total Balance
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Total Balance")
+                    .font(.scalable(.caption))
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+
+                Text(child.formattedTotalBalance)
+                    .font(.scalable(.title2, weight: .bold))
+                    .fontDesign(.monospaced)
+                    .foregroundStyle(totalBalanceColor)
+                    .accessibilityHidden(true)
+            }
+
+            // Balance breakdown
+            HStack(spacing: 16) {
+                // Spending balance
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(child.formattedBalance)
+                        .font(.scalable(.subheadline, weight: .semibold))
+                        .fontDesign(.monospaced)
+                        .foregroundStyle(.primary)
+                    Text("Spending")
+                        .font(.scalable(.caption2))
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityHidden(true)
+
+                // Savings balance
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(child.formattedSavingsBalance)
+                        .font(.scalable(.subheadline, weight: .semibold))
+                        .fontDesign(.monospaced)
+                        .foregroundStyle(DesignSystem.Colors.primary)
+                    Text("Savings")
+                        .font(.scalable(.caption2))
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityHidden(true)
+
+                Spacer()
+            }
         }
-        .buttonStyle(.plain)
+        .padding()
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(radius: 2)
+        .contentShape(Rectangle())
         .accessibility(
             label: accessibilityLabel,
             hint: "Double tap to view details and transactions",
@@ -182,8 +180,7 @@ private extension Child {
             lastName: "Smith",
             currentBalance: 125.50,
             savingsBalance: 45.00
-        ),
-        onTap: { print("Card tapped") }
+        )
     )
     .padding()
     .previewLayout(.sizeThatFits)
@@ -199,8 +196,7 @@ private extension Child {
             savingsBalance: 0.00,
             lastAllowanceDate: nil,
             allowanceDay: nil
-        ),
-        onTap: { print("Card tapped") }
+        )
     )
     .padding()
     .previewLayout(.sizeThatFits)
@@ -215,8 +211,7 @@ private extension Child {
                 currentBalance: 125.50,
                 savingsBalance: 45.00,
                 allowanceDay: .wednesday
-            ),
-            onTap: { print("Alice tapped") }
+            )
         )
 
         ChildCardView(
@@ -227,8 +222,7 @@ private extension Child {
                 currentBalance: 45.00,
                 savingsBalance: 10.00,
                 allowanceDay: nil
-            ),
-            onTap: { print("Bob tapped") }
+            )
         )
     }
     .padding()

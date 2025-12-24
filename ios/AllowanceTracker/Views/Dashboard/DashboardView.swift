@@ -144,7 +144,7 @@ struct DashboardView: View {
                         NavigationLink {
                             ChildDetailView(child: child)
                         } label: {
-                            ChildCardView(child: child, onTap: {})
+                            ChildCardView(child: child)
                         }
                         .buttonStyle(.plain)
                     }
