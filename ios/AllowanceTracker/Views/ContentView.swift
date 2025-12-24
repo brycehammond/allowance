@@ -11,8 +11,8 @@ struct ContentView: View {
     var body: some View {
         Group {
             if authViewModel.isAuthenticated {
-                // Authenticated - show main app with tab navigation
-                MainTabView()
+                // Authenticated - show dashboard directly (no tab bar)
+                DashboardView()
             } else {
                 // Not authenticated - show login
                 LoginView()

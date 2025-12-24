@@ -133,7 +133,7 @@ struct SavingsAccountView: View {
                     Text(viewModel.totalWithdrawn.currencyFormatted)
                         .font(.headline)
                         .fontDesign(.monospaced)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Color.gray600)
                     Text("Withdrawn")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -178,14 +178,14 @@ struct SavingsAccountView: View {
                 withdrawDescription = ""
                 showingWithdraw = true
             } label: {
-                Label("Withdraw", systemImage: "minus.circle.fill")
+                Label("Withdraw", systemImage: "minus.circle")
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.orange)
+            .buttonStyle(.bordered)
+            .tint(Color.gray600)
         }
         .listRowInsets(EdgeInsets())
         .listRowBackground(Color.clear)
@@ -318,7 +318,7 @@ struct SavingsTransactionRow: View {
         HStack(spacing: 12) {
             Image(systemName: transaction.isDeposit ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .font(.title2)
-                .foregroundStyle(transaction.isDeposit ? .green : .orange)
+                .foregroundStyle(transaction.isDeposit ? .green : Color.gray500)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(transaction.typeDescription)
@@ -342,7 +342,7 @@ struct SavingsTransactionRow: View {
                 Text(transaction.formattedAmount)
                     .font(.headline)
                     .fontDesign(.monospaced)
-                    .foregroundStyle(transaction.isDeposit ? .green : .orange)
+                    .foregroundStyle(transaction.isDeposit ? .green : Color.gray600)
 
                 Text("Bal: \(transaction.balanceAfter.currencyFormatted)")
                     .font(.caption)

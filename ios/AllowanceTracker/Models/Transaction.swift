@@ -7,6 +7,7 @@ struct Transaction: Codable, Identifiable {
     let type: TransactionType
     var category: String = "General"
     let description: String
+    var notes: String?
     let balanceAfter: Decimal
     let createdAt: Date
     var createdByName: String = ""
@@ -41,6 +42,7 @@ struct CreateTransactionRequest: Codable {
     let type: TransactionType
     let category: String
     let description: String
+    let notes: String?
     let drawFromSavings: Bool
 
     init(
@@ -49,6 +51,7 @@ struct CreateTransactionRequest: Codable {
         type: TransactionType,
         category: String,
         description: String,
+        notes: String? = nil,
         drawFromSavings: Bool = false
     ) {
         self.childId = childId
@@ -56,6 +59,7 @@ struct CreateTransactionRequest: Codable {
         self.type = type
         self.category = category
         self.description = description
+        self.notes = notes
         self.drawFromSavings = drawFromSavings
     }
 }

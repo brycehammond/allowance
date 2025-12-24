@@ -191,6 +191,7 @@ enum AccessibilityIdentifier {
     static let createTransactionButton = "create_transaction_button"
     static let transactionAmountField = "transaction_amount_field"
     static let transactionDescriptionField = "transaction_description_field"
+    static let transactionNotesField = "transaction_notes_field"
     static let transactionTypePicker = "transaction_type_picker"
     static let transactionCategoryPicker = "transaction_category_picker"
     static let transactionSaveButton = "transaction_save_button"

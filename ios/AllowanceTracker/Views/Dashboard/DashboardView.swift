@@ -11,6 +11,7 @@ struct DashboardView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var showingAddChild = false
+    @State private var showingProfile = false
 
     // MARK: - Computed Properties
 
@@ -77,16 +78,28 @@ struct DashboardView: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        Task {
-                            await authViewModel.logout()
-                        }
+                        showingProfile = true
                     } label: {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                        Image(systemName: "person.circle.fill")
+                            .font(.title3)
                     }
                 }
             }
             .sheet(isPresented: $showingAddChild) {
                 AddChildView()
+            }
+            .sheet(isPresented: $showingProfile) {
+                NavigationStack {
+                    ProfileView()
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Done") {
+                                    showingProfile = false
+                                }
+                            }
+                        }
+                }
             }
             .onChange(of: showingAddChild) { _, isShowing in
                 if !isShowing {
@@ -310,6 +323,16 @@ struct ChildDetailView: View {
 
     // MARK: - Child Header View
 
+    /// Whether savings balance should be shown (hidden when viewing as child and savingsBalanceVisibleToChild is false)
+    private var shouldShowSavingsBalance: Bool {
+        // Parents always see savings
+        if isParent && !authViewModel.isViewingAsChild {
+            return true
+        }
+        // When viewing as child (or actual child), respect the visibility setting
+        return child.savingsBalanceVisibleToChild
+    }
+
     private var childHeaderView: some View {
         VStack(spacing: 12) {
             HStack(alignment: .center, spacing: 16) {
@@ -336,41 +359,53 @@ struct ChildDetailView: View {
 
                 Spacer()
 
-                // Total balance
+                // Total/Spending balance
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(child.formattedTotalBalance)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .fontDesign(.monospaced)
-                    Text("Total Balance")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if shouldShowSavingsBalance {
+                        Text(child.formattedTotalBalance)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .fontDesign(.monospaced)
+                        Text("Total Balance")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text(child.formattedBalance)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .fontDesign(.monospaced)
+                        Text("Balance")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 
-            // Balance breakdown
-            HStack(spacing: 24) {
-                Spacer()
+            // Balance breakdown (only show when savings is visible)
+            if shouldShowSavingsBalance {
+                HStack(spacing: 24) {
+                    Spacer()
 
-                // Spending balance
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(child.formattedBalance)
-                        .font(.headline)
-                        .fontDesign(.monospaced)
-                    Text("Spending")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                    // Spending balance
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(child.formattedBalance)
+                            .font(.headline)
+                            .fontDesign(.monospaced)
+                        Text("Spending")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
 
-                // Savings balance
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(child.formattedSavingsBalance)
-                        .font(.headline)
-                        .fontDesign(.monospaced)
-                        .foregroundStyle(DesignSystem.Colors.primary)
-                    Text("Savings")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    // Savings balance
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(child.formattedSavingsBalance)
+                            .font(.headline)
+                            .fontDesign(.monospaced)
+                            .foregroundStyle(DesignSystem.Colors.primary)
+                        Text("Savings")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
         }

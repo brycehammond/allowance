@@ -220,7 +220,10 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Array of transactions
     /// - Throws: APIError if request fails
     func getTransactions(forChild childId: UUID, limit: Int = 20) async throws -> [Transaction] {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/transactions?limit=\(limit)")
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/children/\(childId.uuidString)/transactions"
+        components.queryItems = [URLQueryItem(name: "limit", value: String(limit))]
+        guard let endpoint = components.url else { throw APIError.invalidURL }
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         return try await performRequest(urlRequest)
     }
@@ -241,7 +244,9 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Current balance
     /// - Throws: APIError if request fails
     func getBalance(forChild childId: UUID) async throws -> Decimal {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/transactions/children/\(childId.uuidString)/balance")
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/children/\(childId.uuidString)/balance"
+        guard let endpoint = components.url else { throw APIError.invalidURL }
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         let response: [String: Decimal] = try await performRequest(urlRequest)
         return response["balance"] ?? 0
@@ -311,7 +316,10 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Array of balance points
     /// - Throws: APIError if request fails
     func getBalanceHistory(forChild childId: UUID, days: Int = 30) async throws -> [BalancePoint] {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/analytics/children/\(childId.uuidString)/balance-history?days=\(days)")
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/analytics/children/\(childId.uuidString)/balance-history"
+        components.queryItems = [URLQueryItem(name: "days", value: String(days))]
+        guard let endpoint = components.url else { throw APIError.invalidURL }
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         return try await performRequest(urlRequest)
     }
@@ -343,7 +351,10 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Array of monthly comparisons
     /// - Throws: APIError if request fails
     func getMonthlyComparison(forChild childId: UUID, months: Int = 6) async throws -> [MonthlyComparison] {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/analytics/children/\(childId.uuidString)/monthly-comparison?months=\(months)")
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/analytics/children/\(childId.uuidString)/monthly-comparison"
+        components.queryItems = [URLQueryItem(name: "months", value: String(months))]
+        guard let endpoint = components.url else { throw APIError.invalidURL }
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         return try await performRequest(urlRequest)
     }
@@ -367,10 +378,11 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Array of savings transactions
     /// - Throws: APIError if request fails
     func getSavingsHistory(forChild childId: UUID, limit: Int = 50) async throws -> [SavingsTransaction] {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(childId.uuidString)/history")
-        var urlComponents = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
-        urlComponents.queryItems = [URLQueryItem(name: "limit", value: String(limit))]
-        let urlRequest = try await createAuthenticatedRequest(url: urlComponents.url!, method: "GET")
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/savings/\(childId.uuidString)/history"
+        components.queryItems = [URLQueryItem(name: "limit", value: String(limit))]
+        guard let endpoint = components.url else { throw APIError.invalidURL }
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         return try await performRequest(urlRequest)
     }
 

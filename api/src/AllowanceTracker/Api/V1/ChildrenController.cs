@@ -166,6 +166,36 @@ public class ChildrenController : ControllerBase
     }
 
     /// <summary>
+    /// Get current balance for a child
+    /// </summary>
+    [HttpGet("{childId}/balance")]
+    public async Task<ActionResult<object>> GetChildBalance(Guid childId)
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        // Verify user has access to this child
+        var child = await _childManagementService.GetChildAsync(childId, currentUser.Id);
+        if (child == null)
+        {
+            return NotFound(new
+            {
+                error = new
+                {
+                    code = "NOT_FOUND",
+                    message = "Child not found or access denied"
+                }
+            });
+        }
+
+        var balance = await _transactionService.GetCurrentBalanceAsync(childId);
+        return Ok(new { balance });
+    }
+
+    /// <summary>
     /// Update child's weekly allowance (Parent only)
     /// </summary>
     [HttpPut("{childId}/allowance")]

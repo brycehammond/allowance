@@ -18,8 +18,7 @@ struct ProfileView: View {
     // MARK: - Body
 
     var body: some View {
-        NavigationStack {
-            List {
+        List {
                 // User Information Section
                 if let user = authViewModel.currentUser {
                     Section("Account") {
@@ -109,27 +108,26 @@ struct ProfileView: View {
                     .accessibilityIdentifier(AccessibilityIdentifier.signOutButton)
                 }
             }
-            .navigationTitle("Profile")
-            .confirmationDialog(
-                "Sign Out",
-                isPresented: $showingLogoutConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button("Sign Out", role: .destructive) {
-                    Task {
-                        await authViewModel.logout()
-                    }
+        .navigationTitle("Profile")
+        .confirmationDialog(
+            "Sign Out",
+            isPresented: $showingLogoutConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Sign Out", role: .destructive) {
+                Task {
+                    await authViewModel.logout()
                 }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Are you sure you want to sign out?")
             }
-            .sheet(isPresented: $showingAddChild) {
-                AddChildView()
-            }
-            .sheet(isPresented: $showingInviteParent) {
-                InviteParentView()
-            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to sign out?")
+        }
+        .sheet(isPresented: $showingAddChild) {
+            AddChildView()
+        }
+        .sheet(isPresented: $showingInviteParent) {
+            InviteParentView()
         }
     }
 }

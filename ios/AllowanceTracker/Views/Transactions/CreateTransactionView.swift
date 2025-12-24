@@ -14,6 +14,7 @@ struct CreateTransactionView: View {
     @State private var transactionType: TransactionType = .credit
     @State private var category: TransactionCategory = .allowance
     @State private var description: String = ""
+    @State private var notes: String = ""
     @State private var showingConfirmation = false
     @State private var pendingTransaction: PendingTransaction?
     @FocusState private var focusedField: Field?
@@ -27,7 +28,7 @@ struct CreateTransactionView: View {
     // MARK: - Field enum
 
     private enum Field {
-        case amount, description
+        case amount, description, notes
     }
 
     // MARK: - Pending Transaction
@@ -37,6 +38,7 @@ struct CreateTransactionView: View {
         let type: TransactionType
         let category: String
         let description: String
+        let notes: String?
         let fromSpending: Decimal
         let fromSavings: Decimal
         let intoDebt: Decimal
@@ -109,6 +111,19 @@ struct CreateTransactionView: View {
                     Text("Description")
                 } footer: {
                     Text("Describe what this transaction is for")
+                        .foregroundStyle(.secondary)
+                }
+
+                // Notes section (optional)
+                Section {
+                    TextField("Enter notes (optional)", text: $notes, axis: .vertical)
+                        .lineLimit(2...4)
+                        .focused($focusedField, equals: .notes)
+                        .accessibilityIdentifier(AccessibilityIdentifier.transactionNotesField)
+                } header: {
+                    Text("Notes")
+                } footer: {
+                    Text("Additional details or context")
                         .foregroundStyle(.secondary)
                 }
 
@@ -261,6 +276,7 @@ struct CreateTransactionView: View {
                     type: transactionType,
                     category: category.rawValue,
                     description: description,
+                    notes: notes.isEmpty ? nil : notes,
                     fromSpending: impact.fromSpending,
                     fromSavings: impact.fromSavings,
                     intoDebt: impact.intoDebt
@@ -276,6 +292,7 @@ struct CreateTransactionView: View {
             type: transactionType,
             category: category.rawValue,
             description: description,
+            notes: notes.isEmpty ? nil : notes,
             drawFromSavings: false
         )
 
@@ -291,6 +308,7 @@ struct CreateTransactionView: View {
             type: pending.type,
             category: pending.category,
             description: pending.description,
+            notes: pending.notes,
             drawFromSavings: true
         )
 

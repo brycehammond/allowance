@@ -82,12 +82,14 @@ final class TransactionViewModel {
     ///   - type: Credit or Debit
     ///   - category: Transaction category
     ///   - description: Transaction description
+    ///   - notes: Optional additional notes
     ///   - drawFromSavings: Whether to draw from savings if spending balance is insufficient
     func createTransaction(
         amount: Decimal,
         type: TransactionType,
         category: String,
         description: String,
+        notes: String? = nil,
         drawFromSavings: Bool = false
     ) async -> Bool {
         // Clear previous errors
@@ -120,6 +122,7 @@ final class TransactionViewModel {
                 type: type,
                 category: category,
                 description: description,
+                notes: notes?.isEmpty == true ? nil : notes,
                 drawFromSavings: drawFromSavings
             )
 
