@@ -148,7 +148,7 @@ export const childrenApi = {
 // Transactions API
 export const transactionsApi = {
   getByChild: async (childId: string): Promise<Transaction[]> => {
-    const response = await apiClient.get<Transaction[]>(`/api/v1/transactions/children/${childId}`);
+    const response = await apiClient.get<Transaction[]>(`/api/v1/children/${childId}/transactions`);
     return response.data;
   },
 
