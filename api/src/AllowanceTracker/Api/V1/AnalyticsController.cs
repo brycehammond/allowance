@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AllowanceTracker.Api.V1;
 
 [ApiController]
-[Route("api/v1/analytics")]
+[Route("api/v1/children/{childId}/analytics")]
 [Authorize]
 public class AnalyticsController : ControllerBase
 {
@@ -20,7 +20,7 @@ public class AnalyticsController : ControllerBase
     /// <summary>
     /// Get balance history for a child over specified number of days
     /// </summary>
-    [HttpGet("children/{childId}/balance-history")]
+    [HttpGet("balance-history")]
     public async Task<ActionResult<List<BalancePoint>>> GetBalanceHistory(Guid childId, [FromQuery] int days = 30)
     {
         var balanceHistory = await _analyticsService.GetBalanceHistoryAsync(childId, days);
@@ -30,7 +30,7 @@ public class AnalyticsController : ControllerBase
     /// <summary>
     /// Get income vs spending summary for a child
     /// </summary>
-    [HttpGet("children/{childId}/income-spending")]
+    [HttpGet("income-spending")]
     public async Task<ActionResult<IncomeSpendingSummary>> GetIncomeVsSpending(
         Guid childId,
         [FromQuery] DateTime? startDate = null,
@@ -43,7 +43,7 @@ public class AnalyticsController : ControllerBase
     /// <summary>
     /// Get spending trend for a child over specified time period
     /// </summary>
-    [HttpGet("children/{childId}/spending-trend")]
+    [HttpGet("spending-trend")]
     public async Task<ActionResult<TrendData>> GetSpendingTrend(
         Guid childId,
         [FromQuery] TimePeriod period = TimePeriod.Week)
@@ -55,7 +55,7 @@ public class AnalyticsController : ControllerBase
     /// <summary>
     /// Get savings rate for a child over specified time period
     /// </summary>
-    [HttpGet("children/{childId}/savings-rate")]
+    [HttpGet("savings-rate")]
     public async Task<ActionResult<object>> GetSavingsRate(
         Guid childId,
         [FromQuery] TimePeriod period = TimePeriod.Month)
@@ -67,7 +67,7 @@ public class AnalyticsController : ControllerBase
     /// <summary>
     /// Get monthly comparison data for a child
     /// </summary>
-    [HttpGet("children/{childId}/monthly-comparison")]
+    [HttpGet("monthly-comparison")]
     public async Task<ActionResult<List<MonthlyComparison>>> GetMonthlyComparison(
         Guid childId,
         [FromQuery] int months = 6)
@@ -79,7 +79,7 @@ public class AnalyticsController : ControllerBase
     /// <summary>
     /// Get transaction heatmap data for a child
     /// </summary>
-    [HttpGet("children/{childId}/heatmap")]
+    [HttpGet("heatmap")]
     public async Task<ActionResult<Dictionary<DateTime, TransactionDayData>>> GetTransactionHeatmap(
         Guid childId,
         [FromQuery] int days = 365)
@@ -91,7 +91,7 @@ public class AnalyticsController : ControllerBase
     /// <summary>
     /// Get spending breakdown by category for a child
     /// </summary>
-    [HttpGet("children/{childId}/spending-breakdown")]
+    [HttpGet("spending-breakdown")]
     public async Task<ActionResult<List<CategoryBreakdown>>> GetSpendingBreakdown(
         Guid childId,
         [FromQuery] DateTime? startDate = null,

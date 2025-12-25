@@ -308,6 +308,19 @@ class MockAPIService: APIServiceProtocol {
         // Mock implementation - do nothing
     }
 
+    var refreshTokenResult: Result<AuthResponse, APIError>?
+
+    func refreshToken() async throws -> AuthResponse {
+        switch refreshTokenResult {
+        case .success(let response):
+            return response
+        case .failure(let error):
+            throw error
+        case .none:
+            throw APIError.unauthorized
+        }
+    }
+
     func changePassword(_ request: ChangePasswordRequest) async throws -> PasswordMessageResponse {
         switch changePasswordResult {
         case .success(let response):
@@ -354,42 +367,48 @@ class MockAPIService: APIServiceProtocol {
         throw APIError.notFound
     }
 
+    func createChild(_ request: CreateChildRequest) async throws -> Child {
+        throw APIError.notFound
+    }
+
     func updateChildSettings(childId: UUID, _ request: UpdateChildSettingsRequest) async throws -> UpdateChildSettingsResponse {
         throw APIError.notFound
     }
 
     // MARK: - Savings (stub implementations)
 
-    func getSavingsAccounts(forChild childId: UUID) async throws -> [SavingsAccount] {
-        return []
-    }
-
     func getSavingsSummary(forChild childId: UUID) async throws -> SavingsAccountSummary {
         throw APIError.notFound
     }
 
-    func createSavingsAccount(_ request: CreateSavingsAccountRequest) async throws -> SavingsAccount {
-        throw APIError.notFound
-    }
-
-    func updateSavingsAccount(id: UUID, _ request: UpdateSavingsAccountRequest) async throws -> SavingsAccount {
-        throw APIError.notFound
-    }
-
-    func deleteSavingsAccount(id: UUID) async throws {
-        throw APIError.notFound
-    }
-
-    func depositToSavings(accountId: UUID, _ request: DepositRequest) async throws -> SavingsTransaction {
-        throw APIError.notFound
-    }
-
-    func withdrawFromSavings(accountId: UUID, _ request: WithdrawRequest) async throws -> SavingsTransaction {
-        throw APIError.notFound
-    }
-
-    func getSavingsTransactions(forAccount accountId: UUID) async throws -> [SavingsTransaction] {
+    func getSavingsHistory(forChild childId: UUID, limit: Int) async throws -> [SavingsTransaction] {
         return []
+    }
+
+    func depositToSavings(_ request: DepositToSavingsRequest) async throws -> SavingsTransaction {
+        throw APIError.notFound
+    }
+
+    func withdrawFromSavings(_ request: WithdrawFromSavingsRequest) async throws -> SavingsTransaction {
+        throw APIError.notFound
+    }
+
+    // MARK: - Parent Invites (stub implementations)
+
+    func sendParentInvite(_ request: SendParentInviteRequest) async throws -> ParentInviteResponse {
+        throw APIError.notFound
+    }
+
+    func getPendingInvites() async throws -> [PendingInvite] {
+        return []
+    }
+
+    func cancelInvite(inviteId: String) async throws {
+        throw APIError.notFound
+    }
+
+    func resendInvite(inviteId: String) async throws -> ParentInviteResponse {
+        throw APIError.notFound
     }
 
     // MARK: - Transactions
@@ -442,11 +461,11 @@ class MockAPIService: APIServiceProtocol {
         }
     }
 
-    func updateWishListItem(id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem {
+    func updateWishListItem(forChild childId: UUID, id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem {
         throw APIError.notFound
     }
 
-    func deleteWishListItem(id: UUID) async throws {
+    func deleteWishListItem(forChild childId: UUID, id: UUID) async throws {
         switch deleteWishListItemResponse {
         case .success:
             return
@@ -457,7 +476,7 @@ class MockAPIService: APIServiceProtocol {
         }
     }
 
-    func markWishListItemAsPurchased(id: UUID) async throws -> WishListItem {
+    func markWishListItemAsPurchased(forChild childId: UUID, id: UUID) async throws -> WishListItem {
         switch markPurchasedResponse {
         case .success(let item):
             return item

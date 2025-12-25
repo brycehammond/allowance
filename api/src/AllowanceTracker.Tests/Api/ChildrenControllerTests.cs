@@ -1,5 +1,6 @@
 using AllowanceTracker.Api.V1;
 using AllowanceTracker.DTOs;
+using AllowanceTracker.DTOs.Tasks;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using FluentAssertions;
@@ -28,7 +29,9 @@ public class ChildrenControllerTests
             _mockAccountService.Object,
             _mockFamilyService.Object,
             _mockTransactionService.Object,
-            Mock.Of<IAllowanceService>());
+            Mock.Of<IAllowanceService>(),
+            Mock.Of<ITaskService>(),
+            Mock.Of<ICurrentUserService>());
     }
 
     [Fact]

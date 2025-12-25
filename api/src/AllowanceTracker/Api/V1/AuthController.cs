@@ -335,6 +335,63 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Refresh the current JWT token
+    /// </summary>
+    /// <returns>New authentication response with a fresh JWT token</returns>
+    /// <response code="200">Token refreshed successfully, returns new token valid for 24 hours</response>
+    /// <response code="401">Current token is invalid or expired</response>
+    /// <remarks>
+    /// Call this endpoint before the current token expires to maintain the session.
+    /// The new token will be valid for 24 hours from the time of refresh.
+    ///
+    /// Recommended usage:
+    /// - Check token expiration on app launch or before API calls
+    /// - If token expires within the next hour, call this endpoint to get a fresh token
+    /// - Store the new token and expiration time
+    ///
+    /// This is useful for:
+    /// - Keeping users logged in without requiring re-authentication
+    /// - Implementing "remember me" functionality with biometric unlock
+    /// </remarks>
+    [HttpPost("refresh")]
+    [Authorize]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthResponseDto>> RefreshToken()
+    {
+        var user = await _accountService.GetCurrentUserAsync();
+        if (user == null)
+        {
+            return Unauthorized(new
+            {
+                error = new
+                {
+                    code = "INVALID_TOKEN",
+                    message = "Token is invalid or expired"
+                }
+            });
+        }
+
+        var family = user.FamilyId.HasValue
+            ? await _context.Families.FindAsync(user.FamilyId.Value)
+            : null;
+
+        var token = _jwtService.GenerateToken(user);
+        var expiresAt = DateTime.UtcNow.AddDays(1);
+
+        return Ok(new AuthResponseDto(
+            user.Id,
+            user.Email!,
+            user.FirstName,
+            user.LastName,
+            user.Role.ToString(),
+            user.FamilyId,
+            family?.Name,
+            token,
+            expiresAt));
+    }
+
+    /// <summary>
     /// Get current authenticated user information
     /// </summary>
     /// <returns>Current user's profile information</returns>

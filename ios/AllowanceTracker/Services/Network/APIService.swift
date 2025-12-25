@@ -125,6 +125,21 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         try keychainService.deleteToken()
     }
 
+    /// Refresh the current JWT token
+    /// - Returns: New authentication response with fresh token
+    /// - Throws: APIError if refresh fails (e.g., token expired)
+    func refreshToken() async throws -> AuthResponse {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/auth/refresh")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+
+        let response: AuthResponse = try await performRequest(urlRequest)
+
+        // Save new token to keychain
+        try keychainService.saveToken(response.token)
+
+        return response
+    }
+
     /// Change password for authenticated user
     /// - Parameter request: Change password request with current and new password
     /// - Returns: Success message
@@ -244,9 +259,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Current balance
     /// - Throws: APIError if request fails
     func getBalance(forChild childId: UUID) async throws -> Decimal {
-        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
-        components.path = "/api/v1/children/\(childId.uuidString)/balance"
-        guard let endpoint = components.url else { throw APIError.invalidURL }
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/balance")
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         let response: [String: Decimal] = try await performRequest(urlRequest)
         return response["balance"] ?? 0
@@ -259,7 +272,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Array of wish list items
     /// - Throws: APIError if request fails
     func getWishList(forChild childId: UUID) async throws -> [WishListItem] {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/wishlist/children/\(childId.uuidString)")
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/wishlist")
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         return try await performRequest(urlRequest)
     }
@@ -269,7 +282,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Created wish list item
     /// - Throws: APIError if request fails
     func createWishListItem(_ request: CreateWishListItemRequest) async throws -> WishListItem {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/wishlist")
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(request.childId.uuidString)/wishlist")
         let body = try jsonEncoder.encode(request)
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
         return try await performRequest(urlRequest)
@@ -277,32 +290,37 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
 
     /// Update a wish list item
     /// - Parameters:
+    ///   - childId: Child's unique identifier
     ///   - id: Wish list item identifier
     ///   - request: Update request
     /// - Returns: Updated wish list item
     /// - Throws: APIError if request fails
-    func updateWishListItem(id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/wishlist/\(id.uuidString)")
+    func updateWishListItem(forChild childId: UUID, id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/wishlist/\(id.uuidString)")
         let body = try jsonEncoder.encode(request)
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
         return try await performRequest(urlRequest)
     }
 
     /// Delete a wish list item
-    /// - Parameter id: Wish list item identifier
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - id: Wish list item identifier
     /// - Throws: APIError if request fails
-    func deleteWishListItem(id: UUID) async throws {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/wishlist/\(id.uuidString)")
+    func deleteWishListItem(forChild childId: UUID, id: UUID) async throws {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/wishlist/\(id.uuidString)")
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "DELETE")
         let _: EmptyResponse = try await performRequest(urlRequest)
     }
 
     /// Mark wish list item as purchased
-    /// - Parameter id: Wish list item identifier
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - id: Wish list item identifier
     /// - Returns: Updated wish list item
     /// - Throws: APIError if request fails
-    func markWishListItemAsPurchased(id: UUID) async throws -> WishListItem {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/wishlist/\(id.uuidString)/purchase")
+    func markWishListItemAsPurchased(forChild childId: UUID, id: UUID) async throws -> WishListItem {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/wishlist/\(id.uuidString)/purchase")
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
         return try await performRequest(urlRequest)
     }
@@ -317,7 +335,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Throws: APIError if request fails
     func getBalanceHistory(forChild childId: UUID, days: Int = 30) async throws -> [BalancePoint] {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
-        components.path = "/api/v1/analytics/children/\(childId.uuidString)/balance-history"
+        components.path = "/api/v1/children/\(childId.uuidString)/analytics/balance-history"
         components.queryItems = [URLQueryItem(name: "days", value: String(days))]
         guard let endpoint = components.url else { throw APIError.invalidURL }
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
@@ -329,7 +347,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Income spending summary
     /// - Throws: APIError if request fails
     func getIncomeVsSpending(forChild childId: UUID) async throws -> IncomeSpendingSummary {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/analytics/children/\(childId.uuidString)/income-spending")
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/analytics/income-spending")
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         return try await performRequest(urlRequest)
     }
@@ -339,7 +357,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Array of category breakdowns
     /// - Throws: APIError if request fails
     func getSpendingBreakdown(forChild childId: UUID) async throws -> [CategoryBreakdown] {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/analytics/children/\(childId.uuidString)/spending-breakdown")
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/analytics/spending-breakdown")
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         return try await performRequest(urlRequest)
     }
@@ -352,7 +370,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Throws: APIError if request fails
     func getMonthlyComparison(forChild childId: UUID, months: Int = 6) async throws -> [MonthlyComparison] {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
-        components.path = "/api/v1/analytics/children/\(childId.uuidString)/monthly-comparison"
+        components.path = "/api/v1/children/\(childId.uuidString)/analytics/monthly-comparison"
         components.queryItems = [URLQueryItem(name: "months", value: String(months))]
         guard let endpoint = components.url else { throw APIError.invalidURL }
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
@@ -366,7 +384,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Savings account summary (includes balanceHidden flag)
     /// - Throws: APIError if request fails
     func getSavingsSummary(forChild childId: UUID) async throws -> SavingsAccountSummary {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/\(childId.uuidString)/summary")
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/savings/summary")
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
         return try await performRequest(urlRequest)
     }
@@ -379,7 +397,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Throws: APIError if request fails
     func getSavingsHistory(forChild childId: UUID, limit: Int = 50) async throws -> [SavingsTransaction] {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
-        components.path = "/api/v1/savings/\(childId.uuidString)/history"
+        components.path = "/api/v1/children/\(childId.uuidString)/savings/history"
         components.queryItems = [URLQueryItem(name: "limit", value: String(limit))]
         guard let endpoint = components.url else { throw APIError.invalidURL }
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
@@ -391,7 +409,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Created savings transaction
     /// - Throws: APIError if request fails
     func depositToSavings(_ request: DepositToSavingsRequest) async throws -> SavingsTransaction {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/deposit")
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(request.childId.uuidString)/savings/deposit")
         let body = try jsonEncoder.encode(request)
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
         return try await performRequest(urlRequest)
@@ -402,7 +420,7 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// - Returns: Created savings transaction
     /// - Throws: APIError if request fails
     func withdrawFromSavings(_ request: WithdrawFromSavingsRequest) async throws -> SavingsTransaction {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/savings/withdraw")
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(request.childId.uuidString)/savings/withdraw")
         let body = try jsonEncoder.encode(request)
         let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
         return try await performRequest(urlRequest)

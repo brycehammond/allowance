@@ -5,12 +5,19 @@ struct ContentView: View {
     // MARK: - Properties
 
     @Environment(AuthViewModel.self) private var authViewModel
+    @State private var hasCheckedAuth = false
 
     // MARK: - Body
 
     var body: some View {
         Group {
-            if authViewModel.isAuthenticated {
+            if !hasCheckedAuth {
+                // Loading state while checking authentication
+                LaunchScreenView()
+            } else if authViewModel.requiresBiometricAuth {
+                // Biometric authentication required
+                BiometricLockView()
+            } else if authViewModel.isAuthenticated {
                 // Authenticated - show dashboard directly (no tab bar)
                 DashboardView()
             } else {
@@ -19,6 +26,32 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut, value: authViewModel.isAuthenticated)
+        .animation(.easeInOut, value: authViewModel.requiresBiometricAuth)
+        .task {
+            // Check authentication status on app launch
+            await authViewModel.checkAuthenticationStatus()
+            hasCheckedAuth = true
+        }
+    }
+}
+
+// MARK: - Launch Screen View
+
+/// Simple loading view shown while checking authentication status
+struct LaunchScreenView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "dollarsign.circle.fill")
+                .font(.system(size: 80))
+                .foregroundStyle(Color.accentColor)
+
+            Text("Allowance Tracker")
+                .font(.title)
+                .fontWeight(.bold)
+
+            ProgressView()
+                .padding(.top, 8)
+        }
     }
 }
 

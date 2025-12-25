@@ -218,25 +218,4 @@ public class TasksController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Get task statistics for a child
-    /// </summary>
-    [HttpGet("children/{childId}/statistics")]
-    public async Task<ActionResult<TaskStatisticsDto>> GetTaskStatistics(Guid childId)
-    {
-        try
-        {
-            var userId = _currentUserService.UserId;
-            var statistics = await _taskService.GetTaskStatisticsAsync(childId, userId);
-            return Ok(statistics);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Forbid(ex.Message);
-        }
-    }
 }

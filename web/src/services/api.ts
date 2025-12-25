@@ -166,38 +166,37 @@ export const transactionsApi = {
 // Wish List API
 export const wishListApi = {
   getByChild: async (childId: string): Promise<WishListItem[]> => {
-    const response = await apiClient.get<WishListItem[]>(`/api/v1/wishlist/children/${childId}`);
+    const response = await apiClient.get<WishListItem[]>(`/api/v1/children/${childId}/wishlist`);
     return response.data;
   },
 
   create: async (data: CreateWishListItemRequest): Promise<WishListItem> => {
     // Map frontend property names to backend DTO names
     const backendData = {
-      childId: data.childId,
       name: data.itemName,
       price: data.targetAmount,
     };
-    const response = await apiClient.post<WishListItem>('/api/v1/wishlist', backendData);
+    const response = await apiClient.post<WishListItem>(`/api/v1/children/${data.childId}/wishlist`, backendData);
     return response.data;
   },
 
-  markAsPurchased: async (id: string): Promise<void> => {
-    await apiClient.post(`/api/v1/wishlist/${id}/purchase`);
+  markAsPurchased: async (childId: string, id: string): Promise<void> => {
+    await apiClient.post(`/api/v1/children/${childId}/wishlist/${id}/purchase`);
   },
 
-  markAsUnpurchased: async (id: string): Promise<void> => {
-    await apiClient.post(`/api/v1/wishlist/${id}/unpurchase`);
+  markAsUnpurchased: async (childId: string, id: string): Promise<void> => {
+    await apiClient.post(`/api/v1/children/${childId}/wishlist/${id}/unpurchase`);
   },
 
-  delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/api/v1/wishlist/${id}`);
+  delete: async (childId: string, id: string): Promise<void> => {
+    await apiClient.delete(`/api/v1/children/${childId}/wishlist/${id}`);
   },
 };
 
 // Analytics API
 export const analyticsApi = {
   getBalanceHistory: async (childId: string, days: number = 30): Promise<BalancePoint[]> => {
-    const response = await apiClient.get<BalancePoint[]>(`/api/v1/analytics/children/${childId}/balance-history`, {
+    const response = await apiClient.get<BalancePoint[]>(`/api/v1/children/${childId}/analytics/balance-history`, {
       params: { days },
     });
     return response.data;
@@ -209,14 +208,14 @@ export const analyticsApi = {
     endDate?: string
   ): Promise<IncomeSpendingSummary> => {
     const response = await apiClient.get<IncomeSpendingSummary>(
-      `/api/v1/analytics/children/${childId}/income-spending`,
+      `/api/v1/children/${childId}/analytics/income-spending`,
       { params: { startDate, endDate } }
     );
     return response.data;
   },
 
   getSpendingTrend: async (childId: string, period: TimePeriod = TimePeriod.Week): Promise<TrendData> => {
-    const response = await apiClient.get<TrendData>(`/api/v1/analytics/children/${childId}/spending-trend`, {
+    const response = await apiClient.get<TrendData>(`/api/v1/children/${childId}/analytics/spending-trend`, {
       params: { period },
     });
     return response.data;
@@ -224,7 +223,7 @@ export const analyticsApi = {
 
   getSavingsRate: async (childId: string, period: TimePeriod = TimePeriod.Month): Promise<number> => {
     const response = await apiClient.get<{ savingsRate: number }>(
-      `/api/v1/analytics/children/${childId}/savings-rate`,
+      `/api/v1/children/${childId}/analytics/savings-rate`,
       { params: { period } }
     );
     return response.data.savingsRate;
@@ -232,7 +231,7 @@ export const analyticsApi = {
 
   getMonthlyComparison: async (childId: string, months: number = 6): Promise<MonthlyComparison[]> => {
     const response = await apiClient.get<MonthlyComparison[]>(
-      `/api/v1/analytics/children/${childId}/monthly-comparison`,
+      `/api/v1/children/${childId}/analytics/monthly-comparison`,
       { params: { months } }
     );
     return response.data;
@@ -244,7 +243,7 @@ export const analyticsApi = {
     endDate?: string
   ): Promise<CategoryBreakdown[]> => {
     const response = await apiClient.get<CategoryBreakdown[]>(
-      `/api/v1/analytics/children/${childId}/spending-breakdown`,
+      `/api/v1/children/${childId}/analytics/spending-breakdown`,
       { params: { startDate, endDate } }
     );
     return response.data;
@@ -254,38 +253,44 @@ export const analyticsApi = {
 // Savings Account API
 export const savingsApi = {
   getSummary: async (childId: string): Promise<SavingsAccountSummary> => {
-    const response = await apiClient.get<SavingsAccountSummary>(`/api/v1/savings/${childId}/summary`);
+    const response = await apiClient.get<SavingsAccountSummary>(`/api/v1/children/${childId}/savings/summary`);
     return response.data;
   },
 
   getBalance: async (childId: string): Promise<number> => {
-    const response = await apiClient.get<number>(`/api/v1/savings/${childId}/balance`);
+    const response = await apiClient.get<number>(`/api/v1/children/${childId}/savings/balance`);
     return response.data;
   },
 
   getHistory: async (childId: string, limit: number = 50): Promise<SavingsTransaction[]> => {
-    const response = await apiClient.get<SavingsTransaction[]>(`/api/v1/savings/${childId}/history`, {
+    const response = await apiClient.get<SavingsTransaction[]>(`/api/v1/children/${childId}/savings/history`, {
       params: { limit },
     });
     return response.data;
   },
 
   deposit: async (data: DepositToSavingsRequest): Promise<SavingsTransaction> => {
-    const response = await apiClient.post<SavingsTransaction>('/api/v1/savings/deposit', data);
+    const response = await apiClient.post<SavingsTransaction>(`/api/v1/children/${data.childId}/savings/deposit`, {
+      amount: data.amount,
+      description: data.description,
+    });
     return response.data;
   },
 
   withdraw: async (data: WithdrawFromSavingsRequest): Promise<SavingsTransaction> => {
-    const response = await apiClient.post<SavingsTransaction>('/api/v1/savings/withdraw', data);
+    const response = await apiClient.post<SavingsTransaction>(`/api/v1/children/${data.childId}/savings/withdraw`, {
+      amount: data.amount,
+      description: data.description,
+    });
     return response.data;
   },
 
   updateConfig: async (data: UpdateSavingsConfigRequest): Promise<void> => {
-    await apiClient.put('/api/v1/savings/config', data);
+    await apiClient.put(`/api/v1/children/${data.childId}/savings/config`, data);
   },
 
   disable: async (childId: string): Promise<void> => {
-    await apiClient.post(`/api/v1/savings/${childId}/disable`);
+    await apiClient.post(`/api/v1/children/${childId}/savings/disable`);
   },
 };
 

@@ -1,5 +1,6 @@
 using AllowanceTracker.DTOs;
 using AllowanceTracker.DTOs.Allowances;
+using AllowanceTracker.DTOs.Tasks;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -17,19 +18,25 @@ public class ChildrenController : ControllerBase
     private readonly IFamilyService _familyService;
     private readonly ITransactionService _transactionService;
     private readonly IAllowanceService _allowanceService;
+    private readonly ITaskService _taskService;
+    private readonly ICurrentUserService _currentUserService;
 
     public ChildrenController(
         IChildManagementService childManagementService,
         IAccountService accountService,
         IFamilyService familyService,
         ITransactionService transactionService,
-        IAllowanceService allowanceService)
+        IAllowanceService allowanceService,
+        ITaskService taskService,
+        ICurrentUserService currentUserService)
     {
         _childManagementService = childManagementService;
         _accountService = accountService;
         _familyService = familyService;
         _transactionService = transactionService;
         _allowanceService = allowanceService;
+        _taskService = taskService;
+        _currentUserService = currentUserService;
     }
 
     /// <summary>
@@ -456,5 +463,34 @@ public class ChildrenController : ControllerBase
 
         var history = await _allowanceService.GetAllowanceAdjustmentHistoryAsync(childId);
         return Ok(history);
+    }
+
+    /// <summary>
+    /// Get task statistics for a child
+    /// </summary>
+    [HttpGet("{childId}/tasks/statistics")]
+    public async Task<ActionResult<TaskStatisticsDto>> GetTaskStatistics(Guid childId)
+    {
+        try
+        {
+            var userId = _currentUserService.UserId;
+            var statistics = await _taskService.GetTaskStatisticsAsync(childId, userId);
+            return Ok(statistics);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new
+            {
+                error = new
+                {
+                    code = "NOT_FOUND",
+                    message = ex.Message
+                }
+            });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
     }
 }

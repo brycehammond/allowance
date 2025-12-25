@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
+// Alias for SavingsTransactionRequest from controller
+using SavingsTransactionRequest = AllowanceTracker.Api.V1.SavingsTransactionRequest;
+
 namespace AllowanceTracker.Tests.Api;
 
 public class SavingsAccountControllerTests
@@ -37,17 +40,18 @@ public class SavingsAccountControllerTests
     public async Task EnableSavingsAccount_ReturnsOk()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var request = new EnableSavingsAccountRequest(
-            Guid.NewGuid(),
+            childId,
             SavingsTransferType.FixedAmount,
             5m);
 
         _mockSavingsAccountService
-            .Setup(x => x.EnableSavingsAccountAsync(request.ChildId, request.TransferType, request.Amount))
+            .Setup(x => x.EnableSavingsAccountAsync(childId, request.TransferType, request.Amount))
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _controller.EnableSavingsAccount(request);
+        var result = await _controller.EnableSavingsAccount(childId, request);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -59,17 +63,18 @@ public class SavingsAccountControllerTests
     public async Task UpdateSavingsConfig_ReturnsOk()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var request = new UpdateSavingsConfigRequest(
-            Guid.NewGuid(),
+            childId,
             SavingsTransferType.Percentage,
             20m);
 
         _mockSavingsAccountService
-            .Setup(x => x.UpdateSavingsConfigAsync(request.ChildId, request.TransferType, request.Amount))
+            .Setup(x => x.UpdateSavingsConfigAsync(childId, request.TransferType, request.Amount))
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _controller.UpdateSavingsConfig(request);
+        var result = await _controller.UpdateSavingsConfig(childId, request);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -96,15 +101,15 @@ public class SavingsAccountControllerTests
     public async Task DepositToSavings_ReturnsCreatedWithTransaction()
     {
         // Arrange
-        var request = new DepositToSavingsRequest(
-            Guid.NewGuid(),
+        var childId = Guid.NewGuid();
+        var request = new SavingsTransactionRequest(
             25m,
             "Manual deposit");
 
         var transaction = new SavingsTransaction
         {
             Id = Guid.NewGuid(),
-            ChildId = request.ChildId,
+            ChildId = childId,
             Amount = request.Amount,
             Type = SavingsTransactionType.Deposit,
             Description = request.Description,
@@ -116,14 +121,14 @@ public class SavingsAccountControllerTests
 
         _mockSavingsAccountService
             .Setup(x => x.DepositToSavingsAsync(
-                request.ChildId,
+                childId,
                 request.Amount,
                 request.Description,
                 It.IsAny<Guid>()))
             .ReturnsAsync(transaction);
 
         // Act
-        var result = await _controller.DepositToSavings(request);
+        var result = await _controller.DepositToSavings(childId, request);
 
         // Assert
         var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
@@ -136,15 +141,15 @@ public class SavingsAccountControllerTests
     public async Task WithdrawFromSavings_ReturnsCreatedWithTransaction()
     {
         // Arrange
-        var request = new WithdrawFromSavingsRequest(
-            Guid.NewGuid(),
+        var childId = Guid.NewGuid();
+        var request = new SavingsTransactionRequest(
             15m,
             "Need money");
 
         var transaction = new SavingsTransaction
         {
             Id = Guid.NewGuid(),
-            ChildId = request.ChildId,
+            ChildId = childId,
             Amount = request.Amount,
             Type = SavingsTransactionType.Withdrawal,
             Description = request.Description,
@@ -156,14 +161,14 @@ public class SavingsAccountControllerTests
 
         _mockSavingsAccountService
             .Setup(x => x.WithdrawFromSavingsAsync(
-                request.ChildId,
+                childId,
                 request.Amount,
                 request.Description,
                 It.IsAny<Guid>()))
             .ReturnsAsync(transaction);
 
         // Act
-        var result = await _controller.WithdrawFromSavings(request);
+        var result = await _controller.WithdrawFromSavings(childId, request);
 
         // Assert
         var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;

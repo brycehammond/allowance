@@ -6,6 +6,7 @@ protocol APIServiceProtocol {
     func login(_ request: LoginRequest) async throws -> AuthResponse
     func register(_ request: RegisterRequest) async throws -> AuthResponse
     func logout() async throws
+    func refreshToken() async throws -> AuthResponse
     func changePassword(_ request: ChangePasswordRequest) async throws -> PasswordMessageResponse
     func forgotPassword(_ request: ForgotPasswordRequest) async throws -> PasswordMessageResponse
     func resetPassword(_ request: ResetPasswordRequest) async throws -> PasswordMessageResponse
@@ -24,9 +25,9 @@ protocol APIServiceProtocol {
     // MARK: - Wish List
     func getWishList(forChild childId: UUID) async throws -> [WishListItem]
     func createWishListItem(_ request: CreateWishListItemRequest) async throws -> WishListItem
-    func updateWishListItem(id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem
-    func deleteWishListItem(id: UUID) async throws
-    func markWishListItemAsPurchased(id: UUID) async throws -> WishListItem
+    func updateWishListItem(forChild childId: UUID, id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem
+    func deleteWishListItem(forChild childId: UUID, id: UUID) async throws
+    func markWishListItemAsPurchased(forChild childId: UUID, id: UUID) async throws -> WishListItem
 
     // MARK: - Analytics
     func getBalanceHistory(forChild childId: UUID, days: Int) async throws -> [BalancePoint]

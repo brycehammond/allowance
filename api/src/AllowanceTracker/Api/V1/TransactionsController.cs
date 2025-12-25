@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace AllowanceTracker.Api.V1;
 
 /// <summary>
-/// Manages financial transactions for children's allowance accounts
+/// Manages financial transactions for children's allowance accounts.
+/// Note: GET operations for transactions and balance are available via ChildrenController
+/// at /api/v1/children/{childId}/transactions and /api/v1/children/{childId}/balance
 /// </summary>
 [ApiController]
 [Route("api/v1/[controller]")]
@@ -19,28 +21,6 @@ public class TransactionsController : ControllerBase
     public TransactionsController(ITransactionService transactionService)
     {
         _transactionService = transactionService;
-    }
-
-    /// <summary>
-    /// Get transaction history for a specific child
-    /// </summary>
-    /// <param name="childId">ID of the child whose transactions to retrieve</param>
-    /// <param name="limit">Maximum number of transactions to return (default: 20, max: 100)</param>
-    /// <returns>List of transactions ordered by date (newest first)</returns>
-    /// <response code="200">Returns the list of transactions</response>
-    /// <response code="401">User is not authenticated</response>
-    /// <response code="403">User does not have access to this child</response>
-    [HttpGet("children/{childId}")]
-    [ProducesResponseType(typeof(List<TransactionDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<List<TransactionDto>>> GetChildTransactions(
-        Guid childId,
-        [FromQuery] int limit = 20)
-    {
-        var transactions = await _transactionService.GetChildTransactionsAsync(childId, limit);
-        var dtos = transactions.Select(TransactionDto.FromTransaction).ToList();
-        return Ok(dtos);
     }
 
     /// <summary>
@@ -89,28 +69,10 @@ public class TransactionsController : ControllerBase
         }
 
         var transactionDto = TransactionDto.FromTransaction(latestTransaction);
-        return CreatedAtAction(nameof(GetChildTransactions),
-            new { childId = dto.ChildId },
-            transactionDto);
-    }
-
-    /// <summary>
-    /// Get current balance for a child
-    /// </summary>
-    /// <param name="childId">ID of the child</param>
-    /// <returns>Current balance amount</returns>
-    /// <response code="200">Returns the current balance</response>
-    /// <response code="401">User is not authenticated</response>
-    /// <response code="403">User does not have access to this child</response>
-    /// <response code="404">Child not found</response>
-    [HttpGet("children/{childId}/balance")]
-    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<decimal>> GetBalance(Guid childId)
-    {
-        var balance = await _transactionService.GetCurrentBalanceAsync(childId);
-        return Ok(new { balance });
+        return CreatedAtAction(
+            actionName: "GetChildTransactions",
+            controllerName: "Children",
+            routeValues: new { childId = dto.ChildId },
+            value: transactionDto);
     }
 }

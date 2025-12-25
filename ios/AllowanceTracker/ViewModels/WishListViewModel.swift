@@ -154,7 +154,7 @@ final class WishListViewModel {
                 notes: notes
             )
 
-            let updatedItem = try await apiService.updateWishListItem(id: id, request)
+            let updatedItem = try await apiService.updateWishListItem(forChild: childId, id: id, request)
 
             // Update local state
             if let index = items.firstIndex(where: { $0.id == id }) {
@@ -183,7 +183,7 @@ final class WishListViewModel {
         defer { isProcessing = false }
 
         do {
-            try await apiService.deleteWishListItem(id: id)
+            try await apiService.deleteWishListItem(forChild: childId, id: id)
 
             // Update local state
             items.removeAll { $0.id == id }
@@ -210,7 +210,7 @@ final class WishListViewModel {
         defer { isProcessing = false }
 
         do {
-            let updatedItem = try await apiService.markWishListItemAsPurchased(id: id)
+            let updatedItem = try await apiService.markWishListItemAsPurchased(forChild: childId, id: id)
 
             // Update local state
             if let index = items.firstIndex(where: { $0.id == id }) {

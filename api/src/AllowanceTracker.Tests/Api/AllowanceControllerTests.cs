@@ -1,5 +1,6 @@
 using AllowanceTracker.Api.V1;
 using AllowanceTracker.DTOs.Allowances;
+using AllowanceTracker.DTOs.Tasks;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using FluentAssertions;
@@ -27,7 +28,9 @@ public class AllowanceControllerTests
             _mockAccountService.Object,
             Mock.Of<IFamilyService>(),
             Mock.Of<ITransactionService>(),
-            _mockAllowanceService.Object);
+            _mockAllowanceService.Object,
+            Mock.Of<ITaskService>(),
+            Mock.Of<ICurrentUserService>());
     }
 
     #region PauseAllowance Tests

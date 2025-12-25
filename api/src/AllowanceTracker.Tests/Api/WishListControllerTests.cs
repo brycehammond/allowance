@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
+// Alias for CreateWishListItemRequest from controller
+using CreateWishListItemRequest = AllowanceTracker.Api.V1.CreateWishListItemRequest;
+
 namespace AllowanceTracker.Tests.Api;
 
 public class WishListControllerTests
@@ -48,10 +51,11 @@ public class WishListControllerTests
     public async Task GetWishListItem_ReturnsOkWithItem()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
         var item = new WishListItemDto(
             itemId,
-            Guid.NewGuid(),
+            childId,
             "Nintendo Switch",
             299.99m,
             "https://example.com",
@@ -66,7 +70,7 @@ public class WishListControllerTests
             .ReturnsAsync(item);
 
         // Act
-        var result = await _controller.GetWishListItem(itemId);
+        var result = await _controller.GetWishListItem(childId, itemId);
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -78,13 +82,14 @@ public class WishListControllerTests
     public async Task GetWishListItem_ReturnsNotFound_WhenItemNotFound()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
         _mockWishListService
             .Setup(x => x.GetWishListItemAsync(itemId))
             .ReturnsAsync((WishListItemDto?)null);
 
         // Act
-        var result = await _controller.GetWishListItem(itemId);
+        var result = await _controller.GetWishListItem(childId, itemId);
 
         // Assert
         result.Result.Should().BeOfType<NotFoundResult>();
@@ -95,8 +100,7 @@ public class WishListControllerTests
     {
         // Arrange
         var childId = Guid.NewGuid();
-        var dto = new CreateWishListItemDto(
-            childId,
+        var request = new CreateWishListItemRequest(
             "PlayStation 5",
             499.99m,
             "https://example.com/ps5",
@@ -113,11 +117,11 @@ public class WishListControllerTests
         };
 
         _mockWishListService
-            .Setup(x => x.CreateWishListItemAsync(dto))
+            .Setup(x => x.CreateWishListItemAsync(It.IsAny<CreateWishListItemDto>()))
             .ReturnsAsync(createdItem);
 
         // Act
-        var result = await _controller.CreateWishListItem(dto);
+        var result = await _controller.CreateWishListItem(childId, request);
 
         // Assert
         var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
@@ -132,6 +136,7 @@ public class WishListControllerTests
     public async Task UpdateWishListItem_ReturnsOkWithUpdatedItem()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
         var updateDto = new UpdateWishListItemDto("Updated Name", 29.99m, null, "Updated notes");
         var updatedItem = new WishListItem
@@ -147,7 +152,7 @@ public class WishListControllerTests
             .ReturnsAsync(updatedItem);
 
         // Act
-        var result = await _controller.UpdateWishListItem(itemId, updateDto);
+        var result = await _controller.UpdateWishListItem(childId, itemId, updateDto);
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -159,6 +164,7 @@ public class WishListControllerTests
     public async Task UpdateWishListItem_ReturnsNotFound_WhenItemNotFound()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
         var updateDto = new UpdateWishListItemDto("Name", 10m, null, null);
 
@@ -167,7 +173,7 @@ public class WishListControllerTests
             .ReturnsAsync((WishListItem?)null);
 
         // Act
-        var result = await _controller.UpdateWishListItem(itemId, updateDto);
+        var result = await _controller.UpdateWishListItem(childId, itemId, updateDto);
 
         // Assert
         result.Result.Should().BeOfType<NotFoundResult>();
@@ -177,13 +183,14 @@ public class WishListControllerTests
     public async Task DeleteWishListItem_ReturnsNoContent()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
         _mockWishListService
             .Setup(x => x.DeleteWishListItemAsync(itemId))
             .ReturnsAsync(true);
 
         // Act
-        var result = await _controller.DeleteWishListItem(itemId);
+        var result = await _controller.DeleteWishListItem(childId, itemId);
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
@@ -193,13 +200,14 @@ public class WishListControllerTests
     public async Task DeleteWishListItem_ReturnsNotFound_WhenItemNotFound()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
         _mockWishListService
             .Setup(x => x.DeleteWishListItemAsync(itemId))
             .ReturnsAsync(false);
 
         // Act
-        var result = await _controller.DeleteWishListItem(itemId);
+        var result = await _controller.DeleteWishListItem(childId, itemId);
 
         // Assert
         result.Should().BeOfType<NotFoundResult>();
@@ -209,6 +217,7 @@ public class WishListControllerTests
     public async Task MarkAsPurchased_ReturnsOkWithUpdatedItem()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
         var purchasedItem = new WishListItem
         {
@@ -224,7 +233,7 @@ public class WishListControllerTests
             .ReturnsAsync(purchasedItem);
 
         // Act
-        var result = await _controller.MarkAsPurchased(itemId);
+        var result = await _controller.MarkAsPurchased(childId, itemId);
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -236,13 +245,14 @@ public class WishListControllerTests
     public async Task MarkAsPurchased_ReturnsNotFound_WhenItemNotFound()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
         _mockWishListService
             .Setup(x => x.MarkAsPurchasedAsync(itemId))
             .ReturnsAsync((WishListItem?)null);
 
         // Act
-        var result = await _controller.MarkAsPurchased(itemId);
+        var result = await _controller.MarkAsPurchased(childId, itemId);
 
         // Assert
         result.Result.Should().BeOfType<NotFoundResult>();
@@ -252,6 +262,7 @@ public class WishListControllerTests
     public async Task MarkAsUnpurchased_ReturnsOkWithUpdatedItem()
     {
         // Arrange
+        var childId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
         var unpurchasedItem = new WishListItem
         {
@@ -267,7 +278,7 @@ public class WishListControllerTests
             .ReturnsAsync(unpurchasedItem);
 
         // Act
-        var result = await _controller.MarkAsUnpurchased(itemId);
+        var result = await _controller.MarkAsUnpurchased(childId, itemId);
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AllowanceTracker.Api.V1;
 
 [ApiController]
-[Route("api/v1/wishlist")]
+[Route("api/v1/children/{childId}/wishlist")]
 [Authorize]
 public class WishListController : ControllerBase
 {
@@ -20,7 +20,7 @@ public class WishListController : ControllerBase
     /// <summary>
     /// Get all wish list items for a child
     /// </summary>
-    [HttpGet("children/{childId}")]
+    [HttpGet]
     public async Task<ActionResult<List<WishListItemDto>>> GetChildWishList(Guid childId)
     {
         var items = await _wishListService.GetChildWishListAsync(childId);
@@ -31,7 +31,7 @@ public class WishListController : ControllerBase
     /// Get a specific wish list item by ID
     /// </summary>
     [HttpGet("{id}")]
-    public async Task<ActionResult<WishListItemDto>> GetWishListItem(Guid id)
+    public async Task<ActionResult<WishListItemDto>> GetWishListItem(Guid childId, Guid id)
     {
         var item = await _wishListService.GetWishListItemAsync(id);
 
@@ -45,17 +45,24 @@ public class WishListController : ControllerBase
     /// Create a new wish list item
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<Models.WishListItem>> CreateWishListItem([FromBody] CreateWishListItemDto dto)
+    public async Task<ActionResult<Models.WishListItem>> CreateWishListItem(Guid childId, [FromBody] CreateWishListItemRequest request)
     {
+        var dto = new CreateWishListItemDto(
+            ChildId: childId,
+            Name: request.Name,
+            Price: request.Price,
+            Url: request.Url,
+            Notes: request.Notes
+        );
         var item = await _wishListService.CreateWishListItemAsync(dto);
-        return CreatedAtAction(nameof(GetWishListItem), new { id = item.Id }, item);
+        return CreatedAtAction(nameof(GetWishListItem), new { childId, id = item.Id }, item);
     }
 
     /// <summary>
     /// Update a wish list item
     /// </summary>
     [HttpPut("{id}")]
-    public async Task<ActionResult<Models.WishListItem>> UpdateWishListItem(Guid id, [FromBody] UpdateWishListItemDto dto)
+    public async Task<ActionResult<Models.WishListItem>> UpdateWishListItem(Guid childId, Guid id, [FromBody] UpdateWishListItemDto dto)
     {
         var item = await _wishListService.UpdateWishListItemAsync(id, dto);
 
@@ -69,7 +76,7 @@ public class WishListController : ControllerBase
     /// Delete a wish list item
     /// </summary>
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteWishListItem(Guid id)
+    public async Task<ActionResult> DeleteWishListItem(Guid childId, Guid id)
     {
         var deleted = await _wishListService.DeleteWishListItemAsync(id);
 
@@ -84,7 +91,7 @@ public class WishListController : ControllerBase
     /// </summary>
     [HttpPost("{id}/purchase")]
     [Authorize(Roles = "Parent")]
-    public async Task<ActionResult<Models.WishListItem>> MarkAsPurchased(Guid id)
+    public async Task<ActionResult<Models.WishListItem>> MarkAsPurchased(Guid childId, Guid id)
     {
         var item = await _wishListService.MarkAsPurchasedAsync(id);
 
@@ -99,7 +106,7 @@ public class WishListController : ControllerBase
     /// </summary>
     [HttpPost("{id}/unpurchase")]
     [Authorize(Roles = "Parent")]
-    public async Task<ActionResult<Models.WishListItem>> MarkAsUnpurchased(Guid id)
+    public async Task<ActionResult<Models.WishListItem>> MarkAsUnpurchased(Guid childId, Guid id)
     {
         var item = await _wishListService.MarkAsUnpurchasedAsync(id);
 
@@ -109,3 +116,13 @@ public class WishListController : ControllerBase
         return Ok(item);
     }
 }
+
+/// <summary>
+/// Request for creating a wish list item (childId comes from route)
+/// </summary>
+public record CreateWishListItemRequest(
+    string Name,
+    decimal Price,
+    string? Url,
+    string? Notes
+);

@@ -151,13 +151,11 @@ final class APIServiceTests: XCTestCase {
         // Arrange
         mockKeychainService.tokenToReturn = "stored-jwt-token"
         let expectedChildren = [
-            Child(
-                id: UUID(),
+            Child.makeForTest(
                 firstName: "Alice",
                 lastName: "Johnson",
                 weeklyAllowance: 10.0,
-                currentBalance: 50.0,
-                lastAllowanceDate: nil
+                currentBalance: 50.0
             )
         ]
         let encoder = JSONEncoder()
@@ -290,6 +288,9 @@ class MockKeychainService: KeychainServiceProtocol {
     var tokenToReturn: String?
     var shouldThrowError = false
     var didDeleteToken = false
+    var savedExpiration: Date?
+    var expirationToReturn: Date?
+    var biometricEnabled = false
 
     func saveToken(_ token: String) throws {
         if shouldThrowError {
@@ -315,5 +316,70 @@ class MockKeychainService: KeychainServiceProtocol {
         didDeleteToken = true
         savedToken = nil
         tokenToReturn = nil
+    }
+
+    func saveTokenExpiration(_ date: Date) throws {
+        if shouldThrowError {
+            throw KeychainError.unableToSave
+        }
+        savedExpiration = date
+    }
+
+    func getTokenExpiration() throws -> Date {
+        if shouldThrowError {
+            throw KeychainError.notFound
+        }
+        guard let expiration = expirationToReturn else {
+            throw KeychainError.notFound
+        }
+        return expiration
+    }
+
+    func deleteTokenExpiration() throws {
+        if shouldThrowError {
+            throw KeychainError.unableToDelete
+        }
+        savedExpiration = nil
+        expirationToReturn = nil
+    }
+
+    func saveBiometricEnabled(_ enabled: Bool) throws {
+        if shouldThrowError {
+            throw KeychainError.unableToSave
+        }
+        biometricEnabled = enabled
+    }
+
+    func isBiometricEnabled() -> Bool {
+        return biometricEnabled
+    }
+
+    func deleteBiometricEnabled() throws {
+        if shouldThrowError {
+            throw KeychainError.unableToDelete
+        }
+        biometricEnabled = false
+    }
+
+    func hasValidToken() -> Bool {
+        guard tokenToReturn != nil else { return false }
+        guard let expiration = expirationToReturn else { return true }
+        return expiration > Date()
+    }
+
+    func isTokenExpiringSoon(withinMinutes minutes: Int) -> Bool {
+        guard let expiration = expirationToReturn else { return false }
+        let threshold = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        return expiration <= threshold
+    }
+
+    func clearAllAuthData() throws {
+        if shouldThrowError {
+            throw KeychainError.unableToDelete
+        }
+        savedToken = nil
+        tokenToReturn = nil
+        savedExpiration = nil
+        expirationToReturn = nil
     }
 }

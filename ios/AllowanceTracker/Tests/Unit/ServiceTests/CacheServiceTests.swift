@@ -23,8 +23,8 @@ final class CacheServiceTests: XCTestCase {
     func testCacheChildren_StoresChildrenSuccessfully() async {
         // Arrange
         let children = [
-            Child(id: UUID(), firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50, lastAllowanceDate: nil),
-            Child(id: UUID(), firstName: "Bob", lastName: "Smith", weeklyAllowance: 15.00, currentBalance: 30.00, lastAllowanceDate: nil)
+            Child.makeForTest(firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50),
+            Child.makeForTest(firstName: "Bob", lastName: "Smith", weeklyAllowance: 15.00, currentBalance: 30.00)
         ]
 
         // Act
@@ -47,8 +47,8 @@ final class CacheServiceTests: XCTestCase {
 
     func testCacheChildren_OverwritesPreviousCache() async {
         // Arrange
-        let firstBatch = [Child(id: UUID(), firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50, lastAllowanceDate: nil)]
-        let secondBatch = [Child(id: UUID(), firstName: "Charlie", lastName: "Brown", weeklyAllowance: 20.00, currentBalance: 50.00, lastAllowanceDate: nil)]
+        let firstBatch = [Child.makeForTest(firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50)]
+        let secondBatch = [Child.makeForTest(firstName: "Charlie", lastName: "Brown", weeklyAllowance: 20.00, currentBalance: 50.00)]
 
         // Act
         await sut.cacheChildren(firstBatch)
@@ -146,7 +146,7 @@ final class CacheServiceTests: XCTestCase {
 
     func testNeedsRefresh_ReturnsFalseWhenCacheIsFresh() async {
         // Arrange
-        let children = [Child(id: UUID(), firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50, lastAllowanceDate: nil)]
+        let children = [Child.makeForTest(firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50)]
         await sut.cacheChildren(children)
 
         // Act
@@ -158,7 +158,7 @@ final class CacheServiceTests: XCTestCase {
 
     func testNeedsRefresh_ReturnsTrueWhenCacheIsStale() async {
         // Arrange
-        let children = [Child(id: UUID(), firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50, lastAllowanceDate: nil)]
+        let children = [Child.makeForTest(firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50)]
         await sut.cacheChildren(children)
 
         // Act - Use very short maxAge to simulate stale cache
@@ -177,7 +177,7 @@ final class CacheServiceTests: XCTestCase {
 
     func testClearCache_RemovesAllCachedData() async {
         // Arrange
-        let children = [Child(id: UUID(), firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50, lastAllowanceDate: nil)]
+        let children = [Child.makeForTest(firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50)]
         let childId = UUID()
         let transactions = [Transaction(id: UUID(), childId: childId, amount: 10.00, type: .credit, description: "Test", balanceAfter: 10.00, createdAt: Date(), createdByName: "Parent")]
 

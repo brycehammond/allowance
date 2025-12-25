@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AllowanceTracker.Api.V1;
 
 [ApiController]
-[Route("api/v1/savings")]
+[Route("api/v1/children/{childId}/savings")]
 [Authorize]
 public class SavingsAccountController : ControllerBase
 {
@@ -33,10 +33,10 @@ public class SavingsAccountController : ControllerBase
     /// </summary>
     [HttpPost("enable")]
     [Authorize(Roles = "Parent")]
-    public async Task<IActionResult> EnableSavingsAccount([FromBody] EnableSavingsAccountRequest request)
+    public async Task<IActionResult> EnableSavingsAccount(Guid childId, [FromBody] EnableSavingsAccountRequest request)
     {
         await _savingsAccountService.EnableSavingsAccountAsync(
-            request.ChildId,
+            childId,
             request.TransferType,
             request.Amount);
 
@@ -48,10 +48,10 @@ public class SavingsAccountController : ControllerBase
     /// </summary>
     [HttpPut("config")]
     [Authorize(Roles = "Parent")]
-    public async Task<IActionResult> UpdateSavingsConfig([FromBody] UpdateSavingsConfigRequest request)
+    public async Task<IActionResult> UpdateSavingsConfig(Guid childId, [FromBody] UpdateSavingsConfigRequest request)
     {
         await _savingsAccountService.UpdateSavingsConfigAsync(
-            request.ChildId,
+            childId,
             request.TransferType,
             request.Amount);
 
@@ -61,7 +61,7 @@ public class SavingsAccountController : ControllerBase
     /// <summary>
     /// Disable savings account for a child
     /// </summary>
-    [HttpPost("{childId}/disable")]
+    [HttpPost("disable")]
     [Authorize(Roles = "Parent")]
     public async Task<IActionResult> DisableSavingsAccount(Guid childId)
     {
@@ -75,10 +75,10 @@ public class SavingsAccountController : ControllerBase
     /// </summary>
     [HttpPost("deposit")]
     [Authorize(Roles = "Parent")]
-    public async Task<ActionResult<SavingsTransactionDto>> DepositToSavings([FromBody] DepositToSavingsRequest request)
+    public async Task<ActionResult<SavingsTransactionDto>> DepositToSavings(Guid childId, [FromBody] SavingsTransactionRequest request)
     {
         var transaction = await _savingsAccountService.DepositToSavingsAsync(
-            request.ChildId,
+            childId,
             request.Amount,
             request.Description,
             _currentUserService.UserId);
@@ -87,7 +87,7 @@ public class SavingsAccountController : ControllerBase
 
         return CreatedAtAction(
             nameof(GetSavingsHistory),
-            new { childId = request.ChildId },
+            new { childId },
             dto);
     }
 
@@ -96,10 +96,10 @@ public class SavingsAccountController : ControllerBase
     /// </summary>
     [HttpPost("withdraw")]
     [Authorize(Roles = "Parent")]
-    public async Task<ActionResult<SavingsTransactionDto>> WithdrawFromSavings([FromBody] WithdrawFromSavingsRequest request)
+    public async Task<ActionResult<SavingsTransactionDto>> WithdrawFromSavings(Guid childId, [FromBody] SavingsTransactionRequest request)
     {
         var transaction = await _savingsAccountService.WithdrawFromSavingsAsync(
-            request.ChildId,
+            childId,
             request.Amount,
             request.Description,
             _currentUserService.UserId);
@@ -108,14 +108,14 @@ public class SavingsAccountController : ControllerBase
 
         return CreatedAtAction(
             nameof(GetSavingsHistory),
-            new { childId = request.ChildId },
+            new { childId },
             dto);
     }
 
     /// <summary>
     /// Get current savings balance for a child
     /// </summary>
-    [HttpGet("{childId}/balance")]
+    [HttpGet("balance")]
     public async Task<ActionResult<object>> GetSavingsBalance(Guid childId)
     {
         var currentUser = await _accountService.GetCurrentUserAsync();
@@ -152,7 +152,7 @@ public class SavingsAccountController : ControllerBase
     /// <summary>
     /// Get savings transaction history for a child
     /// </summary>
-    [HttpGet("{childId}/history")]
+    [HttpGet("history")]
     public async Task<ActionResult<List<SavingsTransactionDto>>> GetSavingsHistory(Guid childId, [FromQuery] int limit = 50)
     {
         var transactions = await _savingsAccountService.GetSavingsHistoryAsync(childId, limit);
@@ -163,7 +163,7 @@ public class SavingsAccountController : ControllerBase
     /// <summary>
     /// Get comprehensive savings account summary
     /// </summary>
-    [HttpGet("{childId}/summary")]
+    [HttpGet("summary")]
     public async Task<ActionResult<object>> GetSavingsSummary(Guid childId)
     {
         var currentUser = await _accountService.GetCurrentUserAsync();
@@ -230,3 +230,11 @@ public class SavingsAccountController : ControllerBase
         );
     }
 }
+
+/// <summary>
+/// Request for deposit/withdraw operations (childId comes from route)
+/// </summary>
+public record SavingsTransactionRequest(
+    decimal Amount,
+    string Description
+);

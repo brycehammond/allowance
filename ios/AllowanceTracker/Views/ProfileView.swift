@@ -67,6 +67,13 @@ struct ProfileView: View {
                     }
                 }
 
+                // Security Section
+                if authViewModel.isBiometricAvailable {
+                    Section("Security") {
+                        BiometricToggleRow()
+                    }
+                }
+
                 // Settings Section
                 Section("Settings") {
                     NavigationLink {
@@ -128,6 +135,30 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showingInviteParent) {
             InviteParentView()
+        }
+    }
+}
+
+// MARK: - Biometric Toggle Row
+
+/// Toggle row for enabling/disabling biometric authentication
+struct BiometricToggleRow: View {
+    @Environment(AuthViewModel.self) private var authViewModel
+    @State private var isEnabled: Bool = false
+
+    var body: some View {
+        Toggle(isOn: $isEnabled) {
+            Label(
+                authViewModel.biometricType.displayName,
+                systemImage: authViewModel.biometricType.iconName
+            )
+        }
+        .tint(DesignSystem.Colors.primary)
+        .onAppear {
+            isEnabled = authViewModel.isBiometricEnabled
+        }
+        .onChange(of: isEnabled) { _, newValue in
+            authViewModel.setBiometricEnabled(newValue)
         }
     }
 }

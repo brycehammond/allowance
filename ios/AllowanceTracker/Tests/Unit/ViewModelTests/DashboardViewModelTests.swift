@@ -23,8 +23,8 @@ final class DashboardViewModelTests: XCTestCase {
     func testLoadChildren_Success_PopulatesChildrenArray() async {
         // Arrange
         let expectedChildren = [
-            Child(id: UUID(), firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50, lastAllowanceDate: nil),
-            Child(id: UUID(), firstName: "Bob", lastName: "Smith", weeklyAllowance: 15.00, currentBalance: 30.00, lastAllowanceDate: nil)
+            Child.makeForTest(firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50),
+            Child.makeForTest(firstName: "Bob", lastName: "Smith", weeklyAllowance: 15.00, currentBalance: 30.00)
         ]
         mockAPIService.childrenResult = .success(expectedChildren)
 
@@ -89,11 +89,11 @@ final class DashboardViewModelTests: XCTestCase {
     func testRefresh_Success_UpdatesChildren() async {
         // Arrange
         let initialChildren = [
-            Child(id: UUID(), firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50, lastAllowanceDate: nil)
+            Child.makeForTest(firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50)
         ]
         let updatedChildren = [
-            Child(id: UUID(), firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 35.50, lastAllowanceDate: Date()),
-            Child(id: UUID(), firstName: "Charlie", lastName: "Brown", weeklyAllowance: 20.00, currentBalance: 50.00, lastAllowanceDate: nil)
+            Child.makeForTest(firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 35.50, lastAllowanceDate: Date()),
+            Child.makeForTest(firstName: "Charlie", lastName: "Brown", weeklyAllowance: 20.00, currentBalance: 50.00)
         ]
 
         mockAPIService.childrenResult = .success(initialChildren)
@@ -176,7 +176,7 @@ final class DashboardViewModelTests: XCTestCase {
     func testMultipleLoadCalls_HandlesGracefully() async {
         // Arrange
         let children = [
-            Child(id: UUID(), firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50, lastAllowanceDate: nil)
+            Child.makeForTest(firstName: "Alice", lastName: "Smith", weeklyAllowance: 10.00, currentBalance: 25.50)
         ]
         mockAPIService.childrenResult = .success(children)
 
@@ -199,3 +199,4 @@ extension MockAPIService {
         set { childrenResponse = newValue }
     }
 }
+

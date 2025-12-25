@@ -21,83 +21,6 @@ public class TransactionsControllerTests
     }
 
     [Fact]
-    public async Task GetChildTransactions_ReturnsOkWithTransactions()
-    {
-        // Arrange
-        var childId = Guid.NewGuid();
-        var createdBy = new ApplicationUser
-        {
-            Id = Guid.NewGuid(),
-            FirstName = "Test",
-            LastName = "Parent",
-            Email = "parent@test.com",
-            UserName = "parent@test.com"
-        };
-
-        var transactions = new List<Transaction>
-        {
-            new()
-            {
-                Id = Guid.NewGuid(),
-                ChildId = childId,
-                Amount = 10m,
-                Type = TransactionType.Credit,
-                Category = TransactionCategory.Allowance,
-                Description = "Test credit",
-                BalanceAfter = 10m,
-                CreatedBy = createdBy,
-                CreatedById = createdBy.Id,
-                CreatedAt = DateTime.UtcNow
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                ChildId = childId,
-                Amount = 5m,
-                Type = TransactionType.Debit,
-                Category = TransactionCategory.Toys,
-                Description = "Test debit",
-                BalanceAfter = 5m,
-                CreatedBy = createdBy,
-                CreatedById = createdBy.Id,
-                CreatedAt = DateTime.UtcNow
-            }
-        };
-
-        _mockTransactionService
-            .Setup(x => x.GetChildTransactionsAsync(childId, 20))
-            .ReturnsAsync(transactions);
-
-        // Act
-        var result = await _controller.GetChildTransactions(childId, 20);
-
-        // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedTransactions = okResult.Value.Should().BeAssignableTo<List<TransactionDto>>().Subject;
-        returnedTransactions.Should().HaveCount(2);
-    }
-
-    [Fact]
-    public async Task GetChildTransactions_UsesDefaultLimit()
-    {
-        // Arrange
-        var childId = Guid.NewGuid();
-        var transactions = new List<Transaction>();
-
-        _mockTransactionService
-            .Setup(x => x.GetChildTransactionsAsync(childId, 20))
-            .ReturnsAsync(transactions);
-
-        // Act
-        await _controller.GetChildTransactions(childId);
-
-        // Assert
-        _mockTransactionService.Verify(
-            x => x.GetChildTransactionsAsync(childId, 20),
-            Times.Once);
-    }
-
-    [Fact]
     public async Task CreateTransaction_ReturnsCreatedWithTransaction()
     {
         // Arrange
@@ -140,37 +63,13 @@ public class TransactionsControllerTests
 
         // Assert
         var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-        createdResult.ActionName.Should().Be(nameof(TransactionsController.GetChildTransactions));
+        createdResult.ActionName.Should().Be("GetChildTransactions");
+        createdResult.ControllerName.Should().Be("Children");
         createdResult.RouteValues!["childId"].Should().Be(childId);
 
         var returnedTransaction = createdResult.Value.Should().BeAssignableTo<TransactionDto>().Subject;
         returnedTransaction.Id.Should().Be(createdTransaction.Id);
         returnedTransaction.Amount.Should().Be(25m);
-    }
-
-    [Fact]
-    public async Task GetBalance_ReturnsOkWithBalance()
-    {
-        // Arrange
-        var childId = Guid.NewGuid();
-        var balance = 150.75m;
-
-        _mockTransactionService
-            .Setup(x => x.GetCurrentBalanceAsync(childId))
-            .ReturnsAsync(balance);
-
-        // Act
-        var result = await _controller.GetBalance(childId);
-
-        // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var balanceResponse = okResult.Value.Should().BeAssignableTo<object>().Subject;
-
-        // Check the anonymous type has balance property
-        var balanceProp = balanceResponse.GetType().GetProperty("balance");
-        balanceProp.Should().NotBeNull();
-        var actualBalance = balanceProp!.GetValue(balanceResponse);
-        actualBalance.Should().Be(150.75m);
     }
 
     [Fact]

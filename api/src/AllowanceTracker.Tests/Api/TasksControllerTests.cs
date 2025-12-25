@@ -444,38 +444,4 @@ public class TasksControllerTests
     }
 
     #endregion
-
-    #region GetTaskStatistics Tests
-
-    [Fact]
-    public async Task GetTaskStatistics_ReturnsOkWithStatistics()
-    {
-        // Arrange
-        var childId = Guid.NewGuid();
-        var stats = new TaskStatisticsDto(
-            TotalTasks: 10,
-            ActiveTasks: 7,
-            ArchivedTasks: 3,
-            TotalCompletions: 25,
-            PendingApprovals: 2,
-            TotalEarned: 125.50m,
-            PendingEarnings: 10m,
-            CompletionRate: 85.5
-        );
-
-        _mockTaskService
-            .Setup(x => x.GetTaskStatisticsAsync(childId, _currentUserId))
-            .ReturnsAsync(stats);
-
-        // Act
-        var result = await _controller.GetTaskStatistics(childId);
-
-        // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedStats = okResult.Value.Should().BeAssignableTo<TaskStatisticsDto>().Subject;
-        returnedStats.TotalTasks.Should().Be(10);
-        returnedStats.TotalEarned.Should().Be(125.50m);
-    }
-
-    #endregion
 }
