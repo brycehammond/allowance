@@ -39,14 +39,6 @@ struct ProfileView: View {
                             value: user.role.rawValue,
                             icon: user.role == .parent ? "person.2.fill" : "person.fill"
                         )
-
-                        if let familyId = user.familyId {
-                            ProfileInfoRow(
-                                label: "Family ID",
-                                value: familyId.uuidString,
-                                icon: "house.fill"
-                            )
-                        }
                     }
                 }
 
@@ -89,13 +81,6 @@ struct ProfileView: View {
                         Label("Notifications", systemImage: "bell.fill")
                     }
                     .accessibilityIdentifier(AccessibilityIdentifier.notificationsButton)
-
-                    NavigationLink {
-                        AppearanceSettingsView()
-                    } label: {
-                        Label("Appearance", systemImage: "paintbrush.fill")
-                    }
-                    .accessibilityIdentifier(AccessibilityIdentifier.appearanceButton)
 
                     NavigationLink {
                         AboutView()

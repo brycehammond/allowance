@@ -49,8 +49,6 @@ struct LoginView: View {
                 .frame(maxWidth: isRegularWidth ? 500 : .infinity)
                 .frame(maxWidth: .infinity)
             }
-            .navigationTitle("Login")
-            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showRegister) {
                 RegisterView()
                     .environment(viewModel)

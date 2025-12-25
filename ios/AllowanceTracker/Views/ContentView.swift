@@ -45,7 +45,7 @@ struct LaunchScreenView: View {
                 .font(.system(size: 80))
                 .foregroundStyle(Color.green500)
 
-            Text("Allowance Tracker")
+            Text("Earn & Learn")
                 .font(.title)
                 .fontWeight(.bold)
 
