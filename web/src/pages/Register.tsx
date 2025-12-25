@@ -182,6 +182,10 @@ export const Register: React.FC = () => {
             </Link>
             <p className="text-sm text-gray-500">
               By registering, you agree to our{' '}
+              <Link to="/terms" className="text-primary-600 hover:text-primary-500">
+                Terms of Service
+              </Link>
+              {' '}and{' '}
               <Link to="/privacy" className="text-primary-600 hover:text-primary-500">
                 Privacy Policy
               </Link>

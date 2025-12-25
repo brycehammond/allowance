@@ -14,7 +14,6 @@ struct RegisterView: View {
     @State private var confirmPassword = ""
     @State private var firstName = ""
     @State private var lastName = ""
-    @State private var selectedRole: UserRole = .parent
 
     // MARK: - Computed Properties
 
@@ -153,21 +152,6 @@ struct RegisterView: View {
                         .foregroundStyle(.red)
                 }
             }
-
-            // Role picker
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Account Type")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-
-                Picker("Role", selection: $selectedRole) {
-                    Text("Parent").tag(UserRole.parent)
-                    Text("Child").tag(UserRole.child)
-                }
-                .pickerStyle(.segmented)
-                .disabled(viewModel.isLoading)
-                .accessibilityIdentifier(AccessibilityIdentifier.registerRolePicker)
-            }
         }
     }
 
@@ -184,7 +168,7 @@ struct RegisterView: View {
                     password: password,
                     firstName: firstName,
                     lastName: lastName,
-                    role: selectedRole
+                    role: .parent
                 )
 
                 // Dismiss on success

@@ -29,7 +29,17 @@ struct ContentView: View {
         .animation(.easeInOut, value: authViewModel.requiresBiometricAuth)
         .task {
             // Check authentication status on app launch
-            await authViewModel.checkAuthenticationStatus()
+            // Use a timeout to ensure we don't get stuck loading
+            do {
+                try await withTimeout(seconds: 20) {
+                    await authViewModel.checkAuthenticationStatus()
+                }
+            } catch {
+                // If timeout or error, just show login screen
+                #if DEBUG
+                print("Auth check failed or timed out: \(error)")
+                #endif
+            }
             hasCheckedAuth = true
         }
     }
@@ -138,4 +148,28 @@ struct InfoRow: View {
 #Preview {
     ContentView()
         .environment(AuthViewModel())
+}
+
+// MARK: - Timeout Helper
+
+/// Execute an async operation with a timeout
+/// - Parameters:
+///   - seconds: Maximum time to wait
+///   - operation: The async operation to perform
+/// - Throws: CancellationError if timeout is reached
+private func withTimeout<T>(seconds: TimeInterval, operation: @escaping () async -> T) async throws -> T {
+    try await withThrowingTaskGroup(of: T.self) { group in
+        group.addTask {
+            await operation()
+        }
+
+        group.addTask {
+            try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+            throw CancellationError()
+        }
+
+        let result = try await group.next()!
+        group.cancelAll()
+        return result
+    }
 }

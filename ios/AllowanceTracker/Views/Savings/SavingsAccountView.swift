@@ -115,42 +115,49 @@ struct SavingsAccountView: View {
             .padding(.vertical)
 
             // Stats row
-            HStack(spacing: 24) {
+            HStack(spacing: 16) {
                 VStack(spacing: 4) {
                     Text(viewModel.totalDeposited.currencyFormatted)
-                        .font(.headline)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
                         .fontDesign(.monospaced)
                         .foregroundStyle(.green)
                     Text("Deposited")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+                .frame(maxWidth: .infinity)
 
                 Divider()
                     .frame(height: 30)
 
                 VStack(spacing: 4) {
                     Text(viewModel.totalWithdrawn.currencyFormatted)
-                        .font(.headline)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
                         .fontDesign(.monospaced)
                         .foregroundStyle(Color.gray600)
                     Text("Withdrawn")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+                .frame(maxWidth: .infinity)
 
                 Divider()
                     .frame(height: 30)
 
                 VStack(spacing: 4) {
                     Text(viewModel.configDescription)
-                        .font(.headline)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                        .multilineTextAlignment(.center)
                     Text("Auto Transfer")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+                .frame(maxWidth: .infinity)
             }
         }
     }
@@ -164,28 +171,34 @@ struct SavingsAccountView: View {
                 depositDescription = ""
                 showingDeposit = true
             } label: {
-                Label("Deposit", systemImage: "plus.circle.fill")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                Label("Deposit", systemImage: "arrow.down.to.line")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .padding(.vertical, 14)
+                    .background(Color.green500)
+                    .clipShape(Capsule())
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Color.green500)
+            .buttonStyle(.plain)
 
             Button {
                 withdrawAmount = ""
                 withdrawDescription = ""
                 showingWithdraw = true
             } label: {
-                Label("Withdraw", systemImage: "minus.circle")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                Label("Withdraw", systemImage: "arrow.up.to.line")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.gray600)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .padding(.vertical, 14)
+                    .background(Color.white)
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.gray300, lineWidth: 1.5)
+                    )
             }
-            .buttonStyle(.bordered)
-            .tint(Color.gray600)
+            .buttonStyle(.plain)
         }
         .listRowInsets(EdgeInsets())
         .listRowBackground(Color.clear)
@@ -328,7 +341,7 @@ struct SavingsTransactionRow: View {
                     Text(transaction.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                        .lineLimit(2)
                 }
 
                 Text("\(transaction.formattedDate) - \(transaction.createdByName)")

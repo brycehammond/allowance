@@ -171,7 +171,12 @@ export const Privacy: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-8 text-center text-sm text-gray-500">
+        <div className="mt-8 text-center text-sm text-gray-500 space-y-2">
+          <p>
+            <Link to="/terms" className="text-primary-600 hover:text-primary-500">
+              Terms of Service
+            </Link>
+          </p>
           <p>&copy; {new Date().getFullYear()} Earn &amp; Learn. All rights reserved.</p>
         </div>
       </div>

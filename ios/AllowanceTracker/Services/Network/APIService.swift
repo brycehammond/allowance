@@ -74,7 +74,13 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
 
     /// Convenience initializer with configuration from Info.plist
     convenience init() {
-        self.init(baseURL: Configuration.apiBaseURL)
+        // Create URLSession with reasonable timeout (15 seconds)
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 30
+        let session = URLSession(configuration: configuration)
+
+        self.init(baseURL: Configuration.apiBaseURL, urlSession: session)
     }
 
     // MARK: - Authentication
