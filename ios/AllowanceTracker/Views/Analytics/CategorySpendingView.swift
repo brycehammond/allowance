@@ -192,7 +192,7 @@ private struct SummaryCard: View {
                                 .fontWeight(.semibold)
                         } icon: {
                             Image(systemName: top.category.icon)
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(Color.green500)
                         }
                     } else {
                         Text("—")

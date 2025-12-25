@@ -171,7 +171,7 @@ struct SavingsAccountView: View {
                     .padding(.vertical, 12)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.green)
+            .tint(Color.green500)
 
             Button {
                 withdrawAmount = ""

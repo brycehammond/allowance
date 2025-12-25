@@ -68,7 +68,7 @@ struct LoginView: View {
         VStack(spacing: 12) {
             Image(systemName: "dollarsign.circle.fill")
                 .font(.system(size: 80))
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.green500)
                 .accessibilityHidden()
 
             Text("Earn & Learn")
@@ -136,7 +136,7 @@ struct LoginView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color.blue)
+            .background(Color.green500)
             .foregroundColor(.white)
             .cornerRadius(12)
         }
@@ -152,7 +152,7 @@ struct LoginView: View {
         } label: {
             Text("Forgot your password?")
                 .font(.scalable(.subheadline, weight: .medium))
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.green600)
         }
         .disabled(viewModel.isLoading)
         .accessibilityLabel("Forgot password")
@@ -168,7 +168,7 @@ struct LoginView: View {
                     .foregroundStyle(.secondary)
                 Text("Sign Up")
                     .fontWeight(.semibold)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.green600)
             }
             .font(.scalable(.subheadline))
         }

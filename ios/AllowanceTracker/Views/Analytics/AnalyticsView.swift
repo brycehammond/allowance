@@ -81,7 +81,7 @@ struct AnalyticsView: View {
             HStack {
                 Label("Balance History", systemImage: "chart.line.uptrend.xyaxis")
                     .font(.headline)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.green600)
 
                 Spacer()
 
@@ -90,7 +90,7 @@ struct AnalyticsView: View {
                         .font(.title3)
                         .fontWeight(.bold)
                         .fontDesign(.monospaced)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.green500)
                 }
             }
 
@@ -100,13 +100,13 @@ struct AnalyticsView: View {
                     x: .value("Date", point.date),
                     y: .value("Balance", Double(truncating: point.balance as NSDecimalNumber))
                 )
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.green500)
 
                 AreaMark(
                     x: .value("Date", point.date),
                     y: .value("Balance", Double(truncating: point.balance as NSDecimalNumber))
                 )
-                .foregroundStyle(.blue.opacity(0.1))
+                .foregroundStyle(Color.green500.opacity(0.1))
             }
             .frame(height: 200)
             .chartXAxis {
@@ -140,7 +140,7 @@ struct AnalyticsView: View {
             HStack {
                 Label("Income vs Spending", systemImage: "chart.bar.fill")
                     .font(.headline)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.green600)
 
                 Spacer()
             }
@@ -158,7 +158,7 @@ struct AnalyticsView: View {
                         .font(.title3)
                         .fontWeight(.bold)
                         .fontDesign(.monospaced)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.green500)
 
                     Text("\(summary.incomeTransactionCount) transactions")
                         .font(.caption2)
@@ -177,7 +177,7 @@ struct AnalyticsView: View {
                         .font(.title3)
                         .fontWeight(.bold)
                         .fontDesign(.monospaced)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.error)
 
                     Text("\(summary.spendingTransactionCount) transactions")
                         .font(.caption2)
@@ -198,7 +198,7 @@ struct AnalyticsView: View {
                         .font(.title2)
                         .fontWeight(.bold)
                         .fontDesign(.monospaced)
-                        .foregroundStyle(summary.netSavings >= 0 ? .green : .red)
+                        .foregroundStyle(summary.netSavings >= 0 ? Color.green500 : Color.error)
                 }
 
                 Spacer()
@@ -211,7 +211,7 @@ struct AnalyticsView: View {
                     Text(summary.formattedSavingsRate)
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(summary.savingsRate >= 0 ? .green : .red)
+                        .foregroundStyle(summary.savingsRate >= 0 ? Color.green500 : Color.error)
                 }
             }
         }
@@ -227,7 +227,7 @@ struct AnalyticsView: View {
             HStack {
                 Label("Spending by Category", systemImage: "chart.pie.fill")
                     .font(.headline)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.green600)
 
                 Spacer()
             }
@@ -252,7 +252,7 @@ struct AnalyticsView: View {
 
                     HStack {
                         ProgressView(value: Double(truncating: category.percentage as NSDecimalNumber), total: 100)
-                            .tint(.blue)
+                            .tint(Color.green500)
 
                         Text(category.formattedPercentage)
                             .font(.caption2)
@@ -281,13 +281,13 @@ struct AnalyticsView: View {
             HStack {
                 Label("Monthly Comparison", systemImage: "calendar")
                     .font(.headline)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.green600)
 
                 Spacer()
 
                 if viewModel.isSavingsImproving {
                     Image(systemName: "arrow.up.circle.fill")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.green500)
                 }
             }
 
@@ -308,7 +308,7 @@ struct AnalyticsView: View {
                             Text(month.formattedIncome)
                                 .font(.caption)
                                 .fontDesign(.monospaced)
-                                .foregroundStyle(.green)
+                                .foregroundStyle(Color.green500)
                         }
 
                         VStack(alignment: .leading, spacing: 2) {
@@ -318,7 +318,7 @@ struct AnalyticsView: View {
                             Text(month.formattedSpending)
                                 .font(.caption)
                                 .fontDesign(.monospaced)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.error)
                         }
 
                         VStack(alignment: .leading, spacing: 2) {

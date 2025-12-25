@@ -22,7 +22,7 @@ struct WishListItemCard: View {
                         .font(.title3)
                         .fontWeight(.bold)
                         .fontDesign(.monospaced)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.amber500)
                 }
 
                 Spacer()
@@ -30,7 +30,7 @@ struct WishListItemCard: View {
                 if item.isPurchased {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.title2)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.green500)
                 }
             }
 
@@ -47,11 +47,11 @@ struct WishListItemCard: View {
                         Text("\(Int(item.progressPercentage(currentBalance: currentBalance) * 100))%")
                             .font(.caption)
                             .fontWeight(.medium)
-                            .foregroundStyle(item.canAfford ? .green : .secondary)
+                            .foregroundStyle(item.canAfford ? Color.green500 : .secondary)
                     }
 
                     ProgressView(value: item.progressPercentage(currentBalance: currentBalance))
-                        .tint(item.canAfford ? .green : .blue)
+                        .tint(item.canAfford ? Color.green500 : Color.amber500)
 
                     HStack {
                         Text("Your balance:")
@@ -69,7 +69,7 @@ struct WishListItemCard: View {
                             Text("You can afford this!")
                                 .font(.caption2)
                                 .fontWeight(.semibold)
-                                .foregroundStyle(.green)
+                                .foregroundStyle(Color.green500)
                         } else {
                             let needed = item.price - currentBalance
                             Text("Need \(needed.currencyFormatted) more")
@@ -93,7 +93,7 @@ struct WishListItemCard: View {
                 Link(destination: urlObj) {
                     Label("View Item", systemImage: "link")
                         .font(.caption)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.green600)
                 }
             }
 
@@ -102,7 +102,7 @@ struct WishListItemCard: View {
                 HStack {
                     Label("Purchased", systemImage: "checkmark.circle.fill")
                         .font(.caption)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.green500)
 
                     Spacer()
 

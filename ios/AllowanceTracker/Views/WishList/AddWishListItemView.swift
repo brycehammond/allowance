@@ -99,7 +99,7 @@ struct AddWishListItemView: View {
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .fontDesign(.monospaced)
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(Color.amber500)
                             }
 
                             if !notes.isEmpty {
@@ -111,7 +111,7 @@ struct AddWishListItemView: View {
                             if !url.isEmpty {
                                 Text(url)
                                     .font(.caption)
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(Color.green600)
                                     .lineLimit(1)
                             }
                         }

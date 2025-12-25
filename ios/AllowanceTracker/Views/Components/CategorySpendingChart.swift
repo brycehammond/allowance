@@ -64,7 +64,7 @@ private struct CategorySpendingRow: View {
         HStack(spacing: 12) {
             // Icon
             Image(systemName: spending.category.icon)
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.green600)
                 .font(.title3)
                 .frame(width: 32, height: 32)
 

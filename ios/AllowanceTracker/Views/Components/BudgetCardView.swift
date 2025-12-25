@@ -16,7 +16,7 @@ struct BudgetCardView: View {
                         .font(.headline)
                 } icon: {
                     Image(systemName: budget.category.icon)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.green600)
                 }
 
                 Spacer()
@@ -44,7 +44,7 @@ struct BudgetCardView: View {
                         .foregroundStyle(.secondary)
                     Image(systemName: budget.period.icon)
                         .font(.title3)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.green600)
                 }
             }
 
@@ -122,8 +122,8 @@ struct Badge: View {
             .fontWeight(.medium)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color.blue.opacity(0.1))
-            .foregroundStyle(.blue)
+            .background(Color.green500.opacity(0.1))
+            .foregroundStyle(Color.green600)
             .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

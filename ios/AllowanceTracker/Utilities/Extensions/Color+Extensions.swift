@@ -4,25 +4,25 @@ extension Color {
 
     // MARK: - Brand Colors
 
-    /// Primary brand color (green for money)
-    static let brandPrimary = Color.green
+    /// Primary brand color (muted green for money/stability)
+    static let brandPrimary = Color.green500
 
-    /// Secondary brand color (blue for trust)
-    static let brandSecondary = Color.blue
+    /// Secondary brand color (amber for achievements/savings)
+    static let brandSecondary = Color.amber500
 
     /// Accent color for important actions
-    static let brandAccent = Color.orange
+    static let brandAccent = Color.amber500
 
     // MARK: - Transaction Colors
 
     /// Color for credit/income transactions
-    static let transactionCredit = Color.green
+    static let transactionCredit = Color.green500
 
     /// Color for debit/expense transactions
-    static let transactionDebit = Color.red
+    static let transactionDebit = Color.error
 
     /// Color for pending transactions
-    static let transactionPending = Color.orange
+    static let transactionPending = Color.amber500
 
     // Note: Status colors (success, warning, error, info) are defined in DesignSystem.swift
 
@@ -51,13 +51,13 @@ extension Color {
     // MARK: - Currency
 
     /// Positive balance color
-    static let balancePositive = Color.green
+    static let balancePositive = Color.green500
 
     /// Negative balance color
-    static let balanceNegative = Color.red
+    static let balanceNegative = Color.error
 
     /// Zero balance color
-    static let balanceZero = Color.gray
+    static let balanceZero = Color.gray500
 }
 
 // Note: init(hex:) is defined in DesignSystem.swift

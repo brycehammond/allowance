@@ -66,7 +66,7 @@ struct RegisterView: View {
         VStack(spacing: 8) {
             Image(systemName: "person.circle.fill")
                 .font(.system(size: 60))
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.green500)
 
             Text("Join Earn & Learn")
                 .font(.title3)
@@ -205,7 +205,7 @@ struct RegisterView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color.blue)
+            .background(Color.green500)
             .foregroundColor(.white)
             .cornerRadius(12)
         }

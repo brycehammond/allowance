@@ -157,7 +157,7 @@ struct WishListView: View {
             HStack {
                 Label("Wish List Summary", systemImage: "star.fill")
                     .font(.headline)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.amber500)
 
                 Spacer()
             }
@@ -181,7 +181,7 @@ struct WishListView: View {
                     Text("\(viewModel.affordableItems.count)")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.green500)
                     Text("Can Afford")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -233,7 +233,7 @@ struct WishListView: View {
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.green500)
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }

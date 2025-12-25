@@ -40,7 +40,7 @@ struct AddBudgetSheet: View {
                                     Text(category.displayName)
                                 } icon: {
                                     Image(systemName: category.icon)
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(Color.green600)
                                 }
                                 .tag(category)
                             }
@@ -53,7 +53,7 @@ struct AddBudgetSheet: View {
                                 Text(selectedCategory.displayName)
                             } icon: {
                                 Image(systemName: selectedCategory.icon)
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(Color.green600)
                             }
                             Spacer()
                             Text("Category")
@@ -80,7 +80,7 @@ struct AddBudgetSheet: View {
                                 Text(periodOption.rawValue)
                             } icon: {
                                 Image(systemName: periodOption.icon)
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(Color.green600)
                             }
                             .tag(periodOption)
                         }

@@ -124,7 +124,7 @@ struct TransactionListView: View {
             HStack {
                 Label("Current Balance", systemImage: "dollarsign.circle.fill")
                     .font(.headline)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.green600)
 
                 Spacer()
             }
@@ -189,7 +189,7 @@ struct TransactionListView: View {
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.green500)
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
@@ -206,11 +206,11 @@ struct TransactionListView: View {
     /// Color based on balance amount
     private var balanceColor: Color {
         if viewModel.currentBalance < 0 {
-            return .red
+            return .error
         } else if viewModel.currentBalance == 0 {
             return .secondary
         } else {
-            return .green
+            return .green500
         }
     }
 }

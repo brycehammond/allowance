@@ -18,7 +18,7 @@ struct CategoryPicker: View {
                     Text(category.displayName)
                 } icon: {
                     Image(systemName: category.icon)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.green600)
                 }
                 .tag(category)
             }
