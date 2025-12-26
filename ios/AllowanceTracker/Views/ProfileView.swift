@@ -242,25 +242,17 @@ struct AboutView: View {
             }
 
             Section("Support") {
-                Link(destination: URL(string: "https://allowancetracker.com")!) {
+                Link(destination: URL(string: "https://earnandlearn.app")!) {
                     Label("Website", systemImage: "globe")
-                }
-
-                Link(destination: URL(string: "mailto:support@allowancetracker.com")!) {
-                    Label("Email Support", systemImage: "envelope.fill")
                 }
             }
 
             Section {
-                NavigationLink {
-                    PrivacyPolicyView()
-                } label: {
+                Link(destination: URL(string: "https://earnandlearn.app/privacy")!) {
                     Label("Privacy Policy", systemImage: "hand.raised.fill")
                 }
 
-                NavigationLink {
-                    TermsOfServiceView()
-                } label: {
+                Link(destination: URL(string: "https://earnandlearn.app/terms")!) {
                     Label("Terms of Service", systemImage: "doc.text.fill")
                 }
             }
@@ -270,93 +262,6 @@ struct AboutView: View {
     }
 }
 
-/// Placeholder for privacy policy
-struct PrivacyPolicyView: View {
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Privacy Policy")
-                    .font(.title)
-                    .fontWeight(.bold)
-
-                Text("Last updated: \(Date().formatted(date: .long, time: .omitted))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                Text("""
-                Your privacy is important to us. This privacy policy explains how Earn & Learn collects, uses, and protects your personal information.
-
-                **Information We Collect**
-                - Account information (name, email)
-                - Transaction data
-                - Usage information
-
-                **How We Use Your Information**
-                - To provide and improve our services
-                - To communicate with you
-                - To ensure security
-
-                **Data Security**
-                We implement industry-standard security measures to protect your data.
-
-                **Your Rights**
-                You have the right to access, update, or delete your personal information.
-
-                For questions, contact us at privacy@earnandlearn.app
-                """)
-                .font(.body)
-            }
-            .padding()
-        }
-        .navigationTitle("Privacy Policy")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-/// Placeholder for terms of service
-struct TermsOfServiceView: View {
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Terms of Service")
-                    .font(.title)
-                    .fontWeight(.bold)
-
-                Text("Last updated: \(Date().formatted(date: .long, time: .omitted))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                Text("""
-                **1. Acceptance of Terms**
-                By using Earn & Learn, you agree to these terms of service.
-
-                **2. User Accounts**
-                You are responsible for maintaining the security of your account.
-
-                **3. Parental Consent**
-                Parents must provide consent for children under 13 to use this service.
-
-                **4. Service Usage**
-                - Use the service only for lawful purposes
-                - Do not attempt to compromise security
-                - Respect other users' privacy
-
-                **5. Limitation of Liability**
-                Earn & Learn is provided "as is" without warranties.
-
-                **6. Changes to Terms**
-                We may update these terms at any time. Continued use constitutes acceptance.
-
-                For questions, contact us at legal@earnandlearn.app
-                """)
-                .font(.body)
-            }
-            .padding()
-        }
-        .navigationTitle("Terms of Service")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
 
 // MARK: - Preview Provider
 
