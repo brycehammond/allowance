@@ -119,27 +119,27 @@ export const ChildDetail: React.FC = () => {
             Back to Dashboard
           </button>
 
-          <div className="bg-white shadow-sm rounded-lg p-6">
-            <div className="flex items-center justify-between">
+          <div className="bg-white shadow-sm rounded-lg p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center">
-                <div className="h-16 w-16 rounded-full bg-primary-100 flex items-center justify-center mr-4">
-                  <span className="text-2xl font-semibold text-primary-600">
+                <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-primary-100 flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                  <span className="text-xl sm:text-2xl font-semibold text-primary-600">
                     {child.firstName.charAt(0)}
                   </span>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{child.fullName}</h1>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{child.fullName}</h1>
                   <p className="text-sm text-gray-600 mt-1">
                     Weekly Allowance: {formatCurrency(child.weeklyAllowance)}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-4xl font-bold text-gray-900">
+              <div className="text-left sm:text-right border-t sm:border-t-0 pt-4 sm:pt-0">
+                <div className="text-3xl sm:text-4xl font-bold text-gray-900">
                   {formatCurrency(child.currentBalance + child.savingsBalance)}
                 </div>
                 <p className="text-sm text-gray-600 mb-3">Total Balance</p>
-                <div className="flex gap-6 justify-end">
+                <div className="flex gap-6 sm:justify-end">
                   <div>
                     <p className="text-lg font-semibold text-gray-900">{formatCurrency(child.currentBalance)}</p>
                     <p className="text-xs text-gray-500">Spending</p>
@@ -156,7 +156,7 @@ export const ChildDetail: React.FC = () => {
 
         {/* Tabs */}
         <div className="bg-white shadow-sm rounded-lg mb-6">
-          <nav className="flex border-b border-gray-200">
+          <nav className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -164,15 +164,15 @@ export const ChildDetail: React.FC = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex-1 flex items-center justify-center px-4 py-4 text-sm font-medium border-b-2 transition-colors
+                    flex-1 sm:flex-initial flex items-center justify-center px-3 sm:px-4 py-3 sm:py-4 text-sm font-medium border-b-2 transition-colors min-w-[44px] flex-shrink-0
                     ${activeTab === tab.id
                       ? 'border-primary-500 text-primary-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }
                   `}
                 >
-                  <Icon className={`w-5 h-5 mr-2 ${activeTab === tab.id ? 'text-primary-500' : 'text-gray-400'}`} />
-                  {tab.label}
+                  <Icon className={`w-5 h-5 sm:mr-2 ${activeTab === tab.id ? 'text-primary-500' : 'text-gray-400'}`} />
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </button>
               );
             })}

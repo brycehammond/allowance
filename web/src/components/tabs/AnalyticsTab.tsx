@@ -257,80 +257,82 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ childId }) => {
 
       {/* Balance History Chart */}
       {balanceHistory.length > 0 && (
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-lg p-4 sm:p-6">
           <h4 className="text-md font-medium text-gray-900 mb-4">Balance History</h4>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={balanceHistory.map(p => ({
-              date: formatDate(p.date),
-              balance: p.balance,
-            }))}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis tickFormatter={(value) => `$${value}`} />
-              <Tooltip formatter={(value) => formatCurrency(value as number)} />
-              <Legend />
-              <Line type="monotone" dataKey="balance" stroke="#2da370" strokeWidth={2} name="Balance" />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="h-[200px] sm:h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={balanceHistory.map(p => ({
+                date: formatDate(p.date),
+                balance: p.balance,
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+                <YAxis tickFormatter={(value) => `$${value}`} tick={{ fontSize: 11 }} width={50} />
+                <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                <Legend />
+                <Line type="monotone" dataKey="balance" stroke="#2da370" strokeWidth={2} name="Balance" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Comparison Chart */}
         {monthlyComparison.length > 0 && (
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
             <h4 className="text-md font-medium text-gray-900 mb-4">Monthly Comparison</h4>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyComparison}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="monthName" />
-                <YAxis tickFormatter={(value) => `$${value}`} />
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                <Legend />
-                <Bar dataKey="income" fill="#2da370" name="Income" />
-                <Bar dataKey="spending" fill="#ef4444" name="Spending" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="h-[200px] sm:h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyComparison}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="monthName" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={50} />
+                  <YAxis tickFormatter={(value) => `$${value}`} tick={{ fontSize: 11 }} width={50} />
+                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                  <Legend />
+                  <Bar dataKey="income" fill="#2da370" name="Income" />
+                  <Bar dataKey="spending" fill="#ef4444" name="Spending" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
 
         {/* Spending Breakdown Chart */}
         {categoryBreakdown.length > 0 && (
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
             <h4 className="text-md font-medium text-gray-900 mb-4">Spending by Category</h4>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={categoryBreakdown.map(cat => ({ ...cat, name: cat.category, value: cat.amount }))}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={(entry) => {
-                    const data = entry as unknown as { category: string; percentage: number };
-                    return `${data.category}: ${data.percentage.toFixed(0)}%`;
-                  }}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {categoryBreakdown.map((_cat, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="h-[180px] sm:h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryBreakdown.map(cat => ({ ...cat, name: cat.category, value: cat.amount }))}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius="70%"
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {categoryBreakdown.map((_cat, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
             <div className="mt-4 space-y-2">
               {categoryBreakdown.map((cat, index) => (
                 <div key={cat.category} className="flex items-center justify-between text-sm">
                   <div className="flex items-center">
                     <div
-                      className="w-3 h-3 rounded-full mr-2"
+                      className="w-3 h-3 rounded-full mr-2 flex-shrink-0"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     ></div>
-                    <span className="text-gray-700">{cat.category}</span>
+                    <span className="text-gray-700 truncate">{cat.category}</span>
                   </div>
-                  <div className="text-gray-900 font-medium">
+                  <div className="text-gray-900 font-medium whitespace-nowrap ml-2">
                     {formatCurrency(cat.amount)} ({cat.percentage.toFixed(1)}%)
                   </div>
                 </div>
