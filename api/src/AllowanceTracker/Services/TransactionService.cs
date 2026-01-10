@@ -11,17 +11,20 @@ public class TransactionService : ITransactionService
     private readonly ICurrentUserService _currentUser;
     private readonly ICategoryService? _categoryService;
     private readonly INotificationService? _notificationService;
+    private readonly IAchievementService? _achievementService;
 
     public TransactionService(
         AllowanceContext context,
         ICurrentUserService currentUser,
         ICategoryService? categoryService = null,
-        INotificationService? notificationService = null)
+        INotificationService? notificationService = null,
+        IAchievementService? achievementService = null)
     {
         _context = context;
         _currentUser = currentUser;
         _categoryService = categoryService;
         _notificationService = notificationService;
+        _achievementService = achievementService;
     }
 
     public async Task<Transaction> CreateTransactionAsync(CreateTransactionDto dto)
@@ -129,6 +132,28 @@ public class TransactionService : ITransactionService
                 catch
                 {
                     // Don't fail the transaction if notification fails
+                }
+            }
+
+            // Check for achievement badges
+            if (_achievementService != null)
+            {
+                try
+                {
+                    await _achievementService.CheckAndUnlockBadgesAsync(
+                        dto.ChildId,
+                        BadgeTrigger.TransactionCreated,
+                        new { TransactionId = transaction.Id, Amount = dto.Amount, Type = dto.Type, Category = dto.Category });
+
+                    // Also check balance-related badges
+                    await _achievementService.CheckAndUnlockBadgesAsync(
+                        dto.ChildId,
+                        BadgeTrigger.BalanceChanged,
+                        new { NewBalance = child.CurrentBalance });
+                }
+                catch
+                {
+                    // Don't fail the transaction if badge check fails
                 }
             }
 

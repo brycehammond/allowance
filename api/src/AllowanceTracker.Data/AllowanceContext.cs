@@ -25,6 +25,11 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<NotificationPreference> NotificationPreferences { get; set; }
     public DbSet<DeviceToken> DeviceTokens { get; set; }
+    public DbSet<Badge> Badges { get; set; }
+    public DbSet<ChildBadge> ChildBadges { get; set; }
+    public DbSet<BadgeProgress> BadgeProgressRecords { get; set; }
+    public DbSet<Reward> Rewards { get; set; }
+    public DbSet<ChildReward> ChildRewards { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -94,6 +99,14 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             // Allowance pause properties
             entity.Property(e => e.AllowancePaused).HasDefaultValue(false);
             entity.Property(e => e.AllowancePausedReason).HasMaxLength(500);
+
+            // Achievement system properties
+            entity.Property(e => e.TotalPoints).HasDefaultValue(0);
+            entity.Property(e => e.AvailablePoints).HasDefaultValue(0);
+            entity.Property(e => e.EquippedAvatarUrl).HasMaxLength(500);
+            entity.Property(e => e.EquippedTheme).HasMaxLength(100);
+            entity.Property(e => e.EquippedTitle).HasMaxLength(100);
+            entity.Property(e => e.SavingStreak).HasDefaultValue(0);
 
             entity.HasOne(e => e.User)
                   .WithOne(u => u.ChildProfile)
@@ -349,6 +362,105 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.HasIndex(e => e.Token).IsUnique();
             entity.HasIndex(e => new { e.UserId, e.IsActive });
         });
+
+        // Badge configuration
+        builder.Entity<Badge>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.IconUrl).HasMaxLength(500);
+            entity.Property(e => e.CriteriaConfig).HasMaxLength(2000);
+
+            entity.HasIndex(e => e.Code).IsUnique();
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.Rarity);
+            entity.HasIndex(e => e.IsActive);
+        });
+
+        // ChildBadge configuration
+        builder.Entity<ChildBadge>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.EarnedContext).HasMaxLength(2000);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.Badges)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Badge)
+                  .WithMany(b => b.ChildBadges)
+                  .HasForeignKey(e => e.BadgeId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // One badge per child
+            entity.HasIndex(e => new { e.ChildId, e.BadgeId }).IsUnique();
+            entity.HasIndex(e => e.EarnedAt);
+            entity.HasIndex(e => e.IsNew);
+        });
+
+        // BadgeProgress configuration
+        builder.Entity<BadgeProgress>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.BadgeProgress)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Badge)
+                  .WithMany(b => b.BadgeProgress)
+                  .HasForeignKey(e => e.BadgeId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // One progress record per badge per child
+            entity.HasIndex(e => new { e.ChildId, e.BadgeId }).IsUnique();
+        });
+
+        // Reward configuration
+        builder.Entity<Reward>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.Value).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.PreviewUrl).HasMaxLength(500);
+
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.PointsCost);
+        });
+
+        // ChildReward configuration
+        builder.Entity<ChildReward>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.Rewards)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Reward)
+                  .WithMany(r => r.ChildRewards)
+                  .HasForeignKey(e => e.RewardId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // One reward per child (can't unlock same reward twice)
+            entity.HasIndex(e => new { e.ChildId, e.RewardId }).IsUnique();
+            entity.HasIndex(e => e.IsEquipped);
+        });
+
+        // Seed Badge data
+        var badges = AllowanceTracker.Data.SeedData.BadgeSeedData.GetBadges();
+        builder.Entity<Badge>().HasData(badges);
+
+        // Seed Reward data
+        var rewards = AllowanceTracker.Data.SeedData.BadgeSeedData.GetRewards();
+        builder.Entity<Reward>().HasData(rewards);
     }
 
     // Override SaveChanges to handle CreatedAt automatically

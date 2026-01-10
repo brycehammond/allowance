@@ -8,10 +8,14 @@ namespace AllowanceTracker.Services;
 public class SavingsAccountService : ISavingsAccountService
 {
     private readonly AllowanceContext _context;
+    private readonly IAchievementService? _achievementService;
 
-    public SavingsAccountService(AllowanceContext context)
+    public SavingsAccountService(
+        AllowanceContext context,
+        IAchievementService? achievementService = null)
     {
         _context = context;
+        _achievementService = achievementService;
     }
 
     // Configuration Methods
@@ -136,6 +140,22 @@ public class SavingsAccountService : ISavingsAccountService
             _context.SavingsTransactions.Add(savingsTransaction);
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            // Check for achievement badges
+            if (_achievementService != null)
+            {
+                try
+                {
+                    await _achievementService.CheckAndUnlockBadgesAsync(
+                        childId,
+                        BadgeTrigger.SavingsDeposit,
+                        new { TransactionId = savingsTransaction.Id, Amount = amount, NewSavingsBalance = child.SavingsBalance });
+                }
+                catch
+                {
+                    // Don't fail the deposit if badge check fails
+                }
+            }
 
             return savingsTransaction;
         }

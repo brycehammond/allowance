@@ -69,6 +69,42 @@ public class Child : IHasCreatedAt
     /// </summary>
     public bool AllowDebt { get; set; } = false;
 
+    // Achievement System Properties
+    /// <summary>
+    /// Total points earned from all badges
+    /// </summary>
+    public int TotalPoints { get; set; } = 0;
+
+    /// <summary>
+    /// Points available to spend on rewards
+    /// </summary>
+    public int AvailablePoints { get; set; } = 0;
+
+    /// <summary>
+    /// URL of the currently equipped avatar reward
+    /// </summary>
+    public string? EquippedAvatarUrl { get; set; }
+
+    /// <summary>
+    /// Identifier of the currently equipped theme reward
+    /// </summary>
+    public string? EquippedTheme { get; set; }
+
+    /// <summary>
+    /// Currently equipped title reward
+    /// </summary>
+    public string? EquippedTitle { get; set; }
+
+    /// <summary>
+    /// Current saving streak in weeks (consecutive weeks with savings)
+    /// </summary>
+    public int SavingStreak { get; set; } = 0;
+
+    /// <summary>
+    /// Date of last savings activity for streak tracking
+    /// </summary>
+    public DateTime? LastSavingDate { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
@@ -81,4 +117,7 @@ public class Child : IHasCreatedAt
     public virtual ICollection<ChoreTask> Tasks { get; set; } = new List<ChoreTask>();
     public virtual ICollection<TaskCompletion> TaskCompletions { get; set; } = new List<TaskCompletion>();
     public virtual ICollection<AllowanceAdjustment> AllowanceAdjustments { get; set; } = new List<AllowanceAdjustment>();
+    public virtual ICollection<ChildBadge> Badges { get; set; } = new List<ChildBadge>();
+    public virtual ICollection<BadgeProgress> BadgeProgress { get; set; } = new List<BadgeProgress>();
+    public virtual ICollection<ChildReward> Rewards { get; set; } = new List<ChildReward>();
 }
