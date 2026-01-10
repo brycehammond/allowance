@@ -95,7 +95,7 @@ struct BiometricLockView: View {
     // MARK: - Private Methods
 
     private func authenticate() async {
-        authViewModel.clearError()
+        await authViewModel.clearError()
         isAuthenticating = true
         defer { isAuthenticating = false }
 
