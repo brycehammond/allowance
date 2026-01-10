@@ -172,8 +172,25 @@ jobs:
       - name: Verify deployment
         run: |
           echo "API deployed to: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
-          sleep 30
-          curl -f ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health || exit 1
+          URL="${{ steps.deploy-to-webapp.outputs.webapp-url }}/health"
+          MAX_ATTEMPTS=5
+          DELAY=20
+
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            echo "Health check attempt $i of $MAX_ATTEMPTS..."
+            if curl -sf --max-time 30 "$URL" > /dev/null 2>&1; then
+              echo "Health check passed!"
+              exit 0
+            fi
+            if [ $i -lt $MAX_ATTEMPTS ]; then
+              echo "Health check failed, waiting ${DELAY}s before retry..."
+              sleep $DELAY
+            fi
+          done
+
+          echo "Health check failed after $MAX_ATTEMPTS attempts"
+          curl -v "$URL" || true
+          exit 1
 
       - name: Logout from Azure
         run: az logout
