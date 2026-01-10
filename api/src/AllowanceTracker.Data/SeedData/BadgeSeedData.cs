@@ -24,6 +24,9 @@ public class SeedBadgeCriteriaConfig
 /// </summary>
 public static class BadgeSeedData
 {
+    // Static seed date to avoid PendingModelChangesWarning in EF Core
+    private static readonly DateTime SeedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
     public static List<Badge> GetBadges()
     {
         var badges = new List<Badge>();
@@ -333,7 +336,7 @@ public static class BadgeSeedData
             IsSecret = isSecret,
             IsActive = true,
             SortOrder = sortOrder,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = SeedDate
         };
     }
 
@@ -357,7 +360,7 @@ public static class BadgeSeedData
             PointsCost = pointsCost,
             IsActive = true,
             SortOrder = sortOrder,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = SeedDate
         };
     }
 
