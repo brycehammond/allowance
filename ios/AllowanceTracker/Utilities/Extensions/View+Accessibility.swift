@@ -106,9 +106,12 @@ extension Decimal {
     /// Format currency for accessibility with spoken pronunciation
     /// Example: $25.50 -> "25 dollars and 50 cents"
     var accessibilityCurrencyLabel: String {
-        let dollarAmount = Int(truncating: self as NSNumber)
+        // Use NSDecimalNumber for reliable Decimal to Int conversion
+        let nsDecimal = NSDecimalNumber(decimal: self)
+        let dollarAmount = nsDecimal.intValue
         let fractionalPart = self - Decimal(dollarAmount)
-        let centsAmount = Int(truncating: (fractionalPart * 100) as NSNumber)
+        let centsNsDecimal = NSDecimalNumber(decimal: fractionalPart * 100)
+        let centsAmount = centsNsDecimal.intValue
 
         if centsAmount == 0 {
             return "\(abs(dollarAmount)) dollar\(abs(dollarAmount) == 1 ? "" : "s")"
