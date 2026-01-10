@@ -18,7 +18,7 @@ on:
       - 'api/src/AllowanceTracker.Tests/**'
 
 env:
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: '10.0.x'
 
 jobs:
   build:
@@ -78,7 +78,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install EF Core tools
-        run: dotnet tool install --global dotnet-ef --version 8.*
+        run: dotnet tool install --global dotnet-ef --version 10.*
 
       - name: Restore dependencies
         run: dotnet restore api/AllowanceTracker.sln
