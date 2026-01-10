@@ -59,12 +59,15 @@ struct DashboardView: View {
                 } else if viewModel.children.isEmpty {
                     // Empty state (parent with no children)
                     emptyStateView
+                } else if viewModel.children.count == 1, let child = viewModel.children.first {
+                    // Single child: show detail view directly
+                    ChildDetailView(child: child)
                 } else {
-                    // Parent: show children list
+                    // Parent with multiple children: show children list
                     childrenListView
                 }
             }
-            .navigationTitle(isChild ? "" : "Dashboard")
+            .navigationTitle(isChild || viewModel.children.count == 1 ? "" : "Dashboard")
             .toolbar {
                 if isParent && !viewModel.children.isEmpty {
                     ToolbarItem(placement: .navigationBarLeading) {

@@ -16,6 +16,13 @@ export const Dashboard: React.FC = () => {
     loadChildren();
   }, []);
 
+  // Auto-navigate to child detail if there's only one child
+  useEffect(() => {
+    if (!isLoading && children.length === 1) {
+      navigate(`/children/${children[0].id}`, { replace: true });
+    }
+  }, [isLoading, children, navigate]);
+
   const loadChildren = async () => {
     try {
       setIsLoading(true);
