@@ -24,14 +24,15 @@ final class BackgroundRefreshManagerTests: XCTestCase {
 
     // MARK: - Registration Tests
 
-    func testRegisterBackgroundTasks_RegistersHandler() {
-        // Act
-        sut.registerBackgroundTasks()
+    func testRegisterBackgroundTasks_ManagerExists() {
+        // Note: BGTaskScheduler.shared.register() throws in unit test environments
+        // because task identifiers must be declared in Info.plist and the app
+        // must have proper entitlements. We can only verify the manager exists.
+        // Actual registration is tested via integration/UI tests.
 
         // Assert
-        // Note: We can't easily test BGTaskScheduler registration without an actual app
-        // This test documents the expected behavior
         XCTAssertNotNil(sut)
+        XCTAssertEqual(BackgroundRefreshManager.taskIdentifier, "com.allowancetracker.refresh")
     }
 
     // MARK: - Schedule Tests

@@ -9,7 +9,7 @@ final class UserModelTests: XCTestCase {
         // Arrange
         let json = """
         {
-            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
             "email": "test@example.com",
             "firstName": "John",
             "lastName": "Doe",
@@ -51,7 +51,7 @@ final class UserModelTests: XCTestCase {
         // Arrange
         let parentJson = """
         {
-            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
             "email": "parent@example.com",
             "firstName": "Jane",
             "lastName": "Parent",
@@ -62,7 +62,7 @@ final class UserModelTests: XCTestCase {
 
         let childJson = """
         {
-            "id": "123e4567-e89b-12d3-a456-426614174001",
+            "userId": "123e4567-e89b-12d3-a456-426614174001",
             "email": "child@example.com",
             "firstName": "Tommy",
             "lastName": "Child",
@@ -83,19 +83,18 @@ final class UserModelTests: XCTestCase {
     // MARK: - AuthResponse Tests
 
     func testAuthResponseDecoding() throws {
-        // Arrange
+        // Arrange - AuthResponse is now a flat structure with computed user property
         let json = """
         {
+            "userId": "123e4567-e89b-12d3-a456-426614174000",
+            "email": "test@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "role": "Parent",
+            "familyId": "223e4567-e89b-12d3-a456-426614174000",
+            "familyName": "Doe Family",
             "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
-            "expiresAt": "2025-12-31T23:59:59Z",
-            "user": {
-                "id": "123e4567-e89b-12d3-a456-426614174000",
-                "email": "test@example.com",
-                "firstName": "John",
-                "lastName": "Doe",
-                "role": "Parent",
-                "familyId": "223e4567-e89b-12d3-a456-426614174000"
-            }
+            "expiresAt": "2025-12-31T23:59:59Z"
         }
         """.data(using: .utf8)!
 
@@ -108,6 +107,7 @@ final class UserModelTests: XCTestCase {
         // Assert
         XCTAssertEqual(response.token, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
         XCTAssertEqual(response.user.email, "test@example.com")
+        XCTAssertEqual(response.email, "test@example.com")
         XCTAssertNotNil(response.expiresAt)
     }
 

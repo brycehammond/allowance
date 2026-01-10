@@ -11,9 +11,8 @@ final class CacheServiceTests: XCTestCase {
     }
 
     override func tearDown() {
-        Task {
-            await sut.clearCache()
-        }
+        // No need to clear cache - each test creates a fresh CacheService instance
+        // and CacheService is an actor with in-memory storage only
         sut = nil
         super.tearDown()
     }

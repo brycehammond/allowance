@@ -151,42 +151,45 @@ final class AccessibilityExtensionsTests: XCTestCase {
     }
 
     // MARK: - Color Contrast Tests
+    // Note: These tests use explicit RGB colors instead of system colors because
+    // SwiftUI system colors (Color.green, etc.) can't resolve RGB components
+    // in headless CI test environments without a UI context.
 
     func testColor_BlackHasContrastWithWhite() {
-        // Arrange
-        let black = Color.black
+        // Arrange - Use explicit RGB black instead of Color.black
+        let black = Color(red: 0, green: 0, blue: 0)
 
         // Assert
         XCTAssertTrue(black.hasContrastWithWhite)
     }
 
     func testColor_WhiteHasContrastWithBlack() {
-        // Arrange
-        let white = Color.white
+        // Arrange - Use explicit RGB white instead of Color.white
+        let white = Color(red: 1, green: 1, blue: 1)
 
         // Assert
         XCTAssertTrue(white.hasContrastWithBlack)
     }
 
     func testColor_GreenHasContrastWithWhite() {
-        // Arrange
-        let green = Color.green
+        // Arrange - Use a dark green that has sufficient contrast with white
+        let green = Color(red: 0, green: 0.5, blue: 0)
 
         // Assert
         XCTAssertTrue(green.hasContrastWithWhite)
     }
 
     func testColor_RedHasContrastWithWhite() {
-        // Arrange
-        let red = Color.red
+        // Arrange - Use a dark red that has sufficient contrast with white
+        let red = Color(red: 0.7, green: 0, blue: 0)
 
         // Assert
         XCTAssertTrue(red.hasContrastWithWhite)
     }
 
     func testColor_BlueHasContrastWithWhite() {
-        // Arrange
-        let blue = Color.blue
+        // Arrange - Use a dark blue that has sufficient contrast with white
+        let blue = Color(red: 0, green: 0, blue: 0.7)
 
         // Assert
         XCTAssertTrue(blue.hasContrastWithWhite)

@@ -355,6 +355,10 @@ class MockAPIService: APIServiceProtocol {
     }
 
     func getChildren() async throws -> [Child] {
+        if shouldDelay {
+            try await Task.sleep(nanoseconds: 100_000_000) // 100ms
+        }
+
         switch childrenResponse {
         case .success(let children):
             return children
