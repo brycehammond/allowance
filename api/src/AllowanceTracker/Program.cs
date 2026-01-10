@@ -138,6 +138,24 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
+
+    // Configure JWT authentication for SignalR
+    // SignalR sends the access token via query string for WebSocket connections
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Register application services
@@ -155,6 +173,24 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IParentInviteService, ParentInviteService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IDeviceTokenService, DeviceTokenService>();
+builder.Services.AddScoped<ISignalRNotificationService, SignalRNotificationService>();
+
+// Add Firebase Push Notification service (optional - works without Firebase config)
+var firebaseCredPath = builder.Configuration["Firebase:CredentialPath"];
+var firebaseCredJson = builder.Configuration["Firebase:CredentialJson"];
+if (!string.IsNullOrEmpty(firebaseCredPath) || !string.IsNullOrEmpty(firebaseCredJson))
+{
+    builder.Services.AddSingleton<IFirebasePushService, FirebasePushService>();
+}
+else
+{
+    builder.Services.AddSingleton<IFirebasePushService, NoOpFirebasePushService>();
+}
+
+// Add SignalR for real-time notifications
+builder.Services.AddSignalR();
 
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();
@@ -226,6 +262,9 @@ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
 app.MapHealthChecks("/health/ready");
 
 app.MapControllers();
+
+// Map SignalR hubs
+app.MapHub<AllowanceTracker.Hubs.NotificationHub>("/hubs/notifications");
 
 app.Run();
 

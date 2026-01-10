@@ -22,6 +22,9 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<TaskCompletion> TaskCompletions { get; set; }
     public DbSet<AllowanceAdjustment> AllowanceAdjustments { get; set; }
     public DbSet<ParentInvite> ParentInvites { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<NotificationPreference> NotificationPreferences { get; set; }
+    public DbSet<DeviceToken> DeviceTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -294,6 +297,57 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.HasIndex(e => new { e.InvitedEmail, e.FamilyId });
             entity.HasIndex(e => e.ExpiresAt);
             entity.HasIndex(e => e.Status);
+        });
+
+        // Notification configuration
+        builder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Body).IsRequired().HasMaxLength(1000);
+            entity.Property(e => e.Data).HasMaxLength(4000);
+            entity.Property(e => e.ErrorMessage).HasMaxLength(500);
+            entity.Property(e => e.RelatedEntityType).HasMaxLength(50);
+
+            entity.HasOne(e => e.User)
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => new { e.UserId, e.IsRead });
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.Type);
+        });
+
+        // NotificationPreference configuration
+        builder.Entity<NotificationPreference>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.User)
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => new { e.UserId, e.NotificationType }).IsUnique();
+        });
+
+        // DeviceToken configuration
+        builder.Entity<DeviceToken>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Token).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.DeviceName).HasMaxLength(100);
+            entity.Property(e => e.AppVersion).HasMaxLength(20);
+
+            entity.HasOne(e => e.User)
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.Token).IsUnique();
+            entity.HasIndex(e => new { e.UserId, e.IsActive });
         });
     }
 

@@ -8,10 +8,14 @@ namespace AllowanceTracker.Services;
 public class CategoryBudgetService : ICategoryBudgetService
 {
     private readonly AllowanceContext _context;
+    private readonly INotificationService? _notificationService;
 
-    public CategoryBudgetService(AllowanceContext context)
+    public CategoryBudgetService(
+        AllowanceContext context,
+        INotificationService? notificationService = null)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<CategoryBudget> SetBudgetAsync(SetBudgetDto dto, Guid currentUserId)
@@ -43,6 +47,26 @@ public class CategoryBudgetService : ICategoryBudgetService
             existingBudget.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            // Notify child about budget update
+            if (_notificationService != null)
+            {
+                try
+                {
+                    var periodText = dto.Period == BudgetPeriod.Weekly ? "weekly" : "monthly";
+                    await _notificationService.SendNotificationAsync(
+                        child.UserId,
+                        NotificationType.BudgetWarning,
+                        "Budget Updated",
+                        $"Your {periodText} {dto.Category} budget has been updated to {dto.Limit:C}.",
+                        data: new { budgetId = existingBudget.Id, category = dto.Category.ToString(), limit = dto.Limit, period = dto.Period.ToString() });
+                }
+                catch
+                {
+                    // Don't fail budget update if notification fails
+                }
+            }
+
             return existingBudget;
         }
         else
@@ -64,6 +88,26 @@ public class CategoryBudgetService : ICategoryBudgetService
 
             _context.CategoryBudgets.Add(budget);
             await _context.SaveChangesAsync();
+
+            // Notify child about new budget
+            if (_notificationService != null)
+            {
+                try
+                {
+                    var periodText = dto.Period == BudgetPeriod.Weekly ? "weekly" : "monthly";
+                    await _notificationService.SendNotificationAsync(
+                        child.UserId,
+                        NotificationType.BudgetWarning,
+                        "New Budget Set",
+                        $"A {periodText} budget of {dto.Limit:C} has been set for {dto.Category}.",
+                        data: new { budgetId = budget.Id, category = dto.Category.ToString(), limit = dto.Limit, period = dto.Period.ToString() });
+                }
+                catch
+                {
+                    // Don't fail budget creation if notification fails
+                }
+            }
+
             return budget;
         }
     }

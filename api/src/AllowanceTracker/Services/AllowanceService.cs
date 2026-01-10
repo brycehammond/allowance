@@ -13,6 +13,7 @@ public class AllowanceService : IAllowanceService
     private readonly ICurrentUserService _currentUser;
     private readonly ITransactionService _transactionService;
     private readonly ISavingsAccountService? _savingsAccountService;
+    private readonly INotificationService? _notificationService;
     private readonly ILogger<AllowanceService>? _logger;
 
     public AllowanceService(
@@ -20,12 +21,14 @@ public class AllowanceService : IAllowanceService
         ICurrentUserService currentUser,
         ITransactionService transactionService,
         ISavingsAccountService? savingsAccountService = null,
+        INotificationService? notificationService = null,
         ILogger<AllowanceService>? logger = null)
     {
         _context = context;
         _currentUser = currentUser;
         _transactionService = transactionService;
         _savingsAccountService = savingsAccountService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -91,6 +94,24 @@ public class AllowanceService : IAllowanceService
         // Update last allowance date
         child.LastAllowanceDate = DateTime.UtcNow;
         await _context.SaveChangesAsync();
+
+        // Send notification to the child
+        if (_notificationService != null)
+        {
+            try
+            {
+                await _notificationService.SendNotificationAsync(
+                    child.UserId,
+                    NotificationType.AllowanceDeposit,
+                    "Allowance Received!",
+                    $"Your weekly allowance of {child.WeeklyAllowance:C} has been deposited.",
+                    data: new { childId = childId, amount = child.WeeklyAllowance });
+            }
+            catch
+            {
+                // Don't fail the allowance payment if notification fails
+            }
+        }
 
         _logger?.LogInformation(
             "Paid weekly allowance of {Amount} to child {ChildId}",
@@ -161,6 +182,25 @@ public class AllowanceService : IAllowanceService
 
         await _context.SaveChangesAsync();
 
+        // Send notification to the child
+        if (_notificationService != null)
+        {
+            try
+            {
+                var reasonText = string.IsNullOrEmpty(reason) ? "" : $" Reason: {reason}";
+                await _notificationService.SendNotificationAsync(
+                    child.UserId,
+                    NotificationType.AllowancePaused,
+                    "Allowance Paused",
+                    $"Your allowance has been paused.{reasonText}",
+                    data: new { childId = childId, reason = reason });
+            }
+            catch
+            {
+                // Don't fail the pause operation if notification fails
+            }
+        }
+
         _logger?.LogInformation(
             "Paused allowance for child {ChildId}. Reason: {Reason}",
             childId,
@@ -185,6 +225,24 @@ public class AllowanceService : IAllowanceService
         _context.AllowanceAdjustments.Add(adjustment);
 
         await _context.SaveChangesAsync();
+
+        // Send notification to the child
+        if (_notificationService != null)
+        {
+            try
+            {
+                await _notificationService.SendNotificationAsync(
+                    child.UserId,
+                    NotificationType.AllowanceResumed,
+                    "Allowance Resumed",
+                    "Your allowance has been resumed. You will receive your next payment on schedule.",
+                    data: new { childId = childId });
+            }
+            catch
+            {
+                // Don't fail the resume operation if notification fails
+            }
+        }
 
         _logger?.LogInformation(
             "Resumed allowance for child {ChildId}",

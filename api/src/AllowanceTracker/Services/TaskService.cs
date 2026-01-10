@@ -8,10 +8,14 @@ namespace AllowanceTracker.Services;
 public class TaskService : ITaskService
 {
     private readonly AllowanceContext _context;
+    private readonly INotificationService? _notificationService;
 
-    public TaskService(AllowanceContext context)
+    public TaskService(
+        AllowanceContext context,
+        INotificationService? notificationService = null)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<TaskDto> CreateTaskAsync(CreateTaskDto dto, Guid createdById)
@@ -52,6 +56,27 @@ public class TaskService : ITaskService
 
         _context.Tasks.Add(task);
         await _context.SaveChangesAsync();
+
+        // Send notification to the child about the new task
+        if (_notificationService != null)
+        {
+            try
+            {
+                var rewardText = dto.RewardAmount > 0 ? $" Worth {dto.RewardAmount:C}!" : "";
+                await _notificationService.SendNotificationAsync(
+                    child.UserId,
+                    NotificationType.TaskAssigned,
+                    "New Task Assigned!",
+                    $"You have a new task: {dto.Title}.{rewardText}",
+                    data: new { taskId = task.Id, title = dto.Title, rewardAmount = dto.RewardAmount },
+                    relatedEntityId: task.Id,
+                    relatedEntityType: "Task");
+            }
+            catch
+            {
+                // Don't fail task creation if notification fails
+            }
+        }
 
         return await MapToDto(task, child, creator);
     }
@@ -224,6 +249,25 @@ public class TaskService : ITaskService
         _context.TaskCompletions.Add(completion);
         await _context.SaveChangesAsync();
 
+        // Send notification to parents about pending approval
+        if (_notificationService != null)
+        {
+            try
+            {
+                var childName = task.Child.User.FirstName;
+                await _notificationService.SendFamilyNotificationAsync(
+                    task.Child.FamilyId,
+                    NotificationType.TaskCompletionPendingApproval,
+                    "Task Awaiting Approval",
+                    $"{childName} completed \"{task.Title}\" and is waiting for approval.",
+                    excludeUserId: task.Child.UserId);
+            }
+            catch
+            {
+                // Don't fail completion if notification fails
+            }
+        }
+
         return await MapCompletionToDto(completion, task, task.Child);
     }
 
@@ -372,6 +416,41 @@ public class TaskService : ITaskService
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            // Send notification to the child about the review result
+            if (_notificationService != null)
+            {
+                try
+                {
+                    if (dto.IsApproved)
+                    {
+                        await _notificationService.SendNotificationAsync(
+                            completion.Child.UserId,
+                            NotificationType.TaskApproved,
+                            "Task Approved!",
+                            $"Great job! Your task \"{completion.Task.Title}\" was approved. You earned {completion.Task.RewardAmount:C}!",
+                            data: new { taskId = completion.TaskId, completionId = completion.Id, rewardAmount = completion.Task.RewardAmount },
+                            relatedEntityId: completion.Id,
+                            relatedEntityType: "TaskCompletion");
+                    }
+                    else
+                    {
+                        var reasonText = string.IsNullOrEmpty(dto.RejectionReason) ? "" : $" Reason: {dto.RejectionReason}";
+                        await _notificationService.SendNotificationAsync(
+                            completion.Child.UserId,
+                            NotificationType.TaskRejected,
+                            "Task Needs Redo",
+                            $"Your task \"{completion.Task.Title}\" needs to be redone.{reasonText}",
+                            data: new { taskId = completion.TaskId, completionId = completion.Id, rejectionReason = dto.RejectionReason },
+                            relatedEntityId: completion.Id,
+                            relatedEntityType: "TaskCompletion");
+                    }
+                }
+                catch
+                {
+                    // Don't fail the review if notification fails
+                }
+            }
 
             return await MapCompletionToDto(completion, completion.Task, completion.Child);
         }

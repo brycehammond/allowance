@@ -13,18 +13,21 @@ public class ParentInviteService : IParentInviteService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IJwtService _jwtService;
     private readonly IEmailService _emailService;
+    private readonly INotificationService? _notificationService;
     private const int InviteExpirationDays = 7;
 
     public ParentInviteService(
         AllowanceContext context,
         UserManager<ApplicationUser> userManager,
         IJwtService jwtService,
-        IEmailService emailService)
+        IEmailService emailService,
+        INotificationService? notificationService = null)
     {
         _context = context;
         _userManager = userManager;
         _jwtService = jwtService;
         _emailService = emailService;
+        _notificationService = notificationService;
     }
 
     public async Task<ParentInviteResponseDto> SendInviteAsync(SendParentInviteDto dto, Guid inviterId, Guid familyId)
@@ -222,8 +225,27 @@ public class ParentInviteService : IParentInviteService
         invite.AcceptedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
+        // Notify other family members about the new parent
+        if (_notificationService != null)
+        {
+            try
+            {
+                var newParentName = $"{user.FirstName} {user.LastName}";
+                await _notificationService.SendFamilyNotificationAsync(
+                    invite.FamilyId,
+                    NotificationType.FamilyUpdate,
+                    "New Family Member!",
+                    $"{newParentName} has joined your family as a parent.",
+                    excludeUserId: user.Id);
+            }
+            catch
+            {
+                // Don't fail the invite acceptance if notification fails
+            }
+        }
+
         // Generate JWT token for auto-login
-        var token = _jwtService.GenerateToken(user);
+        var jwtToken = _jwtService.GenerateToken(user);
 
         return new AuthResponseDto(
             user.Id,
@@ -233,7 +255,7 @@ public class ParentInviteService : IParentInviteService
             user.Role.ToString(),
             user.FamilyId,
             invite.Family.Name,
-            token,
+            jwtToken,
             DateTime.UtcNow.AddDays(1));
     }
 
@@ -286,6 +308,25 @@ public class ParentInviteService : IParentInviteService
         invite.AcceptedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
+        // Notify other family members about the new parent
+        if (_notificationService != null)
+        {
+            try
+            {
+                var newParentName = $"{currentUser.FirstName} {currentUser.LastName}";
+                await _notificationService.SendFamilyNotificationAsync(
+                    invite.FamilyId,
+                    NotificationType.FamilyUpdate,
+                    "New Family Member!",
+                    $"{newParentName} has joined your family as a parent.",
+                    excludeUserId: currentUser.Id);
+            }
+            catch
+            {
+                // Don't fail the join acceptance if notification fails
+            }
+        }
 
         return new AcceptJoinResponseDto(
             invite.FamilyId,

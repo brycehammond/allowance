@@ -10,15 +10,18 @@ public class TransactionService : ITransactionService
     private readonly AllowanceContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly ICategoryService? _categoryService;
+    private readonly INotificationService? _notificationService;
 
     public TransactionService(
         AllowanceContext context,
         ICurrentUserService currentUser,
-        ICategoryService? categoryService = null)
+        ICategoryService? categoryService = null,
+        INotificationService? notificationService = null)
     {
         _context = context;
         _currentUser = currentUser;
         _categoryService = categoryService;
+        _notificationService = notificationService;
     }
 
     public async Task<Transaction> CreateTransactionAsync(CreateTransactionDto dto)
@@ -104,6 +107,30 @@ public class TransactionService : ITransactionService
             _context.Transactions.Add(transaction);
             await _context.SaveChangesAsync();
             await dbTransaction.CommitAsync();
+
+            // Send notification to the child about the transaction
+            if (_notificationService != null)
+            {
+                try
+                {
+                    var typeText = dto.Type == TransactionType.Credit ? "received" : "spent";
+                    var title = dto.Type == TransactionType.Credit ? "Money Added" : "Purchase Recorded";
+                    var body = $"You {typeText} {dto.Amount:C} - {dto.Description}";
+
+                    await _notificationService.SendNotificationAsync(
+                        child.UserId,
+                        NotificationType.TransactionCreated,
+                        title,
+                        body,
+                        data: new { transactionId = transaction.Id, amount = dto.Amount, type = dto.Type.ToString(), category = dto.Category.ToString() },
+                        relatedEntityId: transaction.Id,
+                        relatedEntityType: "Transaction");
+                }
+                catch
+                {
+                    // Don't fail the transaction if notification fails
+                }
+            }
 
             return transaction;
         }
