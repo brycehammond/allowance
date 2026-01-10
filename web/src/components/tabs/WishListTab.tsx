@@ -76,9 +76,9 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
 
     try {
       if (item.isPurchased) {
-        await wishListApi.markAsUnpurchased(item.id);
+        await wishListApi.markAsUnpurchased(childId, item.id);
       } else {
-        await wishListApi.markAsPurchased(item.id);
+        await wishListApi.markAsPurchased(childId, item.id);
       }
       await loadWishList();
     } catch (err: unknown) {
@@ -93,7 +93,7 @@ export const WishListTab: React.FC<WishListTabProps> = ({ childId }) => {
     if (!confirm('Are you sure you want to delete this wish list item?')) return;
 
     try {
-      await wishListApi.delete(itemId);
+      await wishListApi.delete(childId, itemId);
       await loadWishList();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error && 'response' in err
