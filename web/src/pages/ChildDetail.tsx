@@ -7,12 +7,14 @@ import { TransactionsTab } from '../components/tabs/TransactionsTab';
 import { WishListTab } from '../components/tabs/WishListTab';
 import { AnalyticsTab } from '../components/tabs/AnalyticsTab';
 import { SavingsTab } from '../components/tabs/SavingsTab';
+import { SavingsGoalsTab } from '../components/tabs/SavingsGoalsTab';
 import { SettingsTab } from '../components/tabs/SettingsTab';
 import { BadgesTab } from '../components/tabs/BadgesTab';
+import { ChoresTab } from '../components/tabs/ChoresTab';
 import { Layout } from '../components/Layout';
-import { ArrowLeft, Receipt, Star, TrendingUp, Wallet, Settings, Award } from 'lucide-react';
+import { ArrowLeft, Receipt, Star, TrendingUp, Wallet, Settings, Award, ClipboardList, Target } from 'lucide-react';
 
-type TabType = 'transactions' | 'wishlist' | 'analytics' | 'badges' | 'savings' | 'settings';
+type TabType = 'transactions' | 'wishlist' | 'goals' | 'analytics' | 'badges' | 'chores' | 'savings' | 'settings';
 
 export const ChildDetail: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
@@ -22,7 +24,7 @@ export const ChildDetail: React.FC = () => {
   const [child, setChild] = useState<Child | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['transactions', 'wishlist', 'analytics', 'badges', 'savings', 'settings'].includes(tabParam)) {
+    if (tabParam && ['transactions', 'wishlist', 'goals', 'analytics', 'badges', 'chores', 'savings', 'settings'].includes(tabParam)) {
       return tabParam as TabType;
     }
     return 'transactions';
@@ -98,6 +100,8 @@ export const ChildDetail: React.FC = () => {
   const tabs: Array<{ id: TabType; label: string; icon: React.FC<{ className?: string }> }> = [
     { id: 'transactions', label: 'Transactions', icon: Receipt },
     { id: 'wishlist', label: 'Wish List', icon: Star },
+    { id: 'goals', label: 'Goals', icon: Target },
+    { id: 'chores', label: 'Chores', icon: ClipboardList },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
     { id: 'badges', label: 'Badges', icon: Award },
   ];
@@ -185,6 +189,8 @@ export const ChildDetail: React.FC = () => {
         <div>
           {activeTab === 'transactions' && <TransactionsTab childId={child.id} currentBalance={child.currentBalance} savingsBalance={child.savingsBalance} allowDebt={child.allowDebt} onBalanceChange={loadChild} />}
           {activeTab === 'wishlist' && <WishListTab childId={child.id} />}
+          {activeTab === 'goals' && <SavingsGoalsTab childId={child.id} currentBalance={child.currentBalance} onBalanceChange={loadChild} />}
+          {activeTab === 'chores' && <ChoresTab childId={child.id} />}
           {activeTab === 'analytics' && <AnalyticsTab childId={child.id} />}
           {activeTab === 'badges' && <BadgesTab childId={child.id} />}
           {activeTab === 'savings' && isParent && <SavingsTab childId={child.id} onBalanceChange={loadChild} />}

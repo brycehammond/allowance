@@ -40,6 +40,29 @@ import {
   type AchievementSummaryDto,
   type UpdateBadgeDisplayRequest,
   type MarkBadgesSeenRequest,
+  type ChoreTask,
+  type ChoreTaskStatus,
+  type CreateTaskRequest,
+  type UpdateTaskRequest,
+  type TaskCompletion,
+  type CompletionStatus,
+  type TaskStatistics,
+  type ReviewCompletionRequest,
+  type SavingsGoal,
+  type GoalStatus,
+  type GoalContribution,
+  type ContributionType,
+  type MatchingRule,
+  type GoalChallenge,
+  type GoalProgressEvent,
+  type CreateSavingsGoalRequest,
+  type UpdateSavingsGoalRequest,
+  type ContributeToGoalRequest,
+  type WithdrawFromGoalRequest,
+  type CreateMatchingRuleRequest,
+  type UpdateMatchingRuleRequest,
+  type CreateGoalChallengeRequest,
+  type MarkGoalPurchasedRequest,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7071';
@@ -491,6 +514,211 @@ export const badgesApi = {
 
   getChildPoints: async (childId: string): Promise<ChildPointsDto> => {
     const response = await apiClient.get<ChildPointsDto>(`/api/v1/children/${childId}/points`);
+    return response.data;
+  },
+};
+
+// Tasks/Chores API
+export const tasksApi = {
+  getAll: async (childId?: string, status?: ChoreTaskStatus, isRecurring?: boolean): Promise<ChoreTask[]> => {
+    const response = await apiClient.get<ChoreTask[]>('/api/v1/tasks', {
+      params: { childId, status, isRecurring },
+    });
+    return response.data;
+  },
+
+  getById: async (taskId: string): Promise<ChoreTask> => {
+    const response = await apiClient.get<ChoreTask>(`/api/v1/tasks/${taskId}`);
+    return response.data;
+  },
+
+  create: async (data: CreateTaskRequest): Promise<ChoreTask> => {
+    const response = await apiClient.post<ChoreTask>('/api/v1/tasks', data);
+    return response.data;
+  },
+
+  update: async (taskId: string, data: UpdateTaskRequest): Promise<ChoreTask> => {
+    const response = await apiClient.put<ChoreTask>(`/api/v1/tasks/${taskId}`, data);
+    return response.data;
+  },
+
+  archive: async (taskId: string): Promise<void> => {
+    await apiClient.delete(`/api/v1/tasks/${taskId}`);
+  },
+
+  complete: async (taskId: string, notes?: string, photo?: File): Promise<TaskCompletion> => {
+    const formData = new FormData();
+    if (notes) {
+      formData.append('notes', notes);
+    }
+    if (photo) {
+      formData.append('photo', photo);
+    }
+    const response = await apiClient.post<TaskCompletion>(
+      `/api/v1/tasks/${taskId}/complete`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  getCompletions: async (
+    taskId: string,
+    status?: CompletionStatus,
+    startDate?: string,
+    endDate?: string
+  ): Promise<TaskCompletion[]> => {
+    const response = await apiClient.get<TaskCompletion[]>(`/api/v1/tasks/${taskId}/completions`, {
+      params: { status, startDate, endDate },
+    });
+    return response.data;
+  },
+
+  getPendingApprovals: async (): Promise<TaskCompletion[]> => {
+    const response = await apiClient.get<TaskCompletion[]>('/api/v1/tasks/completions/pending');
+    return response.data;
+  },
+
+  reviewCompletion: async (completionId: string, data: ReviewCompletionRequest): Promise<TaskCompletion> => {
+    const response = await apiClient.put<TaskCompletion>(
+      `/api/v1/tasks/completions/${completionId}/review`,
+      data
+    );
+    return response.data;
+  },
+
+  getStatistics: async (childId: string): Promise<TaskStatistics> => {
+    const response = await apiClient.get<TaskStatistics>(`/api/v1/children/${childId}/tasks/statistics`);
+    return response.data;
+  },
+};
+
+// Savings Goals API
+export const savingsGoalsApi = {
+  // Goal CRUD
+  getByChild: async (
+    childId: string,
+    status?: GoalStatus,
+    includeCompleted: boolean = false
+  ): Promise<SavingsGoal[]> => {
+    const response = await apiClient.get<SavingsGoal[]>(`/api/v1/children/${childId}/savings-goals`, {
+      params: { status, includeCompleted },
+    });
+    return response.data;
+  },
+
+  getById: async (goalId: string): Promise<SavingsGoal> => {
+    const response = await apiClient.get<SavingsGoal>(`/api/v1/savings-goals/${goalId}`);
+    return response.data;
+  },
+
+  create: async (data: CreateSavingsGoalRequest): Promise<SavingsGoal> => {
+    const response = await apiClient.post<SavingsGoal>('/api/v1/savings-goals', data);
+    return response.data;
+  },
+
+  update: async (goalId: string, data: UpdateSavingsGoalRequest): Promise<SavingsGoal> => {
+    const response = await apiClient.put<SavingsGoal>(`/api/v1/savings-goals/${goalId}`, data);
+    return response.data;
+  },
+
+  delete: async (goalId: string): Promise<void> => {
+    await apiClient.delete(`/api/v1/savings-goals/${goalId}`);
+  },
+
+  pause: async (goalId: string): Promise<SavingsGoal> => {
+    const response = await apiClient.post<SavingsGoal>(`/api/v1/savings-goals/${goalId}/pause`);
+    return response.data;
+  },
+
+  resume: async (goalId: string): Promise<SavingsGoal> => {
+    const response = await apiClient.post<SavingsGoal>(`/api/v1/savings-goals/${goalId}/resume`);
+    return response.data;
+  },
+
+  // Contributions
+  contribute: async (goalId: string, data: ContributeToGoalRequest): Promise<GoalProgressEvent> => {
+    const response = await apiClient.post<GoalProgressEvent>(`/api/v1/savings-goals/${goalId}/contribute`, data);
+    return response.data;
+  },
+
+  withdraw: async (goalId: string, data: WithdrawFromGoalRequest): Promise<GoalContribution> => {
+    const response = await apiClient.post<GoalContribution>(`/api/v1/savings-goals/${goalId}/withdraw`, data);
+    return response.data;
+  },
+
+  getContributions: async (
+    goalId: string,
+    type?: ContributionType,
+    startDate?: string,
+    endDate?: string
+  ): Promise<GoalContribution[]> => {
+    const response = await apiClient.get<GoalContribution[]>(`/api/v1/savings-goals/${goalId}/contributions`, {
+      params: { type, startDate, endDate },
+    });
+    return response.data;
+  },
+
+  markAsPurchased: async (goalId: string, data?: MarkGoalPurchasedRequest): Promise<SavingsGoal> => {
+    const response = await apiClient.post<SavingsGoal>(`/api/v1/savings-goals/${goalId}/purchase`, data || {});
+    return response.data;
+  },
+
+  // Matching Rules
+  createMatchingRule: async (goalId: string, data: CreateMatchingRuleRequest): Promise<MatchingRule> => {
+    const response = await apiClient.post<MatchingRule>(`/api/v1/savings-goals/${goalId}/matching`, data);
+    return response.data;
+  },
+
+  getMatchingRule: async (goalId: string): Promise<MatchingRule | null> => {
+    try {
+      const response = await apiClient.get<MatchingRule>(`/api/v1/savings-goals/${goalId}/matching`);
+      return response.data;
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  },
+
+  updateMatchingRule: async (goalId: string, data: UpdateMatchingRuleRequest): Promise<MatchingRule> => {
+    const response = await apiClient.put<MatchingRule>(`/api/v1/savings-goals/${goalId}/matching`, data);
+    return response.data;
+  },
+
+  deleteMatchingRule: async (goalId: string): Promise<void> => {
+    await apiClient.delete(`/api/v1/savings-goals/${goalId}/matching`);
+  },
+
+  // Challenges
+  createChallenge: async (goalId: string, data: CreateGoalChallengeRequest): Promise<GoalChallenge> => {
+    const response = await apiClient.post<GoalChallenge>(`/api/v1/savings-goals/${goalId}/challenge`, data);
+    return response.data;
+  },
+
+  getChallenge: async (goalId: string): Promise<GoalChallenge | null> => {
+    try {
+      const response = await apiClient.get<GoalChallenge>(`/api/v1/savings-goals/${goalId}/challenge`);
+      return response.data;
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  },
+
+  cancelChallenge: async (goalId: string): Promise<void> => {
+    await apiClient.delete(`/api/v1/savings-goals/${goalId}/challenge`);
+  },
+
+  getChildChallenges: async (childId: string): Promise<GoalChallenge[]> => {
+    const response = await apiClient.get<GoalChallenge[]>(`/api/v1/children/${childId}/challenges`);
     return response.data;
   },
 };

@@ -439,3 +439,307 @@ export interface UpdateBadgeDisplayRequest {
 export interface MarkBadgesSeenRequest {
   badgeIds: string[];
 }
+
+// Tasks/Chores
+export const ChoreTaskStatus = {
+  Active: 'Active',
+  Archived: 'Archived',
+} as const;
+
+export type ChoreTaskStatus = typeof ChoreTaskStatus[keyof typeof ChoreTaskStatus];
+
+export const RecurrenceType = {
+  Daily: 'Daily',
+  Weekly: 'Weekly',
+  Monthly: 'Monthly',
+} as const;
+
+export type RecurrenceType = typeof RecurrenceType[keyof typeof RecurrenceType];
+
+export const CompletionStatus = {
+  PendingApproval: 'PendingApproval',
+  Approved: 'Approved',
+  Rejected: 'Rejected',
+} as const;
+
+export type CompletionStatus = typeof CompletionStatus[keyof typeof CompletionStatus];
+
+export interface ChoreTask {
+  id: string;
+  childId: string;
+  childName: string;
+  title: string;
+  description: string | null;
+  rewardAmount: number;
+  status: ChoreTaskStatus;
+  isRecurring: boolean;
+  recurrenceType: RecurrenceType | null;
+  recurrenceDisplay: string;
+  createdAt: string;
+  createdById: string;
+  createdByName: string;
+  totalCompletions: number;
+  pendingApprovals: number;
+  lastCompletedAt: string | null;
+}
+
+export interface CreateTaskRequest {
+  childId: string;
+  title: string;
+  description?: string;
+  rewardAmount: number;
+  isRecurring: boolean;
+  recurrenceType?: RecurrenceType;
+  recurrenceDay?: DayOfWeek;
+  recurrenceDayOfMonth?: number;
+}
+
+export interface UpdateTaskRequest {
+  title: string;
+  description?: string;
+  rewardAmount: number;
+  isRecurring: boolean;
+  recurrenceType?: RecurrenceType;
+  recurrenceDay?: DayOfWeek;
+  recurrenceDayOfMonth?: number;
+}
+
+export interface TaskCompletion {
+  id: string;
+  taskId: string;
+  taskTitle: string;
+  rewardAmount: number;
+  childId: string;
+  childName: string;
+  completedAt: string;
+  notes: string | null;
+  photoUrl: string | null;
+  status: CompletionStatus;
+  approvedById: string | null;
+  approvedByName: string | null;
+  approvedAt: string | null;
+  rejectionReason: string | null;
+  transactionId: string | null;
+}
+
+export interface TaskStatistics {
+  totalTasks: number;
+  activeTasks: number;
+  archivedTasks: number;
+  totalCompletions: number;
+  pendingApprovals: number;
+  totalEarned: number;
+  pendingEarnings: number;
+  completionRate: number;
+}
+
+export interface ReviewCompletionRequest {
+  isApproved: boolean;
+  rejectionReason?: string;
+}
+
+// Savings Goals
+export const GoalStatus = {
+  Active: 'Active',
+  Completed: 'Completed',
+  Purchased: 'Purchased',
+  Cancelled: 'Cancelled',
+  Paused: 'Paused',
+} as const;
+
+export type GoalStatus = typeof GoalStatus[keyof typeof GoalStatus];
+
+export const GoalCategory = {
+  Toy: 'Toy',
+  Game: 'Game',
+  Electronics: 'Electronics',
+  Clothing: 'Clothing',
+  Experience: 'Experience',
+  Savings: 'Savings',
+  Charity: 'Charity',
+  Other: 'Other',
+} as const;
+
+export type GoalCategory = typeof GoalCategory[keyof typeof GoalCategory];
+
+export const ContributionType = {
+  ChildDeposit: 'ChildDeposit',
+  AutoTransfer: 'AutoTransfer',
+  ParentMatch: 'ParentMatch',
+  ParentGift: 'ParentGift',
+  ChallengeBonus: 'ChallengeBonus',
+  Withdrawal: 'Withdrawal',
+  ExternalGift: 'ExternalGift',
+} as const;
+
+export type ContributionType = typeof ContributionType[keyof typeof ContributionType];
+
+export const MatchingType = {
+  RatioMatch: 'RatioMatch',
+  PercentageMatch: 'PercentageMatch',
+  MilestoneBonus: 'MilestoneBonus',
+} as const;
+
+export type MatchingType = typeof MatchingType[keyof typeof MatchingType];
+
+export const ChallengeStatus = {
+  Active: 'Active',
+  Completed: 'Completed',
+  Failed: 'Failed',
+  Cancelled: 'Cancelled',
+} as const;
+
+export type ChallengeStatus = typeof ChallengeStatus[keyof typeof ChallengeStatus];
+
+export const AutoTransferType = {
+  None: 'None',
+  FixedAmount: 'FixedAmount',
+  Percentage: 'Percentage',
+} as const;
+
+export type AutoTransferType = typeof AutoTransferType[keyof typeof AutoTransferType];
+
+export interface SavingsGoal {
+  id: string;
+  childId: string;
+  name: string;
+  description: string | null;
+  targetAmount: number;
+  currentAmount: number;
+  category: GoalCategory;
+  categoryName: string;
+  status: GoalStatus;
+  statusName: string;
+  imageUrl: string | null;
+  autoTransferType: AutoTransferType;
+  autoTransferAmount: number | null;
+  autoTransferPercentage: number | null;
+  priority: number;
+  progressPercentage: number;
+  amountRemaining: number;
+  isCompleted: boolean;
+  createdAt: string;
+  completedAt: string | null;
+  purchasedAt: string | null;
+  milestones: GoalMilestone[];
+  hasActiveChallenge: boolean;
+  hasMatchingRule: boolean;
+}
+
+export interface GoalMilestone {
+  id: string;
+  percentComplete: number;
+  isAchieved: boolean;
+  achievedAt: string | null;
+  bonusAmount: number | null;
+}
+
+export interface GoalContribution {
+  id: string;
+  goalId: string;
+  childId: string;
+  amount: number;
+  type: ContributionType;
+  typeName: string;
+  description: string | null;
+  goalBalanceAfter: number;
+  parentMatchId: string | null;
+  createdAt: string;
+  createdById: string;
+  createdByName: string;
+}
+
+export interface MatchingRule {
+  id: string;
+  goalId: string;
+  matchType: MatchingType;
+  matchTypeName: string;
+  matchRatio: number;
+  maxMatchAmount: number | null;
+  totalMatchedAmount: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface GoalChallenge {
+  id: string;
+  goalId: string;
+  targetAmount: number;
+  currentAmount: number;
+  bonusAmount: number;
+  startDate: string;
+  endDate: string;
+  status: ChallengeStatus;
+  statusName: string;
+  progressPercentage: number;
+  daysRemaining: number;
+  isExpired: boolean;
+  completedAt: string | null;
+}
+
+export interface GoalProgressEvent {
+  contribution: GoalContribution;
+  goal: SavingsGoal;
+  newMilestonesAchieved: GoalMilestone[];
+  matchContribution: GoalContribution | null;
+  challengeCompleted: boolean;
+  challengeBonus: GoalContribution | null;
+}
+
+// Savings Goals Requests
+export interface CreateSavingsGoalRequest {
+  childId: string;
+  name: string;
+  description?: string;
+  targetAmount: number;
+  category: GoalCategory;
+  imageUrl?: string;
+  autoTransferType?: AutoTransferType;
+  autoTransferAmount?: number;
+  autoTransferPercentage?: number;
+  priority?: number;
+}
+
+export interface UpdateSavingsGoalRequest {
+  name?: string;
+  description?: string;
+  targetAmount?: number;
+  category?: GoalCategory;
+  imageUrl?: string;
+  autoTransferType?: AutoTransferType;
+  autoTransferAmount?: number;
+  autoTransferPercentage?: number;
+  priority?: number;
+}
+
+export interface ContributeToGoalRequest {
+  amount: number;
+  description?: string;
+}
+
+export interface WithdrawFromGoalRequest {
+  amount: number;
+  reason?: string;
+}
+
+export interface CreateMatchingRuleRequest {
+  matchType: MatchingType;
+  matchRatio: number;
+  maxMatchAmount?: number;
+}
+
+export interface UpdateMatchingRuleRequest {
+  matchRatio?: number;
+  maxMatchAmount?: number;
+  isActive?: boolean;
+}
+
+export interface CreateGoalChallengeRequest {
+  targetAmount: number;
+  endDate: string;
+  bonusAmount: number;
+}
+
+export interface MarkGoalPurchasedRequest {
+  purchaseNotes?: string;
+}
