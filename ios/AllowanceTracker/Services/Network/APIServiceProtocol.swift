@@ -46,4 +46,13 @@ protocol APIServiceProtocol {
     func getPendingInvites() async throws -> [PendingInvite]
     func cancelInvite(inviteId: String) async throws
     func resendInvite(inviteId: String) async throws -> ParentInviteResponse
+
+    // MARK: - Badges
+    func getAllBadges(category: BadgeCategory?, includeSecret: Bool) async throws -> [BadgeDto]
+    func getChildBadges(forChild childId: UUID, category: BadgeCategory?, newOnly: Bool) async throws -> [ChildBadgeDto]
+    func getBadgeProgress(forChild childId: UUID) async throws -> [BadgeProgressDto]
+    func getAchievementSummary(forChild childId: UUID) async throws -> AchievementSummaryDto
+    func toggleBadgeDisplay(forChild childId: UUID, badgeId: UUID, _ request: UpdateBadgeDisplayRequest) async throws -> ChildBadgeDto
+    func markBadgesSeen(forChild childId: UUID, _ request: MarkBadgesSeenRequest) async throws
+    func getChildPoints(forChild childId: UUID) async throws -> ChildPointsDto
 }

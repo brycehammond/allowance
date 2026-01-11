@@ -101,6 +101,10 @@
 		F4E45E82B72406A2F999324E /* CategoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37170C845EF4D52B10190B0 /* CategoryPicker.swift */; };
 		F95122D9FEC002140DB4CCEC /* SavingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E71C71E4853AF5D4B2AA392 /* SavingsUITests.swift */; };
 		FA876E7626C49A35B4934C5B /* WishListUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5FEDAD8A2AE357B0FB81E38 /* WishListUITests.swift */; };
+		F724CA548941485289BCB702 /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F89330BC992469097EC4E51 /* Badge.swift */; };
+		D542700AB4A1473D9EB2538C /* BadgesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1781AC4904F3397942A43 /* BadgesViewModel.swift */; };
+		12873EAA3C0A491DAB768D21 /* BadgesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8F268F501B427D908C5D87 /* BadgesView.swift */; };
+		5666E1016AD34ED289C7E4F9 /* BadgeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952D3BE0A7743EB92A5467F /* BadgeCardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -220,6 +224,10 @@
 		F45D1965078A6166B2675BA0 /* CategorySpendingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySpendingChart.swift; sourceTree = "<group>"; };
 		F88034558BD809F2C0DCCE5E /* AllowanceTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowanceTrackerUITests.swift; sourceTree = "<group>"; };
 		"TEMP_CAF928C1-7EA7-48DC-8CFA-98613A64BEA6" /* AllowanceTracker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AllowanceTracker.xcodeproj; sourceTree = "<group>"; };
+		7F89330BC992469097EC4E51 /* Badge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
+		83E1781AC4904F3397942A43 /* BadgesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgesViewModel.swift; sourceTree = "<group>"; };
+		4F8F268F501B427D908C5D87 /* BadgesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgesView.swift; sourceTree = "<group>"; };
+		A952D3BE0A7743EB92A5467F /* BadgeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeCardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -306,6 +314,7 @@
 				FA2475A4D2AD3961B6D8FCA5 /* Savings */,
 				F250324F929A427D09E736C3 /* Transactions */,
 				57CCA6D1A036D57E548482E1 /* WishList */,
+				4FF2A4C4924E4796B8C97149 /* Badges */,
 				3277C3D8F8652BDA89889DC9 /* ContentView.swift */,
 				ABF4A76879BD2EF9E907311B /* MainTabView.swift */,
 				1F9393FC942F14213C030010 /* ProfileView.swift */,
@@ -431,6 +440,7 @@
 				7890189081FC5ED1DB116247 /* SavingsAccountViewModel.swift */,
 				38F9BEE80AC69B5FEAE141A7 /* TransactionViewModel.swift */,
 				B3B9C76F31A78298F467E9FB /* WishListViewModel.swift */,
+				83E1781AC4904F3397942A43 /* BadgesViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -575,6 +585,7 @@
 				81833015C67E6DCDDA56F83F /* TransactionCategory.swift */,
 				2B5EECC8A2B7A7EC49E5C731 /* User.swift */,
 				2C4605F2EC6F3B323BCF3719 /* WishListItem.swift */,
+				7F89330BC992469097EC4E51 /* Badge.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -603,6 +614,15 @@
 				4975CB39C45C4DC329B7233B /* CategorySpendingView.swift */,
 			);
 			path = Analytics;
+			sourceTree = "<group>";
+		};
+		4FF2A4C4924E4796B8C97149 /* Badges */ = {
+			isa = PBXGroup;
+			children = (
+				4F8F268F501B427D908C5D87 /* BadgesView.swift */,
+				A952D3BE0A7743EB92A5467F /* BadgeCardView.swift */,
+			);
+			path = Badges;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -782,6 +802,10 @@
 				DDDDF216AD145AA2A2921C8D /* ContentView.swift in Sources */,
 				5C47E70308B479B7C6DC33B1 /* CreateTransactionView.swift in Sources */,
 				754FAE657A95A7E9E2B52E7C /* DashboardView.swift in Sources */,
+				F724CA548941485289BCB702 /* Badge.swift in Sources */,
+				D542700AB4A1473D9EB2538C /* BadgesViewModel.swift in Sources */,
+				12873EAA3C0A491DAB768D21 /* BadgesView.swift in Sources */,
+				5666E1016AD34ED289C7E4F9 /* BadgeCardView.swift in Sources */,
 				64C8BB0E6B0CDC9B443F0A0F /* DashboardViewModel.swift in Sources */,
 				98A8681444ECB2AAC9CA249A /* DesignSystem.swift in Sources */,
 				3D4132A32423DA826EA367C0 /* EditWishListItemView.swift in Sources */,

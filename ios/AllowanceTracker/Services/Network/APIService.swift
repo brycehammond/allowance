@@ -473,6 +473,107 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         return try await performRequest(urlRequest)
     }
 
+    // MARK: - Badges
+
+    /// Get all available badges
+    /// - Parameters:
+    ///   - category: Optional category filter
+    ///   - includeSecret: Whether to include secret badges
+    /// - Returns: Array of badge definitions
+    /// - Throws: APIError if request fails
+    func getAllBadges(category: BadgeCategory?, includeSecret: Bool) async throws -> [BadgeDto] {
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/badges"
+        var queryItems: [URLQueryItem] = []
+        if let category = category {
+            queryItems.append(URLQueryItem(name: "category", value: category.rawValue))
+        }
+        queryItems.append(URLQueryItem(name: "includeSecret", value: String(includeSecret)))
+        components.queryItems = queryItems.isEmpty ? nil : queryItems
+        guard let endpoint = components.url else { throw APIError.invalidURL }
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get badges earned by a child
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - category: Optional category filter
+    ///   - newOnly: Whether to only return newly earned badges
+    /// - Returns: Array of earned badges
+    /// - Throws: APIError if request fails
+    func getChildBadges(forChild childId: UUID, category: BadgeCategory?, newOnly: Bool) async throws -> [ChildBadgeDto] {
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/children/\(childId.uuidString)/badges"
+        var queryItems: [URLQueryItem] = []
+        if let category = category {
+            queryItems.append(URLQueryItem(name: "category", value: category.rawValue))
+        }
+        if newOnly {
+            queryItems.append(URLQueryItem(name: "newOnly", value: "true"))
+        }
+        components.queryItems = queryItems.isEmpty ? nil : queryItems
+        guard let endpoint = components.url else { throw APIError.invalidURL }
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get badge progress for a child
+    /// - Parameter childId: Child's unique identifier
+    /// - Returns: Array of badge progress items
+    /// - Throws: APIError if request fails
+    func getBadgeProgress(forChild childId: UUID) async throws -> [BadgeProgressDto] {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/badges/progress")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get achievement summary for a child
+    /// - Parameter childId: Child's unique identifier
+    /// - Returns: Achievement summary with stats and recent badges
+    /// - Throws: APIError if request fails
+    func getAchievementSummary(forChild childId: UUID) async throws -> AchievementSummaryDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/badges/summary")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Toggle whether a badge is displayed on child's profile
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - badgeId: Badge's unique identifier
+    ///   - request: Update request with display setting
+    /// - Returns: Updated child badge
+    /// - Throws: APIError if request fails
+    func toggleBadgeDisplay(forChild childId: UUID, badgeId: UUID, _ request: UpdateBadgeDisplayRequest) async throws -> ChildBadgeDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/badges/\(badgeId.uuidString)/display")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PATCH", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Mark badges as seen by the child
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - request: Request with badge IDs to mark as seen
+    /// - Throws: APIError if request fails
+    func markBadgesSeen(forChild childId: UUID, _ request: MarkBadgesSeenRequest) async throws {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/badges/seen")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        let _: EmptyResponse = try await performRequest(urlRequest)
+    }
+
+    /// Get points summary for a child
+    /// - Parameter childId: Child's unique identifier
+    /// - Returns: Points summary with totals and counts
+    /// - Throws: APIError if request fails
+    func getChildPoints(forChild childId: UUID) async throws -> ChildPointsDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/points")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
     // MARK: - Private Helpers
 
     /// Empty response for DELETE requests

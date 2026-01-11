@@ -265,13 +265,20 @@ struct ChildDetailView: View {
                     }
                     .tag(2)
 
+                // Badges tab
+                BadgesView(childId: child.id)
+                    .tabItem {
+                        Label("Badges", systemImage: "medal")
+                    }
+                    .tag(3)
+
                 // Savings tab (Parent only)
                 if isParent {
                     SavingsAccountView(childId: child.id)
                         .tabItem {
                             Label("Savings", systemImage: "banknote")
                         }
-                        .tag(3)
+                        .tag(4)
                 }
 
                 // Settings tab (Parent only)
@@ -280,7 +287,7 @@ struct ChildDetailView: View {
                         .tabItem {
                             Label("Settings", systemImage: "gearshape")
                         }
-                        .tag(4)
+                        .tag(5)
                 }
             }
             .tint(DesignSystem.Colors.primary)
