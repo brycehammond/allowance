@@ -337,3 +337,105 @@ export interface PendingInvite {
   expiresAt: string;
   createdAt: string;
 }
+
+// Achievement Badges
+export const BadgeCategory = {
+  Saving: 'Saving',
+  Spending: 'Spending',
+  Goals: 'Goals',
+  Chores: 'Chores',
+  Streaks: 'Streaks',
+  Milestones: 'Milestones',
+  Special: 'Special',
+} as const;
+
+export type BadgeCategory = typeof BadgeCategory[keyof typeof BadgeCategory];
+
+export const BadgeRarity = {
+  Common: 'Common',
+  Uncommon: 'Uncommon',
+  Rare: 'Rare',
+  Epic: 'Epic',
+  Legendary: 'Legendary',
+} as const;
+
+export type BadgeRarity = typeof BadgeRarity[keyof typeof BadgeRarity];
+
+export interface BadgeDto {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  iconUrl: string;
+  category: BadgeCategory;
+  categoryName: string;
+  rarity: BadgeRarity;
+  rarityName: string;
+  pointsValue: number;
+  isSecret: boolean;
+  isEarned: boolean;
+  earnedAt: string | null;
+  isDisplayed: boolean;
+  currentProgress: number | null;
+  targetProgress: number | null;
+  progressPercentage: number | null;
+}
+
+export interface ChildBadgeDto {
+  id: string;
+  badgeId: string;
+  badgeName: string;
+  badgeDescription: string;
+  iconUrl: string;
+  category: BadgeCategory;
+  categoryName: string;
+  rarity: BadgeRarity;
+  rarityName: string;
+  pointsValue: number;
+  earnedAt: string;
+  isDisplayed: boolean;
+  isNew: boolean;
+  earnedContext: string | null;
+}
+
+export interface BadgeProgressDto {
+  badgeId: string;
+  badgeName: string;
+  description: string;
+  iconUrl: string;
+  category: BadgeCategory;
+  categoryName: string;
+  rarity: BadgeRarity;
+  rarityName: string;
+  pointsValue: number;
+  currentProgress: number;
+  targetProgress: number;
+  progressPercentage: number;
+  progressText: string;
+}
+
+export interface ChildPointsDto {
+  totalPoints: number;
+  availablePoints: number;
+  spentPoints: number;
+  badgesEarned: number;
+  rewardsUnlocked: number;
+}
+
+export interface AchievementSummaryDto {
+  totalBadges: number;
+  earnedBadges: number;
+  totalPoints: number;
+  availablePoints: number;
+  recentBadges: ChildBadgeDto[];
+  inProgressBadges: BadgeProgressDto[];
+  badgesByCategory: Record<string, number>;
+}
+
+export interface UpdateBadgeDisplayRequest {
+  isDisplayed: boolean;
+}
+
+export interface MarkBadgesSeenRequest {
+  badgeIds: string[];
+}

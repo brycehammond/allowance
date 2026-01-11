@@ -32,6 +32,14 @@ import {
   type AcceptJoinRequest,
   type AcceptJoinResponse,
   type PendingInvite,
+  type BadgeCategory,
+  type BadgeDto,
+  type ChildBadgeDto,
+  type BadgeProgressDto,
+  type ChildPointsDto,
+  type AchievementSummaryDto,
+  type UpdateBadgeDisplayRequest,
+  type MarkBadgesSeenRequest,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7071';
@@ -431,6 +439,58 @@ export const invitesApi = {
 
   getPendingInvites: async (): Promise<PendingInvite[]> => {
     const response = await apiClient.get<PendingInvite[]>('/api/v1/invites');
+    return response.data;
+  },
+};
+
+// Badges API
+export const badgesApi = {
+  getAll: async (category?: BadgeCategory, includeSecret: boolean = false): Promise<BadgeDto[]> => {
+    const response = await apiClient.get<BadgeDto[]>('/api/v1/badges', {
+      params: { category, includeSecret },
+    });
+    return response.data;
+  },
+
+  getChildBadges: async (
+    childId: string,
+    category?: BadgeCategory,
+    newOnly: boolean = false
+  ): Promise<ChildBadgeDto[]> => {
+    const response = await apiClient.get<ChildBadgeDto[]>(`/api/v1/children/${childId}/badges`, {
+      params: { category, newOnly },
+    });
+    return response.data;
+  },
+
+  getBadgeProgress: async (childId: string): Promise<BadgeProgressDto[]> => {
+    const response = await apiClient.get<BadgeProgressDto[]>(`/api/v1/children/${childId}/badges/progress`);
+    return response.data;
+  },
+
+  getAchievementSummary: async (childId: string): Promise<AchievementSummaryDto> => {
+    const response = await apiClient.get<AchievementSummaryDto>(`/api/v1/children/${childId}/badges/summary`);
+    return response.data;
+  },
+
+  toggleBadgeDisplay: async (
+    childId: string,
+    badgeId: string,
+    data: UpdateBadgeDisplayRequest
+  ): Promise<ChildBadgeDto> => {
+    const response = await apiClient.patch<ChildBadgeDto>(
+      `/api/v1/children/${childId}/badges/${badgeId}/display`,
+      data
+    );
+    return response.data;
+  },
+
+  markBadgesSeen: async (childId: string, data: MarkBadgesSeenRequest): Promise<void> => {
+    await apiClient.post(`/api/v1/children/${childId}/badges/seen`, data);
+  },
+
+  getChildPoints: async (childId: string): Promise<ChildPointsDto> => {
+    const response = await apiClient.get<ChildPointsDto>(`/api/v1/children/${childId}/points`);
     return response.data;
   },
 };

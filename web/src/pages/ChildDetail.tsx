@@ -8,10 +8,11 @@ import { WishListTab } from '../components/tabs/WishListTab';
 import { AnalyticsTab } from '../components/tabs/AnalyticsTab';
 import { SavingsTab } from '../components/tabs/SavingsTab';
 import { SettingsTab } from '../components/tabs/SettingsTab';
+import { BadgesTab } from '../components/tabs/BadgesTab';
 import { Layout } from '../components/Layout';
-import { ArrowLeft, Receipt, Star, TrendingUp, Wallet, Settings } from 'lucide-react';
+import { ArrowLeft, Receipt, Star, TrendingUp, Wallet, Settings, Award } from 'lucide-react';
 
-type TabType = 'transactions' | 'wishlist' | 'analytics' | 'savings' | 'settings';
+type TabType = 'transactions' | 'wishlist' | 'analytics' | 'badges' | 'savings' | 'settings';
 
 export const ChildDetail: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
@@ -21,7 +22,7 @@ export const ChildDetail: React.FC = () => {
   const [child, setChild] = useState<Child | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['transactions', 'wishlist', 'analytics', 'savings', 'settings'].includes(tabParam)) {
+    if (tabParam && ['transactions', 'wishlist', 'analytics', 'badges', 'savings', 'settings'].includes(tabParam)) {
       return tabParam as TabType;
     }
     return 'transactions';
@@ -98,6 +99,7 @@ export const ChildDetail: React.FC = () => {
     { id: 'transactions', label: 'Transactions', icon: Receipt },
     { id: 'wishlist', label: 'Wish List', icon: Star },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+    { id: 'badges', label: 'Badges', icon: Award },
   ];
 
   // Only show savings and settings tabs to parents
@@ -184,6 +186,7 @@ export const ChildDetail: React.FC = () => {
           {activeTab === 'transactions' && <TransactionsTab childId={child.id} currentBalance={child.currentBalance} savingsBalance={child.savingsBalance} allowDebt={child.allowDebt} onBalanceChange={loadChild} />}
           {activeTab === 'wishlist' && <WishListTab childId={child.id} />}
           {activeTab === 'analytics' && <AnalyticsTab childId={child.id} />}
+          {activeTab === 'badges' && <BadgesTab childId={child.id} />}
           {activeTab === 'savings' && isParent && <SavingsTab childId={child.id} onBalanceChange={loadChild} />}
           {activeTab === 'settings' && isParent && (
             <SettingsTab childId={child.id} child={child} onUpdate={loadChild} />
