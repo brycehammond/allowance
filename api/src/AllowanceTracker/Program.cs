@@ -177,6 +177,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDeviceTokenService, DeviceTokenService>();
 builder.Services.AddScoped<ISignalRNotificationService, SignalRNotificationService>();
 builder.Services.AddScoped<IAchievementService, AchievementService>();
+builder.Services.AddScoped<ISavingsGoalService, SavingsGoalService>();
 
 // Add Firebase Push Notification service (optional - works without Firebase config)
 var firebaseCredPath = builder.Configuration["Firebase:CredentialPath"];
@@ -190,8 +191,22 @@ else
     builder.Services.AddSingleton<IFirebasePushService, NoOpFirebasePushService>();
 }
 
+// Add Azure Blob Storage for file uploads (optional - works without config)
+var blobStorageConnectionString = builder.Configuration["AzureBlobStorage:ConnectionString"];
+if (!string.IsNullOrEmpty(blobStorageConnectionString))
+{
+    builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
+}
+else
+{
+    builder.Services.AddSingleton<IBlobStorageService, NoOpBlobStorageService>();
+}
+
 // Add SignalR for real-time notifications
 builder.Services.AddSignalR();
+
+// Add Background Jobs
+builder.Services.AddHostedService<RecurringTasksJob>();
 
 // Add HttpContextAccessor for accessing HTTP context in services
 builder.Services.AddHttpContextAccessor();

@@ -30,6 +30,11 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<BadgeProgress> BadgeProgressRecords { get; set; }
     public DbSet<Reward> Rewards { get; set; }
     public DbSet<ChildReward> ChildRewards { get; set; }
+    public DbSet<SavingsGoal> SavingsGoals { get; set; }
+    public DbSet<SavingsContribution> SavingsContributions { get; set; }
+    public DbSet<ParentMatchingRule> ParentMatchingRules { get; set; }
+    public DbSet<GoalMilestone> GoalMilestones { get; set; }
+    public DbSet<GoalChallenge> GoalChallenges { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -452,6 +457,132 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             // One reward per child (can't unlock same reward twice)
             entity.HasIndex(e => new { e.ChildId, e.RewardId }).IsUnique();
             entity.HasIndex(e => e.IsEquipped);
+        });
+
+        // SavingsGoal configuration
+        builder.Entity<SavingsGoal>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.TargetAmount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.CurrentAmount).HasPrecision(10, 2).HasDefaultValue(0m);
+            entity.Property(e => e.ImageUrl).HasMaxLength(2048);
+            entity.Property(e => e.ProductUrl).HasMaxLength(2048);
+            entity.Property(e => e.AutoTransferAmount).HasPrecision(10, 2).HasDefaultValue(0m);
+            entity.Property(e => e.Priority).HasDefaultValue(1);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.SavingsGoals)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.ChildId);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => new { e.ChildId, e.Status });
+
+            // Ignore computed properties
+            entity.Ignore(e => e.RemainingAmount);
+            entity.Ignore(e => e.ProgressPercentage);
+            entity.Ignore(e => e.DaysRemaining);
+        });
+
+        // SavingsContribution configuration
+        builder.Entity<SavingsContribution>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Amount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.GoalBalanceAfter).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(500);
+
+            entity.HasOne(e => e.Goal)
+                  .WithMany(g => g.Contributions)
+                  .HasForeignKey(e => e.GoalId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.SavingsContributions)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.CreatedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.CreatedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.GoalId);
+            entity.HasIndex(e => e.ChildId);
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.CreatedAt);
+        });
+
+        // ParentMatchingRule configuration
+        builder.Entity<ParentMatchingRule>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.MatchRatio).HasPrecision(10, 4).IsRequired();
+            entity.Property(e => e.MaxMatchAmount).HasPrecision(10, 2);
+            entity.Property(e => e.TotalMatchedAmount).HasPrecision(10, 2).HasDefaultValue(0m);
+
+            entity.HasOne(e => e.Goal)
+                  .WithOne(g => g.MatchingRule)
+                  .HasForeignKey<ParentMatchingRule>(e => e.GoalId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.CreatedByParent)
+                  .WithMany()
+                  .HasForeignKey(e => e.CreatedByParentId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.GoalId).IsUnique();
+            entity.HasIndex(e => e.IsActive);
+
+            // Ignore computed property
+            entity.Ignore(e => e.RemainingMatchAmount);
+        });
+
+        // GoalMilestone configuration
+        builder.Entity<GoalMilestone>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.TargetAmount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.CelebrationMessage).HasMaxLength(500);
+            entity.Property(e => e.BonusAmount).HasPrecision(10, 2);
+
+            entity.HasOne(e => e.Goal)
+                  .WithMany(g => g.Milestones)
+                  .HasForeignKey(e => e.GoalId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.GoalId);
+            entity.HasIndex(e => new { e.GoalId, e.PercentComplete }).IsUnique();
+        });
+
+        // GoalChallenge configuration
+        builder.Entity<GoalChallenge>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.TargetAmount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.BonusAmount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(500);
+
+            entity.HasOne(e => e.Goal)
+                  .WithOne(g => g.ActiveChallenge)
+                  .HasForeignKey<GoalChallenge>(e => e.GoalId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.CreatedByParent)
+                  .WithMany()
+                  .HasForeignKey(e => e.CreatedByParentId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.GoalId);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.EndDate);
+
+            // Ignore computed properties
+            entity.Ignore(e => e.DaysRemaining);
+            entity.Ignore(e => e.IsExpired);
         });
 
         // Seed Badge data

@@ -13,6 +13,7 @@ public class AllowanceService : IAllowanceService
     private readonly ICurrentUserService _currentUser;
     private readonly ITransactionService _transactionService;
     private readonly ISavingsAccountService? _savingsAccountService;
+    private readonly ISavingsGoalService? _savingsGoalService;
     private readonly INotificationService? _notificationService;
     private readonly ILogger<AllowanceService>? _logger;
 
@@ -21,6 +22,7 @@ public class AllowanceService : IAllowanceService
         ICurrentUserService currentUser,
         ITransactionService transactionService,
         ISavingsAccountService? savingsAccountService = null,
+        ISavingsGoalService? savingsGoalService = null,
         INotificationService? notificationService = null,
         ILogger<AllowanceService>? logger = null)
     {
@@ -28,6 +30,7 @@ public class AllowanceService : IAllowanceService
         _currentUser = currentUser;
         _transactionService = transactionService;
         _savingsAccountService = savingsAccountService;
+        _savingsGoalService = savingsGoalService;
         _notificationService = notificationService;
         _logger = logger;
     }
@@ -88,6 +91,26 @@ public class AllowanceService : IAllowanceService
                     "Failed to process automatic savings transfer for child {ChildId}. Allowance was paid successfully.",
                     childId);
                 // Don't throw - allowance payment succeeded, savings transfer is optional
+            }
+        }
+
+        // Process automatic transfers to savings goals
+        if (_savingsGoalService != null)
+        {
+            try
+            {
+                await _savingsGoalService.ProcessAutoTransfersAsync(childId, child.WeeklyAllowance);
+
+                _logger?.LogInformation(
+                    "Processed savings goal auto-transfers for child {ChildId}",
+                    childId);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex,
+                    "Failed to process savings goal auto-transfers for child {ChildId}. Allowance was paid successfully.",
+                    childId);
+                // Don't throw - allowance payment succeeded, auto-transfers are optional
             }
         }
 

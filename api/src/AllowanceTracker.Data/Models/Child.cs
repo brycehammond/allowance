@@ -120,4 +120,6 @@ public class Child : IHasCreatedAt
     public virtual ICollection<ChildBadge> Badges { get; set; } = new List<ChildBadge>();
     public virtual ICollection<BadgeProgress> BadgeProgress { get; set; } = new List<BadgeProgress>();
     public virtual ICollection<ChildReward> Rewards { get; set; } = new List<ChildReward>();
+    public virtual ICollection<SavingsGoal> SavingsGoals { get; set; } = new List<SavingsGoal>();
+    public virtual ICollection<SavingsContribution> SavingsContributions { get; set; } = new List<SavingsContribution>();
 }
