@@ -40,6 +40,8 @@ import {
   type AchievementSummaryDto,
   type UpdateBadgeDisplayRequest,
   type MarkBadgesSeenRequest,
+  type RewardType,
+  type RewardDto,
   type ChoreTask,
   type ChoreTaskStatus,
   type CreateTaskRequest,
@@ -524,6 +526,39 @@ export const badgesApi = {
   getChildPoints: async (childId: string): Promise<ChildPointsDto> => {
     const response = await apiClient.get<ChildPointsDto>(`/api/v1/children/${childId}/points`);
     return response.data;
+  },
+};
+
+// Rewards API
+export const rewardsApi = {
+  getAvailable: async (type?: RewardType, childId?: string): Promise<RewardDto[]> => {
+    const response = await apiClient.get<RewardDto[]>('/api/v1/rewards', {
+      params: { type, childId },
+    });
+    return response.data;
+  },
+
+  getChildRewards: async (childId: string): Promise<RewardDto[]> => {
+    const response = await apiClient.get<RewardDto[]>(`/api/v1/children/${childId}/rewards`);
+    return response.data;
+  },
+
+  unlock: async (childId: string, rewardId: string): Promise<RewardDto> => {
+    const response = await apiClient.post<RewardDto>(
+      `/api/v1/children/${childId}/rewards/${rewardId}/unlock`
+    );
+    return response.data;
+  },
+
+  equip: async (childId: string, rewardId: string): Promise<RewardDto> => {
+    const response = await apiClient.post<RewardDto>(
+      `/api/v1/children/${childId}/rewards/${rewardId}/equip`
+    );
+    return response.data;
+  },
+
+  unequip: async (childId: string, rewardId: string): Promise<void> => {
+    await apiClient.post(`/api/v1/children/${childId}/rewards/${rewardId}/unequip`);
   },
 };
 

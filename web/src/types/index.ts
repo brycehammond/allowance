@@ -440,6 +440,30 @@ export interface MarkBadgesSeenRequest {
   badgeIds: string[];
 }
 
+// Rewards
+export const RewardType = {
+  Avatar: 'Avatar',
+  Theme: 'Theme',
+  Title: 'Title',
+  Special: 'Special',
+} as const;
+
+export type RewardType = typeof RewardType[keyof typeof RewardType];
+
+export interface RewardDto {
+  id: string;
+  name: string;
+  description: string;
+  type: RewardType;
+  typeName: string;
+  value: string;
+  previewUrl: string | null;
+  pointsCost: number;
+  isUnlocked: boolean;
+  isEquipped: boolean;
+  canAfford: boolean;
+}
+
 // Tasks/Chores
 export const ChoreTaskStatus = {
   Active: 'Active',
