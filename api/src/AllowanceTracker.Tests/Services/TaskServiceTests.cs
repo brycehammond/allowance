@@ -623,4 +623,223 @@ public class TaskServiceTests : IDisposable
     }
 
     #endregion
+
+    #region GenerateRecurringTasksAsync Tests
+
+    [Fact]
+    public async System.Threading.Tasks.Task GenerateRecurringTasksAsync_DailyTask_CreatesTaskInstance()
+    {
+        // Arrange
+        var recurringTask = new ChoreTask
+        {
+            Id = Guid.NewGuid(),
+            ChildId = _childId,
+            Title = "Make bed",
+            Description = "Make your bed every morning",
+            RewardAmount = 1.00m,
+            Status = ChoreTaskStatus.Active,
+            IsRecurring = true,
+            RecurrenceType = RecurrenceType.Daily,
+            CreatedById = _parentId,
+            CreatedAt = DateTime.UtcNow.AddDays(-7)
+        };
+        _context.Tasks.Add(recurringTask);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _taskService.GenerateRecurringTasksAsync();
+
+        // Assert
+        count.Should().Be(1);
+
+        // Check a new completion was created for today
+        var completions = await _context.TaskCompletions
+            .Where(tc => tc.TaskId == recurringTask.Id)
+            .ToListAsync();
+
+        completions.Should().HaveCount(1);
+        completions.First().Status.Should().Be(CompletionStatus.PendingApproval);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GenerateRecurringTasksAsync_WeeklyTaskOnCorrectDay_CreatesTaskInstance()
+    {
+        // Arrange
+        var today = DateTime.UtcNow.DayOfWeek;
+        var recurringTask = new ChoreTask
+        {
+            Id = Guid.NewGuid(),
+            ChildId = _childId,
+            Title = "Weekly chore",
+            RewardAmount = 5.00m,
+            Status = ChoreTaskStatus.Active,
+            IsRecurring = true,
+            RecurrenceType = RecurrenceType.Weekly,
+            RecurrenceDay = today, // Set to today's day of week
+            CreatedById = _parentId,
+            CreatedAt = DateTime.UtcNow.AddDays(-7)
+        };
+        _context.Tasks.Add(recurringTask);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _taskService.GenerateRecurringTasksAsync();
+
+        // Assert
+        count.Should().Be(1);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GenerateRecurringTasksAsync_WeeklyTaskOnWrongDay_DoesNotCreateTaskInstance()
+    {
+        // Arrange
+        var today = DateTime.UtcNow.DayOfWeek;
+        var differentDay = (DayOfWeek)(((int)today + 3) % 7); // Pick a different day
+
+        var recurringTask = new ChoreTask
+        {
+            Id = Guid.NewGuid(),
+            ChildId = _childId,
+            Title = "Weekly chore",
+            RewardAmount = 5.00m,
+            Status = ChoreTaskStatus.Active,
+            IsRecurring = true,
+            RecurrenceType = RecurrenceType.Weekly,
+            RecurrenceDay = differentDay, // Set to a different day
+            CreatedById = _parentId,
+            CreatedAt = DateTime.UtcNow.AddDays(-7)
+        };
+        _context.Tasks.Add(recurringTask);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _taskService.GenerateRecurringTasksAsync();
+
+        // Assert
+        count.Should().Be(0);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GenerateRecurringTasksAsync_MonthlyTaskOnCorrectDay_CreatesTaskInstance()
+    {
+        // Arrange
+        var today = DateTime.UtcNow.Day;
+        var recurringTask = new ChoreTask
+        {
+            Id = Guid.NewGuid(),
+            ChildId = _childId,
+            Title = "Monthly deep clean",
+            RewardAmount = 20.00m,
+            Status = ChoreTaskStatus.Active,
+            IsRecurring = true,
+            RecurrenceType = RecurrenceType.Monthly,
+            RecurrenceDayOfMonth = today, // Set to today's day of month
+            CreatedById = _parentId,
+            CreatedAt = DateTime.UtcNow.AddMonths(-1)
+        };
+        _context.Tasks.Add(recurringTask);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _taskService.GenerateRecurringTasksAsync();
+
+        // Assert
+        count.Should().Be(1);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GenerateRecurringTasksAsync_ArchivedTask_DoesNotGenerate()
+    {
+        // Arrange
+        var recurringTask = new ChoreTask
+        {
+            Id = Guid.NewGuid(),
+            ChildId = _childId,
+            Title = "Archived recurring task",
+            RewardAmount = 5.00m,
+            Status = ChoreTaskStatus.Archived, // Archived
+            ArchivedAt = DateTime.UtcNow.AddDays(-1),
+            IsRecurring = true,
+            RecurrenceType = RecurrenceType.Daily,
+            CreatedById = _parentId,
+            CreatedAt = DateTime.UtcNow.AddDays(-7)
+        };
+        _context.Tasks.Add(recurringTask);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _taskService.GenerateRecurringTasksAsync();
+
+        // Assert
+        count.Should().Be(0);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GenerateRecurringTasksAsync_AlreadyHasTodayCompletion_DoesNotDuplicate()
+    {
+        // Arrange
+        var recurringTask = new ChoreTask
+        {
+            Id = Guid.NewGuid(),
+            ChildId = _childId,
+            Title = "Daily chore",
+            RewardAmount = 2.00m,
+            Status = ChoreTaskStatus.Active,
+            IsRecurring = true,
+            RecurrenceType = RecurrenceType.Daily,
+            CreatedById = _parentId,
+            CreatedAt = DateTime.UtcNow.AddDays(-7)
+        };
+
+        var todayCompletion = new TaskCompletion
+        {
+            Id = Guid.NewGuid(),
+            TaskId = recurringTask.Id,
+            ChildId = _childId,
+            CompletedAt = DateTime.UtcNow.Date.AddHours(8), // Today's completion
+            Status = CompletionStatus.PendingApproval
+        };
+
+        _context.Tasks.Add(recurringTask);
+        _context.TaskCompletions.Add(todayCompletion);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _taskService.GenerateRecurringTasksAsync();
+
+        // Assert
+        count.Should().Be(0); // Should not create duplicate
+
+        var completions = await _context.TaskCompletions
+            .Where(tc => tc.TaskId == recurringTask.Id)
+            .ToListAsync();
+        completions.Should().HaveCount(1); // Still only one completion
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GenerateRecurringTasksAsync_NonRecurringTask_IsIgnored()
+    {
+        // Arrange
+        var oneTimeTask = new ChoreTask
+        {
+            Id = Guid.NewGuid(),
+            ChildId = _childId,
+            Title = "One-time task",
+            RewardAmount = 10.00m,
+            Status = ChoreTaskStatus.Active,
+            IsRecurring = false, // Not recurring
+            CreatedById = _parentId,
+            CreatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+        _context.Tasks.Add(oneTimeTask);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _taskService.GenerateRecurringTasksAsync();
+
+        // Assert
+        count.Should().Be(0);
+    }
+
+    #endregion
 }

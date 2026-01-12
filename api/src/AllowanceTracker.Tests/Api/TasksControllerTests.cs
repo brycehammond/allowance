@@ -3,7 +3,9 @@ using AllowanceTracker.DTOs.Tasks;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -13,6 +15,8 @@ public class TasksControllerTests
 {
     private readonly Mock<ITaskService> _mockTaskService;
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
+    private readonly Mock<IBlobStorageService> _mockBlobStorageService;
+    private readonly Mock<ILogger<TasksController>> _mockLogger;
     private readonly TasksController _controller;
     private readonly Guid _currentUserId = Guid.NewGuid();
 
@@ -20,12 +24,26 @@ public class TasksControllerTests
     {
         _mockTaskService = new Mock<ITaskService>();
         _mockCurrentUserService = new Mock<ICurrentUserService>();
+        _mockBlobStorageService = new Mock<IBlobStorageService>();
+        _mockLogger = new Mock<ILogger<TasksController>>();
 
         _mockCurrentUserService
             .Setup(x => x.UserId)
             .Returns(_currentUserId);
 
-        _controller = new TasksController(_mockTaskService.Object, _mockCurrentUserService.Object);
+        _mockBlobStorageService
+            .Setup(x => x.AllowedContentTypes)
+            .Returns(new[] { "image/jpeg", "image/png" });
+
+        _mockBlobStorageService
+            .Setup(x => x.MaxFileSizeBytes)
+            .Returns(10 * 1024 * 1024);
+
+        _controller = new TasksController(
+            _mockTaskService.Object,
+            _mockCurrentUserService.Object,
+            _mockBlobStorageService.Object,
+            _mockLogger.Object);
     }
 
     #region GetTasks Tests
@@ -263,23 +281,23 @@ public class TasksControllerTests
     #region CompleteTask Tests
 
     [Fact]
-    public async Task CompleteTask_ReturnsCreatedWithCompletion()
+    public async Task CompleteTask_WithoutPhoto_ReturnsCreatedWithCompletion()
     {
         // Arrange
         var taskId = Guid.NewGuid();
-        var dto = new CompleteTaskDto("All done!", null);
+        var notes = "All done!";
 
         var completion = new TaskCompletionDto(
             Guid.NewGuid(), taskId, "Clean room", 5m, Guid.NewGuid(), "Child 1",
-            DateTime.UtcNow, dto.Notes, null, CompletionStatus.PendingApproval,
+            DateTime.UtcNow, notes, null, CompletionStatus.PendingApproval,
             null, null, null, null, null);
 
         _mockTaskService
-            .Setup(x => x.CompleteTaskAsync(taskId, dto, _currentUserId))
+            .Setup(x => x.CompleteTaskAsync(taskId, It.Is<CompleteTaskDto>(d => d.Notes == notes && d.PhotoUrl == null), _currentUserId))
             .ReturnsAsync(completion);
 
         // Act
-        var result = await _controller.CompleteTask(taskId, dto);
+        var result = await _controller.CompleteTask(taskId, notes, null);
 
         // Assert
         var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
@@ -288,18 +306,90 @@ public class TasksControllerTests
     }
 
     [Fact]
+    public async Task CompleteTask_WithPhoto_UploadsAndReturnsCompletion()
+    {
+        // Arrange
+        var taskId = Guid.NewGuid();
+        var notes = "Check the photo!";
+        var photoUrl = "https://allowanceuploads.blob.core.windows.net/photos/tasks/test.jpg";
+
+        var mockFile = new Mock<IFormFile>();
+        mockFile.Setup(f => f.FileName).Returns("proof.jpg");
+        mockFile.Setup(f => f.ContentType).Returns("image/jpeg");
+        mockFile.Setup(f => f.Length).Returns(1024);
+        mockFile.Setup(f => f.OpenReadStream()).Returns(new MemoryStream(new byte[1024]));
+
+        _mockBlobStorageService
+            .Setup(x => x.UploadAsync(It.IsAny<Stream>(), "proof.jpg", "image/jpeg", $"tasks/{taskId}"))
+            .ReturnsAsync(photoUrl);
+
+        var completion = new TaskCompletionDto(
+            Guid.NewGuid(), taskId, "Clean room", 5m, Guid.NewGuid(), "Child 1",
+            DateTime.UtcNow, notes, photoUrl, CompletionStatus.PendingApproval,
+            null, null, null, null, null);
+
+        _mockTaskService
+            .Setup(x => x.CompleteTaskAsync(taskId, It.Is<CompleteTaskDto>(d => d.Notes == notes && d.PhotoUrl == photoUrl), _currentUserId))
+            .ReturnsAsync(completion);
+
+        // Act
+        var result = await _controller.CompleteTask(taskId, notes, mockFile.Object);
+
+        // Assert
+        var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+        var returnedCompletion = createdResult.Value.Should().BeAssignableTo<TaskCompletionDto>().Subject;
+        returnedCompletion.PhotoUrl.Should().Be(photoUrl);
+        _mockBlobStorageService.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "proof.jpg", "image/jpeg", $"tasks/{taskId}"), Times.Once);
+    }
+
+    [Fact]
+    public async Task CompleteTask_WithInvalidFileType_ReturnsBadRequest()
+    {
+        // Arrange
+        var taskId = Guid.NewGuid();
+
+        var mockFile = new Mock<IFormFile>();
+        mockFile.Setup(f => f.FileName).Returns("document.pdf");
+        mockFile.Setup(f => f.ContentType).Returns("application/pdf");
+        mockFile.Setup(f => f.Length).Returns(1024);
+
+        // Act
+        var result = await _controller.CompleteTask(taskId, null, mockFile.Object);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Fact]
+    public async Task CompleteTask_WithFileTooLarge_ReturnsBadRequest()
+    {
+        // Arrange
+        var taskId = Guid.NewGuid();
+
+        var mockFile = new Mock<IFormFile>();
+        mockFile.Setup(f => f.FileName).Returns("large.jpg");
+        mockFile.Setup(f => f.ContentType).Returns("image/jpeg");
+        mockFile.Setup(f => f.Length).Returns(11 * 1024 * 1024); // 11 MB
+
+        // Act
+        var result = await _controller.CompleteTask(taskId, null, mockFile.Object);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Fact]
     public async Task CompleteTask_ReturnsBadRequest_WhenTaskArchived()
     {
         // Arrange
         var taskId = Guid.NewGuid();
-        var dto = new CompleteTaskDto(null, null);
 
         _mockTaskService
-            .Setup(x => x.CompleteTaskAsync(taskId, dto, _currentUserId))
+            .Setup(x => x.CompleteTaskAsync(taskId, It.IsAny<CompleteTaskDto>(), _currentUserId))
             .ThrowsAsync(new InvalidOperationException("Cannot complete archived task"));
 
         // Act
-        var result = await _controller.CompleteTask(taskId, dto);
+        var result = await _controller.CompleteTask(taskId, null, null);
 
         // Assert
         result.Result.Should().BeOfType<BadRequestObjectResult>();

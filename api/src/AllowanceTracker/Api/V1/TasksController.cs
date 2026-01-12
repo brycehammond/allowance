@@ -13,11 +13,19 @@ public class TasksController : ControllerBase
 {
     private readonly ITaskService _taskService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IBlobStorageService _blobStorageService;
+    private readonly ILogger<TasksController> _logger;
 
-    public TasksController(ITaskService taskService, ICurrentUserService currentUserService)
+    public TasksController(
+        ITaskService taskService,
+        ICurrentUserService currentUserService,
+        IBlobStorageService blobStorageService,
+        ILogger<TasksController> logger)
     {
         _taskService = taskService;
         _currentUserService = currentUserService;
+        _blobStorageService = blobStorageService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -129,14 +137,68 @@ public class TasksController : ControllerBase
     }
 
     /// <summary>
-    /// Mark task as complete (Children only - assigned child)
+    /// Mark task as complete with optional photo proof (Children only - assigned child)
     /// </summary>
+    /// <remarks>
+    /// Accepts multipart form data with:
+    /// - photo: Optional image file (JPEG, PNG, GIF, WEBP)
+    /// - notes: Optional completion notes
+    ///
+    /// The photo is automatically uploaded to blob storage and the URL is stored with the completion.
+    /// </remarks>
     [HttpPost("{id}/complete")]
-    public async Task<ActionResult<TaskCompletionDto>> CompleteTask(Guid id, [FromBody] CompleteTaskDto dto)
+    [RequestSizeLimit(10 * 1024 * 1024)] // 10 MB limit
+    public async Task<ActionResult<TaskCompletionDto>> CompleteTask(
+        Guid id,
+        [FromForm] string? notes,
+        IFormFile? photo)
     {
         try
         {
             var userId = _currentUserService.UserId;
+            string? photoUrl = null;
+
+            // Upload photo if provided
+            if (photo != null && photo.Length > 0)
+            {
+                // Validate content type
+                if (!_blobStorageService.AllowedContentTypes.Contains(photo.ContentType.ToLowerInvariant()))
+                {
+                    return BadRequest(new
+                    {
+                        error = $"File type '{photo.ContentType}' is not allowed",
+                        allowedTypes = _blobStorageService.AllowedContentTypes
+                    });
+                }
+
+                // Validate file size
+                if (photo.Length > _blobStorageService.MaxFileSizeBytes)
+                {
+                    return BadRequest(new
+                    {
+                        error = $"File size exceeds maximum allowed size of {_blobStorageService.MaxFileSizeBytes / 1024 / 1024} MB"
+                    });
+                }
+
+                try
+                {
+                    using var stream = photo.OpenReadStream();
+                    photoUrl = await _blobStorageService.UploadAsync(
+                        stream,
+                        photo.FileName,
+                        photo.ContentType,
+                        $"tasks/{id}");
+
+                    _logger.LogInformation("Photo uploaded for task {TaskId}: {PhotoUrl}", id, photoUrl);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to upload photo for task {TaskId}", id);
+                    return StatusCode(500, new { error = "Failed to upload photo" });
+                }
+            }
+
+            var dto = new CompleteTaskDto(notes, photoUrl);
             var completion = await _taskService.CompleteTaskAsync(id, dto, userId);
             return CreatedAtAction(nameof(GetTaskCompletions), new { taskId = id }, completion);
         }

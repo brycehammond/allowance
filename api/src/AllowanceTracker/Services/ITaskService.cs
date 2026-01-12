@@ -23,4 +23,11 @@ public interface ITaskService
 
     // Statistics
     Task<TaskStatisticsDto> GetTaskStatisticsAsync(Guid childId, Guid userId);
+
+    // Recurring Task Generation (Background Job)
+    /// <summary>
+    /// Generates task instances from recurring task templates.
+    /// Called by background job to create today's recurring tasks.
+    /// </summary>
+    Task<int> GenerateRecurringTasksAsync();
 }

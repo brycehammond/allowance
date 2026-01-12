@@ -562,4 +562,72 @@ public class TaskService : ITaskService
             TransactionId: completion.TransactionId
         );
     }
+
+    public async Task<int> GenerateRecurringTasksAsync()
+    {
+        var now = DateTime.UtcNow;
+        var today = now.Date;
+        var generatedCount = 0;
+
+        // Get all active recurring tasks
+        var recurringTasks = await _context.Tasks
+            .Include(t => t.Completions)
+            .Where(t => t.IsRecurring && t.Status == ChoreTaskStatus.Active)
+            .ToListAsync();
+
+        foreach (var task in recurringTasks)
+        {
+            // Check if we should generate a task instance today
+            if (!ShouldGenerateToday(task, now))
+            {
+                continue;
+            }
+
+            // Check if already has a completion for today
+            var hasCompletionToday = task.Completions.Any(c =>
+                c.CompletedAt.Date == today);
+
+            if (hasCompletionToday)
+            {
+                continue;
+            }
+
+            // Create a new pending completion for today
+            var completion = new TaskCompletion
+            {
+                Id = Guid.NewGuid(),
+                TaskId = task.Id,
+                ChildId = task.ChildId,
+                CompletedAt = now,
+                Status = CompletionStatus.PendingApproval,
+                Notes = $"Auto-generated recurring task for {today:yyyy-MM-dd}"
+            };
+
+            _context.TaskCompletions.Add(completion);
+            generatedCount++;
+        }
+
+        if (generatedCount > 0)
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        return generatedCount;
+    }
+
+    private bool ShouldGenerateToday(ChoreTask task, DateTime now)
+    {
+        if (task.RecurrenceType == null)
+        {
+            return false;
+        }
+
+        return task.RecurrenceType switch
+        {
+            RecurrenceType.Daily => true,
+            RecurrenceType.Weekly => task.RecurrenceDay == now.DayOfWeek,
+            RecurrenceType.Monthly => task.RecurrenceDayOfMonth == now.Day,
+            _ => false
+        };
+    }
 }
