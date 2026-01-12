@@ -11,6 +11,7 @@ import {
   DollarSign,
   Key,
 } from 'lucide-react';
+import { NotificationBell } from './notifications';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -92,6 +93,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </p>
                   <p className="text-xs text-primary-200">{user?.role}</p>
                 </div>
+                <NotificationBell />
                 <button
                   onClick={handleLogout}
                   className="ml-2 rounded-md p-2 text-primary-200 hover:bg-primary-600 hover:text-white transition-colors"
@@ -112,16 +114,19 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <DollarSign className="h-6 w-6 text-white" />
             <h1 className="ml-2 text-lg font-bold text-white">Earn &amp; Learn</h1>
           </div>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="rounded-md p-2 text-white hover:bg-primary-600"
-          >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="rounded-md p-2 text-white hover:bg-primary-600"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile menu overlay */}

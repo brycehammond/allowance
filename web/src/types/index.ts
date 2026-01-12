@@ -743,3 +743,143 @@ export interface CreateGoalChallengeRequest {
 export interface MarkGoalPurchasedRequest {
   purchaseNotes?: string;
 }
+
+// Notifications
+export const NotificationType = {
+  // Balance & Transactions
+  BalanceAlert: 1,
+  LowBalanceWarning: 2,
+  TransactionCreated: 3,
+  // Allowance
+  AllowanceDeposit: 10,
+  AllowancePaused: 11,
+  AllowanceResumed: 12,
+  // Goals & Savings
+  GoalProgress: 20,
+  GoalMilestone: 21,
+  GoalCompleted: 22,
+  ParentMatchAdded: 23,
+  // Tasks
+  TaskAssigned: 30,
+  TaskReminder: 31,
+  TaskCompleted: 32,
+  ApprovalRequired: 33,
+  TaskApproved: 34,
+  TaskRejected: 35,
+  // Budget
+  BudgetWarning: 40,
+  BudgetExceeded: 41,
+  // Achievements
+  AchievementUnlocked: 50,
+  StreakUpdate: 51,
+  // Family
+  FamilyInvite: 60,
+  ChildAdded: 61,
+  GiftReceived: 62,
+  // System
+  WeeklySummary: 70,
+  MonthlySummary: 71,
+  SystemAnnouncement: 99,
+} as const;
+
+export type NotificationType = typeof NotificationType[keyof typeof NotificationType];
+
+export const NotificationStatus = {
+  Pending: 1,
+  Sent: 2,
+  Delivered: 3,
+  Failed: 4,
+  Expired: 5,
+} as const;
+
+export type NotificationStatus = typeof NotificationStatus[keyof typeof NotificationStatus];
+
+export const NotificationChannel = {
+  InApp: 1,
+  Push: 2,
+  Email: 3,
+  All: 99,
+} as const;
+
+export type NotificationChannel = typeof NotificationChannel[keyof typeof NotificationChannel];
+
+export const DevicePlatform = {
+  iOS: 1,
+  Android: 2,
+  Web: 3,
+} as const;
+
+export type DevicePlatform = typeof DevicePlatform[keyof typeof DevicePlatform];
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  typeName: string;
+  title: string;
+  body: string;
+  data?: string;
+  isRead: boolean;
+  readAt?: string;
+  createdAt: string;
+  relatedEntityType?: string;
+  relatedEntityId?: string;
+  timeAgo: string;
+}
+
+export interface NotificationListResponse {
+  notifications: Notification[];
+  unreadCount: number;
+  totalCount: number;
+  hasMore: boolean;
+}
+
+export interface NotificationPreferenceItem {
+  notificationType: NotificationType;
+  typeName: string;
+  category: string;
+  inAppEnabled: boolean;
+  pushEnabled: boolean;
+  emailEnabled: boolean;
+}
+
+export interface NotificationPreferences {
+  preferences: NotificationPreferenceItem[];
+  quietHoursEnabled: boolean;
+  quietHoursStart?: string;
+  quietHoursEnd?: string;
+}
+
+export interface RegisterDeviceRequest {
+  token: string;
+  platform: DevicePlatform;
+  deviceName?: string;
+  appVersion?: string;
+}
+
+export interface DeviceTokenResponse {
+  id: string;
+  platform: DevicePlatform;
+  deviceName?: string;
+  isActive: boolean;
+  createdAt: string;
+  lastUsedAt?: string;
+}
+
+export interface MarkNotificationsReadRequest {
+  notificationIds?: string[];
+}
+
+export interface UpdateNotificationPreferencesRequest {
+  preferences: Array<{
+    notificationType: NotificationType;
+    inAppEnabled: boolean;
+    pushEnabled: boolean;
+    emailEnabled: boolean;
+  }>;
+}
+
+export interface UpdateQuietHoursRequest {
+  enabled: boolean;
+  startTime?: string;
+  endTime?: string;
+}
