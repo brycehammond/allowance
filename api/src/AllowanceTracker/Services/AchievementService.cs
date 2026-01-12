@@ -221,7 +221,6 @@ public class AchievementService : IAchievementService
 
     private async Task<bool> EvaluateBadgeCriteriaAsync(Badge badge, Guid childId, object? triggerData)
     {
-        // Simplified evaluation - real implementation would be more comprehensive
         var config = JsonSerializer.Deserialize<BadgeCriteriaConfig>(badge.CriteriaConfig) ?? new BadgeCriteriaConfig();
 
         return badge.CriteriaType switch
@@ -230,6 +229,10 @@ public class AchievementService : IAchievementService
             BadgeCriteriaType.CountThreshold => await EvaluateCountThresholdAsync(config, childId),
             BadgeCriteriaType.AmountThreshold => await EvaluateAmountThresholdAsync(config, childId),
             BadgeCriteriaType.StreakCount => await EvaluateStreakCountAsync(config, childId),
+            BadgeCriteriaType.PercentageTarget => await EvaluatePercentageTargetAsync(config, childId, triggerData),
+            BadgeCriteriaType.GoalCompletion => await EvaluateGoalCompletionAsync(config, childId),
+            BadgeCriteriaType.TimeBasedAction => EvaluateTimeBasedAction(config, triggerData),
+            BadgeCriteriaType.Compound => await EvaluateCompoundAsync(config, childId, triggerData),
             _ => false
         };
     }
@@ -278,6 +281,154 @@ public class AchievementService : IAchievementService
 
         var child = await _context.Children.FindAsync(childId);
         return child?.SavingStreak >= config.StreakTarget.Value;
+    }
+
+    private async Task<bool> EvaluatePercentageTargetAsync(BadgeCriteriaConfig config, Guid childId, object? triggerData)
+    {
+        if (!config.PercentageTarget.HasValue)
+            return false;
+
+        var child = await _context.Children.FindAsync(childId);
+        if (child == null || child.WeeklyAllowance <= 0)
+            return false;
+
+        // Calculate percentage based on MeasureField
+        decimal percentage = 0;
+
+        if (config.MeasureField == "savings_rate" || config.MeasureField == null)
+        {
+            // Calculate what percentage of allowance was saved
+            // If triggerData contains the savings amount, use that
+            if (triggerData != null)
+            {
+                try
+                {
+                    var json = JsonSerializer.Serialize(triggerData);
+                    var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+                    if (data != null && data.TryGetValue("Amount", out var amountEl) && amountEl.TryGetDecimal(out var amount))
+                    {
+                        percentage = (amount / child.WeeklyAllowance) * 100;
+                    }
+                }
+                catch
+                {
+                    // Fall back to checking savings balance as percentage of total earned
+                    var totalEarned = await _context.Transactions
+                        .Where(t => t.ChildId == childId && t.Type == TransactionType.Credit)
+                        .SumAsync(t => t.Amount);
+                    if (totalEarned > 0)
+                    {
+                        percentage = (child.SavingsBalance / totalEarned) * 100;
+                    }
+                }
+            }
+            else
+            {
+                // Check lifetime savings rate
+                var totalEarned = await _context.Transactions
+                    .Where(t => t.ChildId == childId && t.Type == TransactionType.Credit)
+                    .SumAsync(t => t.Amount);
+                if (totalEarned > 0)
+                {
+                    var totalSaved = await _context.SavingsTransactions
+                        .Where(st => st.ChildId == childId && st.Type == SavingsTransactionType.Deposit)
+                        .SumAsync(st => st.Amount);
+                    percentage = (totalSaved / totalEarned) * 100;
+                }
+            }
+        }
+
+        return percentage >= config.PercentageTarget.Value;
+    }
+
+    private async Task<bool> EvaluateGoalCompletionAsync(BadgeCriteriaConfig config, Guid childId)
+    {
+        var targetGoals = config.GoalTarget ?? config.CountTarget ?? 1;
+
+        var completedGoals = await _context.SavingsGoals
+            .CountAsync(g => g.ChildId == childId && g.Status == GoalStatus.Completed);
+
+        return completedGoals >= targetGoals;
+    }
+
+    private bool EvaluateTimeBasedAction(BadgeCriteriaConfig config, object? triggerData)
+    {
+        if (string.IsNullOrEmpty(config.TimeCondition))
+            return false;
+
+        var now = DateTime.UtcNow;
+
+        return config.TimeCondition switch
+        {
+            // Same day as allowance - check if action happened on same day as allowance
+            "same_day_as_allowance" => true, // If triggered during allowance, it's same day
+
+            // Weekend saver - action on Saturday or Sunday
+            "weekend" => now.DayOfWeek == DayOfWeek.Saturday || now.DayOfWeek == DayOfWeek.Sunday,
+
+            // Early bird - action before 9 AM
+            "early_bird" => now.Hour < 9,
+
+            // Night owl - action after 9 PM
+            "night_owl" => now.Hour >= 21,
+
+            // Start of month - first 3 days
+            "start_of_month" => now.Day <= 3,
+
+            // End of month - last 3 days
+            "end_of_month" => now.Day >= DateTime.DaysInMonth(now.Year, now.Month) - 2,
+
+            // Consistent saver - this would typically be tracked via streak
+            "consistent" => true,
+
+            _ => false
+        };
+    }
+
+    private async Task<bool> EvaluateCompoundAsync(BadgeCriteriaConfig config, Guid childId, object? triggerData)
+    {
+        if (config.SubCriteria == null || config.SubCriteria.Count == 0)
+            return false;
+
+        // All sub-criteria must be met
+        foreach (var subConfig in config.SubCriteria)
+        {
+            // Create a temporary badge with the sub-criteria to evaluate
+            var subBadge = new Badge
+            {
+                CriteriaType = DetermineCriteriaType(subConfig),
+                CriteriaConfig = JsonSerializer.Serialize(subConfig)
+            };
+
+            var subResult = await EvaluateBadgeCriteriaAsync(subBadge, childId, triggerData);
+            if (!subResult)
+                return false;
+        }
+
+        return true;
+    }
+
+    private static BadgeCriteriaType DetermineCriteriaType(BadgeCriteriaConfig config)
+    {
+        // Determine criteria type based on which fields are populated
+        if (config.SubCriteria != null && config.SubCriteria.Count > 0)
+            return BadgeCriteriaType.Compound;
+        if (!string.IsNullOrEmpty(config.TimeCondition))
+            return BadgeCriteriaType.TimeBasedAction;
+        if (config.GoalTarget.HasValue)
+            return BadgeCriteriaType.GoalCompletion;
+        if (config.PercentageTarget.HasValue)
+            return BadgeCriteriaType.PercentageTarget;
+        if (config.StreakTarget.HasValue)
+            return BadgeCriteriaType.StreakCount;
+        if (config.AmountTarget.HasValue)
+            return BadgeCriteriaType.AmountThreshold;
+        if (config.CountTarget.HasValue)
+            return BadgeCriteriaType.CountThreshold;
+        if (!string.IsNullOrEmpty(config.ActionType))
+            return BadgeCriteriaType.SingleAction;
+
+        return BadgeCriteriaType.SingleAction;
     }
 
     #endregion
