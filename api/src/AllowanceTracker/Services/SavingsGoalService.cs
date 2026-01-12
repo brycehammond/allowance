@@ -349,6 +349,69 @@ public class SavingsGoalService : ISavingsGoalService
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
+            // Send notifications after successful commit
+            if (_notificationService != null)
+            {
+                try
+                {
+                    // Notify about parent match if applicable
+                    if (matchAmount > 0)
+                    {
+                        await _notificationService.SendNotificationAsync(
+                            goal.Child.UserId,
+                            NotificationType.ParentMatchAdded,
+                            "Parent Match!",
+                            $"Your parent added {matchAmount:C} to match your savings for \"{goal.Name}\"!",
+                            data: new { goalId = goal.Id, matchAmount = matchAmount, goalName = goal.Name },
+                            relatedEntityId: goal.Id,
+                            relatedEntityType: "SavingsGoal");
+                    }
+
+                    // Notify about milestone reached
+                    if (milestoneReached != null)
+                    {
+                        await _notificationService.SendNotificationAsync(
+                            goal.Child.UserId,
+                            NotificationType.GoalMilestone,
+                            "Milestone Reached!",
+                            $"You've reached {milestoneReached.PercentComplete}% of your \"{goal.Name}\" goal!",
+                            data: new { goalId = goal.Id, milestone = milestoneReached.PercentComplete, goalName = goal.Name },
+                            relatedEntityId: goal.Id,
+                            relatedEntityType: "SavingsGoal");
+                    }
+
+                    // Notify about goal completion
+                    if (isCompleted)
+                    {
+                        await _notificationService.SendNotificationAsync(
+                            goal.Child.UserId,
+                            NotificationType.GoalCompleted,
+                            "Goal Achieved!",
+                            $"Congratulations! You saved enough for \"{goal.Name}\"!",
+                            data: new { goalId = goal.Id, goalName = goal.Name, targetAmount = goal.TargetAmount },
+                            relatedEntityId: goal.Id,
+                            relatedEntityType: "SavingsGoal");
+                    }
+                    // Notify about progress if not completed and no milestone (just a regular contribution update)
+                    else if (milestoneReached == null)
+                    {
+                        await _notificationService.SendNotificationAsync(
+                            goal.Child.UserId,
+                            NotificationType.GoalProgress,
+                            "Savings Progress",
+                            $"You're now {progressPercent:F0}% of the way to \"{goal.Name}\"!",
+                            data: new { goalId = goal.Id, progress = progressPercent, goalName = goal.Name, currentAmount = goal.CurrentAmount, targetAmount = goal.TargetAmount },
+                            relatedEntityId: goal.Id,
+                            relatedEntityType: "SavingsGoal");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogWarning(ex, "Failed to send notification for goal contribution {GoalId}", goalId);
+                    // Don't fail the contribution if notification fails
+                }
+            }
+
             return new GoalProgressEventDto(
                 GoalId: goalId,
                 GoalName: goal.Name,

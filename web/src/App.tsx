@@ -14,6 +14,7 @@ import { AcceptInvite } from './pages/AcceptInvite';
 import { AcceptJoinRequest } from './pages/AcceptJoinRequest';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
+import { NotificationSettings } from './pages/NotificationSettings';
 
 function App() {
   return (
@@ -57,6 +58,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notification-settings"
+            element={
+              <ProtectedRoute>
+                <NotificationSettings />
               </ProtectedRoute>
             }
           />

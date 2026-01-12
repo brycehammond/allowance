@@ -10,6 +10,7 @@ import {
   X,
   DollarSign,
   Key,
+  Bell,
 } from 'lucide-react';
 import { NotificationBell } from './notifications';
 
@@ -32,6 +33,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Add Child', href: '/children/add', icon: UserPlus },
     { name: 'Add Co-Parent', href: '/parent/add', icon: Users },
+    { name: 'Notifications', href: '/notification-settings', icon: Bell },
     { name: 'Change Password', href: '/change-password', icon: Key },
   ];
 

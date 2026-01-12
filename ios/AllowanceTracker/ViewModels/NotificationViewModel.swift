@@ -172,6 +172,71 @@ final class NotificationViewModel {
         errorMessage = nil
     }
 
+    // MARK: - Push Notification Methods
+
+    /// Request push notification permission
+    func requestPushNotificationPermission() async -> Bool {
+        await PushNotificationService.shared.requestAuthorization()
+    }
+
+    /// Register device token with backend
+    func registerDeviceToken() async {
+        // Get current token from PushNotificationService
+        if let fcmToken = PushNotificationService.shared.fcmToken {
+            await PushNotificationService.shared.registerDeviceToken(fcmToken)
+        } else if let apnsToken = PushNotificationService.shared.apnsToken {
+            let tokenString = apnsToken.map { String(format: "%02.2hhx", $0) }.joined()
+            await PushNotificationService.shared.registerDeviceToken(tokenString)
+        }
+    }
+
+    /// Refresh FCM/APNs token
+    func refreshFCMToken() async {
+        await PushNotificationService.shared.refreshToken()
+    }
+
+    /// Load notification preferences
+    func loadPreferences() async -> NotificationPreferences? {
+        do {
+            return try await apiService.getNotificationPreferences()
+        } catch {
+            print("Failed to load notification preferences: \(error)")
+            return nil
+        }
+    }
+
+    /// Update notification preferences
+    func updatePreferences(_ request: UpdateNotificationPreferencesRequest) async -> Bool {
+        do {
+            _ = try await apiService.updateNotificationPreferences(request)
+            return true
+        } catch {
+            print("Failed to update notification preferences: \(error)")
+            return false
+        }
+    }
+
+    /// Update quiet hours
+    func updateQuietHours(_ request: UpdateQuietHoursRequest) async -> Bool {
+        do {
+            _ = try await apiService.updateQuietHours(request)
+            return true
+        } catch {
+            print("Failed to update quiet hours: \(error)")
+            return false
+        }
+    }
+
+    /// Update badge count based on unread notifications
+    func updateBadgeCount() async {
+        await PushNotificationService.shared.setBadge(unreadCount)
+    }
+
+    /// Clear notification badge
+    func clearBadge() async {
+        await PushNotificationService.shared.clearBadge()
+    }
+
     // MARK: - Computed Properties
 
     /// Notifications that are unread
