@@ -56,6 +56,13 @@ protocol APIServiceProtocol {
     func markBadgesSeen(forChild childId: UUID, _ request: MarkBadgesSeenRequest) async throws
     func getChildPoints(forChild childId: UUID) async throws -> ChildPointsDto
 
+    // MARK: - Rewards
+    func getAvailableRewards(type: RewardType?, forChild childId: UUID?) async throws -> [RewardDto]
+    func getChildRewards(forChild childId: UUID) async throws -> [RewardDto]
+    func unlockReward(forChild childId: UUID, rewardId: UUID) async throws -> RewardDto
+    func equipReward(forChild childId: UUID, rewardId: UUID) async throws -> RewardDto
+    func unequipReward(forChild childId: UUID, rewardId: UUID) async throws
+
     // MARK: - Tasks/Chores
     func getTasks(childId: UUID?, status: ChoreTaskStatus?, isRecurring: Bool?) async throws -> [ChoreTask]
     func getTask(id: UUID) async throws -> ChoreTask

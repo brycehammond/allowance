@@ -574,6 +574,75 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         return try await performRequest(urlRequest)
     }
 
+    // MARK: - Rewards
+
+    /// Get all available rewards
+    /// - Parameters:
+    ///   - type: Optional reward type filter
+    ///   - childId: Optional child ID to check affordability
+    /// - Returns: Array of available rewards
+    /// - Throws: APIError if request fails
+    func getAvailableRewards(type: RewardType?, forChild childId: UUID?) async throws -> [RewardDto] {
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/rewards"
+        var queryItems: [URLQueryItem] = []
+        if let type = type {
+            queryItems.append(URLQueryItem(name: "type", value: type.rawValue))
+        }
+        if let childId = childId {
+            queryItems.append(URLQueryItem(name: "childId", value: childId.uuidString))
+        }
+        components.queryItems = queryItems.isEmpty ? nil : queryItems
+        guard let endpoint = components.url else { throw APIError.invalidURL }
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get rewards unlocked by a child
+    /// - Parameter childId: Child's unique identifier
+    /// - Returns: Array of unlocked rewards
+    /// - Throws: APIError if request fails
+    func getChildRewards(forChild childId: UUID) async throws -> [RewardDto] {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/rewards")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Unlock a reward using points
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - rewardId: Reward's unique identifier
+    /// - Returns: Unlocked reward details
+    /// - Throws: APIError if request fails
+    func unlockReward(forChild childId: UUID, rewardId: UUID) async throws -> RewardDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/rewards/\(rewardId.uuidString)/unlock")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Equip a reward (avatar, theme, or title)
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - rewardId: Reward's unique identifier
+    /// - Returns: Updated reward details
+    /// - Throws: APIError if request fails
+    func equipReward(forChild childId: UUID, rewardId: UUID) async throws -> RewardDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/rewards/\(rewardId.uuidString)/equip")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Unequip a reward
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - rewardId: Reward's unique identifier
+    /// - Throws: APIError if request fails
+    func unequipReward(forChild childId: UUID, rewardId: UUID) async throws {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/rewards/\(rewardId.uuidString)/unequip")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        let _: EmptyResponse = try await performRequest(urlRequest)
+    }
+
     // MARK: - Tasks/Chores
 
     /// Get all tasks with optional filters

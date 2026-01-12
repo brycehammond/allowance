@@ -151,3 +151,51 @@ struct UpdateBadgeDisplayRequest: Codable {
 struct MarkBadgesSeenRequest: Codable {
     let badgeIds: [UUID]
 }
+
+// MARK: - Reward Types
+
+enum RewardType: String, Codable, CaseIterable {
+    case Avatar
+    case Theme
+    case Title
+    case Special
+
+    var displayName: String {
+        rawValue
+    }
+
+    var systemImage: String {
+        switch self {
+        case .Avatar: return "person.crop.circle"
+        case .Theme: return "paintpalette"
+        case .Title: return "textformat"
+        case .Special: return "star.circle"
+        }
+    }
+}
+
+// MARK: - Reward DTO
+
+struct RewardDto: Codable, Identifiable {
+    let id: UUID
+    let name: String
+    let description: String
+    let type: RewardType
+    let typeName: String
+    let value: String
+    let previewUrl: String?
+    let pointsCost: Int
+    let isUnlocked: Bool
+    let isEquipped: Bool
+    let canAfford: Bool
+}
+
+// MARK: - Reward Request DTOs
+
+struct UnlockRewardRequest: Codable {
+    let rewardId: UUID
+}
+
+struct EquipRewardRequest: Codable {
+    let rewardId: UUID
+}

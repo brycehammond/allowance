@@ -48,6 +48,13 @@ struct BadgesView: View {
             }
         }
         .navigationTitle("Badges")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                NavigationLink(destination: RewardShopView(childId: viewModel.childId)) {
+                    Label("Reward Shop", systemImage: "gift.fill")
+                }
+            }
+        }
         .refreshable {
             await viewModel.refresh()
         }

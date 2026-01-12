@@ -22,7 +22,7 @@ final class BadgesViewModel {
     // MARK: - Dependencies
 
     private let apiService: APIServiceProtocol
-    private let childId: UUID
+    let childId: UUID
 
     // MARK: - Initialization
 
