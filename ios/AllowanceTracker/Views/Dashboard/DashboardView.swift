@@ -272,13 +272,31 @@ struct ChildDetailView: View {
                     }
                     .tag(3)
 
+                // Chores tab
+                TasksView(childId: child.id, isParent: isParent)
+                    .tabItem {
+                        Label("Chores", systemImage: "checklist")
+                    }
+                    .tag(4)
+
+                // Savings Goals tab
+                SavingsGoalsView(
+                    childId: child.id,
+                    isParent: isParent,
+                    currentBalance: child.currentBalance
+                )
+                    .tabItem {
+                        Label("Goals", systemImage: "target")
+                    }
+                    .tag(5)
+
                 // Savings tab (Parent only)
                 if isParent {
                     SavingsAccountView(childId: child.id)
                         .tabItem {
                             Label("Savings", systemImage: "banknote")
                         }
-                        .tag(4)
+                        .tag(6)
                 }
 
                 // Settings tab (Parent only)
@@ -287,7 +305,7 @@ struct ChildDetailView: View {
                         .tabItem {
                             Label("Settings", systemImage: "gearshape")
                         }
-                        .tag(5)
+                        .tag(7)
                 }
             }
             .tint(DesignSystem.Colors.primary)

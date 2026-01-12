@@ -574,6 +574,419 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         return try await performRequest(urlRequest)
     }
 
+    // MARK: - Tasks/Chores
+
+    /// Get all tasks with optional filters
+    /// - Parameters:
+    ///   - childId: Optional child ID to filter by
+    ///   - status: Optional status filter (Active/Archived)
+    ///   - isRecurring: Optional recurring filter
+    /// - Returns: Array of tasks
+    /// - Throws: APIError if request fails
+    func getTasks(childId: UUID?, status: ChoreTaskStatus?, isRecurring: Bool?) async throws -> [ChoreTask] {
+        var components = URLComponents(url: baseURL.appendingPathComponent("/api/v1/tasks"), resolvingAgainstBaseURL: false)!
+        var queryItems: [URLQueryItem] = []
+
+        if let childId = childId {
+            queryItems.append(URLQueryItem(name: "childId", value: childId.uuidString))
+        }
+        if let status = status {
+            queryItems.append(URLQueryItem(name: "status", value: status.rawValue))
+        }
+        if let isRecurring = isRecurring {
+            queryItems.append(URLQueryItem(name: "isRecurring", value: String(isRecurring)))
+        }
+
+        if !queryItems.isEmpty {
+            components.queryItems = queryItems
+        }
+
+        let urlRequest = try await createAuthenticatedRequest(url: components.url!, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get a task by ID
+    /// - Parameter id: Task's unique identifier
+    /// - Returns: Task details
+    /// - Throws: APIError if request fails
+    func getTask(id: UUID) async throws -> ChoreTask {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/tasks/\(id.uuidString)")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Create a new task
+    /// - Parameter request: Task creation data
+    /// - Returns: Created task
+    /// - Throws: APIError if request fails
+    func createTask(_ request: CreateTaskRequest) async throws -> ChoreTask {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/tasks")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Update an existing task
+    /// - Parameters:
+    ///   - id: Task's unique identifier
+    ///   - request: Task update data
+    /// - Returns: Updated task
+    /// - Throws: APIError if request fails
+    func updateTask(id: UUID, _ request: UpdateTaskRequest) async throws -> ChoreTask {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/tasks/\(id.uuidString)")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Archive a task (soft delete)
+    /// - Parameter id: Task's unique identifier
+    /// - Throws: APIError if request fails
+    func archiveTask(id: UUID) async throws {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/tasks/\(id.uuidString)")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "DELETE")
+        let _: EmptyResponse = try await performRequest(urlRequest)
+    }
+
+    /// Complete a task with optional photo
+    /// - Parameters:
+    ///   - id: Task's unique identifier
+    ///   - notes: Optional completion notes
+    ///   - photoData: Optional photo data
+    ///   - photoFileName: Optional photo filename
+    /// - Returns: Task completion record
+    /// - Throws: APIError if request fails
+    func completeTask(id: UUID, notes: String?, photoData: Data?, photoFileName: String?) async throws -> TaskCompletion {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/tasks/\(id.uuidString)/complete")
+
+        guard let token = try? keychainService.getToken() else {
+            throw APIError.unauthorized
+        }
+
+        let boundary = UUID().uuidString
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        var body = Data()
+
+        // Add notes if provided
+        if let notes = notes, !notes.isEmpty {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"notes\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(notes)\r\n".data(using: .utf8)!)
+        }
+
+        // Add photo if provided
+        if let photoData = photoData, let fileName = photoFileName {
+            let mimeType = getMimeType(for: fileName)
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"photo\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+            body.append(photoData)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body
+
+        return try await performRequest(request)
+    }
+
+    /// Get completions for a task
+    /// - Parameters:
+    ///   - taskId: Task's unique identifier
+    ///   - status: Optional status filter
+    /// - Returns: Array of task completions
+    /// - Throws: APIError if request fails
+    func getTaskCompletions(taskId: UUID, status: CompletionStatus?) async throws -> [TaskCompletion] {
+        var components = URLComponents(url: baseURL.appendingPathComponent("/api/v1/tasks/\(taskId.uuidString)/completions"), resolvingAgainstBaseURL: false)!
+
+        if let status = status {
+            components.queryItems = [URLQueryItem(name: "status", value: status.rawValue)]
+        }
+
+        let urlRequest = try await createAuthenticatedRequest(url: components.url!, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get all pending approvals for the current user's family
+    /// - Returns: Array of pending task completions
+    /// - Throws: APIError if request fails
+    func getPendingApprovals() async throws -> [TaskCompletion] {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/tasks/completions/pending")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Review a task completion (approve or reject)
+    /// - Parameters:
+    ///   - id: Completion's unique identifier
+    ///   - request: Review data with approval status
+    /// - Returns: Updated task completion
+    /// - Throws: APIError if request fails
+    func reviewCompletion(id: UUID, _ request: ReviewCompletionRequest) async throws -> TaskCompletion {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/tasks/completions/\(id.uuidString)/review")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get MIME type for file extension
+    private func getMimeType(for fileName: String) -> String {
+        let ext = (fileName as NSString).pathExtension.lowercased()
+        switch ext {
+        case "jpg", "jpeg": return "image/jpeg"
+        case "png": return "image/png"
+        case "gif": return "image/gif"
+        case "webp": return "image/webp"
+        default: return "application/octet-stream"
+        }
+    }
+
+    // MARK: - Savings Goals
+
+    /// Get savings goals for a child
+    /// - Parameters:
+    ///   - childId: Child's unique identifier
+    ///   - status: Optional status filter
+    ///   - includeCompleted: Whether to include completed goals
+    /// - Returns: Array of savings goals
+    /// - Throws: APIError if request fails
+    func getSavingsGoals(forChild childId: UUID, status: GoalStatus?, includeCompleted: Bool) async throws -> [SavingsGoalDto] {
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/children/\(childId.uuidString)/savings-goals"
+        var queryItems: [URLQueryItem] = []
+        if let status = status {
+            queryItems.append(URLQueryItem(name: "status", value: status.rawValue))
+        }
+        queryItems.append(URLQueryItem(name: "includeCompleted", value: String(includeCompleted)))
+        components.queryItems = queryItems.isEmpty ? nil : queryItems
+        guard let endpoint = components.url else { throw APIError.invalidURL }
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get a savings goal by ID
+    /// - Parameter id: Goal's unique identifier
+    /// - Returns: Savings goal details
+    /// - Throws: APIError if request fails
+    func getSavingsGoal(id: UUID) async throws -> SavingsGoalDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(id.uuidString)")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Create a new savings goal
+    /// - Parameter request: Goal creation data
+    /// - Returns: Created savings goal
+    /// - Throws: APIError if request fails
+    func createSavingsGoal(_ request: CreateSavingsGoalRequest) async throws -> SavingsGoalDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Update an existing savings goal
+    /// - Parameters:
+    ///   - id: Goal's unique identifier
+    ///   - request: Goal update data
+    /// - Returns: Updated savings goal
+    /// - Throws: APIError if request fails
+    func updateSavingsGoal(id: UUID, _ request: UpdateSavingsGoalRequest) async throws -> SavingsGoalDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(id.uuidString)")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Delete a savings goal
+    /// - Parameter id: Goal's unique identifier
+    /// - Throws: APIError if request fails
+    func deleteSavingsGoal(id: UUID) async throws {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(id.uuidString)")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "DELETE")
+        let _: EmptyResponse = try await performRequest(urlRequest)
+    }
+
+    /// Pause a savings goal
+    /// - Parameter id: Goal's unique identifier
+    /// - Returns: Updated savings goal
+    /// - Throws: APIError if request fails
+    func pauseSavingsGoal(id: UUID) async throws -> SavingsGoalDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(id.uuidString)/pause")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Resume a paused savings goal
+    /// - Parameter id: Goal's unique identifier
+    /// - Returns: Updated savings goal
+    /// - Throws: APIError if request fails
+    func resumeSavingsGoal(id: UUID) async throws -> SavingsGoalDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(id.uuidString)/resume")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Contribute to a savings goal
+    /// - Parameters:
+    ///   - goalId: Goal's unique identifier
+    ///   - request: Contribution data
+    /// - Returns: Goal progress event with contribution details
+    /// - Throws: APIError if request fails
+    func contributeToGoal(goalId: UUID, _ request: ContributeToGoalRequest) async throws -> GoalProgressEventDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/contribute")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Withdraw from a savings goal
+    /// - Parameters:
+    ///   - goalId: Goal's unique identifier
+    ///   - request: Withdrawal data
+    /// - Returns: Contribution record for the withdrawal
+    /// - Throws: APIError if request fails
+    func withdrawFromGoal(goalId: UUID, _ request: WithdrawFromGoalRequest) async throws -> GoalContributionDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/withdraw")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get contributions for a savings goal
+    /// - Parameters:
+    ///   - goalId: Goal's unique identifier
+    ///   - type: Optional contribution type filter
+    /// - Returns: Array of contributions
+    /// - Throws: APIError if request fails
+    func getGoalContributions(goalId: UUID, type: ContributionType?) async throws -> [GoalContributionDto] {
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        components.path = "/api/v1/savings-goals/\(goalId.uuidString)/contributions"
+        if let type = type {
+            components.queryItems = [URLQueryItem(name: "type", value: type.rawValue)]
+        }
+        guard let endpoint = components.url else { throw APIError.invalidURL }
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Mark a savings goal as purchased
+    /// - Parameters:
+    ///   - goalId: Goal's unique identifier
+    ///   - request: Optional purchase notes
+    /// - Returns: Updated savings goal
+    /// - Throws: APIError if request fails
+    func markGoalAsPurchased(goalId: UUID, _ request: MarkGoalPurchasedRequest?) async throws -> SavingsGoalDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/purchase")
+        var urlRequest: URLRequest
+        if let request = request {
+            let body = try jsonEncoder.encode(request)
+            urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        } else {
+            urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        }
+        return try await performRequest(urlRequest)
+    }
+
+    /// Create a matching rule for a savings goal
+    /// - Parameters:
+    ///   - goalId: Goal's unique identifier
+    ///   - request: Matching rule configuration
+    /// - Returns: Created matching rule
+    /// - Throws: APIError if request fails
+    func createMatchingRule(goalId: UUID, _ request: CreateMatchingRuleRequest) async throws -> MatchingRuleDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/matching")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get matching rule for a savings goal
+    /// - Parameter goalId: Goal's unique identifier
+    /// - Returns: Matching rule if exists, nil otherwise
+    /// - Throws: APIError if request fails
+    func getMatchingRule(goalId: UUID) async throws -> MatchingRuleDto? {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/matching")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        do {
+            return try await performRequest(urlRequest)
+        } catch APIError.notFound {
+            return nil
+        }
+    }
+
+    /// Update matching rule for a savings goal
+    /// - Parameters:
+    ///   - goalId: Goal's unique identifier
+    ///   - request: Updated matching rule configuration
+    /// - Returns: Updated matching rule
+    /// - Throws: APIError if request fails
+    func updateMatchingRule(goalId: UUID, _ request: UpdateMatchingRuleRequest) async throws -> MatchingRuleDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/matching")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Delete matching rule for a savings goal
+    /// - Parameter goalId: Goal's unique identifier
+    /// - Throws: APIError if request fails
+    func deleteMatchingRule(goalId: UUID) async throws {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/matching")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "DELETE")
+        let _: EmptyResponse = try await performRequest(urlRequest)
+    }
+
+    /// Create a challenge for a savings goal
+    /// - Parameters:
+    ///   - goalId: Goal's unique identifier
+    ///   - request: Challenge configuration
+    /// - Returns: Created challenge
+    /// - Throws: APIError if request fails
+    func createGoalChallenge(goalId: UUID, _ request: CreateGoalChallengeRequest) async throws -> GoalChallengeDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/challenge")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get active challenge for a savings goal
+    /// - Parameter goalId: Goal's unique identifier
+    /// - Returns: Active challenge if exists, nil otherwise
+    /// - Throws: APIError if request fails
+    func getGoalChallenge(goalId: UUID) async throws -> GoalChallengeDto? {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/challenge")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        do {
+            return try await performRequest(urlRequest)
+        } catch APIError.notFound {
+            return nil
+        }
+    }
+
+    /// Cancel a challenge for a savings goal
+    /// - Parameter goalId: Goal's unique identifier
+    /// - Throws: APIError if request fails
+    func cancelGoalChallenge(goalId: UUID) async throws {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/savings-goals/\(goalId.uuidString)/challenge")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "DELETE")
+        let _: EmptyResponse = try await performRequest(urlRequest)
+    }
+
+    /// Get all challenges for a child
+    /// - Parameter childId: Child's unique identifier
+    /// - Returns: Array of challenges
+    /// - Throws: APIError if request fails
+    func getChildChallenges(forChild childId: UUID) async throws -> [GoalChallengeDto] {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/challenges")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
     // MARK: - Private Helpers
 
     /// Empty response for DELETE requests

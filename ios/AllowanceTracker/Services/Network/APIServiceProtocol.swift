@@ -55,4 +55,36 @@ protocol APIServiceProtocol {
     func toggleBadgeDisplay(forChild childId: UUID, badgeId: UUID, _ request: UpdateBadgeDisplayRequest) async throws -> ChildBadgeDto
     func markBadgesSeen(forChild childId: UUID, _ request: MarkBadgesSeenRequest) async throws
     func getChildPoints(forChild childId: UUID) async throws -> ChildPointsDto
+
+    // MARK: - Tasks/Chores
+    func getTasks(childId: UUID?, status: ChoreTaskStatus?, isRecurring: Bool?) async throws -> [ChoreTask]
+    func getTask(id: UUID) async throws -> ChoreTask
+    func createTask(_ request: CreateTaskRequest) async throws -> ChoreTask
+    func updateTask(id: UUID, _ request: UpdateTaskRequest) async throws -> ChoreTask
+    func archiveTask(id: UUID) async throws
+    func completeTask(id: UUID, notes: String?, photoData: Data?, photoFileName: String?) async throws -> TaskCompletion
+    func getTaskCompletions(taskId: UUID, status: CompletionStatus?) async throws -> [TaskCompletion]
+    func getPendingApprovals() async throws -> [TaskCompletion]
+    func reviewCompletion(id: UUID, _ request: ReviewCompletionRequest) async throws -> TaskCompletion
+
+    // MARK: - Savings Goals
+    func getSavingsGoals(forChild childId: UUID, status: GoalStatus?, includeCompleted: Bool) async throws -> [SavingsGoalDto]
+    func getSavingsGoal(id: UUID) async throws -> SavingsGoalDto
+    func createSavingsGoal(_ request: CreateSavingsGoalRequest) async throws -> SavingsGoalDto
+    func updateSavingsGoal(id: UUID, _ request: UpdateSavingsGoalRequest) async throws -> SavingsGoalDto
+    func deleteSavingsGoal(id: UUID) async throws
+    func pauseSavingsGoal(id: UUID) async throws -> SavingsGoalDto
+    func resumeSavingsGoal(id: UUID) async throws -> SavingsGoalDto
+    func contributeToGoal(goalId: UUID, _ request: ContributeToGoalRequest) async throws -> GoalProgressEventDto
+    func withdrawFromGoal(goalId: UUID, _ request: WithdrawFromGoalRequest) async throws -> GoalContributionDto
+    func getGoalContributions(goalId: UUID, type: ContributionType?) async throws -> [GoalContributionDto]
+    func markGoalAsPurchased(goalId: UUID, _ request: MarkGoalPurchasedRequest?) async throws -> SavingsGoalDto
+    func createMatchingRule(goalId: UUID, _ request: CreateMatchingRuleRequest) async throws -> MatchingRuleDto
+    func getMatchingRule(goalId: UUID) async throws -> MatchingRuleDto?
+    func updateMatchingRule(goalId: UUID, _ request: UpdateMatchingRuleRequest) async throws -> MatchingRuleDto
+    func deleteMatchingRule(goalId: UUID) async throws
+    func createGoalChallenge(goalId: UUID, _ request: CreateGoalChallengeRequest) async throws -> GoalChallengeDto
+    func getGoalChallenge(goalId: UUID) async throws -> GoalChallengeDto?
+    func cancelGoalChallenge(goalId: UUID) async throws
+    func getChildChallenges(forChild childId: UUID) async throws -> [GoalChallengeDto]
 }

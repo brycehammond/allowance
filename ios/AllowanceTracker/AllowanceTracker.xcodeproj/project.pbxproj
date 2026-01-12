@@ -105,6 +105,16 @@
 		D542700AB4A1473D9EB2538C /* BadgesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1781AC4904F3397942A43 /* BadgesViewModel.swift */; };
 		12873EAA3C0A491DAB768D21 /* BadgesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8F268F501B427D908C5D87 /* BadgesView.swift */; };
 		5666E1016AD34ED289C7E4F9 /* BadgeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A952D3BE0A7743EB92A5467F /* BadgeCardView.swift */; };
+		6F7A8B9C0D1E2F3A4B5C6D7E /* ChoreTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E2F /* ChoreTask.swift */; };
+		7A8B9C0D1E2F3A4B5C6D7E8F /* TaskViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3C4D5E6F7A8B9C0D1E2F3A /* TaskViewModel.swift */; };
+		8B9C0D1E2F3A4B5C6D7E8F9A /* TasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4D5E6F7A8B9C0D1E2F3A4B /* TasksView.swift */; };
+		9C0D1E2F3A4B5C6D7E8F9A0B /* AddTaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5E6F7A8B9C0D1E2F3A4B5C /* AddTaskView.swift */; };
+		0D1E2F3A4B5C6D7E8F9A0B1C /* CompleteTaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6F7A8B9C0D1E2F3A4B5C6D /* CompleteTaskView.swift */; };
+		1E2F3A4B5C6D7E8F9A0B1C2D /* SavingsGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1A2B3C4D5E6F7A8B9C0D1E /* SavingsGoal.swift */; };
+		2F3A4B5C6D7E8F9A0B1C2D3E /* SavingsGoalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E3F /* SavingsGoalViewModel.swift */; };
+		3A4B5C6D7E8F9A0B1C2D3E4F /* SavingsGoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3C4D5E6F7A8B9C0D1E2F4A /* SavingsGoalsView.swift */; };
+		4B5C6D7E8F9A0B1C2D3E4F5A /* AddGoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4D5E6F7A8B9C0D1E2F3A5B /* AddGoalView.swift */; };
+		5C6D7E8F9A0B1C2D3E4F5A6B /* GoalDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5E6F7A8B9C0D1E2F3A4B6C /* GoalDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -228,6 +238,16 @@
 		83E1781AC4904F3397942A43 /* BadgesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgesViewModel.swift; sourceTree = "<group>"; };
 		4F8F268F501B427D908C5D87 /* BadgesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgesView.swift; sourceTree = "<group>"; };
 		A952D3BE0A7743EB92A5467F /* BadgeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeCardView.swift; sourceTree = "<group>"; };
+		1A2B3C4D5E6F7A8B9C0D1E2F /* ChoreTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreTask.swift; sourceTree = "<group>"; };
+		2B3C4D5E6F7A8B9C0D1E2F3A /* TaskViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskViewModel.swift; sourceTree = "<group>"; };
+		3C4D5E6F7A8B9C0D1E2F3A4B /* TasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksView.swift; sourceTree = "<group>"; };
+		4D5E6F7A8B9C0D1E2F3A4B5C /* AddTaskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTaskView.swift; sourceTree = "<group>"; };
+		5E6F7A8B9C0D1E2F3A4B5C6D /* CompleteTaskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompleteTaskView.swift; sourceTree = "<group>"; };
+		0F1A2B3C4D5E6F7A8B9C0D1E /* SavingsGoal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoal.swift; sourceTree = "<group>"; };
+		1A2B3C4D5E6F7A8B9C0D1E3F /* SavingsGoalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalViewModel.swift; sourceTree = "<group>"; };
+		2B3C4D5E6F7A8B9C0D1E2F4A /* SavingsGoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalsView.swift; sourceTree = "<group>"; };
+		3C4D5E6F7A8B9C0D1E2F3A5B /* AddGoalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddGoalView.swift; sourceTree = "<group>"; };
+		4D5E6F7A8B9C0D1E2F3A4B6C /* GoalDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -312,6 +332,8 @@
 				0D75775C3E3206F8E1238D35 /* Dashboard */,
 				A246821B7344388A84E6E06F /* Profile */,
 				FA2475A4D2AD3961B6D8FCA5 /* Savings */,
+				B2C3D4E5F67890ABCDEF1234 /* SavingsGoals */,
+				A1B2C3D4E5F67890ABCDEF12 /* Tasks */,
 				F250324F929A427D09E736C3 /* Transactions */,
 				57CCA6D1A036D57E548482E1 /* WishList */,
 				4FF2A4C4924E4796B8C97149 /* Badges */,
@@ -438,9 +460,11 @@
 				0CB99FE810BEE0019FD17684 /* BudgetViewModel.swift */,
 				41E12A204B1320B4DEBFFDCD /* DashboardViewModel.swift */,
 				7890189081FC5ED1DB116247 /* SavingsAccountViewModel.swift */,
+				2B3C4D5E6F7A8B9C0D1E2F3A /* TaskViewModel.swift */,
 				38F9BEE80AC69B5FEAE141A7 /* TransactionViewModel.swift */,
 				B3B9C76F31A78298F467E9FB /* WishListViewModel.swift */,
 				83E1781AC4904F3397942A43 /* BadgesViewModel.swift */,
+				1A2B3C4D5E6F7A8B9C0D1E3F /* SavingsGoalViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -579,6 +603,7 @@
 				E0D765448D63F943EAAF4E7A /* CategoryBudget.swift */,
 				44AB75FD1281D4DCF728BEBE /* CategorySpending.swift */,
 				BD55683925400343BF99664F /* Child.swift */,
+				1A2B3C4D5E6F7A8B9C0D1E2F /* ChoreTask.swift */,
 				73E1881BD7AEEFC3A9138793 /* ParentInvite.swift */,
 				AEFC1247011C4421DB4A8BE9 /* SavingsAccount.swift */,
 				A8B64E88012242818DF6F545 /* Transaction.swift */,
@@ -586,6 +611,7 @@
 				2B5EECC8A2B7A7EC49E5C731 /* User.swift */,
 				2C4605F2EC6F3B323BCF3719 /* WishListItem.swift */,
 				7F89330BC992469097EC4E51 /* Badge.swift */,
+				0F1A2B3C4D5E6F7A8B9C0D1E /* SavingsGoal.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -623,6 +649,26 @@
 				A952D3BE0A7743EB92A5467F /* BadgeCardView.swift */,
 			);
 			path = Badges;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F67890ABCDEF12 /* Tasks */ = {
+			isa = PBXGroup;
+			children = (
+				4D5E6F7A8B9C0D1E2F3A4B5C /* AddTaskView.swift */,
+				5E6F7A8B9C0D1E2F3A4B5C6D /* CompleteTaskView.swift */,
+				3C4D5E6F7A8B9C0D1E2F3A4B /* TasksView.swift */,
+			);
+			path = Tasks;
+			sourceTree = "<group>";
+		};
+		B2C3D4E5F67890ABCDEF1234 /* SavingsGoals */ = {
+			isa = PBXGroup;
+			children = (
+				3C4D5E6F7A8B9C0D1E2F3A5B /* AddGoalView.swift */,
+				4D5E6F7A8B9C0D1E2F3A4B6C /* GoalDetailView.swift */,
+				2B3C4D5E6F7A8B9C0D1E2F4A /* SavingsGoalsView.swift */,
+			);
+			path = SavingsGoals;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -835,6 +881,16 @@
 				818C8BBF4CECC8AAB6397C6E /* WishListItemCard.swift in Sources */,
 				60A5EE98A3678AE99994268D /* WishListView.swift in Sources */,
 				53138129CB75D6856015BD6A /* WishListViewModel.swift in Sources */,
+				6F7A8B9C0D1E2F3A4B5C6D7E /* ChoreTask.swift in Sources */,
+				7A8B9C0D1E2F3A4B5C6D7E8F /* TaskViewModel.swift in Sources */,
+				8B9C0D1E2F3A4B5C6D7E8F9A /* TasksView.swift in Sources */,
+				9C0D1E2F3A4B5C6D7E8F9A0B /* AddTaskView.swift in Sources */,
+				0D1E2F3A4B5C6D7E8F9A0B1C /* CompleteTaskView.swift in Sources */,
+				1E2F3A4B5C6D7E8F9A0B1C2D /* SavingsGoal.swift in Sources */,
+				2F3A4B5C6D7E8F9A0B1C2D3E /* SavingsGoalViewModel.swift in Sources */,
+				3A4B5C6D7E8F9A0B1C2D3E4F /* SavingsGoalsView.swift in Sources */,
+				4B5C6D7E8F9A0B1C2D3E4F5A /* AddGoalView.swift in Sources */,
+				5C6D7E8F9A0B1C2D3E4F5A6B /* GoalDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
