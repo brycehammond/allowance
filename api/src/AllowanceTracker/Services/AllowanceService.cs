@@ -15,6 +15,7 @@ public class AllowanceService : IAllowanceService
     private readonly ISavingsAccountService? _savingsAccountService;
     private readonly ISavingsGoalService? _savingsGoalService;
     private readonly INotificationService? _notificationService;
+    private readonly IAchievementService? _achievementService;
     private readonly ILogger<AllowanceService>? _logger;
 
     public AllowanceService(
@@ -24,6 +25,7 @@ public class AllowanceService : IAllowanceService
         ISavingsAccountService? savingsAccountService = null,
         ISavingsGoalService? savingsGoalService = null,
         INotificationService? notificationService = null,
+        IAchievementService? achievementService = null,
         ILogger<AllowanceService>? logger = null)
     {
         _context = context;
@@ -32,6 +34,7 @@ public class AllowanceService : IAllowanceService
         _savingsAccountService = savingsAccountService;
         _savingsGoalService = savingsGoalService;
         _notificationService = notificationService;
+        _achievementService = achievementService;
         _logger = logger;
     }
 
@@ -133,6 +136,28 @@ public class AllowanceService : IAllowanceService
             catch
             {
                 // Don't fail the allowance payment if notification fails
+            }
+        }
+
+        // Check for badge unlocks after allowance payment
+        if (_achievementService != null)
+        {
+            try
+            {
+                await _achievementService.CheckAndUnlockBadgesAsync(
+                    childId,
+                    BadgeTrigger.AllowanceReceived,
+                    new { Amount = child.WeeklyAllowance });
+
+                // Also check balance-related badges
+                await _achievementService.CheckAndUnlockBadgesAsync(
+                    childId,
+                    BadgeTrigger.BalanceChanged,
+                    new { NewBalance = child.CurrentBalance });
+            }
+            catch
+            {
+                // Don't fail the allowance payment if badge check fails
             }
         }
 

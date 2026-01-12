@@ -9,13 +9,16 @@ public class TaskService : ITaskService
 {
     private readonly AllowanceContext _context;
     private readonly INotificationService? _notificationService;
+    private readonly IAchievementService? _achievementService;
 
     public TaskService(
         AllowanceContext context,
-        INotificationService? notificationService = null)
+        INotificationService? notificationService = null,
+        IAchievementService? achievementService = null)
     {
         _context = context;
         _notificationService = notificationService;
+        _achievementService = achievementService;
     }
 
     public async Task<TaskDto> CreateTaskAsync(CreateTaskDto dto, Guid createdById)
@@ -449,6 +452,22 @@ public class TaskService : ITaskService
                 catch
                 {
                     // Don't fail the review if notification fails
+                }
+            }
+
+            // Check for badge unlocks after task approval
+            if (dto.IsApproved && _achievementService != null)
+            {
+                try
+                {
+                    await _achievementService.CheckAndUnlockBadgesAsync(
+                        completion.ChildId,
+                        BadgeTrigger.TaskApproved,
+                        new { TaskId = completion.TaskId, RewardAmount = completion.Task.RewardAmount });
+                }
+                catch
+                {
+                    // Don't fail the review if badge check fails
                 }
             }
 

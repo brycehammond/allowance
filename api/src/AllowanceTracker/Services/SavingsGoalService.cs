@@ -77,6 +77,22 @@ public class SavingsGoalService : ISavingsGoalService
 
         await _context.SaveChangesAsync();
 
+        // Check for badge unlocks after goal creation
+        if (_achievementService != null)
+        {
+            try
+            {
+                await _achievementService.CheckAndUnlockBadgesAsync(
+                    dto.ChildId,
+                    BadgeTrigger.GoalCreated,
+                    new { GoalId = goal.Id, GoalName = goal.Name, TargetAmount = goal.TargetAmount });
+            }
+            catch
+            {
+                // Don't fail goal creation if badge check fails
+            }
+        }
+
         // Reload with navigation properties
         goal = await _context.SavingsGoals
             .Include(g => g.Child).ThenInclude(c => c.User)
@@ -409,6 +425,33 @@ public class SavingsGoalService : ISavingsGoalService
                 {
                     _logger?.LogWarning(ex, "Failed to send notification for goal contribution {GoalId}", goalId);
                     // Don't fail the contribution if notification fails
+                }
+            }
+
+            // Check for badge unlocks after contribution
+            if (_achievementService != null)
+            {
+                try
+                {
+                    // Check for goal completion badge
+                    if (isCompleted)
+                    {
+                        await _achievementService.CheckAndUnlockBadgesAsync(
+                            goal.ChildId,
+                            BadgeTrigger.GoalCompleted,
+                            new { GoalId = goal.Id, GoalName = goal.Name, TargetAmount = goal.TargetAmount });
+                    }
+
+                    // Check for savings deposit badges
+                    await _achievementService.CheckAndUnlockBadgesAsync(
+                        goal.ChildId,
+                        BadgeTrigger.SavingsDeposit,
+                        new { Amount = dto.Amount, GoalId = goal.Id });
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogWarning(ex, "Failed to check badges for goal contribution {GoalId}", goalId);
+                    // Don't fail the contribution if badge check fails
                 }
             }
 
