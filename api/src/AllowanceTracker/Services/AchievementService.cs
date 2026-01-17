@@ -12,10 +12,14 @@ namespace AllowanceTracker.Services;
 public class AchievementService : IAchievementService
 {
     private readonly AllowanceContext _context;
+    private readonly INotificationService? _notificationService;
 
-    public AchievementService(AllowanceContext context)
+    public AchievementService(
+        AllowanceContext context,
+        INotificationService? notificationService = null)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     #region Badge Queries
@@ -182,6 +186,27 @@ public class AchievementService : IAchievementService
         child.AvailablePoints += badge.PointsValue;
 
         await _context.SaveChangesAsync();
+
+        // Send notification about unlocked badge
+        if (_notificationService != null)
+        {
+            try
+            {
+                var pointsText = badge.PointsValue > 0 ? $" You earned {badge.PointsValue} points!" : "";
+                await _notificationService.SendNotificationAsync(
+                    child.UserId,
+                    NotificationType.AchievementUnlocked,
+                    "Achievement Unlocked!",
+                    $"You earned the \"{badge.Name}\" badge!{pointsText}",
+                    data: new { badgeId = badge.Id, badgeName = badge.Name, badgeCode = badge.Code, pointsValue = badge.PointsValue, rarity = badge.Rarity.ToString() },
+                    relatedEntityId: childBadge.Id,
+                    relatedEntityType: "ChildBadge");
+            }
+            catch
+            {
+                // Don't fail badge unlock if notification fails
+            }
+        }
 
         // Load the badge for the DTO
         childBadge.Badge = badge;
