@@ -74,6 +74,20 @@ import {
   type UpdateQuietHoursRequest,
   type DeviceTokenResponse,
   type RegisterDeviceRequest,
+  type GiftLink,
+  type CreateGiftLinkRequest,
+  type UpdateGiftLinkRequest,
+  type GiftLinkStats,
+  type Gift,
+  type SubmitGiftRequest,
+  type GiftSubmissionResult,
+  type ApproveGiftRequest,
+  type RejectGiftRequest,
+  type GiftPortalData,
+  type ThankYouNote,
+  type PendingThankYou,
+  type CreateThankYouNoteRequest,
+  type UpdateThankYouNoteRequest,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7071';
@@ -837,6 +851,111 @@ export const notificationsApi = {
 
   unregisterDevice: async (id: string): Promise<void> => {
     await apiClient.delete(`/api/v1/devices/${id}`);
+  },
+};
+
+// Gift Links API (Parent only)
+export const giftLinksApi = {
+  getAll: async (): Promise<GiftLink[]> => {
+    const response = await apiClient.get<GiftLink[]>('/api/v1/gift-links');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<GiftLink> => {
+    const response = await apiClient.get<GiftLink>(`/api/v1/gift-links/${id}`);
+    return response.data;
+  },
+
+  create: async (data: CreateGiftLinkRequest): Promise<GiftLink> => {
+    const response = await apiClient.post<GiftLink>('/api/v1/gift-links', data);
+    return response.data;
+  },
+
+  update: async (id: string, data: UpdateGiftLinkRequest): Promise<GiftLink> => {
+    const response = await apiClient.put<GiftLink>(`/api/v1/gift-links/${id}`, data);
+    return response.data;
+  },
+
+  deactivate: async (id: string): Promise<void> => {
+    await apiClient.post(`/api/v1/gift-links/${id}/deactivate`);
+  },
+
+  regenerateToken: async (id: string): Promise<GiftLink> => {
+    const response = await apiClient.post<GiftLink>(`/api/v1/gift-links/${id}/regenerate-token`);
+    return response.data;
+  },
+
+  getStats: async (id: string): Promise<GiftLinkStats> => {
+    const response = await apiClient.get<GiftLinkStats>(`/api/v1/gift-links/${id}/stats`);
+    return response.data;
+  },
+};
+
+// Gifts API
+export const giftsApi = {
+  // Public portal endpoints (no auth required)
+  getPortalData: async (token: string): Promise<GiftPortalData> => {
+    const response = await apiClient.get<GiftPortalData>(`/api/v1/gifts/portal/${token}`);
+    return response.data;
+  },
+
+  submitGift: async (token: string, data: SubmitGiftRequest): Promise<GiftSubmissionResult> => {
+    const response = await apiClient.post<GiftSubmissionResult>(`/api/v1/gifts/portal/${token}/submit`, data);
+    return response.data;
+  },
+
+  // Authenticated endpoints
+  getPendingGifts: async (): Promise<Gift[]> => {
+    const response = await apiClient.get<Gift[]>('/api/v1/gifts/pending');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<Gift> => {
+    const response = await apiClient.get<Gift>(`/api/v1/gifts/${id}`);
+    return response.data;
+  },
+
+  getByChild: async (childId: string): Promise<Gift[]> => {
+    const response = await apiClient.get<Gift[]>(`/api/v1/gifts/child/${childId}`);
+    return response.data;
+  },
+
+  approve: async (id: string, data: ApproveGiftRequest): Promise<Gift> => {
+    const response = await apiClient.post<Gift>(`/api/v1/gifts/${id}/approve`, data);
+    return response.data;
+  },
+
+  reject: async (id: string, data: RejectGiftRequest): Promise<Gift> => {
+    const response = await apiClient.post<Gift>(`/api/v1/gifts/${id}/reject`, data);
+    return response.data;
+  },
+};
+
+// Thank You Notes API
+export const thankYouNotesApi = {
+  getPending: async (): Promise<PendingThankYou[]> => {
+    const response = await apiClient.get<PendingThankYou[]>('/api/v1/gifts/thank-you/pending');
+    return response.data;
+  },
+
+  getByGiftId: async (giftId: string): Promise<ThankYouNote> => {
+    const response = await apiClient.get<ThankYouNote>(`/api/v1/gifts/${giftId}/thank-you`);
+    return response.data;
+  },
+
+  create: async (giftId: string, data: CreateThankYouNoteRequest): Promise<ThankYouNote> => {
+    const response = await apiClient.post<ThankYouNote>(`/api/v1/gifts/${giftId}/thank-you`, data);
+    return response.data;
+  },
+
+  update: async (giftId: string, data: UpdateThankYouNoteRequest): Promise<ThankYouNote> => {
+    const response = await apiClient.put<ThankYouNote>(`/api/v1/gifts/${giftId}/thank-you`, data);
+    return response.data;
+  },
+
+  send: async (giftId: string): Promise<ThankYouNote> => {
+    const response = await apiClient.post<ThankYouNote>(`/api/v1/gifts/${giftId}/thank-you/send`);
+    return response.data;
   },
 };
 

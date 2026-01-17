@@ -12,10 +12,13 @@ import { SettingsTab } from '../components/tabs/SettingsTab';
 import { BadgesTab } from '../components/tabs/BadgesTab';
 import { RewardShopTab } from '../components/tabs/RewardShopTab';
 import { ChoresTab } from '../components/tabs/ChoresTab';
+import { GiftLinksTab } from '../components/tabs/GiftLinksTab';
+import { PendingGiftsTab } from '../components/tabs/PendingGiftsTab';
+import { ThankYouNotesTab } from '../components/tabs/ThankYouNotesTab';
 import { Layout } from '../components/Layout';
-import { ArrowLeft, Receipt, Star, TrendingUp, Wallet, Settings, Award, ClipboardList, Target, Gift } from 'lucide-react';
+import { ArrowLeft, Receipt, Star, TrendingUp, Wallet, Settings, Award, ClipboardList, Target, Gift, Link2, Inbox, Heart } from 'lucide-react';
 
-type TabType = 'transactions' | 'wishlist' | 'goals' | 'analytics' | 'badges' | 'rewards' | 'chores' | 'savings' | 'settings';
+type TabType = 'transactions' | 'wishlist' | 'goals' | 'analytics' | 'badges' | 'rewards' | 'chores' | 'savings' | 'settings' | 'giftlinks' | 'gifts' | 'thankyou';
 
 export const ChildDetail: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
@@ -25,7 +28,7 @@ export const ChildDetail: React.FC = () => {
   const [child, setChild] = useState<Child | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['transactions', 'wishlist', 'goals', 'analytics', 'badges', 'rewards', 'chores', 'savings', 'settings'].includes(tabParam)) {
+    if (tabParam && ['transactions', 'wishlist', 'goals', 'analytics', 'badges', 'rewards', 'chores', 'savings', 'settings', 'giftlinks', 'gifts', 'thankyou'].includes(tabParam)) {
       return tabParam as TabType;
     }
     return 'transactions';
@@ -108,10 +111,15 @@ export const ChildDetail: React.FC = () => {
     { id: 'rewards', label: 'Rewards', icon: Gift },
   ];
 
-  // Only show savings and settings tabs to parents
+  // Only show savings, settings, and gifting tabs to parents
   if (isParent) {
+    tabs.push({ id: 'giftlinks', label: 'Gift Links', icon: Link2 });
+    tabs.push({ id: 'gifts', label: 'Pending Gifts', icon: Inbox });
     tabs.push({ id: 'savings', label: 'Savings', icon: Wallet });
     tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
+  } else {
+    // Thank you notes tab for children
+    tabs.push({ id: 'thankyou', label: 'Thank You', icon: Heart });
   }
 
   return (
@@ -200,6 +208,9 @@ export const ChildDetail: React.FC = () => {
           {activeTab === 'settings' && isParent && (
             <SettingsTab childId={child.id} child={child} onUpdate={loadChild} />
           )}
+          {activeTab === 'giftlinks' && isParent && <GiftLinksTab childId={child.id} childName={child.firstName} />}
+          {activeTab === 'gifts' && isParent && <PendingGiftsTab childId={child.id} childName={child.firstName} />}
+          {activeTab === 'thankyou' && !isParent && <ThankYouNotesTab childId={child.id} />}
         </div>
       </div>
     </Layout>

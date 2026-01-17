@@ -15,6 +15,7 @@ import { AcceptJoinRequest } from './pages/AcceptJoinRequest';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { NotificationSettings } from './pages/NotificationSettings';
+import { GiftPortal } from './pages/GiftPortal';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/accept-join" element={<AcceptJoinRequest />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/gift/:token" element={<GiftPortal />} />
           <Route
             path="/dashboard"
             element={

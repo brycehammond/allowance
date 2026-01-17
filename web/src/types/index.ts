@@ -907,3 +907,204 @@ export interface UpdateQuietHoursRequest {
   startTime?: string;
   endTime?: string;
 }
+
+// Gifting - Gift Links
+export const GiftLinkVisibility = {
+  Minimal: 'Minimal',
+  WithGoals: 'WithGoals',
+  WithWishList: 'WithWishList',
+  Full: 'Full',
+} as const;
+
+export type GiftLinkVisibility = typeof GiftLinkVisibility[keyof typeof GiftLinkVisibility];
+
+export const GiftOccasion = {
+  Birthday: 'Birthday',
+  Christmas: 'Christmas',
+  Hanukkah: 'Hanukkah',
+  Easter: 'Easter',
+  Graduation: 'Graduation',
+  GoodGrades: 'GoodGrades',
+  Holiday: 'Holiday',
+  JustBecause: 'JustBecause',
+  Reward: 'Reward',
+  Other: 'Other',
+} as const;
+
+export type GiftOccasion = typeof GiftOccasion[keyof typeof GiftOccasion];
+
+export const GiftStatus = {
+  Pending: 'Pending',
+  Approved: 'Approved',
+  Rejected: 'Rejected',
+  Expired: 'Expired',
+} as const;
+
+export type GiftStatus = typeof GiftStatus[keyof typeof GiftStatus];
+
+export interface GiftLink {
+  id: string;
+  childId: string;
+  childFirstName: string;
+  token: string;
+  name: string;
+  description: string | null;
+  visibility: GiftLinkVisibility;
+  isActive: boolean;
+  expiresAt: string | null;
+  maxUses: number | null;
+  currentUses: number;
+  minAmount: number | null;
+  maxAmount: number | null;
+  defaultOccasion: GiftOccasion | null;
+  createdAt: string;
+  updatedAt: string;
+  portalUrl: string;
+}
+
+export interface CreateGiftLinkRequest {
+  childId: string;
+  name: string;
+  description?: string;
+  visibility?: GiftLinkVisibility;
+  expiresAt?: string;
+  maxUses?: number;
+  minAmount?: number;
+  maxAmount?: number;
+  defaultOccasion?: GiftOccasion;
+}
+
+export interface UpdateGiftLinkRequest {
+  name?: string;
+  description?: string;
+  visibility?: GiftLinkVisibility;
+  expiresAt?: string;
+  maxUses?: number;
+  minAmount?: number;
+  maxAmount?: number;
+  defaultOccasion?: GiftOccasion;
+}
+
+export interface GiftLinkStats {
+  linkId: string;
+  totalGifts: number;
+  pendingGifts: number;
+  approvedGifts: number;
+  rejectedGifts: number;
+  totalAmountReceived: number;
+  lastGiftAt: string | null;
+}
+
+// Gifting - Gifts
+export interface Gift {
+  id: string;
+  childId: string;
+  childFirstName: string;
+  giverName: string;
+  giverEmail: string | null;
+  giverRelationship: string | null;
+  amount: number;
+  occasion: GiftOccasion;
+  customOccasion: string | null;
+  message: string | null;
+  status: GiftStatus;
+  rejectionReason: string | null;
+  processedById: string | null;
+  processedAt: string | null;
+  allocatedToGoalId: string | null;
+  allocatedToGoalName: string | null;
+  savingsPercentage: number | null;
+  createdAt: string;
+  hasThankYouNote: boolean;
+}
+
+export interface SubmitGiftRequest {
+  giverName: string;
+  giverEmail?: string;
+  giverRelationship?: string;
+  amount: number;
+  occasion: GiftOccasion;
+  customOccasion?: string;
+  message?: string;
+}
+
+export interface GiftSubmissionResult {
+  giftId: string;
+  childFirstName: string;
+  amount: number;
+  confirmationMessage: string;
+}
+
+export interface ApproveGiftRequest {
+  allocateToGoalId?: string;
+  savingsPercentage?: number;
+}
+
+export interface RejectGiftRequest {
+  reason?: string;
+}
+
+// Gifting - Gift Portal (Public)
+export interface PortalSavingsGoal {
+  id: string;
+  name: string;
+  description: string | null;
+  targetAmount: number;
+  currentAmount: number;
+  progressPercentage: number;
+}
+
+export interface PortalWishListItem {
+  id: string;
+  name: string;
+  price: number;
+  notes: string | null;
+}
+
+export interface GiftPortalData {
+  childFirstName: string;
+  childPhotoUrl: string | null;
+  minAmount: number | null;
+  maxAmount: number | null;
+  defaultOccasion: GiftOccasion | null;
+  visibility: GiftLinkVisibility;
+  savingsGoals: PortalSavingsGoal[];
+  wishListItems: PortalWishListItem[];
+}
+
+// Gifting - Thank You Notes
+export interface ThankYouNote {
+  id: string;
+  giftId: string;
+  childId: string;
+  childFirstName: string;
+  giverName: string;
+  message: string;
+  imageUrl: string | null;
+  isSent: boolean;
+  sentAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PendingThankYou {
+  giftId: string;
+  giverName: string;
+  giverRelationship: string | null;
+  amount: number;
+  occasion: GiftOccasion;
+  customOccasion: string | null;
+  receivedAt: string;
+  daysSinceReceived: number;
+  hasNote: boolean;
+}
+
+export interface CreateThankYouNoteRequest {
+  message: string;
+  imageUrl?: string;
+}
+
+export interface UpdateThankYouNoteRequest {
+  message?: string;
+  imageUrl?: string;
+}
