@@ -172,7 +172,7 @@ final class PushNotificationService: NSObject, ObservableObject {
 
         // Also clear on the notification center
         let center = UNUserNotificationCenter.current()
-        await center.setBadgeCount(0)
+        try? await center.setBadgeCount(0)
     }
 
     /// Update badge count

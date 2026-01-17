@@ -1204,6 +1204,186 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         let _: EmptyResponse = try await performRequest(urlRequest)
     }
 
+    // MARK: - Gift Links
+
+    /// Get all gift links for the current family
+    /// - Returns: Array of gift links
+    /// - Throws: APIError if request fails
+    func getGiftLinks() async throws -> [GiftLinkDto] {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gift-links")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get a gift link by ID
+    /// - Parameter id: Gift link's unique identifier
+    /// - Returns: Gift link details
+    /// - Throws: APIError if request fails
+    func getGiftLink(id: UUID) async throws -> GiftLinkDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gift-links/\(id.uuidString)")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Create a new gift link
+    /// - Parameter request: Gift link creation data
+    /// - Returns: Created gift link
+    /// - Throws: APIError if request fails
+    func createGiftLink(_ request: CreateGiftLinkRequest) async throws -> GiftLinkDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gift-links")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Update an existing gift link
+    /// - Parameters:
+    ///   - id: Gift link's unique identifier
+    ///   - request: Gift link update data
+    /// - Returns: Updated gift link
+    /// - Throws: APIError if request fails
+    func updateGiftLink(id: UUID, _ request: UpdateGiftLinkRequest) async throws -> GiftLinkDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gift-links/\(id.uuidString)")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Deactivate a gift link
+    /// - Parameter id: Gift link's unique identifier
+    /// - Returns: Updated gift link
+    /// - Throws: APIError if request fails
+    func deactivateGiftLink(id: UUID) async throws -> GiftLinkDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gift-links/\(id.uuidString)/deactivate")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Regenerate token for a gift link
+    /// - Parameter id: Gift link's unique identifier
+    /// - Returns: Updated gift link with new token
+    /// - Throws: APIError if request fails
+    func regenerateGiftLinkToken(id: UUID) async throws -> GiftLinkDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gift-links/\(id.uuidString)/regenerate-token")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get statistics for a gift link
+    /// - Parameter id: Gift link's unique identifier
+    /// - Returns: Gift link statistics
+    /// - Throws: APIError if request fails
+    func getGiftLinkStats(id: UUID) async throws -> GiftLinkStatsDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gift-links/\(id.uuidString)/stats")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    // MARK: - Gifts
+
+    /// Get gifts for a child
+    /// - Parameter childId: Child's unique identifier
+    /// - Returns: Array of gifts
+    /// - Throws: APIError if request fails
+    func getGifts(forChild childId: UUID) async throws -> [GiftDto] {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gifts/child/\(childId.uuidString)")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get a gift by ID
+    /// - Parameter id: Gift's unique identifier
+    /// - Returns: Gift details
+    /// - Throws: APIError if request fails
+    func getGift(id: UUID) async throws -> GiftDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gifts/\(id.uuidString)")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Approve a pending gift
+    /// - Parameters:
+    ///   - id: Gift's unique identifier
+    ///   - request: Approval options (goal allocation, savings percentage)
+    /// - Returns: Approved gift
+    /// - Throws: APIError if request fails
+    func approveGift(id: UUID, _ request: ApproveGiftRequest) async throws -> GiftDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gifts/\(id.uuidString)/approve")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Reject a pending gift
+    /// - Parameters:
+    ///   - id: Gift's unique identifier
+    ///   - request: Rejection reason
+    /// - Returns: Rejected gift
+    /// - Throws: APIError if request fails
+    func rejectGift(id: UUID, _ request: RejectGiftRequest) async throws -> GiftDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gifts/\(id.uuidString)/reject")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    // MARK: - Thank You Notes
+
+    /// Get pending thank yous for the current child
+    /// - Returns: Array of pending thank yous
+    /// - Throws: APIError if request fails
+    func getPendingThankYous() async throws -> [PendingThankYouDto] {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/thank-you-notes/pending")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Get thank you note for a gift
+    /// - Parameter giftId: Gift's unique identifier
+    /// - Returns: Thank you note
+    /// - Throws: APIError if request fails
+    func getThankYouNote(forGiftId giftId: UUID) async throws -> ThankYouNoteDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gifts/\(giftId.uuidString)/thank-you-note")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
+        return try await performRequest(urlRequest)
+    }
+
+    /// Create a thank you note for a gift
+    /// - Parameters:
+    ///   - giftId: Gift's unique identifier
+    ///   - request: Thank you note content
+    /// - Returns: Created thank you note
+    /// - Throws: APIError if request fails
+    func createThankYouNote(forGiftId giftId: UUID, _ request: CreateThankYouNoteRequest) async throws -> ThankYouNoteDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gifts/\(giftId.uuidString)/thank-you-note")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Update a thank you note
+    /// - Parameters:
+    ///   - id: Thank you note's unique identifier
+    ///   - request: Updated content
+    /// - Returns: Updated thank you note
+    /// - Throws: APIError if request fails
+    func updateThankYouNote(id: UUID, _ request: UpdateThankYouNoteRequest) async throws -> ThankYouNoteDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/thank-you-notes/\(id.uuidString)")
+        let body = try jsonEncoder.encode(request)
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
+        return try await performRequest(urlRequest)
+    }
+
+    /// Send a thank you note
+    /// - Parameter giftId: Gift's unique identifier
+    /// - Returns: Sent thank you note
+    /// - Throws: APIError if request fails
+    func sendThankYouNote(forGiftId giftId: UUID) async throws -> ThankYouNoteDto {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/gifts/\(giftId.uuidString)/thank-you-note/send")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
+        return try await performRequest(urlRequest)
+    }
+
     // MARK: - Private Helpers
 
     /// Empty response for DELETE requests

@@ -182,10 +182,8 @@ struct RewardShopView: View {
         let isSelected = viewModel.selectedType == type
 
         return Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                Task {
-                    await viewModel.loadRewards(type: type)
-                }
+            Task {
+                await viewModel.loadRewards(type: type)
             }
         } label: {
             HStack(spacing: 4) {

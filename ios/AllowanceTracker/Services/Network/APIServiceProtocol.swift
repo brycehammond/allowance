@@ -109,4 +109,26 @@ protocol APIServiceProtocol {
     func registerDevice(_ request: RegisterDeviceRequest) async throws -> DeviceTokenDto
     func getDevices() async throws -> [DeviceTokenDto]
     func unregisterDevice(id: UUID) async throws
+
+    // MARK: - Gift Links
+    func getGiftLinks() async throws -> [GiftLinkDto]
+    func getGiftLink(id: UUID) async throws -> GiftLinkDto
+    func createGiftLink(_ request: CreateGiftLinkRequest) async throws -> GiftLinkDto
+    func updateGiftLink(id: UUID, _ request: UpdateGiftLinkRequest) async throws -> GiftLinkDto
+    func deactivateGiftLink(id: UUID) async throws -> GiftLinkDto
+    func regenerateGiftLinkToken(id: UUID) async throws -> GiftLinkDto
+    func getGiftLinkStats(id: UUID) async throws -> GiftLinkStatsDto
+
+    // MARK: - Gifts
+    func getGifts(forChild childId: UUID) async throws -> [GiftDto]
+    func getGift(id: UUID) async throws -> GiftDto
+    func approveGift(id: UUID, _ request: ApproveGiftRequest) async throws -> GiftDto
+    func rejectGift(id: UUID, _ request: RejectGiftRequest) async throws -> GiftDto
+
+    // MARK: - Thank You Notes
+    func getPendingThankYous() async throws -> [PendingThankYouDto]
+    func getThankYouNote(forGiftId giftId: UUID) async throws -> ThankYouNoteDto
+    func createThankYouNote(forGiftId giftId: UUID, _ request: CreateThankYouNoteRequest) async throws -> ThankYouNoteDto
+    func updateThankYouNote(id: UUID, _ request: UpdateThankYouNoteRequest) async throws -> ThankYouNoteDto
+    func sendThankYouNote(forGiftId giftId: UUID) async throws -> ThankYouNoteDto
 }
