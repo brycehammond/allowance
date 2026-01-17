@@ -16,16 +16,14 @@ The following features have complete, implementation-ready specifications:
 | [42-goal-based-savings.md](./42-goal-based-savings.md) | Goal-Based Savings | Visual progress, parent matching, challenges, milestones | 17 days |
 | [43-quick-actions-shortcuts.md](./43-quick-actions-shortcuts.md) | Quick Actions & Shortcuts | iOS widgets, Siri Shortcuts, recurring transactions | 15 days |
 | [44-extended-family-gifting.md](./44-extended-family-gifting.md) | Extended Family Gifting | Guest portal, gift links, thank you notes, privacy controls | 16 days |
-| [45-spending-approval.md](./45-spending-approval.md) | Spending Approval | Approval thresholds, category limits, learning moments | 17 days |
 
 ### Recommended Implementation Order
 
 1. **Push Notifications** (Spec 40) - Foundation for other features
 2. **Achievement Badges** (Spec 41) - Standalone gamification layer
 3. **Goal-Based Savings** (Spec 42) - Builds on existing wish list
-4. **Spending Approval** (Spec 45) - Parental controls
-5. **Extended Family Gifting** (Spec 44) - External user interactions
-6. **Quick Actions & Shortcuts** (Spec 43) - iOS-specific enhancements
+4. **Extended Family Gifting** (Spec 44) - External user interactions
+5. **Quick Actions & Shortcuts** (Spec 43) - iOS-specific enhancements
 
 ---
 
@@ -410,9 +408,7 @@ The following features have complete, implementation-ready specifications:
 
 ---
 
-### 18. Transaction Approval Workflows ✅ SPEC COMPLETE
-> **Full specification available**: [specs/45-spending-approval.md](./45-spending-approval.md)
-
+### 18. Transaction Approval Workflows
 **Description**: Require parent approval for certain transaction types.
 
 **Features**:
@@ -424,7 +420,7 @@ The following features have complete, implementation-ready specifications:
 - "Learning moments" - parent feedback on spending decisions
 - Request expiration handling
 
-**Estimated Effort**: 17 days (see full spec for phases)
+**Estimated Effort**: 10-15 days
 
 ---
 
@@ -492,11 +488,11 @@ Based on current architecture, MVP focus, and user value:
 **Value**: Enhanced wish list, parent matching, visual progress
 **Dependencies**: Push notifications (for goal updates)
 
-### 4. 🛡️ Spending Approval ✅ SPEC READY
-**Priority**: HIGH | **Spec**: [45-spending-approval.md](./45-spending-approval.md)
-**Effort**: 17 days
-**Value**: Parental controls, teaching moments, spending limits
-**Dependencies**: Push notifications (for approval requests)
+### 4. 🎁 Extended Family Gifting ✅ SPEC READY
+**Priority**: HIGH | **Spec**: [44-extended-family-gifting.md](./44-extended-family-gifting.md)
+**Effort**: 16 days
+**Value**: Expands family engagement, external user interactions
+**Dependencies**: Push notifications (for gift notifications)
 
 ### 5. 🏆 Chores & Tasks System
 **Priority**: HIGH | **Spec**: See [11-task-management-specification.md](./11-task-management-specification.md)
@@ -585,13 +581,12 @@ All features must follow strict TDD:
 1. Push Notifications ([spec 40](./40-push-notifications.md)) - 15 days
 2. Achievement Badges ([spec 41](./41-achievement-badges.md)) - 16 days
 
-**Phase 2: Enhanced Savings & Controls (5-6 weeks)** ✅ SPECS READY
+**Phase 2: Enhanced Savings & Family (5-6 weeks)** ✅ SPECS READY
 1. Goal-Based Savings ([spec 42](./42-goal-based-savings.md)) - 17 days
-2. Spending Approval ([spec 45](./45-spending-approval.md)) - 17 days
+2. Extended Family Gifting ([spec 44](./44-extended-family-gifting.md)) - 16 days
 
-**Phase 3: Family & Convenience (5-6 weeks)** ✅ SPECS READY
-1. Extended Family Gifting ([spec 44](./44-extended-family-gifting.md)) - 16 days
-2. Quick Actions & Shortcuts ([spec 43](./43-quick-actions-shortcuts.md)) - 15 days
+**Phase 3: Convenience (3 weeks)** ✅ SPECS READY
+1. Quick Actions & Shortcuts ([spec 43](./43-quick-actions-shortcuts.md)) - 15 days
 
 **Phase 4: Earning (2-3 weeks)**
 1. Tasks/Chores system (spec 11 exists)
@@ -757,13 +752,13 @@ Track these metrics for new features:
 ## Next Steps
 
 1. **Start with Push Notifications**: Implement [spec 40](./40-push-notifications.md) first as the foundation
-2. **Follow the Specs**: Six features have complete, implementation-ready specs (40-45)
+2. **Follow the Specs**: Five features have complete, implementation-ready specs (40-44)
 3. **Use TDD**: Each spec includes 35-50 test cases - write tests first
 4. **Plan Sprints**: 2-week sprints, follow the phases in each spec
 5. **Document**: Update CLAUDE.md with new patterns as you implement
 6. **Deploy Incrementally**: Release features as they're completed
 
-### Total Estimated Effort for Specs 40-45
+### Total Estimated Effort for Specs 40-44
 | Spec | Feature | Days |
 |------|---------|------|
 | 40 | Push Notifications | 15 |
@@ -771,8 +766,7 @@ Track these metrics for new features:
 | 42 | Goal-Based Savings | 17 |
 | 43 | Quick Actions | 15 |
 | 44 | Family Gifting | 16 |
-| 45 | Spending Approval | 17 |
-| **Total** | | **96 days** (~4-5 months) |
+| **Total** | | **79 days** (~3-4 months) |
 
 ---
 
@@ -792,7 +786,7 @@ When implementing these features:
 
 ## Conclusion
 
-This feature roadmap provides a clear path to evolve AllowanceTracker from a solid MVP to a comprehensive financial education platform. **Six features now have complete, implementation-ready specifications** (specs 40-45) with:
+This feature roadmap provides a clear path to evolve AllowanceTracker from a solid MVP to a comprehensive financial education platform. **Five features now have complete, implementation-ready specifications** (specs 40-44) with:
 
 - Database models and migrations
 - DTOs and API endpoints
@@ -806,10 +800,9 @@ The features are designed to:
 
 - **Engage users** through gamification (badges, achievements, progress tracking)
 - **Enable real-time updates** through push notifications and SignalR
-- **Give parents control** through spending approval workflows
 - **Build family bonds** through extended family gifting
 - **Enhance convenience** through iOS widgets and Siri shortcuts
-- **Teach financial literacy** through learning moments and goal-based savings
+- **Teach financial literacy** through goal-based savings and milestones
 
 All features integrate cleanly with the existing architecture and follow TDD practices.
 
