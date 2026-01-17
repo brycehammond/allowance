@@ -8,6 +8,7 @@ namespace AllowanceTracker.Services;
 /// Background job that handles scheduled tasks including:
 /// - Generating recurring task instances for tasks due that day (daily, weekly, monthly)
 /// - Checking and marking expired savings goal challenges as failed
+/// - Expiring old pending gifts (gifts pending for more than 30 days)
 /// Runs hourly to ensure timely processing.
 /// </summary>
 public class RecurringTasksJob : BackgroundService
@@ -55,6 +56,18 @@ public class RecurringTasksJob : BackgroundService
                 var savingsGoalService = scope.ServiceProvider.GetRequiredService<ISavingsGoalService>();
                 await savingsGoalService.CheckExpiredChallengesAsync();
                 _logger.LogDebug("Checked expired savings goal challenges");
+
+                // Expire old pending gifts (30 days default)
+                var giftService = scope.ServiceProvider.GetRequiredService<IGiftService>();
+                var expiredGiftCount = await giftService.ExpireOldPendingGiftsAsync();
+                if (expiredGiftCount > 0)
+                {
+                    _logger.LogInformation("Expired {Count} pending gifts", expiredGiftCount);
+                }
+                else
+                {
+                    _logger.LogDebug("No pending gifts to expire");
+                }
             }
             catch (Exception ex)
             {

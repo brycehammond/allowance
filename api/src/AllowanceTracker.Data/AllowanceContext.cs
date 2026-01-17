@@ -35,6 +35,9 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<ParentMatchingRule> ParentMatchingRules { get; set; }
     public DbSet<GoalMilestone> GoalMilestones { get; set; }
     public DbSet<GoalChallenge> GoalChallenges { get; set; }
+    public DbSet<GiftLink> GiftLinks { get; set; }
+    public DbSet<Gift> Gifts { get; set; }
+    public DbSet<ThankYouNote> ThankYouNotes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -583,6 +586,103 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             // Ignore computed properties
             entity.Ignore(e => e.DaysRemaining);
             entity.Ignore(e => e.IsExpired);
+        });
+
+        // GiftLink configuration
+        builder.Entity<GiftLink>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Token).IsRequired().HasMaxLength(256);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.MinAmount).HasPrecision(10, 2);
+            entity.Property(e => e.MaxAmount).HasPrecision(10, 2);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.GiftLinks)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Family)
+                  .WithMany()
+                  .HasForeignKey(e => e.FamilyId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.CreatedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.CreatedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.Token).IsUnique();
+            entity.HasIndex(e => e.ChildId);
+            entity.HasIndex(e => e.FamilyId);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.ExpiresAt);
+        });
+
+        // Gift configuration
+        builder.Entity<Gift>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.GiverName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.GiverEmail).HasMaxLength(256);
+            entity.Property(e => e.GiverRelationship).HasMaxLength(100);
+            entity.Property(e => e.Amount).HasPrecision(10, 2).IsRequired();
+            entity.Property(e => e.CustomOccasion).HasMaxLength(100);
+            entity.Property(e => e.Message).HasMaxLength(2000);
+            entity.Property(e => e.RejectionReason).HasMaxLength(500);
+
+            entity.HasOne(e => e.GiftLink)
+                  .WithMany(gl => gl.Gifts)
+                  .HasForeignKey(e => e.GiftLinkId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.Gifts)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.ProcessedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.ProcessedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.AllocateToGoal)
+                  .WithMany()
+                  .HasForeignKey(e => e.AllocateToGoalId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(e => e.Transaction)
+                  .WithOne()
+                  .HasForeignKey<Gift>(e => e.TransactionId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.GiftLinkId);
+            entity.HasIndex(e => e.ChildId);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.CreatedAt);
+        });
+
+        // ThankYouNote configuration
+        builder.Entity<ThankYouNote>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Message).IsRequired().HasMaxLength(2000);
+            entity.Property(e => e.ImageUrl).HasMaxLength(2048);
+
+            entity.HasOne(e => e.Gift)
+                  .WithOne(g => g.ThankYouNote)
+                  .HasForeignKey<ThankYouNote>(e => e.GiftId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Child)
+                  .WithMany(c => c.ThankYouNotes)
+                  .HasForeignKey(e => e.ChildId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.GiftId).IsUnique();
+            entity.HasIndex(e => e.ChildId);
+            entity.HasIndex(e => e.IsSent);
         });
 
         // Seed Badge data

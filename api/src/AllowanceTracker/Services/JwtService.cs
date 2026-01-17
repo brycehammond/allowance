@@ -21,7 +21,7 @@ public class JwtService : IJwtService
         _audience = _configuration["Jwt:Audience"] ?? "AllowanceTracker";
     }
 
-    public string GenerateToken(ApplicationUser user)
+    public string GenerateToken(ApplicationUser user, Guid? childId = null)
     {
         var claims = new List<Claim>
         {
@@ -30,7 +30,8 @@ public class JwtService : IJwtService
             new(ClaimTypes.GivenName, user.FirstName),
             new(ClaimTypes.Surname, user.LastName),
             new(ClaimTypes.Role, user.Role.ToString()),
-            new("FamilyId", user.FamilyId?.ToString() ?? "")
+            new("FamilyId", user.FamilyId?.ToString() ?? ""),
+            new("ChildId", childId?.ToString() ?? "")
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));

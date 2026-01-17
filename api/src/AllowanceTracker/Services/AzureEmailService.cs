@@ -214,4 +214,71 @@ public class AzureEmailService : IEmailService
 
         await SendEmailAsync(email, $"You've been removed from {familyName}", htmlContent, plainTextContent);
     }
+
+    public async Task SendGiftConfirmationEmailAsync(string email, string giverName, string childName, decimal amount)
+    {
+        var htmlContent = $@"
+            <html>
+            <body>
+                <h2>Thank You for Your Gift!</h2>
+                <p>Hi {giverName},</p>
+                <p>Thank you for sending a gift of <strong>{amount:C}</strong> to {childName}!</p>
+                <p>The gift has been received and is awaiting approval from the parents. Once approved, it will be added to {childName}'s balance.</p>
+                <p>You may receive a thank you note from {childName} soon!</p>
+                <br/>
+                <p>Thanks for using Earn & Learn,<br/>The Earn & Learn Team</p>
+            </body>
+            </html>";
+
+        var plainTextContent = $@"
+            Thank You for Your Gift!
+
+            Hi {giverName},
+
+            Thank you for sending a gift of {amount:C} to {childName}!
+
+            The gift has been received and is awaiting approval from the parents. Once approved, it will be added to {childName}'s balance.
+
+            You may receive a thank you note from {childName} soon!
+
+            Thanks for using Earn & Learn,
+            The Earn & Learn Team";
+
+        await SendEmailAsync(email, $"Thank you for your gift to {childName}!", htmlContent, plainTextContent);
+    }
+
+    public async Task SendThankYouNoteEmailAsync(string email, string giverName, string childName, string message, string? imageUrl)
+    {
+        var imageSection = !string.IsNullOrEmpty(imageUrl)
+            ? $@"<p><img src=""{imageUrl}"" alt=""Thank you image from {childName}"" style=""max-width: 400px; border-radius: 8px;"" /></p>"
+            : "";
+
+        var htmlContent = $@"
+            <html>
+            <body>
+                <h2>A Thank You Note from {childName}!</h2>
+                <p>Dear {giverName},</p>
+                <div style=""background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;"">
+                    <p style=""font-style: italic; font-size: 16px;"">""{message}""</p>
+                    <p style=""text-align: right;"">- {childName}</p>
+                </div>
+                {imageSection}
+                <br/>
+                <p>Sent via Earn & Learn</p>
+            </body>
+            </html>";
+
+        var plainTextContent = $@"
+            A Thank You Note from {childName}!
+
+            Dear {giverName},
+
+            ""{message}""
+
+            - {childName}
+
+            Sent via Earn & Learn";
+
+        await SendEmailAsync(email, $"A thank you note from {childName}!", htmlContent, plainTextContent);
+    }
 }

@@ -317,9 +317,13 @@ public class AuthController : ControllerBase
 
         var user = await _context.Users
             .Include(u => u.Family)
+            .Include(u => u.ChildProfile)
             .FirstAsync(u => u.Email == dto.Email);
 
-        var token = _jwtService.GenerateToken(user);
+        // Get childId for child users
+        Guid? childId = user.Role == UserRole.Child ? user.ChildProfile?.Id : null;
+
+        var token = _jwtService.GenerateToken(user, childId);
         var expiresAt = DateTime.UtcNow.AddDays(1);
 
         return Ok(new AuthResponseDto(
@@ -376,7 +380,15 @@ public class AuthController : ControllerBase
             ? await _context.Families.FindAsync(user.FamilyId.Value)
             : null;
 
-        var token = _jwtService.GenerateToken(user);
+        // Get childId for child users
+        Guid? childId = null;
+        if (user.Role == UserRole.Child)
+        {
+            var child = await _context.Children.FirstOrDefaultAsync(c => c.UserId == user.Id);
+            childId = child?.Id;
+        }
+
+        var token = _jwtService.GenerateToken(user, childId);
         var expiresAt = DateTime.UtcNow.AddDays(1);
 
         return Ok(new AuthResponseDto(

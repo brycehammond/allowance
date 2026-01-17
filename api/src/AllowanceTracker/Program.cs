@@ -178,6 +178,9 @@ builder.Services.AddScoped<IDeviceTokenService, DeviceTokenService>();
 builder.Services.AddScoped<ISignalRNotificationService, SignalRNotificationService>();
 builder.Services.AddScoped<IAchievementService, AchievementService>();
 builder.Services.AddScoped<ISavingsGoalService, SavingsGoalService>();
+builder.Services.AddScoped<IGiftLinkService, GiftLinkService>();
+builder.Services.AddScoped<IGiftService, GiftService>();
+builder.Services.AddScoped<IThankYouNoteService, ThankYouNoteService>();
 
 // Add Firebase Push Notification service (optional - works without Firebase config)
 var firebaseCredPath = builder.Configuration["Firebase:CredentialPath"];

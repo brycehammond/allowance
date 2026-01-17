@@ -27,4 +27,35 @@ public class CurrentUserService : ICurrentUserService
             return _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
         }
     }
+
+    public bool IsParent
+    {
+        get
+        {
+            var roleClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
+            return roleClaim == "Parent";
+        }
+    }
+
+    public Guid? FamilyId
+    {
+        get
+        {
+            var familyIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("FamilyId")?.Value;
+            if (string.IsNullOrEmpty(familyIdClaim))
+                return null;
+            return Guid.TryParse(familyIdClaim, out var familyId) ? familyId : null;
+        }
+    }
+
+    public Guid? ChildId
+    {
+        get
+        {
+            var childIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("ChildId")?.Value;
+            if (string.IsNullOrEmpty(childIdClaim))
+                return null;
+            return Guid.TryParse(childIdClaim, out var childId) ? childId : null;
+        }
+    }
 }

@@ -49,4 +49,23 @@ public interface IEmailService
     /// <param name="familyName">Name of the family they were removed from</param>
     /// <param name="ownerName">Name of the family owner who removed them</param>
     Task SendParentRemovedFromFamilyEmailAsync(string email, string parentFirstName, string familyName, string ownerName);
+
+    /// <summary>
+    /// Send confirmation email to gift giver after submitting a gift
+    /// </summary>
+    /// <param name="email">Giver's email address</param>
+    /// <param name="giverName">Giver's name</param>
+    /// <param name="childName">Child's first name</param>
+    /// <param name="amount">Gift amount</param>
+    Task SendGiftConfirmationEmailAsync(string email, string giverName, string childName, decimal amount);
+
+    /// <summary>
+    /// Send thank you note email from child to gift giver
+    /// </summary>
+    /// <param name="email">Giver's email address</param>
+    /// <param name="giverName">Giver's name</param>
+    /// <param name="childName">Child's first name</param>
+    /// <param name="message">Thank you message</param>
+    /// <param name="imageUrl">Optional image URL</param>
+    Task SendThankYouNoteEmailAsync(string email, string giverName, string childName, string message, string? imageUrl);
 }

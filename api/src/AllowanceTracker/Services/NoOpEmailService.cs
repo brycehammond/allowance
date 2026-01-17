@@ -51,4 +51,20 @@ public class NoOpEmailService : IEmailService
             email, parentFirstName, familyName, ownerName);
         return Task.CompletedTask;
     }
+
+    public Task SendGiftConfirmationEmailAsync(string email, string giverName, string childName, decimal amount)
+    {
+        _logger.LogWarning(
+            "NoOpEmailService: Would have sent gift confirmation email to {Email} from {Giver} for {Child} amount {Amount:C}",
+            email, giverName, childName, amount);
+        return Task.CompletedTask;
+    }
+
+    public Task SendThankYouNoteEmailAsync(string email, string giverName, string childName, string message, string? imageUrl)
+    {
+        _logger.LogWarning(
+            "NoOpEmailService: Would have sent thank you note email to {Email} from {Child} to {Giver}",
+            email, childName, giverName);
+        return Task.CompletedTask;
+    }
 }

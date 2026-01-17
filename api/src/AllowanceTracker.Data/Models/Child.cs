@@ -122,4 +122,7 @@ public class Child : IHasCreatedAt
     public virtual ICollection<ChildReward> Rewards { get; set; } = new List<ChildReward>();
     public virtual ICollection<SavingsGoal> SavingsGoals { get; set; } = new List<SavingsGoal>();
     public virtual ICollection<SavingsContribution> SavingsContributions { get; set; } = new List<SavingsContribution>();
+    public virtual ICollection<GiftLink> GiftLinks { get; set; } = new List<GiftLink>();
+    public virtual ICollection<Gift> Gifts { get; set; } = new List<Gift>();
+    public virtual ICollection<ThankYouNote> ThankYouNotes { get; set; } = new List<ThankYouNote>();
 }
