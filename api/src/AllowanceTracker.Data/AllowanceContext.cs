@@ -650,7 +650,7 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.HasOne(e => e.AllocateToGoal)
                   .WithMany()
                   .HasForeignKey(e => e.AllocateToGoalId)
-                  .OnDelete(DeleteBehavior.SetNull);
+                  .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.Transaction)
                   .WithOne()

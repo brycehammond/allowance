@@ -2717,7 +2717,7 @@ namespace AllowanceTracker.Data.Migrations
                     b.HasOne("AllowanceTracker.Models.SavingsGoal", "AllocateToGoal")
                         .WithMany()
                         .HasForeignKey("AllocateToGoalId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("AllowanceTracker.Models.Child", "Child")
                         .WithMany("Gifts")

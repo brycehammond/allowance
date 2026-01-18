@@ -105,7 +105,7 @@ namespace AllowanceTracker.Data.Migrations
                         column: x => x.AllocateToGoalId,
                         principalTable: "SavingsGoals",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Gifts_Transactions_TransactionId",
                         column: x => x.TransactionId,
