@@ -312,32 +312,33 @@ struct ChildDetailView: View {
                         .tag(7)
                 }
 
+                // TODO: Re-enable gifting tabs when feature is ready
                 // Gift Links tab (Parent only)
-                if isParent {
-                    GiftLinksView(childId: child.id, childName: child.firstName)
-                        .tabItem {
-                            Label("Gift Links", systemImage: "link")
-                        }
-                        .tag(8)
-                }
+                // if isParent {
+                //     GiftLinksView(childId: child.id, childName: child.firstName)
+                //         .tabItem {
+                //             Label("Gift Links", systemImage: "link")
+                //         }
+                //         .tag(8)
+                // }
 
                 // Pending Gifts tab (Parent only)
-                if isParent {
-                    PendingGiftsView(childId: child.id, childName: child.firstName)
-                        .tabItem {
-                            Label("Gifts", systemImage: "gift")
-                        }
-                        .tag(9)
-                }
+                // if isParent {
+                //     PendingGiftsView(childId: child.id, childName: child.firstName)
+                //         .tabItem {
+                //             Label("Gifts", systemImage: "gift")
+                //         }
+                //         .tag(9)
+                // }
 
                 // Thank You Notes tab (Child only)
-                if !isParent {
-                    ThankYouNotesView(childId: child.id)
-                        .tabItem {
-                            Label("Thank You", systemImage: "heart")
-                        }
-                        .tag(8)
-                }
+                // if !isParent {
+                //     ThankYouNotesView(childId: child.id)
+                //         .tabItem {
+                //             Label("Thank You", systemImage: "heart")
+                //         }
+                //         .tag(8)
+                // }
             }
             .tint(DesignSystem.Colors.primary)
         }

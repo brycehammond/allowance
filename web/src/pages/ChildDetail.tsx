@@ -111,16 +111,18 @@ export const ChildDetail: React.FC = () => {
     { id: 'rewards', label: 'Rewards', icon: Gift },
   ];
 
-  // Only show savings, settings, and gifting tabs to parents
+  // Only show savings and settings tabs to parents
   if (isParent) {
-    tabs.push({ id: 'giftlinks', label: 'Gift Links', icon: Link2 });
-    tabs.push({ id: 'gifts', label: 'Pending Gifts', icon: Inbox });
+    // TODO: Re-enable gifting tabs when feature is ready
+    // tabs.push({ id: 'giftlinks', label: 'Gift Links', icon: Link2 });
+    // tabs.push({ id: 'gifts', label: 'Pending Gifts', icon: Inbox });
     tabs.push({ id: 'savings', label: 'Savings', icon: Wallet });
     tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
-  } else {
-    // Thank you notes tab for children
-    tabs.push({ id: 'thankyou', label: 'Thank You', icon: Heart });
   }
+  // TODO: Re-enable thank you notes tab when gifting feature is ready
+  // else {
+  //   tabs.push({ id: 'thankyou', label: 'Thank You', icon: Heart });
+  // }
 
   return (
     <Layout>
@@ -208,9 +210,10 @@ export const ChildDetail: React.FC = () => {
           {activeTab === 'settings' && isParent && (
             <SettingsTab childId={child.id} child={child} onUpdate={loadChild} />
           )}
-          {activeTab === 'giftlinks' && isParent && <GiftLinksTab childId={child.id} childName={child.firstName} />}
-          {activeTab === 'gifts' && isParent && <PendingGiftsTab childId={child.id} childName={child.firstName} />}
-          {activeTab === 'thankyou' && !isParent && <ThankYouNotesTab childId={child.id} />}
+          {/* TODO: Re-enable gifting tabs when feature is ready */}
+          {/* {activeTab === 'giftlinks' && isParent && <GiftLinksTab childId={child.id} childName={child.firstName} />} */}
+          {/* {activeTab === 'gifts' && isParent && <PendingGiftsTab childId={child.id} childName={child.firstName} />} */}
+          {/* {activeTab === 'thankyou' && !isParent && <ThankYouNotesTab childId={child.id} />} */}
         </div>
       </div>
     </Layout>
