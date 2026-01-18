@@ -12,11 +12,12 @@ import { SettingsTab } from '../components/tabs/SettingsTab';
 import { BadgesTab } from '../components/tabs/BadgesTab';
 import { RewardShopTab } from '../components/tabs/RewardShopTab';
 import { ChoresTab } from '../components/tabs/ChoresTab';
-import { GiftLinksTab } from '../components/tabs/GiftLinksTab';
-import { PendingGiftsTab } from '../components/tabs/PendingGiftsTab';
-import { ThankYouNotesTab } from '../components/tabs/ThankYouNotesTab';
+// TODO: Re-enable gifting imports when feature is ready
+// import { GiftLinksTab } from '../components/tabs/GiftLinksTab';
+// import { PendingGiftsTab } from '../components/tabs/PendingGiftsTab';
+// import { ThankYouNotesTab } from '../components/tabs/ThankYouNotesTab';
 import { Layout } from '../components/Layout';
-import { ArrowLeft, Receipt, Star, TrendingUp, Wallet, Settings, Award, ClipboardList, Target, Gift, Link2, Inbox, Heart } from 'lucide-react';
+import { ArrowLeft, Receipt, Star, TrendingUp, Wallet, Settings, Award, ClipboardList, Target, Gift } from 'lucide-react';
 
 type TabType = 'transactions' | 'wishlist' | 'goals' | 'analytics' | 'badges' | 'rewards' | 'chores' | 'savings' | 'settings' | 'giftlinks' | 'gifts' | 'thankyou';
 
