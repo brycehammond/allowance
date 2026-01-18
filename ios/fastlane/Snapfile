@@ -3,9 +3,8 @@
 
 # Devices to capture screenshots on
 devices([
-  "iPhone 15 Pro Max",  # 6.7" display (required for App Store)
-  "iPhone 15 Pro",      # 6.1" display
-  # "iPad Pro 13-inch (M4)"  # Uncomment if supporting iPad
+  "iPhone 16 Pro Max",  # 6.7" display (required for App Store)
+  "iPad Pro 13-inch (M4)"  # 12.9" display for iPad
 ])
 
 # Languages for screenshots

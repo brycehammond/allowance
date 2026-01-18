@@ -44,7 +44,7 @@ class ScreenshotUITests: XCTestCase {
             emailField.typeText("demo@earnandlearn.app")
 
             passwordField.tap()
-            passwordField.typeText("DemoPass123!")
+            passwordField.typeText("Demo123!")
 
             loginButton.tap()
         }
@@ -56,7 +56,7 @@ class ScreenshotUITests: XCTestCase {
         snapshot("02_Dashboard")
 
         // Try to navigate to child detail
-        let childCard = app.buttons.matching(identifier: "child_card").firstMatch
+        let childCard = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'child_card_'")).firstMatch
         if childCard.waitForExistence(timeout: 5) {
             childCard.tap()
             sleep(2)
@@ -179,14 +179,14 @@ class ScreenshotUITests: XCTestCase {
         emailField.tap()
         emailField.typeText("demo@earnandlearn.app")
         passwordField.tap()
-        passwordField.typeText("DemoPass123!")
+        passwordField.typeText("Demo123!")
         loginButton.tap()
 
         sleep(3)
     }
 
     private func navigateToFirstChild() {
-        let childCard = app.buttons.matching(identifier: "child_card").firstMatch
+        let childCard = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'child_card_'")).firstMatch
         if childCard.waitForExistence(timeout: 5) {
             childCard.tap()
             sleep(2)

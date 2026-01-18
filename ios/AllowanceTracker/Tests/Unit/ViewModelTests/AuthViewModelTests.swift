@@ -508,4 +508,315 @@ class MockAPIService: APIServiceProtocol {
     func getMonthlyComparison(forChild childId: UUID, months: Int) async throws -> [MonthlyComparison] {
         return []
     }
+
+    // MARK: - Badges (stub implementations)
+
+    func getAllBadges(category: BadgeCategory?, includeSecret: Bool) async throws -> [BadgeDto] {
+        return []
+    }
+
+    func getChildBadges(forChild childId: UUID, category: BadgeCategory?, newOnly: Bool) async throws -> [ChildBadgeDto] {
+        return []
+    }
+
+    func getBadgeProgress(forChild childId: UUID) async throws -> [BadgeProgressDto] {
+        return []
+    }
+
+    func getAchievementSummary(forChild childId: UUID) async throws -> AchievementSummaryDto {
+        return AchievementSummaryDto(
+            totalBadges: 0,
+            earnedBadges: 0,
+            totalPoints: 0,
+            availablePoints: 0,
+            recentBadges: [],
+            inProgressBadges: [],
+            badgesByCategory: [:]
+        )
+    }
+
+    func toggleBadgeDisplay(forChild childId: UUID, badgeId: UUID, _ request: UpdateBadgeDisplayRequest) async throws -> ChildBadgeDto {
+        throw APIError.notFound
+    }
+
+    func markBadgesSeen(forChild childId: UUID, _ request: MarkBadgesSeenRequest) async throws {
+        // Mock implementation - do nothing
+    }
+
+    func getChildPoints(forChild childId: UUID) async throws -> ChildPointsDto {
+        return ChildPointsDto(
+            totalPoints: 0,
+            availablePoints: 0,
+            spentPoints: 0,
+            badgesEarned: 0,
+            rewardsUnlocked: 0
+        )
+    }
+
+    // MARK: - Rewards (stub implementations)
+
+    func getAvailableRewards(type: RewardType?, forChild childId: UUID?) async throws -> [RewardDto] {
+        return []
+    }
+
+    func getChildRewards(forChild childId: UUID) async throws -> [RewardDto] {
+        return []
+    }
+
+    func unlockReward(forChild childId: UUID, rewardId: UUID) async throws -> RewardDto {
+        throw APIError.notFound
+    }
+
+    func equipReward(forChild childId: UUID, rewardId: UUID) async throws -> RewardDto {
+        throw APIError.notFound
+    }
+
+    func unequipReward(forChild childId: UUID, rewardId: UUID) async throws {
+        throw APIError.notFound
+    }
+
+    // MARK: - Tasks/Chores (stub implementations)
+
+    func getTasks(childId: UUID?, status: ChoreTaskStatus?, isRecurring: Bool?) async throws -> [ChoreTask] {
+        return []
+    }
+
+    func getTask(id: UUID) async throws -> ChoreTask {
+        throw APIError.notFound
+    }
+
+    func createTask(_ request: CreateTaskRequest) async throws -> ChoreTask {
+        throw APIError.notFound
+    }
+
+    func updateTask(id: UUID, _ request: UpdateTaskRequest) async throws -> ChoreTask {
+        throw APIError.notFound
+    }
+
+    func archiveTask(id: UUID) async throws {
+        throw APIError.notFound
+    }
+
+    func completeTask(id: UUID, notes: String?, photoData: Data?, photoFileName: String?) async throws -> TaskCompletion {
+        throw APIError.notFound
+    }
+
+    func getTaskCompletions(taskId: UUID, status: CompletionStatus?) async throws -> [TaskCompletion] {
+        return []
+    }
+
+    func getPendingApprovals() async throws -> [TaskCompletion] {
+        return []
+    }
+
+    func reviewCompletion(id: UUID, _ request: ReviewCompletionRequest) async throws -> TaskCompletion {
+        throw APIError.notFound
+    }
+
+    // MARK: - Savings Goals (stub implementations)
+
+    func getSavingsGoals(forChild childId: UUID, status: GoalStatus?, includeCompleted: Bool) async throws -> [SavingsGoalDto] {
+        return []
+    }
+
+    func getSavingsGoal(id: UUID) async throws -> SavingsGoalDto {
+        throw APIError.notFound
+    }
+
+    func createSavingsGoal(_ request: CreateSavingsGoalRequest) async throws -> SavingsGoalDto {
+        throw APIError.notFound
+    }
+
+    func updateSavingsGoal(id: UUID, _ request: UpdateSavingsGoalRequest) async throws -> SavingsGoalDto {
+        throw APIError.notFound
+    }
+
+    func deleteSavingsGoal(id: UUID) async throws {
+        throw APIError.notFound
+    }
+
+    func pauseSavingsGoal(id: UUID) async throws -> SavingsGoalDto {
+        throw APIError.notFound
+    }
+
+    func resumeSavingsGoal(id: UUID) async throws -> SavingsGoalDto {
+        throw APIError.notFound
+    }
+
+    func contributeToGoal(goalId: UUID, _ request: ContributeToGoalRequest) async throws -> GoalProgressEventDto {
+        throw APIError.notFound
+    }
+
+    func withdrawFromGoal(goalId: UUID, _ request: WithdrawFromGoalRequest) async throws -> GoalContributionDto {
+        throw APIError.notFound
+    }
+
+    func getGoalContributions(goalId: UUID, type: ContributionType?) async throws -> [GoalContributionDto] {
+        return []
+    }
+
+    func markGoalAsPurchased(goalId: UUID, _ request: MarkGoalPurchasedRequest?) async throws -> SavingsGoalDto {
+        throw APIError.notFound
+    }
+
+    func createMatchingRule(goalId: UUID, _ request: CreateMatchingRuleRequest) async throws -> MatchingRuleDto {
+        throw APIError.notFound
+    }
+
+    func getMatchingRule(goalId: UUID) async throws -> MatchingRuleDto? {
+        return nil
+    }
+
+    func updateMatchingRule(goalId: UUID, _ request: UpdateMatchingRuleRequest) async throws -> MatchingRuleDto {
+        throw APIError.notFound
+    }
+
+    func deleteMatchingRule(goalId: UUID) async throws {
+        throw APIError.notFound
+    }
+
+    func createGoalChallenge(goalId: UUID, _ request: CreateGoalChallengeRequest) async throws -> GoalChallengeDto {
+        throw APIError.notFound
+    }
+
+    func getGoalChallenge(goalId: UUID) async throws -> GoalChallengeDto? {
+        return nil
+    }
+
+    func cancelGoalChallenge(goalId: UUID) async throws {
+        throw APIError.notFound
+    }
+
+    func getChildChallenges(forChild childId: UUID) async throws -> [GoalChallengeDto] {
+        return []
+    }
+
+    // MARK: - Notifications (stub implementations)
+
+    func getNotifications(page: Int, pageSize: Int, unreadOnly: Bool, type: NotificationType?) async throws -> NotificationListResponse {
+        return NotificationListResponse(notifications: [], unreadCount: 0, totalCount: 0, hasMore: false)
+    }
+
+    func getUnreadCount() async throws -> Int {
+        return 0
+    }
+
+    func getNotification(id: UUID) async throws -> NotificationDto {
+        throw APIError.notFound
+    }
+
+    func markNotificationAsRead(id: UUID) async throws -> NotificationDto {
+        throw APIError.notFound
+    }
+
+    func markMultipleAsRead(_ request: MarkNotificationsReadRequest) async throws -> Int {
+        return 0
+    }
+
+    func deleteNotification(id: UUID) async throws {
+        throw APIError.notFound
+    }
+
+    func deleteAllReadNotifications() async throws -> Int {
+        return 0
+    }
+
+    func getNotificationPreferences() async throws -> NotificationPreferences {
+        return NotificationPreferences(
+            preferences: [],
+            quietHoursEnabled: false,
+            quietHoursStart: nil,
+            quietHoursEnd: nil
+        )
+    }
+
+    func updateNotificationPreferences(_ request: UpdateNotificationPreferencesRequest) async throws -> NotificationPreferences {
+        throw APIError.notFound
+    }
+
+    func updateQuietHours(_ request: UpdateQuietHoursRequest) async throws -> NotificationPreferences {
+        throw APIError.notFound
+    }
+
+    func registerDevice(_ request: RegisterDeviceRequest) async throws -> DeviceTokenDto {
+        throw APIError.notFound
+    }
+
+    func getDevices() async throws -> [DeviceTokenDto] {
+        return []
+    }
+
+    func unregisterDevice(id: UUID) async throws {
+        throw APIError.notFound
+    }
+
+    // MARK: - Gift Links (stub implementations)
+
+    func getGiftLinks() async throws -> [GiftLinkDto] {
+        return []
+    }
+
+    func getGiftLink(id: UUID) async throws -> GiftLinkDto {
+        throw APIError.notFound
+    }
+
+    func createGiftLink(_ request: CreateGiftLinkRequest) async throws -> GiftLinkDto {
+        throw APIError.notFound
+    }
+
+    func updateGiftLink(id: UUID, _ request: UpdateGiftLinkRequest) async throws -> GiftLinkDto {
+        throw APIError.notFound
+    }
+
+    func deactivateGiftLink(id: UUID) async throws -> GiftLinkDto {
+        throw APIError.notFound
+    }
+
+    func regenerateGiftLinkToken(id: UUID) async throws -> GiftLinkDto {
+        throw APIError.notFound
+    }
+
+    func getGiftLinkStats(id: UUID) async throws -> GiftLinkStatsDto {
+        throw APIError.notFound
+    }
+
+    // MARK: - Gifts (stub implementations)
+
+    func getGifts(forChild childId: UUID) async throws -> [GiftDto] {
+        return []
+    }
+
+    func getGift(id: UUID) async throws -> GiftDto {
+        throw APIError.notFound
+    }
+
+    func approveGift(id: UUID, _ request: ApproveGiftRequest) async throws -> GiftDto {
+        throw APIError.notFound
+    }
+
+    func rejectGift(id: UUID, _ request: RejectGiftRequest) async throws -> GiftDto {
+        throw APIError.notFound
+    }
+
+    // MARK: - Thank You Notes (stub implementations)
+
+    func getPendingThankYous() async throws -> [PendingThankYouDto] {
+        return []
+    }
+
+    func getThankYouNote(forGiftId giftId: UUID) async throws -> ThankYouNoteDto {
+        throw APIError.notFound
+    }
+
+    func createThankYouNote(forGiftId giftId: UUID, _ request: CreateThankYouNoteRequest) async throws -> ThankYouNoteDto {
+        throw APIError.notFound
+    }
+
+    func updateThankYouNote(id: UUID, _ request: UpdateThankYouNoteRequest) async throws -> ThankYouNoteDto {
+        throw APIError.notFound
+    }
+
+    func sendThankYouNote(forGiftId giftId: UUID) async throws -> ThankYouNoteDto {
+        throw APIError.notFound
+    }
 }
