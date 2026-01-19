@@ -34,7 +34,7 @@ struct WishListView: View {
 
     // MARK: - Initialization
 
-    init(childId: UUID, apiService: APIServiceProtocol = APIService()) {
+    init(childId: UUID, apiService: APIServiceProtocol = ServiceProvider.apiService) {
         _viewModel = State(wrappedValue: WishListViewModel(childId: childId, apiService: apiService))
     }
 
@@ -60,7 +60,10 @@ struct WishListView: View {
                     showingAddItem = true
                 } label: {
                     Image(systemName: "plus.circle.fill")
+                        .accessibilityLabel("Add Item")
                 }
+                .accessibilityIdentifier("add_wish_list_button")
+                .accessibilityLabel("Add Wish List Item")
             }
         }
         .sheet(isPresented: $showingAddItem) {
@@ -237,6 +240,7 @@ struct WishListView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+                .accessibilityIdentifier("add_wish_list_button")
                 .padding(.horizontal, 40)
                 .padding(.top)
             }

@@ -180,6 +180,7 @@ struct SavingsAccountView: View {
                     .clipShape(Capsule())
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("deposit_button")
 
             Button {
                 withdrawAmount = ""
@@ -199,6 +200,7 @@ struct SavingsAccountView: View {
                     )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("withdraw_button")
         }
         .listRowInsets(EdgeInsets())
         .listRowBackground(Color.clear)
@@ -212,6 +214,7 @@ struct SavingsAccountView: View {
                 Section {
                     TextField("Amount", text: $depositAmount)
                         .keyboardType(.decimalPad)
+                        .accessibilityIdentifier("savings_amount_field")
                 } header: {
                     Text("Amount")
                 } footer: {
@@ -220,6 +223,7 @@ struct SavingsAccountView: View {
 
                 Section {
                     TextField("Description", text: $depositDescription)
+                        .accessibilityIdentifier("savings_description_field")
                 } header: {
                     Text("Description")
                 }
@@ -261,6 +265,7 @@ struct SavingsAccountView: View {
                 Section {
                     TextField("Amount", text: $withdrawAmount)
                         .keyboardType(.decimalPad)
+                        .accessibilityIdentifier("savings_amount_field")
                 } header: {
                     Text("Amount")
                 } footer: {
@@ -269,6 +274,7 @@ struct SavingsAccountView: View {
 
                 Section {
                     TextField("Description", text: $withdrawDescription)
+                        .accessibilityIdentifier("savings_description_field")
                 } header: {
                     Text("Description")
                 }
