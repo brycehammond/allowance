@@ -4,9 +4,11 @@ using AllowanceTracker.DTOs;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 
@@ -17,6 +19,8 @@ public class AuthControllerTests : IDisposable
     private readonly AllowanceContext _context;
     private readonly Mock<IAccountService> _mockAccountService;
     private readonly Mock<IJwtService> _mockJwtService;
+    private readonly Mock<IWebHostEnvironment> _mockEnvironment;
+    private readonly Mock<IConfiguration> _mockConfiguration;
     private readonly AuthController _controller;
 
     public AuthControllerTests()
@@ -29,7 +33,10 @@ public class AuthControllerTests : IDisposable
         _context = new AllowanceContext(options);
         _mockAccountService = new Mock<IAccountService>();
         _mockJwtService = new Mock<IJwtService>();
-        _controller = new AuthController(_mockAccountService.Object, _mockJwtService.Object, _context);
+        _mockEnvironment = new Mock<IWebHostEnvironment>();
+        _mockEnvironment.Setup(e => e.EnvironmentName).Returns("Development");
+        _mockConfiguration = new Mock<IConfiguration>();
+        _controller = new AuthController(_mockAccountService.Object, _mockJwtService.Object, _context, _mockEnvironment.Object, _mockConfiguration.Object);
     }
 
     [Fact]

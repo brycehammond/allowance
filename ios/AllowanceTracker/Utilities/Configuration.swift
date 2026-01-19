@@ -11,13 +11,25 @@ enum Configuration {
 
     // MARK: - Public Properties
 
-    /// API base URL from Info.plist
+    /// API base URL - checks for test override first, then falls back to Info.plist
     static var apiBaseURL: URL {
+        // Check for test API URL override (used during UI testing with real API)
+        if let testURLString = ProcessInfo.processInfo.environment["TEST_API_BASE_URL"],
+           let testURL = URL(string: testURLString) {
+            return testURL
+        }
+
+        // Fall back to Info.plist configuration
         guard let urlString = infoPlistValue(for: Keys.apiBaseURL) as? String,
               let url = URL(string: urlString) else {
             fatalError("API_BASE_URL not configured in Info.plist")
         }
         return url
+    }
+
+    /// Whether we're running UI tests with real API integration
+    static var isUITestingWithRealAPI: Bool {
+        ProcessInfo.processInfo.environment["UITEST_REAL_API"] == "1"
     }
 
     /// App version from Info.plist

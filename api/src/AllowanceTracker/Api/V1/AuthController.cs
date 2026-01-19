@@ -18,15 +18,21 @@ public class AuthController : ControllerBase
     private readonly IAccountService _accountService;
     private readonly IJwtService _jwtService;
     private readonly AllowanceContext _context;
+    private readonly IWebHostEnvironment _environment;
+    private readonly IConfiguration _configuration;
 
     public AuthController(
         IAccountService accountService,
         IJwtService jwtService,
-        AllowanceContext context)
+        AllowanceContext context,
+        IWebHostEnvironment environment,
+        IConfiguration configuration)
     {
         _accountService = accountService;
         _jwtService = jwtService;
         _context = context;
+        _environment = environment;
+        _configuration = configuration;
     }
 
     /// <summary>
@@ -528,5 +534,139 @@ public class AuthController : ControllerBase
         }
 
         return Ok(new { message = "Password reset successfully" });
+    }
+
+    /// <summary>
+    /// Delete current user's account
+    /// </summary>
+    /// <returns>Success or failure</returns>
+    /// <response code="200">Account deleted successfully</response>
+    /// <response code="400">Account deletion failed</response>
+    /// <response code="401">User is not authenticated</response>
+    /// <remarks>
+    /// WARNING: This action is irreversible. All user data will be permanently deleted.
+    /// If the user is a family owner, the entire family and all member data will be deleted.
+    /// </remarks>
+    [HttpDelete("account")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        var currentUser = await _accountService.GetCurrentUserAsync();
+        if (currentUser == null)
+            return Unauthorized();
+
+        var result = await _accountService.DeleteAccountAsync(currentUser.Id);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "ACCOUNT_DELETION_FAILED",
+                    message = string.Join(", ", result.Errors.Select(e => e.Description))
+                }
+            });
+        }
+
+        return Ok(new { message = "Account deleted successfully" });
+    }
+
+    /// <summary>
+    /// Delete a test account by email (Development/Staging only, requires API key)
+    /// </summary>
+    /// <param name="email">Email address of the account to delete</param>
+    /// <returns>Success or failure</returns>
+    /// <response code="200">Test account deleted successfully</response>
+    /// <response code="400">Account deletion failed</response>
+    /// <response code="401">Invalid or missing API key</response>
+    /// <response code="403">Endpoint not available in production</response>
+    /// <response code="404">Account not found</response>
+    /// <remarks>
+    /// This endpoint is only available in Development and Staging environments.
+    /// It is intended for automated testing cleanup.
+    /// Requires the X-Test-Api-Key header with the configured test API key.
+    /// WARNING: This action is irreversible. All user data will be permanently deleted.
+    /// </remarks>
+    [HttpDelete("test-account/{email}")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteTestAccount(string email)
+    {
+        // Only allow in development or staging environments
+        if (_environment.IsProduction())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = new
+                {
+                    code = "NOT_ALLOWED",
+                    message = "This endpoint is not available in production"
+                }
+            });
+        }
+
+        // Validate API key
+        var configuredApiKey = _configuration["TestApiKey"];
+        if (string.IsNullOrEmpty(configuredApiKey))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = new
+                {
+                    code = "NOT_CONFIGURED",
+                    message = "Test API key is not configured"
+                }
+            });
+        }
+
+        var providedApiKey = Request.Headers["X-Test-Api-Key"].FirstOrDefault();
+        if (string.IsNullOrEmpty(providedApiKey) || providedApiKey != configuredApiKey)
+        {
+            return Unauthorized(new
+            {
+                error = new
+                {
+                    code = "INVALID_API_KEY",
+                    message = "Invalid or missing test API key"
+                }
+            });
+        }
+
+        var result = await _accountService.DeleteAccountByEmailAsync(email);
+
+        if (!result.Succeeded)
+        {
+            var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            if (errorMessage.Contains("not found"))
+            {
+                return NotFound(new
+                {
+                    error = new
+                    {
+                        code = "ACCOUNT_NOT_FOUND",
+                        message = "Account not found"
+                    }
+                });
+            }
+
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = "ACCOUNT_DELETION_FAILED",
+                    message = errorMessage
+                }
+            });
+        }
+
+        return Ok(new { message = "Test account deleted successfully" });
     }
 }

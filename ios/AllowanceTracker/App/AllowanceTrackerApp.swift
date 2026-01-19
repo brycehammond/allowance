@@ -7,16 +7,41 @@ struct AllowanceTrackerApp: App {
     // MARK: - Properties
 
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State private var authViewModel = AuthViewModel()
+    @State private var authViewModel: AuthViewModel
 
     // MARK: - Initialization
 
     init() {
-        // Register background refresh tasks
-        BackgroundRefreshManager.shared.registerBackgroundTasks()
+        // Create auth view model with appropriate services based on environment
+        if UITestEnvironment.isUITesting {
+            if Configuration.isUITestingWithRealAPI {
+                // UI testing with real API - use real services but with test API URL
+                // The TEST_API_BASE_URL environment variable overrides the API URL
+                _authViewModel = State(initialValue: AuthViewModel())
+                #if DEBUG
+                print("UI TEST MODE: Using REAL API at \(Configuration.apiBaseURL)")
+                #endif
+            } else {
+                // Legacy UI testing mode - use mock services
+                _authViewModel = State(initialValue: AuthViewModel(
+                    apiService: MockAPIService(),
+                    keychainService: MockKeychainService(),
+                    biometricService: BiometricService.shared
+                ))
+                #if DEBUG
+                print("UI TEST MODE: Using mock services")
+                #endif
+            }
+        } else {
+            // Use real services for normal operation
+            _authViewModel = State(initialValue: AuthViewModel())
 
-        // Schedule initial background refresh
-        BackgroundRefreshManager.shared.scheduleAppRefresh()
+            // Register background refresh tasks
+            BackgroundRefreshManager.shared.registerBackgroundTasks()
+
+            // Schedule initial background refresh
+            BackgroundRefreshManager.shared.scheduleAppRefresh()
+        }
 
         #if DEBUG
         Configuration.printConfiguration()

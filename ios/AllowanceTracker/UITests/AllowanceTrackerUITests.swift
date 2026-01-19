@@ -1,17 +1,44 @@
 import XCTest
 
-/// Base class for UI tests with common setup and helper methods
+/// Base class for UI tests with common setup and helper methods.
+/// Supports both mock API mode (fast, deterministic) and real API mode (integration testing).
+///
+/// ## Real API Mode
+/// To run UI tests against a real API server, set these environment variables:
+/// - `TEST_API_BASE_URL`: The API server URL (e.g., "http://localhost:5000")
+/// - `TEST_API_KEY`: The API key for test account cleanup
+/// - `UITEST_REAL_API`: Set to "1" to enable real API mode
+///
+/// In real API mode, a fresh test account is created before each test and deleted after.
 class AllowanceTrackerUITests: XCTestCase {
 
     // MARK: - Properties
 
     var app: XCUIApplication!
 
-    /// Test credentials for parent user
-    let testParentEmail = "testuser@example.com"
-    let testParentPassword = "Password123@"
+    /// The current test account (only populated in real API mode)
+    var testAccount: UITestAPIClient.TestAccount?
 
-    /// Test credentials for child user (if needed)
+    /// Whether we're running in real API mode
+    var isRealAPIMode: Bool {
+        ProcessInfo.processInfo.environment["UITEST_REAL_API"] == "1"
+    }
+
+    /// Test API client for account management
+    let apiClient = UITestAPIClient.shared
+
+    // MARK: - Legacy Test Credentials (for mock mode)
+
+    /// Test credentials for parent user (mock mode only)
+    var testParentEmail: String {
+        testAccount?.email ?? "testuser@example.com"
+    }
+
+    var testParentPassword: String {
+        testAccount?.password ?? "Password123@"
+    }
+
+    /// Test credentials for child user (mock mode only)
     let testChildEmail = "testchild@example.com"
     let testChildPassword = "ChildPass123@"
 
@@ -26,17 +53,108 @@ class AllowanceTrackerUITests: XCTestCase {
         // Initialize the app
         app = XCUIApplication()
 
-        // Set launch arguments for testing
-        app.launchArguments.append("--uitesting")
-        app.launchEnvironment["UITEST_MODE"] = "1"
+        if isRealAPIMode {
+            // Real API mode: create a fresh test account
+            try setUpRealAPIMode()
+        } else {
+            // Mock mode: use mock services
+            setUpMockMode()
+        }
 
         // Launch the app
         app.launch()
     }
 
     override func tearDownWithError() throws {
+        if isRealAPIMode {
+            // Clean up the test account
+            tearDownRealAPIMode()
+        }
+
         app = nil
+        testAccount = nil
         try super.tearDownWithError()
+    }
+
+    // MARK: - Setup Helpers
+
+    /// Set up for real API integration testing
+    private func setUpRealAPIMode() throws {
+        // Generate a unique email for this test
+        let testEmail = UITestAPIClient.generateTestEmail(prefix: "uitest_\(name)")
+
+        // Create the test account synchronously
+        let expectation = XCTestExpectation(description: "Create test account")
+        var creationError: Error?
+
+        Task {
+            do {
+                // First check if API is reachable
+                guard await apiClient.isAPIReachable() else {
+                    creationError = UITestAPIClient.APIError.serverError("API not reachable at \(UITestAPIClient.baseURL)")
+                    expectation.fulfill()
+                    return
+                }
+
+                // Create the test account
+                let account = try await apiClient.createTestParentAccount(
+                    email: testEmail,
+                    password: "TestPass123!",
+                    firstName: "Test",
+                    lastName: "User",
+                    familyName: "Test Family \(Int.random(in: 1000...9999))"
+                )
+                self.testAccount = account
+                print("Created test account: \(testEmail)")
+            } catch {
+                creationError = error
+                print("Failed to create test account: \(error)")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 30.0)
+
+        if let error = creationError {
+            throw error
+        }
+
+        // Configure app for real API mode
+        app.launchArguments.append("--uitesting")
+        app.launchEnvironment["UITEST_MODE"] = "1"
+        app.launchEnvironment["UITEST_REAL_API"] = "1"
+
+        // Pass the API URL to the app
+        if let apiURL = ProcessInfo.processInfo.environment["TEST_API_BASE_URL"] {
+            app.launchEnvironment["TEST_API_BASE_URL"] = apiURL
+        }
+    }
+
+    /// Set up for mock mode testing
+    private func setUpMockMode() {
+        app.launchArguments.append("--uitesting")
+        app.launchEnvironment["UITEST_MODE"] = "1"
+        // Don't set UITEST_REAL_API - this will use mock services
+    }
+
+    /// Clean up test account after test
+    private func tearDownRealAPIMode() {
+        guard let account = testAccount else { return }
+
+        let expectation = XCTestExpectation(description: "Delete test account")
+
+        Task {
+            do {
+                try await apiClient.deleteTestAccount(email: account.email)
+                print("Deleted test account: \(account.email)")
+            } catch {
+                // Log but don't fail - cleanup errors shouldn't fail tests
+                print("Warning: Failed to delete test account \(account.email): \(error)")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 10.0)
     }
 
     // MARK: - Helper Methods
@@ -88,7 +206,12 @@ class AllowanceTrackerUITests: XCTestCase {
         element.typeText(text)
     }
 
-    /// Perform login flow
+    /// Perform login flow with the current test account
+    func performLogin() {
+        performLogin(email: testParentEmail, password: testParentPassword)
+    }
+
+    /// Perform login flow with specific credentials
     func performLogin(email: String, password: String) {
         let emailField = app.textFields["login_email_field"]
         let passwordField = app.secureTextFields["login_password_field"]
@@ -153,5 +276,20 @@ class AllowanceTrackerUITests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+}
+
+// MARK: - Test Mode Helpers
+
+extension AllowanceTrackerUITests {
+
+    /// Skip test if not in real API mode
+    func skipIfNotRealAPIMode() throws {
+        try XCTSkipUnless(isRealAPIMode, "This test requires real API mode")
+    }
+
+    /// Skip test if in real API mode
+    func skipIfRealAPIMode() throws {
+        try XCTSkipIf(isRealAPIMode, "This test only runs in mock mode")
     }
 }

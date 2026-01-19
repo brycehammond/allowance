@@ -45,6 +45,7 @@
 		4B5C6D7E8F9A0B1C2D3E4F5A /* AddGoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4D5E6F7A8B9C0D1E2F3A5B /* AddGoalView.swift */; };
 		4C5639B480606C92AB00F5F8 /* AnalyticsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701106D997975C68D9EFCB11 /* AnalyticsModels.swift */; };
 		4DF43D6E7B1AED274C6029BA /* BudgetCheckResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD137FFBBE6D0B5CBB5A1D7 /* BudgetCheckResult.swift */; };
+		4F750BBEFF926AD1F00CC259 /* MockAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978B42753F3563CD935A34F0 /* MockAPIService.swift */; };
 		52217E7D711D1DFB94B34125 /* CategoryBudget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0D765448D63F943EAAF4E7A /* CategoryBudget.swift */; };
 		53138129CB75D6856015BD6A /* WishListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B9C76F31A78298F467E9FB /* WishListViewModel.swift */; };
 		5347190EB1710AF34A8EC557 /* BudgetManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E5CF3F2866A2B5CA8664AD /* BudgetManagementView.swift */; };
@@ -91,6 +92,7 @@
 		A2CB6A57EF2D22D99D67B1B9 /* View+Accessibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7E35F73B19A803EFF28C17 /* View+Accessibility.swift */; };
 		A558856B52FC7B604CD3EB5F /* BudgetCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9511205BC02AAB27D4C04913 /* BudgetCardView.swift */; };
 		A674089E5C7E9D3CDEB093BF /* ChildModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6CDEAE773B0CEA9FDE7698 /* ChildModelTests.swift */; };
+		AAD5C072E939FB0DA9C8BC45 /* MockKeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57BFED6C5B9E9ED76335BB2 /* MockKeychainService.swift */; };
 		AF00CCECE531D199BDF40CF4 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DA67A14145E295BF161C3FE /* SnapshotHelper.swift */; };
 		B08B4D219CE948FA6B987C14 /* RegistrationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB07737E44061573EE18BA4A /* RegistrationUITests.swift */; };
 		B374C06FF93E8F0BBC2774A6 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F9393FC942F14213C030010 /* ProfileView.swift */; };
@@ -127,6 +129,7 @@
 		EFAAA8B957184341801AA350 /* DashboardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59FD92769EDEBB1EF2D5C96 /* DashboardUITests.swift */; };
 		F06974BCEE86E50AB798D08D /* ResetPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9485050A48C7AC03338E32 /* ResetPasswordView.swift */; };
 		F174A172B5BABFB9C6580E2E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ADA0F7564D34C6925549C4D /* AppDelegate.swift */; };
+		F411089E13CFBFD7B8FCAD06 /* UITestEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286219E1CC7D8DC87F831AEB /* UITestEnvironment.swift */; };
 		F4E45E82B72406A2F999324E /* CategoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37170C845EF4D52B10190B0 /* CategoryPicker.swift */; };
 		F724CA548941485289BCB702 /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F89330BC992469097EC4E51 /* Badge.swift */; };
 		F95122D9FEC002140DB4CCEC /* SavingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E71C71E4853AF5D4B2AA392 /* SavingsUITests.swift */; };
@@ -170,6 +173,7 @@
 		2317210753AA7C14EC4C918F /* NotificationCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NotificationCenterView.swift; path = Notifications/NotificationCenterView.swift; sourceTree = "<group>"; };
 		2386AC59CD77542D1D7DDA16 /* ChangePasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePasswordView.swift; sourceTree = "<group>"; };
 		27702388D759BCD02E8D4917 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
+		286219E1CC7D8DC87F831AEB /* UITestEnvironment.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UITestEnvironment.swift; sourceTree = "<group>"; };
 		2B1045F740869F4E22F84236 /* ChildCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChildCardView.swift; sourceTree = "<group>"; };
 		2B3C4D5E6F7A8B9C0D1E2F3A /* TaskViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskViewModel.swift; sourceTree = "<group>"; };
 		2B3C4D5E6F7A8B9C0D1E2F4A /* SavingsGoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalsView.swift; sourceTree = "<group>"; };
@@ -226,6 +230,7 @@
 		94896A96CF9BDA3798393CDE /* BackgroundRefreshManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshManager.swift; sourceTree = "<group>"; };
 		94D3C235C8CEF981460490C8 /* AllowanceTrackerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AllowanceTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9511205BC02AAB27D4C04913 /* BudgetCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCardView.swift; sourceTree = "<group>"; };
+		978B42753F3563CD935A34F0 /* MockAPIService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockAPIService.swift; sourceTree = "<group>"; };
 		9874A1B2615CBFB5EA712C82 /* AnalyticsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsViewModel.swift; sourceTree = "<group>"; };
 		9971849C1DDDED9DECF734FF /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
 		9ADA0F7564D34C6925549C4D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -273,10 +278,11 @@
 		E1BDF69DDA2EA8DC686D6557 /* GiftLinkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftLinkViewModel.swift; sourceTree = "<group>"; };
 		E26B668E262520C7C447EB39 /* TransactionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionViewModelTests.swift; sourceTree = "<group>"; };
 		E5506D64405103E5E580665B /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
+		E57BFED6C5B9E9ED76335BB2 /* MockKeychainService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockKeychainService.swift; sourceTree = "<group>"; };
 		ECC8718674C0FB958878D770 /* GiftLinksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftLinksView.swift; sourceTree = "<group>"; };
 		F038807F8BD2BF60EB79F6F0 /* DashboardViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModelTests.swift; sourceTree = "<group>"; };
 		F10C80566D753CD427E04E3E /* EditWishListItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditWishListItemView.swift; sourceTree = "<group>"; };
-		F236DDAE8B3A3139A01EDE14 /* AllowanceTrackerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AllowanceTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F236DDAE8B3A3139A01EDE14 /* AllowanceTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AllowanceTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F45D1965078A6166B2675BA0 /* CategorySpendingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySpendingChart.swift; sourceTree = "<group>"; };
 		F88034558BD809F2C0DCCE5E /* AllowanceTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowanceTrackerUITests.swift; sourceTree = "<group>"; };
 		TEMP_CAF928C1-7EA7-48DC-8CFA-98613A64BEA6 /* AllowanceTracker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AllowanceTracker.xcodeproj; sourceTree = "<group>"; };
@@ -353,6 +359,7 @@
 				327985BF8318900994DF769F /* BudgetService.swift */,
 				B3C29B24C99E4AD48ABC5E43 /* CategoryService.swift */,
 				A5AFD616124F6D126C326557 /* PushNotificationService.swift */,
+				CF5D875B5CAE9AEB62DE9DF7 /* Mocks */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -538,6 +545,7 @@
 				72B36C73C8311CE858218313 /* Configuration.swift */,
 				D3957C34C75F799539073007 /* Constants.swift */,
 				DE6C13BF6B487ACE602CF9B0 /* Extensions.swift */,
+				286219E1CC7D8DC87F831AEB /* UITestEnvironment.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -578,7 +586,6 @@
 			children = (
 				3AC931540B34E09987C3200D /* RewardShopView.swift */,
 			);
-			name = Rewards;
 			path = Rewards;
 			sourceTree = "<group>";
 		};
@@ -655,6 +662,16 @@
 			path = Network;
 			sourceTree = "<group>";
 		};
+		CF5D875B5CAE9AEB62DE9DF7 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				978B42753F3563CD935A34F0 /* MockAPIService.swift */,
+				E57BFED6C5B9E9ED76335BB2 /* MockKeychainService.swift */,
+			);
+			name = Mocks;
+			path = Mocks;
+			sourceTree = "<group>";
+		};
 		D5C29525B7808A489AE8A553 /* Gifting */ = {
 			isa = PBXGroup;
 			children = (
@@ -663,7 +680,6 @@
 				C4E4BAB024EEACA67BCC6BD1 /* PendingGiftsView.swift */,
 				C553AC7AA3F31341F10E7B2D /* ThankYouNotesView.swift */,
 			);
-			name = Gifting;
 			path = Gifting;
 			sourceTree = "<group>";
 		};
@@ -978,6 +994,9 @@
 				BCD0861E48B7AD480BC413CF /* GiftLinkViewModel.swift in Sources */,
 				CC30F47934CF3FEFF8D1F8C1 /* PendingGiftsViewModel.swift in Sources */,
 				39AD04859982EB42358FB65D /* ThankYouNotesViewModel.swift in Sources */,
+				F411089E13CFBFD7B8FCAD06 /* UITestEnvironment.swift in Sources */,
+				4F750BBEFF926AD1F00CC259 /* MockAPIService.swift in Sources */,
+				AAD5C072E939FB0DA9C8BC45 /* MockKeychainService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1018,6 +1037,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 8MW535NRK9;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1158,6 +1178,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 8MW535NRK9;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

@@ -1,6 +1,14 @@
 import XCTest
 
-/// UI tests for login and authentication flows
+/// UI tests for login and authentication flows.
+///
+/// These tests work in both mock API mode (fast, deterministic) and real API mode (integration testing).
+/// In real API mode, a fresh test account is created before each test and deleted after.
+///
+/// To run with real API:
+/// ```bash
+/// UITEST_REAL_API=1 TEST_API_BASE_URL=http://localhost:5000 TEST_API_KEY=your-api-key xcodebuild test ...
+/// ```
 final class LoginUITests: AllowanceTrackerUITests {
 
     // MARK: - Login Screen Display Tests
@@ -58,11 +66,12 @@ final class LoginUITests: AllowanceTrackerUITests {
         performLogin(email: "invalid@example.com", password: "wrongpassword")
 
         // Wait for error message to appear
+        // The error message is "Authentication failed. Please check your credentials."
         let errorAlert = app.alerts.firstMatch
-        let errorText = app.staticTexts.element(matching: NSPredicate(format: "label CONTAINS 'error' OR label CONTAINS 'Error' OR label CONTAINS 'Invalid' OR label CONTAINS 'invalid'"))
+        let errorText = app.staticTexts.element(matching: NSPredicate(format: "label CONTAINS 'Authentication' OR label CONTAINS 'failed' OR label CONTAINS 'credentials' OR label CONTAINS 'error' OR label CONTAINS 'Error'"))
 
-        let errorDisplayed = errorAlert.waitForExistence(timeout: 5) ||
-                             errorText.waitForExistence(timeout: 5)
+        let errorDisplayed = errorAlert.waitForExistence(timeout: 10) ||
+                             errorText.waitForExistence(timeout: 10)
 
         XCTAssertTrue(errorDisplayed, "Error message should be displayed for invalid credentials")
 
@@ -108,12 +117,14 @@ final class LoginUITests: AllowanceTrackerUITests {
         let registerButton = app.buttons["register_button"]
         tapWhenAvailable(registerButton)
 
-        // Verify registration screen is displayed
-        let registrationTitle = app.navigationBars["Register"]
-        let emailField = app.textFields.element(matching: NSPredicate(format: "identifier CONTAINS 'email' OR label CONTAINS 'email'"))
+        // Verify registration screen is displayed (presented as a sheet with title "Create Account")
+        let registrationTitle = app.navigationBars["Create Account"]
+        let registerEmailField = app.textFields["register_email_field"]
+        let createAccountText = app.staticTexts["Join Earn & Learn"]
 
         let registrationDisplayed = registrationTitle.waitForExistence(timeout: 5) ||
-                                    (emailField.waitForExistence(timeout: 5) && !app.textFields["login_email_field"].exists)
+                                    registerEmailField.waitForExistence(timeout: 5) ||
+                                    createAccountText.waitForExistence(timeout: 5)
 
         XCTAssertTrue(registrationDisplayed, "Registration screen should be displayed")
 

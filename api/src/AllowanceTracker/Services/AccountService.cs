@@ -242,4 +242,104 @@ public class AccountService : IAccountService
 
         return await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
     }
+
+    public async Task<IdentityResult> DeleteAccountAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+            return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+        return await DeleteUserAndRelatedDataAsync(user);
+    }
+
+    public async Task<IdentityResult> DeleteAccountByEmailAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+        return await DeleteUserAndRelatedDataAsync(user);
+    }
+
+    private async Task<IdentityResult> DeleteUserAndRelatedDataAsync(ApplicationUser user)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            // If user is a child, delete child profile first
+            if (user.Role == UserRole.Child)
+            {
+                var childProfile = await _context.Children
+                    .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+                if (childProfile != null)
+                {
+                    // Delete all related child data (transactions, wish list items, etc.)
+                    // Most should cascade, but be explicit for safety
+                    var transactions = await _context.Transactions
+                        .Where(t => t.ChildId == childProfile.Id)
+                        .ToListAsync();
+                    _context.Transactions.RemoveRange(transactions);
+
+                    var wishListItems = await _context.WishListItems
+                        .Where(w => w.ChildId == childProfile.Id)
+                        .ToListAsync();
+                    _context.WishListItems.RemoveRange(wishListItems);
+
+                    var savingsTransactions = await _context.SavingsTransactions
+                        .Where(s => s.ChildId == childProfile.Id)
+                        .ToListAsync();
+                    _context.SavingsTransactions.RemoveRange(savingsTransactions);
+
+                    _context.Children.Remove(childProfile);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // If user is a parent and owns the family, delete the entire family
+            if (user.Role == UserRole.Parent && user.FamilyId.HasValue)
+            {
+                var family = await _context.Families
+                    .FirstOrDefaultAsync(f => f.Id == user.FamilyId.Value);
+
+                if (family != null && family.OwnerId == user.Id)
+                {
+                    // Delete all family members (children and other parents)
+                    var familyMembers = await _context.Users
+                        .Where(u => u.FamilyId == family.Id && u.Id != user.Id)
+                        .ToListAsync();
+
+                    foreach (var member in familyMembers)
+                    {
+                        // Recursively delete each member
+                        await DeleteUserAndRelatedDataAsync(member);
+                    }
+
+                    // Delete the family
+                    _context.Families.Remove(family);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // Delete the user
+            var result = await _userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
+            {
+                await transaction.CommitAsync();
+            }
+            else
+            {
+                await transaction.RollbackAsync();
+            }
+
+            return result;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
 }
