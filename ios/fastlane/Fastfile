@@ -1,5 +1,10 @@
 # Fastfile for Earn & Learn iOS App
 # https://docs.fastlane.tools
+#
+# WORKFLOW:
+# - Builds & TestFlight: Xcode Cloud
+# - Metadata: Fastlane (this file)
+# - Screenshots: Managed manually in App Store Connect
 
 default_platform(:ios)
 
@@ -8,154 +13,96 @@ platform :ios do
   # Setup & Configuration
   # ==========================================
 
-  before_all do
-    # Ensure we're using the correct Xcode version
-    xcodes(version: "16", select_for_current_build_only: true) if is_ci
-
-    # Generate Xcode project from project.yml
-    Dir.chdir("../AllowanceTracker") do
-      sh("xcodegen", "generate") if File.exist?("project.yml")
-    end
-  end
+  # before_all do
+  #   # Uncomment to require clean git state before running
+  #   ensure_git_status_clean unless is_ci
+  # end
 
   # ==========================================
-  # Code Signing with Match
+  # Metadata Management
   # ==========================================
 
-  desc "Sync development certificates and profiles"
-  lane :sync_dev_certs do
-    match(type: "development", readonly: is_ci)
-  end
-
-  desc "Sync App Store certificates and profiles"
-  lane :sync_appstore_certs do
-    match(type: "appstore", readonly: is_ci)
-  end
-
-  desc "Sync all certificates and profiles"
-  lane :sync_certs do
-    sync_dev_certs
-    sync_appstore_certs
-  end
-
-  # ==========================================
-  # Build Lanes
-  # ==========================================
-
-  desc "Build the app for development"
-  lane :build_dev do
-    sync_dev_certs
-
-    build_app(
-      project: "./AllowanceTracker/AllowanceTracker.xcodeproj",
-      scheme: "AllowanceTracker",
-      configuration: "Debug",
-      export_method: "development",
-      output_directory: "./build",
-      output_name: "AllowanceTracker-Dev.ipa"
-    )
-  end
-
-  desc "Build the app for App Store / TestFlight"
-  lane :build_release do
-    sync_appstore_certs
-
-    # Increment build number based on TestFlight
-    increment_build_number(
-      xcodeproj: "./AllowanceTracker/AllowanceTracker.xcodeproj",
-      build_number: latest_testflight_build_number + 1
+  desc "Upload all metadata to App Store Connect"
+  lane :upload_metadata do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+      key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
     )
 
-    build_app(
-      project: "./AllowanceTracker/AllowanceTracker.xcodeproj",
-      scheme: "AllowanceTracker",
-      configuration: "Release",
-      export_method: "app-store",
-      output_directory: "./build",
-      output_name: "AllowanceTracker.ipa"
-    )
-  end
-
-  # ==========================================
-  # Deploy Lanes
-  # ==========================================
-
-  desc "Submit a new build to TestFlight"
-  lane :beta do
-    # Ensure we have the latest certificates
-    sync_appstore_certs
-
-    # Increment build number
-    increment_build_number(
-      xcodeproj: "./AllowanceTracker/AllowanceTracker.xcodeproj",
-      build_number: latest_testflight_build_number + 1
-    )
-
-    # Build the app
-    build_app(
-      project: "./AllowanceTracker/AllowanceTracker.xcodeproj",
-      scheme: "AllowanceTracker",
-      configuration: "Release",
-      export_method: "app-store",
-      output_directory: "./build",
-      output_name: "AllowanceTracker.ipa"
-    )
-
-    # Upload to TestFlight
-    upload_to_testflight(
-      skip_waiting_for_build_processing: true,
-      distribute_external: false
-    )
-
-    # Clean up
-    clean_build_artifacts
-  end
-
-  desc "Submit to TestFlight and distribute to external testers"
-  lane :beta_external do
-    beta
-
-    # Distribute to external testers (requires app review)
-    upload_to_testflight(
-      distribute_external: true,
-      groups: ["External Testers"],
-      changelog: "Bug fixes and improvements"
-    )
-  end
-
-  # ==========================================
-  # Screenshots
-  # ==========================================
-
-  desc "Generate App Store screenshots"
-  lane :screenshots do
-    capture_screenshots(
-      project: "./AllowanceTracker/AllowanceTracker.xcodeproj",
-      scheme: "AllowanceTracker",
-      devices: ["iPhone 15 Pro Max", "iPhone 15 Pro"],
-      languages: ["en-US"],
-      output_directory: "./screenshots",
-      clear_previous_screenshots: true,
-      override_status_bar: true,
-      stop_after_first_error: false
-    )
-  end
-
-  desc "Generate and upload screenshots to App Store Connect"
-  lane :upload_screenshots do
-    screenshots
-    upload_to_app_store(
+    deliver(
+      api_key: api_key,
       skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_metadata: false,
+      force: true,
+      precheck_include_in_app_purchases: false
+    )
+    UI.success("Metadata uploaded successfully!")
+  end
+
+  desc "Download current metadata from App Store Connect"
+  lane :download_metadata do
+    deliver(
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_metadata: false,
+      force: true,
+      run_precheck_before_submit: false,
+      metadata_path: "./fastlane/metadata"
+    )
+
+    # Actually download (deliver init downloads)
+    sh("cd .. && fastlane deliver download_metadata --force")
+    UI.success("Metadata downloaded to fastlane/metadata/")
+  end
+
+  # ==========================================
+  # App Store Connect Setup
+  # ==========================================
+
+  desc "Create a new app on App Store Connect"
+  lane :create_app do
+    # Set up API key (used automatically by produce)
+    app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+      key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+    )
+
+    produce(
+      app_identifier: "app.earnandlearn.ios",
+      app_name: "Earn & Learn",
+      language: "English",
+      app_version: "1.0.0",
+      sku: "earnandlearn001"
+    )
+    UI.success("App created on App Store Connect!")
+  end
+
+  desc "Sync app information from App Store Connect"
+  lane :sync_app_info do
+    app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+      key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+    )
+
+    # This will show current app status
+    deliver(
+      skip_binary_upload: true,
+      skip_screenshots: true,
       skip_metadata: true,
-      overwrite_screenshots: true
+      precheck_include_in_app_purchases: false,
+      run_precheck_before_submit: true
     )
   end
 
   # ==========================================
-  # Utility Lanes
+  # Local Testing (Optional)
   # ==========================================
 
-  desc "Run tests"
+  desc "Run tests locally"
   lane :test do
     run_tests(
       project: "./AllowanceTracker/AllowanceTracker.xcodeproj",
@@ -165,23 +112,86 @@ platform :ios do
     )
   end
 
+  # ==========================================
+  # Validation
+  # ==========================================
+
+  desc "Validate metadata before upload"
+  lane :validate do
+    # Check metadata files exist
+    required_files = [
+      "metadata/en-US/name.txt",
+      "metadata/en-US/subtitle.txt",
+      "metadata/en-US/description.txt",
+      "metadata/en-US/keywords.txt",
+      "metadata/en-US/privacy_url.txt",
+      "metadata/en-US/support_url.txt",
+      "metadata/review_information/demo_user.txt",
+      "metadata/review_information/demo_password.txt"
+    ]
+
+    missing = required_files.reject { |f| File.exist?(f) }
+
+    if missing.any?
+      UI.user_error!("Missing metadata files: #{missing.join(', ')}")
+    end
+
+    # Validate character limits
+    name = File.read("metadata/en-US/name.txt").strip
+    subtitle = File.read("metadata/en-US/subtitle.txt").strip
+    keywords = File.read("metadata/en-US/keywords.txt").strip
+    promo = File.read("metadata/en-US/promotional_text.txt").strip rescue ""
+    description = File.read("metadata/en-US/description.txt").strip
+
+    errors = []
+    errors << "Name too long (#{name.length}/30)" if name.length > 30
+    errors << "Subtitle too long (#{subtitle.length}/30)" if subtitle.length > 30
+    errors << "Keywords too long (#{keywords.length}/100)" if keywords.length > 100
+    errors << "Promotional text too long (#{promo.length}/170)" if promo.length > 170
+    errors << "Description too long (#{description.length}/4000)" if description.length > 4000
+
+    if errors.any?
+      UI.user_error!(errors.join("\n"))
+    end
+
+    UI.success("All metadata validated successfully!")
+    UI.message("Name: #{name.length}/30 chars")
+    UI.message("Subtitle: #{subtitle.length}/30 chars")
+    UI.message("Keywords: #{keywords.length}/100 chars")
+    UI.message("Promotional: #{promo.length}/170 chars")
+    UI.message("Description: #{description.length}/4000 chars")
+  end
+
+  desc "Run precheck to validate App Store compliance"
+  lane :precheck_app do
+    precheck(
+      app_identifier: "app.earnandlearn.ios",
+      include_in_app_purchases: false
+    )
+  end
+
+  # ==========================================
+  # Utility Lanes
+  # ==========================================
+
+  desc "Print current app version from Xcode project"
+  lane :version do
+    version = get_version_number(
+      xcodeproj: "./AllowanceTracker/AllowanceTracker.xcodeproj"
+    )
+    build = get_build_number(
+      xcodeproj: "./AllowanceTracker/AllowanceTracker.xcodeproj"
+    )
+    UI.message("Current version: #{version} (#{build})")
+  end
+
   desc "Increment version number"
   lane :bump_version do |options|
     increment_version_number(
       xcodeproj: "./AllowanceTracker/AllowanceTracker.xcodeproj",
       bump_type: options[:type] || "patch" # major, minor, patch
     )
-  end
-
-  desc "Create a new app on App Store Connect"
-  lane :create_app do
-    produce(
-      app_identifier: "com.fludivisiondesign.earnandlearn",
-      app_name: "Earn & Learn",
-      language: "English",
-      app_version: "1.0.0",
-      sku: "earnandlearn001"
-    )
+    version
   end
 
   # ==========================================
@@ -189,7 +199,6 @@ platform :ios do
   # ==========================================
 
   error do |lane, exception|
-    # Notify on failure (can integrate with Slack, etc.)
     UI.error("Lane #{lane} failed with error: #{exception.message}")
   end
 end

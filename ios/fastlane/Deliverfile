@@ -1,0 +1,100 @@
+# Deliverfile - App Store Metadata Management
+# https://docs.fastlane.tools/actions/deliver/
+#
+# NOTE: Builds are managed by Xcode Cloud, not fastlane.
+# This file configures metadata-only uploads.
+
+# App Identifier
+app_identifier("app.earnandlearn.ios")
+
+# ===========================================
+# Binary Upload (DISABLED - Using Xcode Cloud)
+# ===========================================
+skip_binary_upload(true)
+
+# ===========================================
+# Metadata Configuration
+# ===========================================
+
+# Metadata path
+metadata_path("./fastlane/metadata")
+
+# Skip metadata upload (set to true to skip)
+skip_metadata(false)
+
+# ===========================================
+# Screenshots (managed manually in App Store Connect)
+# ===========================================
+skip_screenshots(true)
+
+# ===========================================
+# App Information
+# ===========================================
+
+# App rating config file
+app_rating_config_path("./fastlane/metadata/app_rating_config.json")
+
+# Primary and secondary categories
+primary_category("MZGenre.Finance")
+secondary_category("MZGenre.Education")
+
+# Copyright
+copyright("2025 Earn & Learn")
+
+# Price tier - set manually in App Store Connect
+# price_tier(0)  # Disabled due to API changes
+
+# ===========================================
+# Review & Release Settings
+# ===========================================
+
+# Don't submit for review (manual step)
+submit_for_review(false)
+
+# Don't auto-release after approval
+automatic_release(false)
+
+# Phased release (gradual rollout over 7 days)
+phased_release(true)
+
+# ===========================================
+# Submission Information
+# ===========================================
+# Used when submit_for_review is true
+
+submission_information({
+  add_id_info_limits_tracking: true,
+  add_id_info_serves_ads: false,
+  add_id_info_tracks_action: false,
+  add_id_info_tracks_install: false,
+  add_id_info_uses_idfa: false,
+  content_rights_has_rights: true,
+  content_rights_contains_third_party_content: false,
+  export_compliance_uses_encryption: true,
+  export_compliance_encryption_updated: false,
+  export_compliance_compliance_required: false,
+  export_compliance_is_exempt: true,
+  export_compliance_contains_proprietary_cryptography: false,
+  export_compliance_contains_third_party_cryptography: false,
+  export_compliance_available_on_french_store: true,
+  export_compliance_platform: "ios"
+})
+
+# ===========================================
+# Validation
+# ===========================================
+
+# Run precheck before upload (disabled due to API key conflict)
+run_precheck_before_submit(false)
+precheck_include_in_app_purchases(false)
+
+# Skip HTML preview file generation
+force(true)
+
+# ===========================================
+# Authentication
+# ===========================================
+# Credentials are read from environment variables:
+# - APP_STORE_CONNECT_API_KEY_ID
+# - APP_STORE_CONNECT_API_ISSUER_ID
+# - APP_STORE_CONNECT_API_KEY_PATH

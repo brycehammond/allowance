@@ -1,4 +1,5 @@
 source "https://rubygems.org"
 
+# Fastlane for App Store metadata management
+# Builds are handled by Xcode Cloud
 gem "fastlane"
-gem "cocoapods" # May be needed for some dependencies

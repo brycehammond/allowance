@@ -2,6 +2,7 @@ import XCTest
 
 /// UI Tests specifically for generating App Store screenshots
 /// Run with: fastlane snapshot
+@MainActor
 class ScreenshotUITests: XCTestCase {
 
     var app: XCUIApplication!

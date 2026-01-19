@@ -1,0 +1,9 @@
+This app requires an account to function. Please use the demo credentials provided.
+
+The demo account has a pre-configured family with two children and sample transaction history.
+
+Push notifications are used for balance updates and allowance payments.
+
+Face ID is optional and used only for app unlock convenience.
+
+No in-app purchases or subscriptions in version 1.0.

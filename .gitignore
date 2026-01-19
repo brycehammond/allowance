@@ -66,14 +66,22 @@ ios/fastlane/.env.*
 !ios/fastlane/.env.default
 ios/fastlane/report.xml
 ios/fastlane/Preview.html
-ios/fastlane/screenshots/**/*.png
 ios/fastlane/test_output/
-ios/fastlane/README.md
+ios/fastlane/gym/
+ios/fastlane/lane_output/
 ios/build/
 ios/*.ipa
 ios/*.dSYM.zip
 ios/fastlane/AuthKey*.p8
 ios/Gemfile.lock
+
+# Keep fastlane screenshots that are uploaded to App Store
+# but ignore local test screenshots
+ios/screenshots/
+
+# App Store review demo credentials (sensitive)
+ios/fastlane/metadata/review_information/demo_user.txt
+ios/fastlane/metadata/review_information/demo_password.txt
 
 # Xcode
 ios/**/*.xcuserstate
