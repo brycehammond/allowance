@@ -116,41 +116,63 @@ struct WishListView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .padding(.horizontal, isRegularWidth ? 24 : 16)
+                .adaptivePadding(.horizontal)
                 .padding(.top)
 
                 // Summary card (for active items)
                 if selectedFilter == .active {
                     summaryCard
-                        .padding(.horizontal, isRegularWidth ? 24 : 16)
+                        .adaptivePadding(.horizontal)
                 }
 
-                // Items
-                VStack(spacing: 8) {
-                    ForEach(filteredItems) { item in
-                        WishListItemCard(
-                            item: item,
-                            currentBalance: viewModel.currentBalance,
-                            isParent: isParent,
-                            onEdit: {
-                                editingItem = item
-                            },
-                            onDelete: {
-                                deletingItem = item
-                            },
-                            onMarkPurchased: {
-                                Task {
-                                    await markAsPurchased(item)
+                // Items - use grid on iPad for multi-column layout
+                if isRegularWidth {
+                    AdaptiveGrid(minItemWidth: 320, spacing: 12) {
+                        ForEach(filteredItems) { item in
+                            WishListItemCard(
+                                item: item,
+                                currentBalance: viewModel.currentBalance,
+                                isParent: isParent,
+                                onEdit: {
+                                    editingItem = item
+                                },
+                                onDelete: {
+                                    deletingItem = item
+                                },
+                                onMarkPurchased: {
+                                    Task {
+                                        await markAsPurchased(item)
+                                    }
                                 }
-                            }
-                        )
-                        .padding(.horizontal, isRegularWidth ? 24 : 16)
+                            )
+                        }
+                    }
+                    .adaptivePadding(.horizontal)
+                } else {
+                    VStack(spacing: 8) {
+                        ForEach(filteredItems) { item in
+                            WishListItemCard(
+                                item: item,
+                                currentBalance: viewModel.currentBalance,
+                                isParent: isParent,
+                                onEdit: {
+                                    editingItem = item
+                                },
+                                onDelete: {
+                                    deletingItem = item
+                                },
+                                onMarkPurchased: {
+                                    Task {
+                                        await markAsPurchased(item)
+                                    }
+                                }
+                            )
+                            .padding(.horizontal, 16)
+                        }
                     }
                 }
             }
             .padding(.bottom)
-            .frame(maxWidth: isRegularWidth ? 700 : .infinity)
-            .frame(maxWidth: .infinity)
         }
     }
 
@@ -245,8 +267,8 @@ struct WishListView: View {
                 .padding(.top)
             }
         }
-        .frame(maxWidth: isRegularWidth ? 500 : .infinity)
-        .padding()
+        .frame(maxWidth: 500)
+        .adaptivePadding()
     }
 
     // MARK: - Computed Properties

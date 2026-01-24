@@ -98,29 +98,45 @@ struct TasksView: View {
                 // Pending approvals section (Parents only)
                 if isParent && viewModel.hasPendingApprovals {
                     pendingApprovalsSection
-                        .padding(.horizontal, isRegularWidth ? 24 : 16)
+                        .adaptivePadding(.horizontal)
                 }
 
-                // Tasks
-                VStack(spacing: 8) {
-                    ForEach(viewModel.tasks) { task in
-                        TaskCard(
-                            task: task,
-                            isParent: isParent,
-                            onComplete: {
-                                completingTask = task
-                            },
-                            onArchive: {
-                                archivingTask = task
-                            }
-                        )
-                        .padding(.horizontal, isRegularWidth ? 24 : 16)
+                // Tasks - use grid on iPad for multi-column layout
+                if isRegularWidth {
+                    AdaptiveGrid(minItemWidth: 350, spacing: 12) {
+                        ForEach(viewModel.tasks) { task in
+                            TaskCard(
+                                task: task,
+                                isParent: isParent,
+                                onComplete: {
+                                    completingTask = task
+                                },
+                                onArchive: {
+                                    archivingTask = task
+                                }
+                            )
+                        }
+                    }
+                    .adaptivePadding(.horizontal)
+                } else {
+                    VStack(spacing: 8) {
+                        ForEach(viewModel.tasks) { task in
+                            TaskCard(
+                                task: task,
+                                isParent: isParent,
+                                onComplete: {
+                                    completingTask = task
+                                },
+                                onArchive: {
+                                    archivingTask = task
+                                }
+                            )
+                            .padding(.horizontal, 16)
+                        }
                     }
                 }
             }
             .padding(.vertical)
-            .frame(maxWidth: isRegularWidth ? 700 : .infinity)
-            .frame(maxWidth: .infinity)
         }
     }
 
@@ -196,8 +212,8 @@ struct TasksView: View {
                 .padding(.top)
             }
         }
-        .frame(maxWidth: isRegularWidth ? 500 : .infinity)
-        .padding()
+        .frame(maxWidth: 500)
+        .adaptivePadding()
     }
 
     // MARK: - Methods

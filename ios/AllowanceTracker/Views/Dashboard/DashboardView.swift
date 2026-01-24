@@ -154,7 +154,7 @@ struct DashboardView: View {
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, isRegularWidth ? 24 : 16)
+                    .adaptivePadding(.horizontal)
                     .padding(.top)
                 }
 
@@ -169,7 +169,7 @@ struct DashboardView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, isRegularWidth ? 24 : 16)
+                .adaptivePadding(.horizontal)
             }
             .padding(.bottom)
         }
@@ -215,13 +215,52 @@ struct DashboardView: View {
 // MARK: - Child Detail View
 
 /// Detail view for a specific child
-/// Uses TabView on iPhone, optimized layout on iPad
+/// Uses sidebar navigation on iPad, TabView on iPhone
 @MainActor
 struct ChildDetailView: View {
+
+    // MARK: - Child Section Enum
+
+    enum ChildSection: String, CaseIterable, Identifiable {
+        case transactions = "Transactions"
+        case wishList = "Wish List"
+        case analytics = "Analytics"
+        case badges = "Badges"
+        case chores = "Chores"
+        case goals = "Goals"
+        case savings = "Savings"
+        case settings = "Settings"
+
+        var id: String { rawValue }
+
+        var icon: String {
+            switch self {
+            case .transactions: return "receipt"
+            case .wishList: return "star"
+            case .analytics: return "chart.line.uptrend.xyaxis"
+            case .badges: return "medal"
+            case .chores: return "checklist"
+            case .goals: return "target"
+            case .savings: return "banknote"
+            case .settings: return "gearshape"
+            }
+        }
+
+        var isParentOnly: Bool {
+            switch self {
+            case .savings, .settings: return true
+            default: return false
+            }
+        }
+    }
+
+    // MARK: - Properties
+
     let child: Child
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selectedTab = 0
+    @State private var selectedSection: ChildSection? = .transactions
 
     private var isParent: Bool {
         authViewModel.effectiveIsParent
@@ -237,110 +276,26 @@ struct ChildDetailView: View {
         horizontalSizeClass == .regular
     }
 
+    /// Sections available based on user role
+    private var availableSections: [ChildSection] {
+        if isParent {
+            return ChildSection.allCases
+        } else {
+            return ChildSection.allCases.filter { !$0.isParentOnly }
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Header with balance breakdown
             childHeaderView
 
-            // Tab view - same structure works well on both platforms
-            TabView(selection: $selectedTab) {
-                // Transactions tab
-                TransactionListView(
-                    childId: child.id,
-                    savingsBalance: child.savingsBalance,
-                    allowDebt: child.allowDebt
-                )
-                    .tabItem {
-                        Label("Transactions", systemImage: "receipt")
-                    }
-                    .tag(0)
-
-                // Wish List tab
-                WishListView(childId: child.id)
-                    .tabItem {
-                        Label("Wish List", systemImage: "star")
-                    }
-                    .tag(1)
-
-                // Analytics tab
-                AnalyticsView(childId: child.id)
-                    .tabItem {
-                        Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
-                    }
-                    .tag(2)
-
-                // Badges tab
-                BadgesView(childId: child.id)
-                    .tabItem {
-                        Label("Badges", systemImage: "medal")
-                    }
-                    .tag(3)
-
-                // Chores tab
-                TasksView(childId: child.id, isParent: isParent)
-                    .tabItem {
-                        Label("Chores", systemImage: "checklist")
-                    }
-                    .tag(4)
-
-                // Savings Goals tab
-                SavingsGoalsView(
-                    childId: child.id,
-                    isParent: isParent,
-                    currentBalance: child.currentBalance
-                )
-                    .tabItem {
-                        Label("Goals", systemImage: "target")
-                    }
-                    .tag(5)
-
-                // Savings tab (Parent only)
-                if isParent {
-                    SavingsAccountView(childId: child.id)
-                        .tabItem {
-                            Label("Savings", systemImage: "banknote")
-                        }
-                        .tag(6)
-                }
-
-                // Settings tab (Parent only)
-                if isParent {
-                    ChildSettingsView(childId: child.id, apiService: APIService())
-                        .tabItem {
-                            Label("Settings", systemImage: "gearshape")
-                        }
-                        .tag(7)
-                }
-
-                // TODO: Re-enable gifting tabs when feature is ready
-                // Gift Links tab (Parent only)
-                // if isParent {
-                //     GiftLinksView(childId: child.id, childName: child.firstName)
-                //         .tabItem {
-                //             Label("Gift Links", systemImage: "link")
-                //         }
-                //         .tag(8)
-                // }
-
-                // Pending Gifts tab (Parent only)
-                // if isParent {
-                //     PendingGiftsView(childId: child.id, childName: child.firstName)
-                //         .tabItem {
-                //             Label("Gifts", systemImage: "gift")
-                //         }
-                //         .tag(9)
-                // }
-
-                // Thank You Notes tab (Child only)
-                // if !isParent {
-                //     ThankYouNotesView(childId: child.id)
-                //         .tabItem {
-                //             Label("Thank You", systemImage: "heart")
-                //         }
-                //         .tag(8)
-                // }
+            // iPad: Use sidebar, iPhone: Use TabView
+            if isRegularWidth {
+                iPadSidebarLayout
+            } else {
+                iPhoneTabLayout
             }
-            .tint(DesignSystem.Colors.primary)
         }
         .navigationTitle(authViewModel.isViewingAsChild ? "" : child.fullName)
         .navigationBarTitleDisplayMode(.inline)
@@ -379,6 +334,139 @@ struct ChildDetailView: View {
                 }
             }
         }
+    }
+
+    // MARK: - iPad Sidebar Layout
+
+    private var iPadSidebarLayout: some View {
+        HStack(spacing: 0) {
+            // Sidebar
+            List(availableSections, selection: $selectedSection) { section in
+                Label(section.rawValue, systemImage: section.icon)
+                    .tag(section)
+            }
+            .listStyle(.sidebar)
+            .frame(width: 220)
+
+            Divider()
+
+            // Content
+            sectionContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    // MARK: - iPad Section Content
+
+    @ViewBuilder
+    private var sectionContent: some View {
+        switch selectedSection {
+        case .transactions:
+            TransactionListView(
+                childId: child.id,
+                savingsBalance: child.savingsBalance,
+                allowDebt: child.allowDebt
+            )
+        case .wishList:
+            WishListView(childId: child.id)
+        case .analytics:
+            AnalyticsView(childId: child.id)
+        case .badges:
+            BadgesView(childId: child.id)
+        case .chores:
+            TasksView(childId: child.id, isParent: isParent)
+        case .goals:
+            SavingsGoalsView(
+                childId: child.id,
+                isParent: isParent,
+                currentBalance: child.currentBalance
+            )
+        case .savings:
+            SavingsAccountView(childId: child.id)
+        case .settings:
+            ChildSettingsView(childId: child.id, apiService: APIService())
+        case nil:
+            ContentUnavailableView(
+                "Select a Section",
+                systemImage: "sidebar.left",
+                description: Text("Choose a section from the sidebar")
+            )
+        }
+    }
+
+    // MARK: - iPhone Tab Layout
+
+    private var iPhoneTabLayout: some View {
+        TabView(selection: $selectedTab) {
+            // Transactions tab
+            TransactionListView(
+                childId: child.id,
+                savingsBalance: child.savingsBalance,
+                allowDebt: child.allowDebt
+            )
+                .tabItem {
+                    Label("Transactions", systemImage: "receipt")
+                }
+                .tag(0)
+
+            // Wish List tab
+            WishListView(childId: child.id)
+                .tabItem {
+                    Label("Wish List", systemImage: "star")
+                }
+                .tag(1)
+
+            // Analytics tab
+            AnalyticsView(childId: child.id)
+                .tabItem {
+                    Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
+                }
+                .tag(2)
+
+            // Badges tab
+            BadgesView(childId: child.id)
+                .tabItem {
+                    Label("Badges", systemImage: "medal")
+                }
+                .tag(3)
+
+            // Chores tab
+            TasksView(childId: child.id, isParent: isParent)
+                .tabItem {
+                    Label("Chores", systemImage: "checklist")
+                }
+                .tag(4)
+
+            // Savings Goals tab
+            SavingsGoalsView(
+                childId: child.id,
+                isParent: isParent,
+                currentBalance: child.currentBalance
+            )
+                .tabItem {
+                    Label("Goals", systemImage: "target")
+                }
+                .tag(5)
+
+            // Savings tab (Parent only)
+            if isParent {
+                SavingsAccountView(childId: child.id)
+                    .tabItem {
+                        Label("Savings", systemImage: "banknote")
+                    }
+                    .tag(6)
+            }
+
+            // Settings tab (Parent only)
+            if isParent {
+                ChildSettingsView(childId: child.id, apiService: APIService())
+                    .tabItem {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                    .tag(7)
+            }
+        }
+        .tint(DesignSystem.Colors.primary)
     }
 
     // MARK: - Child Header View

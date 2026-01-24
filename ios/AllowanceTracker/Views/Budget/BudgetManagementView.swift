@@ -7,8 +7,14 @@ struct BudgetManagementView: View {
     @State private var budgetToEdit: CategoryBudget?
     @State private var showDeleteConfirmation = false
     @State private var budgetToDelete: CategoryBudget?
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     let child: Child
+
+    /// True when on iPad in regular width mode
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
 
     var body: some View {
         Group {
@@ -23,24 +29,43 @@ struct BudgetManagementView: View {
                     description: Text("Create a budget to start tracking spending by category")
                 )
             } else {
-                // Budget list
+                // Budget list - use grid on iPad
                 ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(viewModel.budgets) { budget in
-                            BudgetCardView(
-                                budget: budget,
-                                status: viewModel.getStatus(for: budget),
-                                onEdit: {
-                                    budgetToEdit = budget
-                                },
-                                onDelete: {
-                                    budgetToDelete = budget
-                                    showDeleteConfirmation = true
-                                }
-                            )
+                    if isRegularWidth {
+                        AdaptiveGrid(minItemWidth: 320, spacing: 12) {
+                            ForEach(viewModel.budgets) { budget in
+                                BudgetCardView(
+                                    budget: budget,
+                                    status: viewModel.getStatus(for: budget),
+                                    onEdit: {
+                                        budgetToEdit = budget
+                                    },
+                                    onDelete: {
+                                        budgetToDelete = budget
+                                        showDeleteConfirmation = true
+                                    }
+                                )
+                            }
                         }
+                        .adaptivePadding()
+                    } else {
+                        LazyVStack(spacing: 12) {
+                            ForEach(viewModel.budgets) { budget in
+                                BudgetCardView(
+                                    budget: budget,
+                                    status: viewModel.getStatus(for: budget),
+                                    onEdit: {
+                                        budgetToEdit = budget
+                                    },
+                                    onDelete: {
+                                        budgetToDelete = budget
+                                        showDeleteConfirmation = true
+                                    }
+                                )
+                            }
+                        }
+                        .padding()
                     }
-                    .padding()
                 }
             }
         }

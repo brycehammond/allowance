@@ -8,6 +8,12 @@ struct AnalyticsView: View {
     // MARK: - Properties
 
     @State private var viewModel: AnalyticsViewModel
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// True when on iPad in regular width mode
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
 
     // MARK: - Initialization
 
@@ -50,29 +56,70 @@ struct AnalyticsView: View {
     /// Main analytics scroll view
     private var analyticsScrollView: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                // Balance history chart
-                if !viewModel.balanceHistory.isEmpty {
-                    balanceHistoryCard
-                }
-
-                // Income vs Spending summary
-                if let summary = viewModel.incomeSpendingSummary {
-                    incomeSpendingSummaryCard(summary)
-                }
-
-                // Spending breakdown
-                if !viewModel.spendingBreakdown.isEmpty {
-                    spendingBreakdownCard
-                }
-
-                // Monthly comparison
-                if !viewModel.monthlyComparison.isEmpty {
-                    monthlyComparisonCard
-                }
+            if isRegularWidth {
+                // iPad: 2x2 grid layout for charts
+                iPadGridLayout
+            } else {
+                // iPhone: Vertical stack
+                iPhoneStackLayout
             }
-            .padding()
         }
+    }
+
+    /// iPad 2-column grid layout
+    private var iPadGridLayout: some View {
+        LazyVGrid(columns: [
+            GridItem(.flexible(), spacing: 16),
+            GridItem(.flexible(), spacing: 16)
+        ], spacing: 16) {
+            // Balance history chart (spans full width on first row)
+            if !viewModel.balanceHistory.isEmpty {
+                balanceHistoryCard
+                    .gridCellColumns(2)
+            }
+
+            // Income vs Spending summary
+            if let summary = viewModel.incomeSpendingSummary {
+                incomeSpendingSummaryCard(summary)
+            }
+
+            // Spending breakdown
+            if !viewModel.spendingBreakdown.isEmpty {
+                spendingBreakdownCard
+            }
+
+            // Monthly comparison (spans full width if alone)
+            if !viewModel.monthlyComparison.isEmpty {
+                monthlyComparisonCard
+            }
+        }
+        .adaptivePadding()
+    }
+
+    /// iPhone vertical stack layout
+    private var iPhoneStackLayout: some View {
+        VStack(spacing: 20) {
+            // Balance history chart
+            if !viewModel.balanceHistory.isEmpty {
+                balanceHistoryCard
+            }
+
+            // Income vs Spending summary
+            if let summary = viewModel.incomeSpendingSummary {
+                incomeSpendingSummaryCard(summary)
+            }
+
+            // Spending breakdown
+            if !viewModel.spendingBreakdown.isEmpty {
+                spendingBreakdownCard
+            }
+
+            // Monthly comparison
+            if !viewModel.monthlyComparison.isEmpty {
+                monthlyComparisonCard
+            }
+        }
+        .padding()
     }
 
     /// Balance history chart card

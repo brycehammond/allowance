@@ -105,16 +105,23 @@ struct TransactionListView: View {
                 // Balance card
                 balanceCard
 
-                // Transactions
-                VStack(spacing: 8) {
-                    ForEach(viewModel.transactions) { transaction in
-                        TransactionRowView(transaction: transaction)
+                // Transactions - use grid on iPad for multi-column layout
+                if isRegularWidth {
+                    AdaptiveGrid(minItemWidth: 350, spacing: 12) {
+                        ForEach(viewModel.transactions) { transaction in
+                            TransactionRowView(transaction: transaction)
+                        }
+                    }
+                } else {
+                    VStack(spacing: 8) {
+                        ForEach(viewModel.transactions) { transaction in
+                            TransactionRowView(transaction: transaction)
+                        }
                     }
                 }
             }
-            .padding(isRegularWidth ? 24 : 16)
-            .frame(maxWidth: isRegularWidth ? 700 : .infinity)
-            .frame(maxWidth: .infinity)
+            .adaptivePadding(.horizontal)
+            .padding(.vertical, 16)
         }
     }
 
@@ -197,8 +204,8 @@ struct TransactionListView: View {
                 .padding(.top)
             }
         }
-        .frame(maxWidth: isRegularWidth ? 500 : .infinity)
-        .padding()
+        .frame(maxWidth: 500)
+        .adaptivePadding()
     }
 
     // MARK: - Computed Properties

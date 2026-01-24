@@ -1,19 +1,111 @@
 import SwiftUI
 
 /// Main tab-based navigation structure for the app
-/// Optimized for both iPhone and iPad with adaptive layouts
+/// Uses sidebar navigation on iPad, tab bar on iPhone
 @MainActor
 struct MainTabView: View {
+
+    // MARK: - Navigation Section
+
+    enum Section: String, CaseIterable, Identifiable {
+        case dashboard = "Dashboard"
+        case budgets = "Budgets"
+        case analytics = "Analytics"
+        case profile = "Profile"
+
+        var id: String { rawValue }
+
+        var icon: String {
+            switch self {
+            case .dashboard: return "house.fill"
+            case .budgets: return "chart.pie.fill"
+            case .analytics: return "chart.line.uptrend.xyaxis"
+            case .profile: return "person.fill"
+            }
+        }
+    }
 
     // MARK: - Properties
 
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selectedTab = 0
+    @State private var selectedSection: Section? = .dashboard
+
+    // MARK: - Computed Properties
+
+    /// True when on iPad in regular width mode
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
+
+    /// Sections available based on user role
+    private var availableSections: [Section] {
+        if authViewModel.effectiveIsParent {
+            return Section.allCases
+        } else {
+            // Children don't see budgets
+            return [.dashboard, .analytics, .profile]
+        }
+    }
 
     // MARK: - Body
 
     var body: some View {
+        if isRegularWidth {
+            // iPad: Use sidebar navigation
+            NavigationSplitView {
+                sidebarContent
+            } detail: {
+                detailContent
+            }
+            .tint(DesignSystem.Colors.primary)
+        } else {
+            // iPhone: Use tab bar
+            tabViewContent
+        }
+    }
+
+    // MARK: - iPad Sidebar
+
+    private var sidebarContent: some View {
+        List(availableSections, selection: $selectedSection) { section in
+            Label(section.rawValue, systemImage: section.icon)
+                .tag(section)
+        }
+        .navigationTitle("Allowance")
+        .listStyle(.sidebar)
+    }
+
+    // MARK: - iPad Detail Content
+
+    @ViewBuilder
+    private var detailContent: some View {
+        switch selectedSection {
+        case .dashboard:
+            DashboardView()
+        case .budgets:
+            NavigationStack {
+                BudgetTabView()
+            }
+        case .analytics:
+            NavigationStack {
+                AnalyticsTabView()
+            }
+        case .profile:
+            ProfileView()
+        case nil:
+            ContentUnavailableView(
+                "Select a Section",
+                systemImage: "sidebar.left",
+                description: Text("Choose a section from the sidebar")
+            )
+        }
+    }
+
+    // MARK: - iPhone Tab View
+
+    private var tabViewContent: some View {
         TabView(selection: $selectedTab) {
             // Tab 1: Dashboard
             DashboardView()

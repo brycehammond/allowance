@@ -108,22 +108,31 @@ struct SavingsGoalsView: View {
                 // Summary section
                 if viewModel.hasActiveGoals {
                     summarySection
-                        .padding(.horizontal, isRegularWidth ? 24 : 16)
+                        .adaptivePadding(.horizontal)
                 }
 
-                // Goals list
-                VStack(spacing: 8) {
-                    ForEach(viewModel.goals) { goal in
-                        GoalCard(goal: goal, isParent: isParent) {
-                            selectedGoalForDetail = goal
+                // Goals list - use grid on iPad for multi-column layout
+                if isRegularWidth {
+                    AdaptiveGrid(minItemWidth: 350, spacing: 12) {
+                        ForEach(viewModel.goals) { goal in
+                            GoalCard(goal: goal, isParent: isParent) {
+                                selectedGoalForDetail = goal
+                            }
                         }
-                        .padding(.horizontal, isRegularWidth ? 24 : 16)
+                    }
+                    .adaptivePadding(.horizontal)
+                } else {
+                    VStack(spacing: 8) {
+                        ForEach(viewModel.goals) { goal in
+                            GoalCard(goal: goal, isParent: isParent) {
+                                selectedGoalForDetail = goal
+                            }
+                            .padding(.horizontal, 16)
+                        }
                     }
                 }
             }
             .padding(.vertical)
-            .frame(maxWidth: isRegularWidth ? 700 : .infinity)
-            .frame(maxWidth: .infinity)
         }
     }
 
@@ -192,8 +201,8 @@ struct SavingsGoalsView: View {
             .padding(.horizontal, 40)
             .padding(.top)
         }
-        .frame(maxWidth: isRegularWidth ? 500 : .infinity)
-        .padding()
+        .frame(maxWidth: 500)
+        .adaptivePadding()
     }
 }
 
