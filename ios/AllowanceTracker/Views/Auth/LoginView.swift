@@ -39,6 +39,9 @@ struct LoginView: View {
                     // Register link
                     registerLink
 
+                    // Terms and Privacy links
+                    termsAndPrivacySection
+
                     // Error message
                     if let errorMessage = viewModel.errorMessage {
                         errorSection(message: errorMessage)
@@ -174,6 +177,27 @@ struct LoginView: View {
         .accessibilityLabel("Don't have an account? Sign up")
         .accessibilityHint("Double tap to create a new account")
         .accessibilityIdentifier(AccessibilityIdentifier.registerButton)
+    }
+
+    private var termsAndPrivacySection: some View {
+        VStack(spacing: 4) {
+            Text("By signing in, you agree to our")
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 4) {
+                Link("Terms of Service", destination: URL(string: "https://www.earnandlearn.app/terms")!)
+                    .foregroundStyle(Color.green600)
+
+                Text("and")
+                    .foregroundStyle(.secondary)
+
+                Link("Privacy Policy", destination: URL(string: "https://www.earnandlearn.app/privacy")!)
+                    .foregroundStyle(Color.green600)
+            }
+        }
+        .font(.scalable(.caption))
+        .multilineTextAlignment(.center)
+        .padding(.top, 8)
     }
 
     private func errorSection(message: String) -> some View {
