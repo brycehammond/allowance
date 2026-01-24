@@ -28,7 +28,7 @@ struct BadgesView: View {
 
     // MARK: - Initialization
 
-    init(childId: UUID, apiService: APIServiceProtocol = APIService()) {
+    init(childId: UUID, apiService: APIServiceProtocol = ServiceProvider.apiService) {
         _viewModel = State(wrappedValue: BadgesViewModel(childId: childId, apiService: apiService))
     }
 

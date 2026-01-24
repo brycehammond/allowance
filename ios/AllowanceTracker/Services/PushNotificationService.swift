@@ -25,7 +25,7 @@ final class PushNotificationService: NSObject, ObservableObject {
     // MARK: - Initialization
 
     private override init() {
-        self.apiService = APIService()
+        self.apiService = ServiceProvider.apiService
         super.init()
     }
 

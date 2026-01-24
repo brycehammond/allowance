@@ -26,7 +26,7 @@ final class BadgesViewModel {
 
     // MARK: - Initialization
 
-    init(childId: UUID, apiService: APIServiceProtocol = APIService()) {
+    init(childId: UUID, apiService: APIServiceProtocol = ServiceProvider.apiService) {
         self.childId = childId
         self.apiService = apiService
     }

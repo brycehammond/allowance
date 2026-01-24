@@ -63,8 +63,8 @@ final class AuthViewModel {
     // MARK: - Initialization
 
     init(
-        apiService: APIServiceProtocol = APIService(),
-        keychainService: KeychainServiceProtocol = KeychainService.shared,
+        apiService: APIServiceProtocol = ServiceProvider.apiService,
+        keychainService: KeychainServiceProtocol = ServiceProvider.keychainService,
         biometricService: BiometricServiceProtocol = BiometricService.shared
     ) {
         self.apiService = apiService

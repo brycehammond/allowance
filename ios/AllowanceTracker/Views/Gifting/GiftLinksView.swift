@@ -18,7 +18,7 @@ struct GiftLinksView: View {
 
     // MARK: - Initialization
 
-    init(childId: UUID, childName: String, apiService: APIServiceProtocol = APIService()) {
+    init(childId: UUID, childName: String, apiService: APIServiceProtocol = ServiceProvider.apiService) {
         self.childName = childName
         _viewModel = State(wrappedValue: GiftLinkViewModel(childId: childId, apiService: apiService))
     }

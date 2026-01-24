@@ -28,7 +28,7 @@ final class TaskViewModel {
 
     // MARK: - Initialization
 
-    init(childId: UUID, isParent: Bool, apiService: APIServiceProtocol = APIService()) {
+    init(childId: UUID, isParent: Bool, apiService: APIServiceProtocol = ServiceProvider.apiService) {
         self.childId = childId
         self.isParent = isParent
         self.apiService = apiService

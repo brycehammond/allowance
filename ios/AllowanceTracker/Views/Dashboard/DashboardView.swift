@@ -41,7 +41,7 @@ struct DashboardView: View {
 
     // MARK: - Initialization
 
-    init(apiService: APIServiceProtocol = APIService()) {
+    init(apiService: APIServiceProtocol = ServiceProvider.apiService) {
         _viewModel = State(wrappedValue: DashboardViewModel(apiService: apiService))
     }
 

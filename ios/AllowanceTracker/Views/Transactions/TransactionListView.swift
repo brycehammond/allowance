@@ -31,7 +31,7 @@ struct TransactionListView: View {
         childId: UUID,
         savingsBalance: Decimal = 0,
         allowDebt: Bool = false,
-        apiService: APIServiceProtocol = APIService()
+        apiService: APIServiceProtocol = ServiceProvider.apiService
     ) {
         self.initialSavingsBalance = savingsBalance
         self.initialAllowDebt = allowDebt

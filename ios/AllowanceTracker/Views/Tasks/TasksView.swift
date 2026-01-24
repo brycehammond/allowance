@@ -26,7 +26,7 @@ struct TasksView: View {
 
     // MARK: - Initialization
 
-    init(childId: UUID, isParent: Bool, apiService: APIServiceProtocol = APIService()) {
+    init(childId: UUID, isParent: Bool, apiService: APIServiceProtocol = ServiceProvider.apiService) {
         _viewModel = State(wrappedValue: TaskViewModel(childId: childId, isParent: isParent, apiService: apiService))
     }
 

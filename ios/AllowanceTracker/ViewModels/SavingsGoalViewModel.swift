@@ -31,7 +31,7 @@ final class SavingsGoalViewModel {
 
     // MARK: - Initialization
 
-    init(childId: UUID, isParent: Bool, currentBalance: Decimal, apiService: APIServiceProtocol = APIService()) {
+    init(childId: UUID, isParent: Bool, currentBalance: Decimal, apiService: APIServiceProtocol = ServiceProvider.apiService) {
         self.childId = childId
         self.isParent = isParent
         self.currentBalance = currentBalance

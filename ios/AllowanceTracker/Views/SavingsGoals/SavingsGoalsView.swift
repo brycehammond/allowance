@@ -25,7 +25,7 @@ struct SavingsGoalsView: View {
 
     // MARK: - Initialization
 
-    init(childId: UUID, isParent: Bool, currentBalance: Decimal, apiService: APIServiceProtocol = APIService()) {
+    init(childId: UUID, isParent: Bool, currentBalance: Decimal, apiService: APIServiceProtocol = ServiceProvider.apiService) {
         _viewModel = State(wrappedValue: SavingsGoalViewModel(
             childId: childId,
             isParent: isParent,

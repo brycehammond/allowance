@@ -19,7 +19,7 @@ final class DashboardViewModel {
 
     // MARK: - Initialization
 
-    init(apiService: APIServiceProtocol = APIService()) {
+    init(apiService: APIServiceProtocol = ServiceProvider.apiService) {
         self.apiService = apiService
     }
 

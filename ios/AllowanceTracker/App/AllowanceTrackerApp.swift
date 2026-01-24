@@ -12,40 +12,24 @@ struct AllowanceTrackerApp: App {
     // MARK: - Initialization
 
     init() {
-        // Create auth view model with appropriate services based on environment
-        if UITestEnvironment.isUITesting {
-            if Configuration.isUITestingWithRealAPI {
-                // UI testing with real API - use real services but with test API URL
-                // The TEST_API_BASE_URL environment variable overrides the API URL
-                _authViewModel = State(initialValue: AuthViewModel())
-                #if DEBUG
-                print("UI TEST MODE: Using REAL API at \(Configuration.apiBaseURL)")
-                #endif
-            } else {
-                // Legacy UI testing mode - use mock services
-                _authViewModel = State(initialValue: AuthViewModel(
-                    apiService: MockAPIService(),
-                    keychainService: MockKeychainService(),
-                    biometricService: BiometricService.shared
-                ))
-                #if DEBUG
-                print("UI TEST MODE: Using mock services")
-                #endif
-            }
-        } else {
-            // Use real services for normal operation
-            _authViewModel = State(initialValue: AuthViewModel())
-
-            // Register background refresh tasks
-            BackgroundRefreshManager.shared.registerBackgroundTasks()
-
-            // Schedule initial background refresh
-            BackgroundRefreshManager.shared.scheduleAppRefresh()
-        }
+        // AuthViewModel uses ServiceProvider which automatically selects
+        // mock or real services based on the environment
+        _authViewModel = State(initialValue: AuthViewModel())
 
         #if DEBUG
+        if ServiceProvider.isMockMode {
+            print("UI TEST MODE: Using mock services")
+        } else if UITestEnvironment.isUITesting {
+            print("UI TEST MODE: Using REAL API at \(Configuration.apiBaseURL)")
+        }
         Configuration.printConfiguration()
         #endif
+
+        // Only register background tasks in normal operation (not UI tests)
+        if !UITestEnvironment.isUITesting {
+            BackgroundRefreshManager.shared.registerBackgroundTasks()
+            BackgroundRefreshManager.shared.scheduleAppRefresh()
+        }
     }
 
     // MARK: - Body
