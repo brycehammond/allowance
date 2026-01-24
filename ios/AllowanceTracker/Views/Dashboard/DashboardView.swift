@@ -224,11 +224,11 @@ struct ChildDetailView: View {
     enum ChildSection: String, CaseIterable, Identifiable {
         case transactions = "Transactions"
         case wishList = "Wish List"
-        case analytics = "Analytics"
+        case savings = "Savings"      // Parent only - prominent position
         case badges = "Badges"
         case chores = "Chores"
         case goals = "Goals"
-        case savings = "Savings"
+        case analytics = "Analytics"  // Moved to More section on iPhone
         case settings = "Settings"
 
         var id: String { rawValue }
@@ -237,11 +237,11 @@ struct ChildDetailView: View {
             switch self {
             case .transactions: return "receipt"
             case .wishList: return "star"
-            case .analytics: return "chart.line.uptrend.xyaxis"
+            case .savings: return "banknote"
             case .badges: return "medal"
             case .chores: return "checklist"
             case .goals: return "target"
-            case .savings: return "banknote"
+            case .analytics: return "chart.line.uptrend.xyaxis"
             case .settings: return "gearshape"
             }
         }
@@ -416,12 +416,14 @@ struct ChildDetailView: View {
                 }
                 .tag(1)
 
-            // Analytics tab
-            AnalyticsView(childId: child.id)
-                .tabItem {
-                    Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
-                }
-                .tag(2)
+            // Savings Account tab (Parent only) - prominent position
+            if isParent {
+                SavingsAccountView(childId: child.id)
+                    .tabItem {
+                        Label("Savings", systemImage: "banknote")
+                    }
+                    .tag(2)
+            }
 
             // Badges tab
             BadgesView(childId: child.id)
@@ -448,14 +450,12 @@ struct ChildDetailView: View {
                 }
                 .tag(5)
 
-            // Savings tab (Parent only)
-            if isParent {
-                SavingsAccountView(childId: child.id)
-                    .tabItem {
-                        Label("Savings", systemImage: "banknote")
-                    }
-                    .tag(6)
-            }
+            // Analytics tab - moved to More section
+            AnalyticsView(childId: child.id)
+                .tabItem {
+                    Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
+                }
+                .tag(6)
 
             // Settings tab (Parent only)
             if isParent {
