@@ -5,8 +5,7 @@ import Foundation
 enum GiftLinkVisibility: String, Codable, CaseIterable {
     case Minimal
     case WithGoals
-    /// Deprecated: Wish list feature removed. Behaves same as Minimal.
-    @available(*, deprecated, message: "Wish list feature removed. Use WithGoals or Minimal instead.")
+    // Note: WithWishList is kept for backward compatibility but behaves same as Minimal
     case WithWishList
     case Full
 
