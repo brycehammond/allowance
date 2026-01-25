@@ -77,13 +77,6 @@ struct ProfileView: View {
                     .accessibilityIdentifier(AccessibilityIdentifier.changePasswordButton)
 
                     NavigationLink {
-                        NotificationsSettingsView()
-                    } label: {
-                        Label("Notifications", systemImage: "bell.fill")
-                    }
-                    .accessibilityIdentifier(AccessibilityIdentifier.notificationsButton)
-
-                    NavigationLink {
                         AboutView()
                     } label: {
                         Label("About", systemImage: "info.circle.fill")
@@ -201,29 +194,6 @@ struct ProfileInfoRow: View {
 
 // MARK: - Placeholder Settings Views
 
-/// Placeholder for notifications settings
-struct NotificationsSettingsView: View {
-    @State private var transactionNotifications = true
-    @State private var allowanceNotifications = true
-    @State private var goalNotifications = true
-
-    var body: some View {
-        Form {
-            Section {
-                Toggle("Transaction Alerts", isOn: $transactionNotifications)
-                Toggle("Allowance Payments", isOn: $allowanceNotifications)
-                Toggle("Goal Milestones", isOn: $goalNotifications)
-            } header: {
-                Text("Notifications")
-            } footer: {
-                Text("Get notified about important events")
-            }
-        }
-        .navigationTitle("Notifications")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
 /// Placeholder for appearance settings
 struct AppearanceSettingsView: View {
     @State private var selectedAppearance = "System"
@@ -302,12 +272,6 @@ struct AboutView: View {
 
     return ProfileView()
         .environment(authViewModel)
-}
-
-#Preview("Notifications Settings") {
-    NavigationStack {
-        NotificationsSettingsView()
-    }
 }
 
 #Preview("About View") {

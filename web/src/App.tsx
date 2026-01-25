@@ -15,7 +15,6 @@ import { AcceptInvite } from './pages/AcceptInvite';
 import { AcceptJoinRequest } from './pages/AcceptJoinRequest';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
-import { NotificationSettings } from './pages/NotificationSettings';
 import { GiftPortal } from './pages/GiftPortal';
 
 function App() {
@@ -69,14 +68,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <DeleteAccount />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/notification-settings"
-            element={
-              <ProtectedRoute>
-                <NotificationSettings />
               </ProtectedRoute>
             }
           />

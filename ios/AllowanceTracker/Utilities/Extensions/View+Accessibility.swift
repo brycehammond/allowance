@@ -216,7 +216,6 @@ enum AccessibilityIdentifier {
     static let profileEmailLabel = "profile_email_label"
     static let profileRoleLabel = "profile_role_label"
     static let changePasswordButton = "change_password_button"
-    static let notificationsButton = "notifications_button"
     static let appearanceButton = "appearance_button"
     static let aboutButton = "about_button"
     static let signOutButton = "sign_out_button"

@@ -89,21 +89,6 @@ protocol APIServiceProtocol {
     func cancelGoalChallenge(goalId: UUID) async throws
     func getChildChallenges(forChild childId: UUID) async throws -> [GoalChallengeDto]
 
-    // MARK: - Notifications
-    func getNotifications(page: Int, pageSize: Int, unreadOnly: Bool, type: NotificationType?) async throws -> NotificationListResponse
-    func getUnreadCount() async throws -> Int
-    func getNotification(id: UUID) async throws -> NotificationDto
-    func markNotificationAsRead(id: UUID) async throws -> NotificationDto
-    func markMultipleAsRead(_ request: MarkNotificationsReadRequest) async throws -> Int
-    func deleteNotification(id: UUID) async throws
-    func deleteAllReadNotifications() async throws -> Int
-    func getNotificationPreferences() async throws -> NotificationPreferences
-    func updateNotificationPreferences(_ request: UpdateNotificationPreferencesRequest) async throws -> NotificationPreferences
-    func updateQuietHours(_ request: UpdateQuietHoursRequest) async throws -> NotificationPreferences
-    func registerDevice(_ request: RegisterDeviceRequest) async throws -> DeviceTokenDto
-    func getDevices() async throws -> [DeviceTokenDto]
-    func unregisterDevice(id: UUID) async throws
-
     // MARK: - Gift Links
     func getGiftLinks() async throws -> [GiftLinkDto]
     func getGiftLink(id: UUID) async throws -> GiftLinkDto

@@ -10,10 +10,8 @@ import {
   X,
   DollarSign,
   Key,
-  Bell,
   Trash2,
 } from 'lucide-react';
-import { NotificationBell } from './notifications';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -34,7 +32,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Add Child', href: '/children/add', icon: UserPlus },
     { name: 'Add Co-Parent', href: '/parent/add', icon: Users },
-    { name: 'Notifications', href: '/notification-settings', icon: Bell },
     { name: 'Change Password', href: '/change-password', icon: Key },
     { name: 'Delete Account', href: '/delete-account', icon: Trash2 },
   ];
@@ -97,7 +94,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </p>
                   <p className="text-xs text-primary-200">{user?.role}</p>
                 </div>
-                <NotificationBell />
                 <button
                   onClick={handleLogout}
                   className="ml-2 rounded-md p-2 text-primary-200 hover:bg-primary-600 hover:text-white transition-colors"
@@ -119,7 +115,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <h1 className="ml-2 text-lg font-bold text-white">Earn &amp; Learn</h1>
           </div>
           <div className="flex items-center gap-2">
-            <NotificationBell />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="rounded-md p-2 text-white hover:bg-primary-600"

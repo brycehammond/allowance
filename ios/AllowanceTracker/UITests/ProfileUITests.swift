@@ -79,28 +79,6 @@ final class ProfileUITests: AllowanceTrackerUITests {
         }
     }
 
-    func testProfile_NavigateToNotifications() throws {
-        // Tap notifications
-        let notificationsButton = app.buttons["notifications_button"]
-        let notificationsCell = app.cells.element(matching: NSPredicate(format: "label CONTAINS 'Notifications' OR identifier CONTAINS 'notifications'"))
-        let notificationsLink = app.buttons.element(matching: NSPredicate(format: "label CONTAINS 'Notifications'"))
-
-        if waitForElement(notificationsButton, timeout: 3) {
-            notificationsButton.tap()
-        } else if waitForElement(notificationsCell, timeout: 3) {
-            notificationsCell.tap()
-        } else if waitForElement(notificationsLink, timeout: 3) {
-            notificationsLink.tap()
-        }
-
-        // Verify notifications settings
-        sleep(1)
-        let notificationsTitle = app.navigationBars["Notifications"]
-        if waitForElement(notificationsTitle, timeout: 3) {
-            takeScreenshot(name: "Notifications Settings")
-        }
-    }
-
     func testProfile_NavigateToAppearance() throws {
         // Tap appearance
         let appearanceButton = app.buttons["appearance_button"]
@@ -142,34 +120,6 @@ final class ProfileUITests: AllowanceTrackerUITests {
         let aboutTitle = app.navigationBars["About"]
         if waitForElement(aboutTitle, timeout: 3) {
             takeScreenshot(name: "About Screen")
-        }
-    }
-
-    // MARK: - Notification Settings Tests
-
-    func testNotificationSettings_DisplaysToggles() throws {
-        navigateToNotifications()
-
-        // Look for toggle switches
-        let toggles = app.switches
-        if toggles.count > 0 {
-            XCTAssertTrue(toggles.count >= 1, "Should have notification toggles")
-            takeScreenshot(name: "Notification Toggles")
-        }
-    }
-
-    func testNotificationSettings_ToggleNotification() throws {
-        navigateToNotifications()
-
-        // Find and toggle a switch
-        let firstToggle = app.switches.firstMatch
-        if firstToggle.exists {
-            let initialValue = firstToggle.value as? String
-            firstToggle.tap()
-            sleep(1)
-            let newValue = firstToggle.value as? String
-            XCTAssertNotEqual(initialValue, newValue, "Toggle value should change")
-            takeScreenshot(name: "Toggle Changed")
         }
     }
 
@@ -365,21 +315,6 @@ final class ProfileUITests: AllowanceTrackerUITests {
         let profileTab = app.tabBars.buttons["Profile"]
         if waitForElement(profileTab, timeout: 5) {
             profileTab.tap()
-        }
-        sleep(1)
-    }
-
-    private func navigateToNotifications() {
-        let notificationsButton = app.buttons["notifications_button"]
-        let notificationsCell = app.cells.element(matching: NSPredicate(format: "label CONTAINS 'Notifications'"))
-        let notificationsLink = app.buttons.element(matching: NSPredicate(format: "label CONTAINS 'Notifications'"))
-
-        if waitForElement(notificationsButton, timeout: 3) {
-            notificationsButton.tap()
-        } else if waitForElement(notificationsCell, timeout: 3) {
-            notificationsCell.tap()
-        } else if waitForElement(notificationsLink, timeout: 3) {
-            notificationsLink.tap()
         }
         sleep(1)
     }

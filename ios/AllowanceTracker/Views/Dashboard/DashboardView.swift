@@ -80,15 +80,11 @@ struct DashboardView: View {
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 16) {
-                        NotificationBellView()
-
-                        Button {
-                            showingProfile = true
-                        } label: {
-                            Image(systemName: "person.circle.fill")
-                                .font(.title3)
-                        }
+                    Button {
+                        showingProfile = true
+                    } label: {
+                        Image(systemName: "person.circle.fill")
+                            .font(.title3)
                     }
                 }
             }

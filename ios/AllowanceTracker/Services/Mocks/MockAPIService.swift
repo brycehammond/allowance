@@ -852,32 +852,6 @@ final class MockAPIService: APIServiceProtocol, @unchecked Sendable {
     func cancelGoalChallenge(goalId: UUID) async throws {}
     func getChildChallenges(forChild childId: UUID) async throws -> [GoalChallengeDto] { return [] }
 
-    // MARK: - Notifications (Returns empty)
-
-    func getNotifications(page: Int, pageSize: Int, unreadOnly: Bool, type: NotificationType?) async throws -> NotificationListResponse {
-        return NotificationListResponse(notifications: [], unreadCount: 0, totalCount: 0, hasMore: false)
-    }
-    func getUnreadCount() async throws -> Int { return 0 }
-    func getNotification(id: UUID) async throws -> NotificationDto { throw APIError.notFound }
-    func markNotificationAsRead(id: UUID) async throws -> NotificationDto { throw APIError.notFound }
-    func markMultipleAsRead(_ request: MarkNotificationsReadRequest) async throws -> Int { return 0 }
-    func deleteNotification(id: UUID) async throws {}
-    func deleteAllReadNotifications() async throws -> Int { return 0 }
-    func getNotificationPreferences() async throws -> NotificationPreferences {
-        return NotificationPreferences(preferences: [], quietHoursEnabled: false, quietHoursStart: nil, quietHoursEnd: nil)
-    }
-    func updateNotificationPreferences(_ request: UpdateNotificationPreferencesRequest) async throws -> NotificationPreferences {
-        return NotificationPreferences(preferences: [], quietHoursEnabled: false, quietHoursStart: nil, quietHoursEnd: nil)
-    }
-    func updateQuietHours(_ request: UpdateQuietHoursRequest) async throws -> NotificationPreferences {
-        return NotificationPreferences(preferences: [], quietHoursEnabled: request.enabled, quietHoursStart: request.startTime, quietHoursEnd: request.endTime)
-    }
-    func registerDevice(_ request: RegisterDeviceRequest) async throws -> DeviceTokenDto {
-        return DeviceTokenDto(id: UUID(), platform: request.platform, deviceName: request.deviceName, isActive: true, createdAt: Date(), lastUsedAt: nil)
-    }
-    func getDevices() async throws -> [DeviceTokenDto] { return [] }
-    func unregisterDevice(id: UUID) async throws {}
-
     // MARK: - Gift Links (Returns empty)
 
     func getGiftLinks() async throws -> [GiftLinkDto] { return [] }

@@ -63,15 +63,6 @@ import {
   type UpdateMatchingRuleRequest,
   type CreateGoalChallengeRequest,
   type MarkGoalPurchasedRequest,
-  type Notification,
-  type NotificationListResponse,
-  type NotificationPreferences,
-  type NotificationType,
-  type MarkNotificationsReadRequest,
-  type UpdateNotificationPreferencesRequest,
-  type UpdateQuietHoursRequest,
-  type DeviceTokenResponse,
-  type RegisterDeviceRequest,
   type GiftLink,
   type CreateGiftLinkRequest,
   type UpdateGiftLinkRequest,
@@ -752,79 +743,6 @@ export const savingsGoalsApi = {
   getChildChallenges: async (childId: string): Promise<GoalChallenge[]> => {
     const response = await apiClient.get<GoalChallenge[]>(`/api/v1/children/${childId}/challenges`);
     return response.data;
-  },
-};
-
-// Notifications API
-export const notificationsApi = {
-  getNotifications: async (
-    page: number = 1,
-    pageSize: number = 20,
-    unreadOnly: boolean = false,
-    type?: NotificationType
-  ): Promise<NotificationListResponse> => {
-    const response = await apiClient.get<NotificationListResponse>('/api/v1/notifications', {
-      params: { page, pageSize, unreadOnly, type },
-    });
-    return response.data;
-  },
-
-  getUnreadCount: async (): Promise<{ count: number }> => {
-    const response = await apiClient.get<{ count: number }>('/api/v1/notifications/unread-count');
-    return response.data;
-  },
-
-  getById: async (id: string): Promise<Notification> => {
-    const response = await apiClient.get<Notification>(`/api/v1/notifications/${id}`);
-    return response.data;
-  },
-
-  markAsRead: async (id: string): Promise<Notification> => {
-    const response = await apiClient.patch<Notification>(`/api/v1/notifications/${id}/read`);
-    return response.data;
-  },
-
-  markMultipleAsRead: async (data: MarkNotificationsReadRequest): Promise<{ markedCount: number }> => {
-    const response = await apiClient.post<{ markedCount: number }>('/api/v1/notifications/read', data);
-    return response.data;
-  },
-
-  delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/api/v1/notifications/${id}`);
-  },
-
-  deleteAllRead: async (): Promise<{ deletedCount: number }> => {
-    const response = await apiClient.delete<{ deletedCount: number }>('/api/v1/notifications');
-    return response.data;
-  },
-
-  getPreferences: async (): Promise<NotificationPreferences> => {
-    const response = await apiClient.get<NotificationPreferences>('/api/v1/notifications/preferences');
-    return response.data;
-  },
-
-  updatePreferences: async (data: UpdateNotificationPreferencesRequest): Promise<NotificationPreferences> => {
-    const response = await apiClient.put<NotificationPreferences>('/api/v1/notifications/preferences', data);
-    return response.data;
-  },
-
-  updateQuietHours: async (data: UpdateQuietHoursRequest): Promise<NotificationPreferences> => {
-    const response = await apiClient.put<NotificationPreferences>('/api/v1/notifications/preferences/quiet-hours', data);
-    return response.data;
-  },
-
-  registerDevice: async (data: RegisterDeviceRequest): Promise<DeviceTokenResponse> => {
-    const response = await apiClient.post<DeviceTokenResponse>('/api/v1/devices', data);
-    return response.data;
-  },
-
-  getDevices: async (): Promise<DeviceTokenResponse[]> => {
-    const response = await apiClient.get<DeviceTokenResponse[]>('/api/v1/devices');
-    return response.data;
-  },
-
-  unregisterDevice: async (id: string): Promise<void> => {
-    await apiClient.delete(`/api/v1/devices/${id}`);
   },
 };
 

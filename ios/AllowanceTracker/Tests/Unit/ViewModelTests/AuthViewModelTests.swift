@@ -639,65 +639,6 @@ class MockAPIService: APIServiceProtocol {
         return []
     }
 
-    // MARK: - Notifications (stub implementations)
-
-    func getNotifications(page: Int, pageSize: Int, unreadOnly: Bool, type: NotificationType?) async throws -> NotificationListResponse {
-        return NotificationListResponse(notifications: [], unreadCount: 0, totalCount: 0, hasMore: false)
-    }
-
-    func getUnreadCount() async throws -> Int {
-        return 0
-    }
-
-    func getNotification(id: UUID) async throws -> NotificationDto {
-        throw APIError.notFound
-    }
-
-    func markNotificationAsRead(id: UUID) async throws -> NotificationDto {
-        throw APIError.notFound
-    }
-
-    func markMultipleAsRead(_ request: MarkNotificationsReadRequest) async throws -> Int {
-        return 0
-    }
-
-    func deleteNotification(id: UUID) async throws {
-        throw APIError.notFound
-    }
-
-    func deleteAllReadNotifications() async throws -> Int {
-        return 0
-    }
-
-    func getNotificationPreferences() async throws -> NotificationPreferences {
-        return NotificationPreferences(
-            preferences: [],
-            quietHoursEnabled: false,
-            quietHoursStart: nil,
-            quietHoursEnd: nil
-        )
-    }
-
-    func updateNotificationPreferences(_ request: UpdateNotificationPreferencesRequest) async throws -> NotificationPreferences {
-        throw APIError.notFound
-    }
-
-    func updateQuietHours(_ request: UpdateQuietHoursRequest) async throws -> NotificationPreferences {
-        throw APIError.notFound
-    }
-
-    func registerDevice(_ request: RegisterDeviceRequest) async throws -> DeviceTokenDto {
-        throw APIError.notFound
-    }
-
-    func getDevices() async throws -> [DeviceTokenDto] {
-        return []
-    }
-
-    func unregisterDevice(id: UUID) async throws {
-        throw APIError.notFound
-    }
-
     // MARK: - Gift Links (stub implementations)
 
     func getGiftLinks() async throws -> [GiftLinkDto] {
