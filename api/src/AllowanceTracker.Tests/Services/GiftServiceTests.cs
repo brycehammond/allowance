@@ -150,32 +150,6 @@ public class GiftServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetPortalData_IncludesWishList_WhenVisibilityAllows()
-    {
-        // Arrange
-        var wishListItem = new WishListItem
-        {
-            Id = Guid.NewGuid(),
-            ChildId = _testChild.Id,
-            Name = "Video Game",
-            Price = 60m
-        };
-        _context.WishListItems.Add(wishListItem);
-        await _context.SaveChangesAsync();
-
-        _testGiftLink.Visibility = GiftLinkVisibility.WithWishList;
-
-        // Act
-        var result = await _service.GetPortalDataAsync("valid_token");
-
-        // Assert
-        result.WishList.Should().NotBeNull();
-        result.WishList.Should().HaveCount(1);
-        result.WishList![0].Name.Should().Be("Video Game");
-        result.WishList[0].Price.Should().Be(60m);
-    }
-
-    [Fact]
     public async Task GetPortalData_ThrowsForExpiredLink()
     {
         // Act

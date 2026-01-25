@@ -43,7 +43,6 @@ public class GiftService : IGiftService
         }
 
         List<PortalSavingsGoalDto>? savingsGoals = null;
-        List<PortalWishListItemDto>? wishList = null;
 
         // Include savings goals if visibility allows
         if (link.Visibility == GiftLinkVisibility.WithGoals || link.Visibility == GiftLinkVisibility.Full)
@@ -63,23 +62,6 @@ public class GiftService : IGiftService
             )).ToList();
         }
 
-        // Include wish list if visibility allows
-        if (link.Visibility == GiftLinkVisibility.WithWishList || link.Visibility == GiftLinkVisibility.Full)
-        {
-            var items = await _context.WishListItems
-                .Where(w => w.ChildId == child.Id && !w.IsPurchased)
-                .OrderByDescending(w => w.CreatedAt)
-                .ToListAsync();
-
-            wishList = items.Select(w => new PortalWishListItemDto(
-                w.Id,
-                w.Name,
-                w.Price,
-                w.Url,
-                null // ImageUrl not currently on WishListItem
-            )).ToList();
-        }
-
         return new GiftPortalDataDto(
             child.User.FirstName,
             child.EquippedAvatarUrl,
@@ -87,8 +69,7 @@ public class GiftService : IGiftService
             link.MaxAmount,
             link.DefaultOccasion,
             link.Visibility,
-            savingsGoals,
-            wishList
+            savingsGoals
         );
     }
 

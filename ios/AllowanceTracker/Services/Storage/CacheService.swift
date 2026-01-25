@@ -1,13 +1,12 @@
 import Foundation
 
 /// Actor-based cache service for offline data persistence
-/// Provides thread-safe caching for children, transactions, and wish list items
+/// Provides thread-safe caching for children and transactions
 actor CacheService {
     // MARK: - Cache Storage
 
     private var childrenCache: [Child] = []
     private var transactionsCache: [UUID: [Transaction]] = [:]
-    private var wishListCache: [UUID: [WishListItem]] = [:]
     private var lastSyncDate: Date?
 
     // MARK: - Children Caching
@@ -42,23 +41,6 @@ actor CacheService {
         transactionsCache[childId] = transactions
     }
 
-    // MARK: - WishList Caching
-
-    /// Get cached wish list items for a specific child
-    /// - Parameter childId: UUID of the child
-    /// - Returns: Array of cached wish list items, or empty array if no cache exists
-    func getCachedWishListItems(for childId: UUID) -> [WishListItem] {
-        return wishListCache[childId] ?? []
-    }
-
-    /// Cache wish list items for a specific child
-    /// - Parameters:
-    ///   - items: Array of wish list items to cache
-    ///   - childId: UUID of the child
-    func cacheWishListItems(_ items: [WishListItem], for childId: UUID) {
-        wishListCache[childId] = items
-    }
-
     // MARK: - Cache Management
 
     /// Check if cache needs refresh based on age
@@ -77,7 +59,6 @@ actor CacheService {
     func clearCache() {
         childrenCache = []
         transactionsCache = [:]
-        wishListCache = [:]
         lastSyncDate = nil
     }
 

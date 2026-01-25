@@ -5,32 +5,31 @@ import Foundation
 enum GiftLinkVisibility: String, Codable, CaseIterable {
     case Minimal
     case WithGoals
+    /// Deprecated: Wish list feature removed. Behaves same as Minimal.
+    @available(*, deprecated, message: "Wish list feature removed. Use WithGoals or Minimal instead.")
     case WithWishList
     case Full
 
     var displayName: String {
         switch self {
-        case .Minimal: return "Minimal"
+        case .Minimal, .WithWishList: return "Minimal"
         case .WithGoals: return "With Goals"
-        case .WithWishList: return "With Wish List"
         case .Full: return "Full"
         }
     }
 
     var description: String {
         switch self {
-        case .Minimal: return "Just child's name"
+        case .Minimal, .WithWishList: return "Just child's name"
         case .WithGoals: return "Show savings goals"
-        case .WithWishList: return "Show wish list"
-        case .Full: return "Show goals and wish list"
+        case .Full: return "Show all savings goals"
         }
     }
 
     var systemImage: String {
         switch self {
-        case .Minimal: return "eye.slash"
+        case .Minimal, .WithWishList: return "eye.slash"
         case .WithGoals: return "target"
-        case .WithWishList: return "star"
         case .Full: return "eye"
         }
     }
@@ -320,7 +319,6 @@ struct GiftPortalDataDto: Codable {
     let allowedOccasions: [GiftOccasion]?
     let defaultOccasion: GiftOccasion?
     let savingsGoals: [PortalSavingsGoalDto]?
-    let wishListItems: [PortalWishListItemDto]?
 }
 
 struct PortalSavingsGoalDto: Codable, Identifiable {
@@ -340,17 +338,6 @@ struct PortalSavingsGoalDto: Codable, Identifiable {
 
     var progressFraction: Double {
         min(progressPercentage / 100.0, 1.0)
-    }
-}
-
-struct PortalWishListItemDto: Codable, Identifiable {
-    let id: UUID
-    let name: String
-    let price: Decimal
-    let notes: String?
-
-    var formattedPrice: String {
-        price.currencyFormatted
     }
 }
 

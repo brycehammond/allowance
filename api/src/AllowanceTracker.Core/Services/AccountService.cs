@@ -237,4 +237,58 @@ public class AccountService : IAccountService
 
         return await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
     }
+
+    public async Task<IdentityResult> DeleteAccountAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+            return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            // Delete child profile if this is a child user
+            if (user.Role == UserRole.Child)
+            {
+                var childProfile = await _context.Children.FirstOrDefaultAsync(c => c.UserId == user.Id);
+                if (childProfile != null)
+                {
+                    var transactions = await _context.Transactions.Where(t => t.ChildId == childProfile.Id).ToListAsync();
+                    _context.Transactions.RemoveRange(transactions);
+
+                    var savingsTransactions = await _context.SavingsTransactions.Where(s => s.ChildId == childProfile.Id).ToListAsync();
+                    _context.SavingsTransactions.RemoveRange(savingsTransactions);
+
+                    _context.Children.Remove(childProfile);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                await transaction.CommitAsync();
+            }
+            else
+            {
+                await transaction.RollbackAsync();
+            }
+
+            return result;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task<IdentityResult> DeleteAccountByEmailAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+        return await DeleteAccountAsync(user.Id);
+    }
 }

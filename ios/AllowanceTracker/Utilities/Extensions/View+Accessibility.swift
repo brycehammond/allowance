@@ -201,17 +201,6 @@ enum AccessibilityIdentifier {
     static let transactionCancelButton = "transaction_cancel_button"
     static let transactionBalanceLabel = "transaction_balance_label"
 
-    // Wish List
-    static let wishListItem = "wish_list_item_"
-    static let addWishListButton = "add_wish_list_button"
-    static let purchaseButton = "purchase_button_"
-    static let wishListNameField = "wish_list_name_field"
-    static let wishListPriceField = "wish_list_price_field"
-    static let wishListUrlField = "wish_list_url_field"
-    static let wishListNotesField = "wish_list_notes_field"
-    static let wishListSaveButton = "wish_list_save_button"
-    static let wishListFilter = "wish_list_filter_"
-
     // Savings
     static let savingsAccountCard = "savings_account_card_"
     static let addSavingsAccountButton = "add_savings_account_button"

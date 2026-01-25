@@ -111,7 +111,6 @@ public class Child : IHasCreatedAt
     public virtual ApplicationUser User { get; set; } = null!;
     public virtual Family Family { get; set; } = null!;
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
-    public virtual ICollection<WishListItem> WishListItems { get; set; } = new List<WishListItem>();
     public virtual ICollection<CategoryBudget> CategoryBudgets { get; set; } = new List<CategoryBudget>();
     public virtual ICollection<SavingsTransaction> SavingsTransactions { get; set; } = new List<SavingsTransaction>();
     public virtual ICollection<ChoreTask> Tasks { get; set; } = new List<ChoreTask>();

@@ -196,43 +196,4 @@ final class CacheServiceTests: XCTestCase {
         XCTAssertTrue(needsRefresh)
     }
 
-    // MARK: - WishList Caching Tests
-
-    func testCacheWishListItems_StoresItemsForChildId() async {
-        // Arrange
-        let childId = UUID()
-        let items = [
-            WishListItem(
-                id: UUID(),
-                childId: childId,
-                name: "Bicycle",
-                price: 150.00,
-                url: nil,
-                notes: "Red one",
-                isPurchased: false,
-                purchasedAt: nil,
-                createdAt: Date(),
-                canAfford: false
-            )
-        ]
-
-        // Act
-        await sut.cacheWishListItems(items, for: childId)
-        let cached = await sut.getCachedWishListItems(for: childId)
-
-        // Assert
-        XCTAssertEqual(cached.count, 1)
-        XCTAssertEqual(cached[0].name, "Bicycle")
-    }
-
-    func testGetCachedWishListItems_ReturnsEmptyArrayWhenNoCacheExists() async {
-        // Arrange
-        let childId = UUID()
-
-        // Act
-        let cached = await sut.getCachedWishListItems(for: childId)
-
-        // Assert
-        XCTAssertTrue(cached.isEmpty)
-    }
 }

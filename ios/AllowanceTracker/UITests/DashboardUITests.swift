@@ -146,12 +146,12 @@ final class DashboardUITests: AllowanceTrackerUITests {
             let firstChildCard = childCards.element(boundBy: 0)
             firstChildCard.tap()
 
-            // Verify child detail view is displayed (has tabs for transactions, wish list, etc.)
+            // Verify child detail view is displayed (has tabs for transactions, savings, etc.)
             let transactionsTab = app.tabBars.buttons["Transactions"]
-            let wishListTab = app.tabBars.buttons["Wish List"]
+            let savingsTab = app.tabBars.buttons["Savings"]
 
             let childDetailDisplayed = transactionsTab.waitForExistence(timeout: 5) ||
-                                        wishListTab.waitForExistence(timeout: 5)
+                                        savingsTab.waitForExistence(timeout: 5)
 
             XCTAssertTrue(childDetailDisplayed, "Child detail view should be displayed")
 
@@ -199,21 +199,6 @@ final class DashboardUITests: AllowanceTrackerUITests {
             XCTAssertTrue(transactionList.waitForExistence(timeout: 5), "Transaction list should be displayed")
 
             takeScreenshot(name: "Transactions Tab")
-        }
-    }
-
-    func testChildDetail_WishListTab_DisplaysWishList() throws {
-        // Navigate to a child's detail view
-        navigateToFirstChildDetail()
-
-        // Tap on Wish List tab
-        let wishListTab = app.tabBars.buttons["Wish List"]
-        if waitForElement(wishListTab) {
-            wishListTab.tap()
-
-            // Verify wish list is displayed
-            sleep(1)
-            takeScreenshot(name: "Wish List Tab")
         }
     }
 

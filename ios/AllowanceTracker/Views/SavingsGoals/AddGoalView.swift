@@ -16,54 +16,65 @@ struct AddGoalView: View {
     @State private var autoTransferType: AutoTransferType = .None
     @State private var autoTransferAmount = ""
     @State private var autoTransferPercentage = ""
+    @State private var showAdvancedOptions = false
 
     // MARK: - Body
 
     var body: some View {
         NavigationStack {
             Form {
-                // Basic info
+                // Basic info - always visible
                 Section("Goal Details") {
                     TextField("Goal Name", text: $name)
 
-                    TextField("Description (optional)", text: $description)
-
                     TextField("Target Amount", text: $targetAmount)
                         .keyboardType(.decimalPad)
-
-                    Picker("Category", selection: $selectedCategory) {
-                        ForEach(GoalCategory.allCases, id: \.self) { category in
-                            Label {
-                                Text(category.displayName)
-                            } icon: {
-                                Text(category.emoji)
-                            }
-                            .tag(category)
-                        }
-                    }
                 }
 
-                // Auto-transfer settings
+                // Toggle for advanced options
                 Section {
-                    Picker("Auto Transfer", selection: $autoTransferType) {
-                        ForEach(AutoTransferType.allCases, id: \.self) { type in
-                            Text(type.displayName).tag(type)
+                    Toggle("More options", isOn: $showAdvancedOptions.animation())
+                }
+
+                // Advanced options - conditionally visible
+                if showAdvancedOptions {
+                    Section("Additional Details") {
+                        TextField("Description (optional)", text: $description)
+
+                        Picker("Category", selection: $selectedCategory) {
+                            ForEach(GoalCategory.allCases, id: \.self) { category in
+                                Label {
+                                    Text(category.displayName)
+                                } icon: {
+                                    Text(category.emoji)
+                                }
+                                .tag(category)
+                            }
                         }
                     }
 
-                    if autoTransferType == .FixedAmount {
-                        TextField("Amount per allowance", text: $autoTransferAmount)
-                            .keyboardType(.decimalPad)
-                    }
+                    // Auto-transfer settings
+                    Section {
+                        Picker("Auto Transfer", selection: $autoTransferType) {
+                            ForEach(AutoTransferType.allCases, id: \.self) { type in
+                                Text(type.displayName).tag(type)
+                            }
+                        }
 
-                    if autoTransferType == .Percentage {
-                        TextField("Percentage of allowance", text: $autoTransferPercentage)
-                            .keyboardType(.decimalPad)
+                        if autoTransferType == .FixedAmount {
+                            TextField("Amount per allowance", text: $autoTransferAmount)
+                                .keyboardType(.decimalPad)
+                        }
+
+                        if autoTransferType == .Percentage {
+                            TextField("Percentage of allowance", text: $autoTransferPercentage)
+                                .keyboardType(.decimalPad)
+                        }
+                    } header: {
+                        Text("Auto Transfer from Allowance")
+                    } footer: {
+                        Text("Automatically transfer a portion of each allowance payment to this goal.")
                     }
-                } header: {
-                    Text("Auto Transfer")
-                } footer: {
-                    Text("Automatically transfer a portion of each allowance payment to this goal.")
                 }
             }
             .navigationTitle("New Goal")

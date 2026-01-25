@@ -76,7 +76,6 @@ public class Startup
         services.AddScoped<ISavingsAccountService, SavingsAccountService>();
         services.AddScoped<IFamilyService, FamilyService>();
         services.AddScoped<IChildManagementService, ChildManagementService>();
-        services.AddScoped<IWishListService, WishListService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();

@@ -99,10 +99,7 @@ public static class BadgeSeedData
                 new SeedBadgeCriteriaConfig { GoalTarget = 10, Triggers = new() { BadgeTrigger.GoalCompleted } },
                 sortOrder++),
 
-            CreateBadge("WISHLIST_WINNER", "Wishlist Winner", "Purchased an item from your wishlist",
-                BadgeCategory.Goals, BadgeRarity.Common, 15, BadgeCriteriaType.SingleAction,
-                new SeedBadgeCriteriaConfig { ActionType = "first_wishlist_purchase", Triggers = new() { BadgeTrigger.WishListPurchased } },
-                sortOrder++),
+            // WISHLIST_WINNER badge removed - wish list feature has been consolidated into savings goals
         });
 
         // Chores Badges

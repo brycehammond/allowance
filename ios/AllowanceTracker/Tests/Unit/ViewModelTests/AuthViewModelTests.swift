@@ -268,10 +268,6 @@ class MockAPIService: APIServiceProtocol {
     var childrenResponse: Result<[Child], Error> = .success([])
     var transactionsResponse: Result<[Transaction], Error>?
     var createTransactionResponse: Result<Transaction, Error>?
-    var wishListResponse: Result<[WishListItem], Error> = .success([])
-    var createWishListItemResponse: Result<WishListItem, Error>?
-    var markPurchasedResponse: Result<WishListItem, Error>?
-    var deleteWishListItemResponse: Result<Void, Error>?
     var shouldDelay = false
 
     func login(_ request: LoginRequest) async throws -> AuthResponse {
@@ -441,54 +437,6 @@ class MockAPIService: APIServiceProtocol {
 
     func getBalance(forChild childId: UUID) async throws -> Decimal {
         return 0
-    }
-
-    // MARK: - Wish List
-
-    func getWishList(forChild childId: UUID) async throws -> [WishListItem] {
-        switch wishListResponse {
-        case .success(let items):
-            return items
-        case .failure(let error):
-            throw error
-        }
-    }
-
-    func createWishListItem(_ request: CreateWishListItemRequest) async throws -> WishListItem {
-        switch createWishListItemResponse {
-        case .success(let item):
-            return item
-        case .failure(let error):
-            throw error
-        case .none:
-            throw APIError.notFound
-        }
-    }
-
-    func updateWishListItem(forChild childId: UUID, id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem {
-        throw APIError.notFound
-    }
-
-    func deleteWishListItem(forChild childId: UUID, id: UUID) async throws {
-        switch deleteWishListItemResponse {
-        case .success:
-            return
-        case .failure(let error):
-            throw error
-        case .none:
-            throw APIError.notFound
-        }
-    }
-
-    func markWishListItemAsPurchased(forChild childId: UUID, id: UUID) async throws -> WishListItem {
-        switch markPurchasedResponse {
-        case .success(let item):
-            return item
-        case .failure(let error):
-            throw error
-        case .none:
-            throw APIError.notFound
-        }
     }
 
     // MARK: - Analytics (stub implementations)

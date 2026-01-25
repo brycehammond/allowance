@@ -41,7 +41,6 @@ final class MockAPIService: APIServiceProtocol, @unchecked Sendable {
 
     private var children: [Child] = []
     private var transactions: [UUID: [Transaction]] = [:] // childId -> transactions
-    private var wishListItems: [UUID: [WishListItem]] = [:] // childId -> items
     private var savingsTransactions: [UUID: [SavingsTransaction]] = [:] // childId -> transactions
     private var currentUser: AuthResponse?
     private var isLoggedIn = false
@@ -207,62 +206,6 @@ final class MockAPIService: APIServiceProtocol, @unchecked Sendable {
             )
         ]
 
-        // Create wish list items for child 1
-        wishListItems[child1.id] = [
-            WishListItem(
-                id: UUID(),
-                childId: child1.id,
-                name: "LEGO Star Wars Set",
-                price: 89.99,
-                url: "https://example.com/lego",
-                notes: "The Millennium Falcon one!",
-                isPurchased: false,
-                purchasedAt: nil,
-                createdAt: now.addingTimeInterval(-86400),
-                canAfford: true
-            ),
-            WishListItem(
-                id: UUID(),
-                childId: child1.id,
-                name: "New Skateboard",
-                price: 45.00,
-                url: nil,
-                notes: nil,
-                isPurchased: false,
-                purchasedAt: nil,
-                createdAt: now.addingTimeInterval(-172800),
-                canAfford: true
-            ),
-            WishListItem(
-                id: UUID(),
-                childId: child1.id,
-                name: "Books Collection",
-                price: 35.00,
-                url: nil,
-                notes: "Harry Potter series",
-                isPurchased: true,
-                purchasedAt: now.addingTimeInterval(-604800),
-                createdAt: now.addingTimeInterval(-1209600),
-                canAfford: true
-            )
-        ]
-
-        // Create wish list items for child 2
-        wishListItems[child2.id] = [
-            WishListItem(
-                id: UUID(),
-                childId: child2.id,
-                name: "Basketball",
-                price: 29.99,
-                url: nil,
-                notes: nil,
-                isPurchased: false,
-                purchasedAt: nil,
-                createdAt: now.addingTimeInterval(-86400),
-                canAfford: true
-            )
-        ]
-
         // Create savings transactions
         savingsTransactions[child1.id] = [
             SavingsTransaction(
@@ -318,7 +261,6 @@ final class MockAPIService: APIServiceProtocol, @unchecked Sendable {
     private func setupEmptyData() {
         children = []
         transactions = [:]
-        wishListItems = [:]
         savingsTransactions = [:]
     }
 
@@ -342,7 +284,6 @@ final class MockAPIService: APIServiceProtocol, @unchecked Sendable {
 
         children = [child]
         transactions[child.id] = []
-        wishListItems[child.id] = []
         savingsTransactions[child.id] = []
     }
 
@@ -478,7 +419,6 @@ final class MockAPIService: APIServiceProtocol, @unchecked Sendable {
         )
         children.append(child)
         transactions[child.id] = []
-        wishListItems[child.id] = []
         savingsTransactions[child.id] = []
         return child
     }
@@ -584,88 +524,6 @@ final class MockAPIService: APIServiceProtocol, @unchecked Sendable {
             throw APIError.notFound
         }
         return child.currentBalance
-    }
-
-    // MARK: - Wish List
-
-    func getWishList(forChild childId: UUID) async throws -> [WishListItem] {
-        return wishListItems[childId] ?? []
-    }
-
-    func createWishListItem(_ request: CreateWishListItemRequest) async throws -> WishListItem {
-        let childBalance = children.first(where: { $0.id == request.childId })?.currentBalance ?? 0
-        let item = WishListItem(
-            id: UUID(),
-            childId: request.childId,
-            name: request.name,
-            price: request.price,
-            url: request.url,
-            notes: request.notes,
-            isPurchased: false,
-            purchasedAt: nil,
-            createdAt: Date(),
-            canAfford: childBalance >= request.price
-        )
-
-        if wishListItems[request.childId] == nil {
-            wishListItems[request.childId] = []
-        }
-        wishListItems[request.childId]?.append(item)
-
-        return item
-    }
-
-    func updateWishListItem(forChild childId: UUID, id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem {
-        guard let items = wishListItems[childId],
-              let index = items.firstIndex(where: { $0.id == id }) else {
-            throw APIError.notFound
-        }
-
-        let existing = items[index]
-        let childBalance = children.first(where: { $0.id == childId })?.currentBalance ?? 0
-        let updated = WishListItem(
-            id: existing.id,
-            childId: existing.childId,
-            name: request.name,
-            price: request.price,
-            url: request.url,
-            notes: request.notes,
-            isPurchased: existing.isPurchased,
-            purchasedAt: existing.purchasedAt,
-            createdAt: existing.createdAt,
-            canAfford: childBalance >= request.price
-        )
-
-        wishListItems[childId]?[index] = updated
-        return updated
-    }
-
-    func deleteWishListItem(forChild childId: UUID, id: UUID) async throws {
-        wishListItems[childId]?.removeAll { $0.id == id }
-    }
-
-    func markWishListItemAsPurchased(forChild childId: UUID, id: UUID) async throws -> WishListItem {
-        guard let items = wishListItems[childId],
-              let index = items.firstIndex(where: { $0.id == id }) else {
-            throw APIError.notFound
-        }
-
-        let existing = items[index]
-        let updated = WishListItem(
-            id: existing.id,
-            childId: existing.childId,
-            name: existing.name,
-            price: existing.price,
-            url: existing.url,
-            notes: existing.notes,
-            isPurchased: true,
-            purchasedAt: Date(),
-            createdAt: existing.createdAt,
-            canAfford: existing.canAfford
-        )
-
-        wishListItems[childId]?[index] = updated
-        return updated
     }
 
     // MARK: - Analytics

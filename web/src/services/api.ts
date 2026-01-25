@@ -11,8 +11,6 @@ import {
   type UpdateChildSettingsRequest,
   type Transaction,
   type CreateTransactionRequest,
-  type WishListItem,
-  type CreateWishListItemRequest,
   type ApiError,
   type BalancePoint,
   type IncomeSpendingSummary,
@@ -311,35 +309,6 @@ export const transactionsApi = {
   },
 };
 
-// Wish List API
-export const wishListApi = {
-  getByChild: async (childId: string): Promise<WishListItem[]> => {
-    const response = await apiClient.get<WishListItem[]>(`/api/v1/children/${childId}/wishlist`);
-    return response.data;
-  },
-
-  create: async (data: CreateWishListItemRequest): Promise<WishListItem> => {
-    // Map frontend property names to backend DTO names
-    const backendData = {
-      name: data.itemName,
-      price: data.targetAmount,
-    };
-    const response = await apiClient.post<WishListItem>(`/api/v1/children/${data.childId}/wishlist`, backendData);
-    return response.data;
-  },
-
-  markAsPurchased: async (childId: string, id: string): Promise<void> => {
-    await apiClient.post(`/api/v1/children/${childId}/wishlist/${id}/purchase`);
-  },
-
-  markAsUnpurchased: async (childId: string, id: string): Promise<void> => {
-    await apiClient.post(`/api/v1/children/${childId}/wishlist/${id}/unpurchase`);
-  },
-
-  delete: async (childId: string, id: string): Promise<void> => {
-    await apiClient.delete(`/api/v1/children/${childId}/wishlist/${id}`);
-  },
-};
 
 // Analytics API
 export const analyticsApi = {

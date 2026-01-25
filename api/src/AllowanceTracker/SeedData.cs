@@ -349,29 +349,6 @@ public static class SeedData
 
         Console.WriteLine($"Created {jackTransactions.Count} transactions for Jack. Balance: ${jackBalance:F2}");
 
-        // Create wish list items
-        var wishListItems = new List<WishListItem>
-        {
-            new() { Id = Guid.NewGuid(), ChildId = child1.Id, Name = "Nintendo Switch Game",
-                Price = 59.99m, Notes = "Pokemon Scarlet", IsPurchased = false,
-                CreatedAt = baseDate.AddDays(-14) },
-            new() { Id = Guid.NewGuid(), ChildId = child1.Id, Name = "Art Set",
-                Price = 24.99m, Notes = "The one with 100 colors", IsPurchased = false,
-                CreatedAt = baseDate.AddDays(-7) },
-            new() { Id = Guid.NewGuid(), ChildId = child1.Id, Name = "Headphones",
-                Price = 29.99m, Notes = null, IsPurchased = false,
-                CreatedAt = baseDate.AddDays(-3) },
-            new() { Id = Guid.NewGuid(), ChildId = child2.Id, Name = "LEGO Star Wars Set",
-                Price = 49.99m, Notes = "Millennium Falcon", IsPurchased = false,
-                CreatedAt = baseDate.AddDays(-21) },
-            new() { Id = Guid.NewGuid(), ChildId = child2.Id, Name = "Soccer Ball",
-                Price = 19.99m, Notes = null, IsPurchased = false,
-                CreatedAt = baseDate.AddDays(-7) }
-        };
-
-        context.WishListItems.AddRange(wishListItems);
-
-        Console.WriteLine($"Created {wishListItems.Count} wish list items");
 
         // Create savings transactions for Emma
         var savingsTransactions = new List<SavingsTransaction>

@@ -60,8 +60,7 @@ public record GiftPortalDataDto(
     decimal? MaxAmount,
     GiftOccasion? DefaultOccasion,
     GiftLinkVisibility Visibility,
-    List<PortalSavingsGoalDto>? SavingsGoals,
-    List<PortalWishListItemDto>? WishList
+    List<PortalSavingsGoalDto>? SavingsGoals
 );
 
 /// <summary>
@@ -76,16 +75,6 @@ public record PortalSavingsGoalDto(
     string? ImageUrl
 );
 
-/// <summary>
-/// Wish list item info visible on portal (limited info)
-/// </summary>
-public record PortalWishListItemDto(
-    Guid Id,
-    string Name,
-    decimal Price,
-    string? Url,
-    string? ImageUrl
-);
 
 /// <summary>
 /// Response after submitting a gift

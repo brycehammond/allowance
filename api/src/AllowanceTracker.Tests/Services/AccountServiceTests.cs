@@ -674,16 +674,6 @@ public class AccountServiceTests : IDisposable
         };
         _context.Transactions.Add(transaction);
 
-        var wishListItem = new WishListItem
-        {
-            Id = Guid.NewGuid(),
-            ChildId = childProfile.Id,
-            Name = "Test Item",
-            Price = 25m,
-            CreatedAt = DateTime.UtcNow
-        };
-        _context.WishListItems.Add(wishListItem);
-
         await _context.SaveChangesAsync();
 
         _userManagerMock
@@ -703,9 +693,6 @@ public class AccountServiceTests : IDisposable
         // Verify child-related data was deleted
         var remainingTransactions = await _context.Transactions.Where(t => t.ChildId == childProfile.Id).ToListAsync();
         remainingTransactions.Should().BeEmpty();
-
-        var remainingWishListItems = await _context.WishListItems.Where(w => w.ChildId == childProfile.Id).ToListAsync();
-        remainingWishListItems.Should().BeEmpty();
 
         var remainingChildProfile = await _context.Children.FirstOrDefaultAsync(c => c.Id == childProfile.Id);
         remainingChildProfile.Should().BeNull();

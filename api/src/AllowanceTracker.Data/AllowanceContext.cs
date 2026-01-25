@@ -15,7 +15,6 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
     public DbSet<Family> Families { get; set; }
     public DbSet<Child> Children { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
-    public DbSet<WishListItem> WishListItems { get; set; }
     public DbSet<CategoryBudget> CategoryBudgets { get; set; }
     public DbSet<SavingsTransaction> SavingsTransactions { get; set; }
     public DbSet<ChoreTask> Tasks { get; set; }
@@ -173,21 +172,6 @@ public class AllowanceContext : IdentityDbContext<ApplicationUser, IdentityRole<
             entity.HasIndex(e => new { e.ChildId, e.Category }).IsUnique();
         });
 
-        // WishListItem configuration
-        builder.Entity<WishListItem>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.Price).HasPrecision(10, 2);
-            entity.Property(e => e.Notes).HasMaxLength(1000);
-
-            entity.HasOne(e => e.Child)
-                  .WithMany(c => c.WishListItems)
-                  .HasForeignKey(e => e.ChildId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasIndex(e => e.ChildId);
-        });
 
         // SavingsTransaction configuration
         builder.Entity<SavingsTransaction>(entity =>

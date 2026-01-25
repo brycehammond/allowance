@@ -144,26 +144,6 @@ export interface CreateTransactionRequest {
   drawFromSavings?: boolean;
 }
 
-// Wish List
-export interface WishListItem {
-  id: string;
-  childId: string;
-  name: string;
-  price: number;
-  url?: string;
-  notes?: string;
-  isPurchased: boolean;
-  purchasedAt?: string;
-  createdAt: string;
-  canAfford: boolean;
-}
-
-export interface CreateWishListItemRequest {
-  childId: string;
-  itemName: string;
-  targetAmount: number;
-}
-
 // API Error
 export interface ApiError {
   message: string;
@@ -912,6 +892,7 @@ export interface UpdateQuietHoursRequest {
 export const GiftLinkVisibility = {
   Minimal: 'Minimal',
   WithGoals: 'WithGoals',
+  /** @deprecated Wish list feature removed. Use WithGoals or Minimal instead. */
   WithWishList: 'WithWishList',
   Full: 'Full',
 } as const;
@@ -1054,13 +1035,6 @@ export interface PortalSavingsGoal {
   progressPercentage: number;
 }
 
-export interface PortalWishListItem {
-  id: string;
-  name: string;
-  price: number;
-  notes: string | null;
-}
-
 export interface GiftPortalData {
   childFirstName: string;
   childPhotoUrl: string | null;
@@ -1069,7 +1043,6 @@ export interface GiftPortalData {
   defaultOccasion: GiftOccasion | null;
   visibility: GiftLinkVisibility;
   savingsGoals: PortalSavingsGoal[];
-  wishListItems: PortalWishListItem[];
 }
 
 // Gifting - Thank You Notes

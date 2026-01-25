@@ -16,5 +16,6 @@ public enum BadgeTrigger
     StreakUpdated = 9,
     BudgetChecked = 10,
     AccountCreated = 11,
+    [Obsolete("Wish list feature removed")]
     WishListPurchased = 12
 }

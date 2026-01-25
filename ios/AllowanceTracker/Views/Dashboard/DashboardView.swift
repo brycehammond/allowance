@@ -223,7 +223,6 @@ struct ChildDetailView: View {
 
     enum ChildSection: String, CaseIterable, Identifiable {
         case transactions = "Transactions"
-        case wishList = "Wish List"
         case savings = "Savings"      // Parent only - prominent position
         case badges = "Badges"
         case chores = "Chores"
@@ -236,7 +235,6 @@ struct ChildDetailView: View {
         var icon: String {
             switch self {
             case .transactions: return "receipt"
-            case .wishList: return "star"
             case .savings: return "banknote"
             case .badges: return "medal"
             case .chores: return "checklist"
@@ -367,8 +365,6 @@ struct ChildDetailView: View {
                 savingsBalance: child.savingsBalance,
                 allowDebt: child.allowDebt
             )
-        case .wishList:
-            WishListView(childId: child.id)
         case .analytics:
             AnalyticsView(childId: child.id)
         case .badges:
@@ -409,20 +405,13 @@ struct ChildDetailView: View {
                 }
                 .tag(0)
 
-            // Wish List tab
-            WishListView(childId: child.id)
-                .tabItem {
-                    Label("Wish List", systemImage: "star")
-                }
-                .tag(1)
-
             // Savings Account tab (Parent only) - prominent position
             if isParent {
                 SavingsAccountView(childId: child.id)
                     .tabItem {
                         Label("Savings", systemImage: "banknote")
                     }
-                    .tag(2)
+                    .tag(1)
             }
 
             // Badges tab
@@ -430,14 +419,14 @@ struct ChildDetailView: View {
                 .tabItem {
                     Label("Badges", systemImage: "medal")
                 }
-                .tag(3)
+                .tag(2)
 
             // Chores tab
             TasksView(childId: child.id, isParent: isParent)
                 .tabItem {
                     Label("Chores", systemImage: "checklist")
                 }
-                .tag(4)
+                .tag(3)
 
             // Savings Goals tab
             SavingsGoalsView(
@@ -448,14 +437,14 @@ struct ChildDetailView: View {
                 .tabItem {
                     Label("Goals", systemImage: "target")
                 }
-                .tag(5)
+                .tag(4)
 
             // Analytics tab - moved to More section
             AnalyticsView(childId: child.id)
                 .tabItem {
                     Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
                 }
-                .tag(6)
+                .tag(5)
 
             // Settings tab (Parent only)
             if isParent {
@@ -463,7 +452,7 @@ struct ChildDetailView: View {
                     .tabItem {
                         Label("Settings", systemImage: "gearshape")
                     }
-                    .tag(7)
+                    .tag(6)
             }
         }
         .tint(DesignSystem.Colors.primary)

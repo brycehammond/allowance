@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Gift, Target, Star, CheckCircle, AlertCircle, Heart } from 'lucide-react';
+import { Gift, Target, CheckCircle, AlertCircle, Heart } from 'lucide-react';
 import { giftsApi } from '../services/api';
 import type { GiftPortalData, SubmitGiftRequest, GiftOccasion, GiftSubmissionResult } from '../types';
 
@@ -158,7 +158,6 @@ export const GiftPortal: React.FC = () => {
   if (!portalData) return null;
 
   const showGoals = ['WithGoals', 'Full'].includes(portalData.visibility) && portalData.savingsGoals.length > 0;
-  const showWishList = ['WithWishList', 'Full'].includes(portalData.visibility) && portalData.wishListItems.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 py-8 px-4">
@@ -208,29 +207,6 @@ export const GiftPortal: React.FC = () => {
                       <span>{formatCurrency(goal.currentAmount)}</span>
                       <span>{formatCurrency(goal.targetAmount)}</span>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Wish List (if visible) */}
-          {showWishList && (
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Star className="w-5 h-5 mr-2 text-secondary-600" />
-                {portalData.childFirstName}'s Wish List
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {portalData.wishListItems.map((item) => (
-                  <div key={item.id} className="border border-gray-200 rounded-lg p-3">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-gray-900">{item.name}</span>
-                      <span className="text-sm text-gray-600">{formatCurrency(item.price)}</span>
-                    </div>
-                    {item.notes && (
-                      <p className="text-xs text-gray-500 mt-1">{item.notes}</p>
-                    )}
                   </div>
                 ))}
               </div>

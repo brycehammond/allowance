@@ -206,7 +206,6 @@ final class AccessibilityExtensionsTests: XCTestCase {
             AccessibilityIdentifier.registerButton,
             AccessibilityIdentifier.addChildButton,
             AccessibilityIdentifier.createTransactionButton,
-            AccessibilityIdentifier.addWishListButton,
             AccessibilityIdentifier.logoutButton
         ]
 

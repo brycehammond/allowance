@@ -48,7 +48,6 @@ builder.Services.AddScoped<ITransactionAnalyticsService, TransactionAnalyticsSer
 builder.Services.AddScoped<ISavingsAccountService, SavingsAccountService>();
 builder.Services.AddScoped<IFamilyService, FamilyService>();
 builder.Services.AddScoped<IChildManagementService, ChildManagementService>();
-builder.Services.AddScoped<IWishListService, WishListService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();
 // Use FunctionCurrentUserService which falls back to system user for timer-triggered functions

@@ -279,66 +279,6 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         return response["balance"] ?? 0
     }
 
-    // MARK: - Wish List
-
-    /// Get wish list items for a child
-    /// - Parameter childId: Child's unique identifier
-    /// - Returns: Array of wish list items
-    /// - Throws: APIError if request fails
-    func getWishList(forChild childId: UUID) async throws -> [WishListItem] {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/wishlist")
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "GET")
-        return try await performRequest(urlRequest)
-    }
-
-    /// Create a new wish list item
-    /// - Parameter request: Wish list item creation request
-    /// - Returns: Created wish list item
-    /// - Throws: APIError if request fails
-    func createWishListItem(_ request: CreateWishListItemRequest) async throws -> WishListItem {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(request.childId.uuidString)/wishlist")
-        let body = try jsonEncoder.encode(request)
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST", body: body)
-        return try await performRequest(urlRequest)
-    }
-
-    /// Update a wish list item
-    /// - Parameters:
-    ///   - childId: Child's unique identifier
-    ///   - id: Wish list item identifier
-    ///   - request: Update request
-    /// - Returns: Updated wish list item
-    /// - Throws: APIError if request fails
-    func updateWishListItem(forChild childId: UUID, id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/wishlist/\(id.uuidString)")
-        let body = try jsonEncoder.encode(request)
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "PUT", body: body)
-        return try await performRequest(urlRequest)
-    }
-
-    /// Delete a wish list item
-    /// - Parameters:
-    ///   - childId: Child's unique identifier
-    ///   - id: Wish list item identifier
-    /// - Throws: APIError if request fails
-    func deleteWishListItem(forChild childId: UUID, id: UUID) async throws {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/wishlist/\(id.uuidString)")
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "DELETE")
-        let _: EmptyResponse = try await performRequest(urlRequest)
-    }
-
-    /// Mark wish list item as purchased
-    /// - Parameters:
-    ///   - childId: Child's unique identifier
-    ///   - id: Wish list item identifier
-    /// - Returns: Updated wish list item
-    /// - Throws: APIError if request fails
-    func markWishListItemAsPurchased(forChild childId: UUID, id: UUID) async throws -> WishListItem {
-        let endpoint = baseURL.appendingPathComponent("/api/v1/children/\(childId.uuidString)/wishlist/\(id.uuidString)/purchase")
-        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "POST")
-        return try await performRequest(urlRequest)
-    }
-
     // MARK: - Analytics
 
     /// Get balance history for a child

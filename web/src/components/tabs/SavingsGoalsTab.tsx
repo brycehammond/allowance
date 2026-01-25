@@ -40,6 +40,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
   } | null>(null);
   const [includeCompleted, setIncludeCompleted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   const isParent = user?.role === 'Parent';
 
@@ -358,6 +359,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h4 className="text-md font-medium text-gray-900 mb-4">New Savings Goal</h4>
           <form onSubmit={handleCreateGoal} className="space-y-4">
+            {/* Basic fields - always visible */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -372,24 +374,6 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   placeholder="e.g., New bicycle"
                 />
-              </div>
-
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                  Category
-                </label>
-                <select
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value as GoalCategory })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                >
-                  {Object.entries(GoalCategoryEnum).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {getCategoryIcon(value)} {key}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div>
@@ -412,91 +396,136 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                   />
                 </div>
               </div>
-
-              <div>
-                <label htmlFor="autoTransfer" className="block text-sm font-medium text-gray-700">
-                  Auto-transfer from Allowance
-                </label>
-                <select
-                  id="autoTransfer"
-                  value={formData.autoTransferType || 'None'}
-                  onChange={(e) => setFormData({ ...formData, autoTransferType: e.target.value as AutoTransferType })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                >
-                  <option value="None">None</option>
-                  <option value="FixedAmount">Fixed Amount</option>
-                  <option value="Percentage">Percentage</option>
-                </select>
-              </div>
-
-              {formData.autoTransferType === 'FixedAmount' && (
-                <div>
-                  <label htmlFor="autoTransferAmount" className="block text-sm font-medium text-gray-700">
-                    Auto-transfer Amount
-                  </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">$</span>
-                    </div>
-                    <input
-                      type="number"
-                      id="autoTransferAmount"
-                      step="0.01"
-                      min="0.01"
-                      value={formData.autoTransferAmount || ''}
-                      onChange={(e) =>
-                        setFormData({ ...formData, autoTransferAmount: parseFloat(e.target.value) || 0 })
-                      }
-                      className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {formData.autoTransferType === 'Percentage' && (
-                <div>
-                  <label htmlFor="autoTransferPercentage" className="block text-sm font-medium text-gray-700">
-                    Auto-transfer Percentage
-                  </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <input
-                      type="number"
-                      id="autoTransferPercentage"
-                      step="1"
-                      min="1"
-                      max="100"
-                      value={formData.autoTransferPercentage || ''}
-                      onChange={(e) =>
-                        setFormData({ ...formData, autoTransferPercentage: parseFloat(e.target.value) || 0 })
-                      }
-                      className="block w-full pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                    />
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">%</span>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                Description (optional)
-              </label>
-              <textarea
-                id="description"
-                rows={2}
-                value={formData.description || ''}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="What are you saving for?"
-              />
-            </div>
+            {/* Toggle for advanced options */}
+            <button
+              type="button"
+              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+              className="flex items-center text-sm text-primary-600 hover:text-primary-700"
+            >
+              <svg
+                className={`w-4 h-4 mr-1 transform transition-transform ${showAdvancedOptions ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+              {showAdvancedOptions ? 'Hide options' : 'More options'}
+            </button>
+
+            {/* Advanced fields - conditionally visible */}
+            {showAdvancedOptions && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                      Category
+                    </label>
+                    <select
+                      id="category"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value as GoalCategory })}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    >
+                      {Object.entries(GoalCategoryEnum).map(([key, value]) => (
+                        <option key={key} value={value}>
+                          {getCategoryIcon(value)} {key}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="autoTransfer" className="block text-sm font-medium text-gray-700">
+                      Auto-transfer from Allowance
+                    </label>
+                    <select
+                      id="autoTransfer"
+                      value={formData.autoTransferType || 'None'}
+                      onChange={(e) => setFormData({ ...formData, autoTransferType: e.target.value as AutoTransferType })}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    >
+                      <option value="None">None</option>
+                      <option value="FixedAmount">Fixed Amount</option>
+                      <option value="Percentage">Percentage</option>
+                    </select>
+                  </div>
+
+                  {formData.autoTransferType === 'FixedAmount' && (
+                    <div>
+                      <label htmlFor="autoTransferAmount" className="block text-sm font-medium text-gray-700">
+                        Auto-transfer Amount
+                      </label>
+                      <div className="mt-1 relative rounded-md shadow-sm">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <span className="text-gray-500 sm:text-sm">$</span>
+                        </div>
+                        <input
+                          type="number"
+                          id="autoTransferAmount"
+                          step="0.01"
+                          min="0.01"
+                          value={formData.autoTransferAmount || ''}
+                          onChange={(e) =>
+                            setFormData({ ...formData, autoTransferAmount: parseFloat(e.target.value) || 0 })
+                          }
+                          className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.autoTransferType === 'Percentage' && (
+                    <div>
+                      <label htmlFor="autoTransferPercentage" className="block text-sm font-medium text-gray-700">
+                        Auto-transfer Percentage
+                      </label>
+                      <div className="mt-1 relative rounded-md shadow-sm">
+                        <input
+                          type="number"
+                          id="autoTransferPercentage"
+                          step="1"
+                          min="1"
+                          max="100"
+                          value={formData.autoTransferPercentage || ''}
+                          onChange={(e) =>
+                            setFormData({ ...formData, autoTransferPercentage: parseFloat(e.target.value) || 0 })
+                          }
+                          className="block w-full pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        />
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                          <span className="text-gray-500 sm:text-sm">%</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description (optional)
+                  </label>
+                  <textarea
+                    id="description"
+                    rows={2}
+                    value={formData.description || ''}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    placeholder="What are you saving for?"
+                  />
+                </div>
+              </>
+            )}
 
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => setShowAddForm(false)}
+                onClick={() => {
+                  setShowAddForm(false);
+                  setShowAdvancedOptions(false);
+                }}
                 className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
                 Cancel

@@ -16,12 +16,14 @@ public enum GiftLinkVisibility
     WithGoals = 2,
 
     /// <summary>
-    /// Shows child's name and their wish list
+    /// Deprecated: Wish list feature removed. Behaves same as Minimal.
+    /// Kept for backward compatibility with existing data.
     /// </summary>
+    [Obsolete("Wish list feature removed. Use WithGoals or Minimal instead.")]
     WithWishList = 3,
 
     /// <summary>
-    /// Shows child's name, savings goals, and wish list
+    /// Shows child's name and savings goals (same as WithGoals, wish list removed)
     /// </summary>
     Full = 4
 }

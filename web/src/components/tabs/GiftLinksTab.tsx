@@ -24,8 +24,7 @@ const occasionLabels: Record<string, string> = {
 const visibilityLabels: Record<string, string> = {
   Minimal: 'Minimal - Just child\'s name',
   WithGoals: 'With Goals - Show savings goals',
-  WithWishList: 'With Wish List - Show wish list',
-  Full: 'Full - Show goals and wish list',
+  Full: 'Full - Show all savings goals',
 };
 
 export const GiftLinksTab: React.FC<GiftLinksTabProps> = ({ childId, childName }) => {

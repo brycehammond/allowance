@@ -23,13 +23,6 @@ protocol APIServiceProtocol {
     func createTransaction(_ request: CreateTransactionRequest) async throws -> Transaction
     func getBalance(forChild childId: UUID) async throws -> Decimal
 
-    // MARK: - Wish List
-    func getWishList(forChild childId: UUID) async throws -> [WishListItem]
-    func createWishListItem(_ request: CreateWishListItemRequest) async throws -> WishListItem
-    func updateWishListItem(forChild childId: UUID, id: UUID, _ request: UpdateWishListItemRequest) async throws -> WishListItem
-    func deleteWishListItem(forChild childId: UUID, id: UUID) async throws
-    func markWishListItemAsPurchased(forChild childId: UUID, id: UUID) async throws -> WishListItem
-
     // MARK: - Analytics
     func getBalanceHistory(forChild childId: UUID, days: Int) async throws -> [BalancePoint]
     func getIncomeVsSpending(forChild childId: UUID) async throws -> IncomeSpendingSummary

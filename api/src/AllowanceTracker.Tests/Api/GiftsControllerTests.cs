@@ -41,7 +41,7 @@ public class GiftsControllerTests
         // Arrange
         var portalData = new GiftPortalDataDto(
             "Timmy", null, 5m, 100m, GiftOccasion.Birthday, GiftLinkVisibility.Full,
-            new List<PortalSavingsGoalDto>(), new List<PortalWishListItemDto>()
+            new List<PortalSavingsGoalDto>()
         );
 
         _mockGiftService

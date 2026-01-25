@@ -275,17 +275,12 @@ public class AccountService : IAccountService
 
                 if (childProfile != null)
                 {
-                    // Delete all related child data (transactions, wish list items, etc.)
+                    // Delete all related child data (transactions, etc.)
                     // Most should cascade, but be explicit for safety
                     var transactions = await _context.Transactions
                         .Where(t => t.ChildId == childProfile.Id)
                         .ToListAsync();
                     _context.Transactions.RemoveRange(transactions);
-
-                    var wishListItems = await _context.WishListItems
-                        .Where(w => w.ChildId == childProfile.Id)
-                        .ToListAsync();
-                    _context.WishListItems.RemoveRange(wishListItems);
 
                     var savingsTransactions = await _context.SavingsTransactions
                         .Where(s => s.ChildId == childProfile.Id)
