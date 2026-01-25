@@ -16,26 +16,26 @@ public class AllowanceService : IAllowanceService
     private readonly ISavingsGoalService? _savingsGoalService;
     private readonly INotificationService? _notificationService;
     private readonly IAchievementService? _achievementService;
-    private readonly ILogger<AllowanceService>? _logger;
+    private readonly ILogger<AllowanceService> _logger;
 
     public AllowanceService(
         AllowanceContext context,
         ICurrentUserService currentUser,
         ITransactionService transactionService,
+        ILogger<AllowanceService> logger,
         ISavingsAccountService? savingsAccountService = null,
         ISavingsGoalService? savingsGoalService = null,
         INotificationService? notificationService = null,
-        IAchievementService? achievementService = null,
-        ILogger<AllowanceService>? logger = null)
+        IAchievementService? achievementService = null)
     {
         _context = context;
         _currentUser = currentUser;
         _transactionService = transactionService;
+        _logger = logger;
         _savingsAccountService = savingsAccountService;
         _savingsGoalService = savingsGoalService;
         _notificationService = notificationService;
         _achievementService = achievementService;
-        _logger = logger;
     }
 
     public async Task PayWeeklyAllowanceAsync(Guid childId)
@@ -50,12 +50,19 @@ public class AllowanceService : IAllowanceService
         if (child.AllowancePaused)
             throw new InvalidOperationException($"Allowance is currently paused{(string.IsNullOrEmpty(child.AllowancePausedReason) ? "" : $": {child.AllowancePausedReason}")}");
 
-        // Check if allowance was already paid this week
+        // Check if allowance was already paid this week (compare dates only, not timestamps)
         if (child.LastAllowanceDate.HasValue)
         {
-            var daysSinceLastPayment = (DateTime.UtcNow - child.LastAllowanceDate.Value).TotalDays;
+            var lastPaymentDate = child.LastAllowanceDate.Value.Date;
+            var todayDate = DateTime.UtcNow.Date;
+            var daysSinceLastPayment = (todayDate - lastPaymentDate).Days;
             if (daysSinceLastPayment < 7)
+            {
+                _logger.LogDebug(
+                    "Child {ChildId} not eligible: only {Days} days since last payment on {LastPaymentDate}",
+                    childId, daysSinceLastPayment, lastPaymentDate);
                 throw new InvalidOperationException("Allowance already paid this week");
+            }
         }
 
         // If AllowanceDay is set, verify today matches the scheduled day
@@ -84,13 +91,13 @@ public class AllowanceService : IAllowanceService
                 await _savingsAccountService.ProcessAutomaticTransferAsync(
                     childId, transaction.Id, child.WeeklyAllowance);
 
-                _logger?.LogInformation(
+                _logger.LogInformation(
                     "Processed automatic savings transfer for child {ChildId}",
                     childId);
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex,
+                _logger.LogError(ex,
                     "Failed to process automatic savings transfer for child {ChildId}. Allowance was paid successfully.",
                     childId);
                 // Don't throw - allowance payment succeeded, savings transfer is optional
@@ -104,13 +111,13 @@ public class AllowanceService : IAllowanceService
             {
                 await _savingsGoalService.ProcessAutoTransfersAsync(childId, child.WeeklyAllowance);
 
-                _logger?.LogInformation(
+                _logger.LogInformation(
                     "Processed savings goal auto-transfers for child {ChildId}",
                     childId);
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex,
+                _logger.LogError(ex,
                     "Failed to process savings goal auto-transfers for child {ChildId}. Allowance was paid successfully.",
                     childId);
                 // Don't throw - allowance payment succeeded, auto-transfers are optional
@@ -161,7 +168,7 @@ public class AllowanceService : IAllowanceService
             }
         }
 
-        _logger?.LogInformation(
+        _logger.LogInformation(
             "Paid weekly allowance of {Amount} to child {ChildId}",
             child.WeeklyAllowance,
             childId);
@@ -169,45 +176,73 @@ public class AllowanceService : IAllowanceService
 
     public async Task ProcessAllPendingAllowancesAsync()
     {
+        _logger.LogInformation("Starting allowance processing run at {Time}", DateTime.UtcNow);
+
         var children = await _context.Children
+            .Include(c => c.User)
             .Where(c => c.WeeklyAllowance > 0 && !c.AllowancePaused)
             .ToListAsync();
 
+        _logger.LogInformation("Found {Count} children eligible for allowance processing", children.Count);
+
         var processedCount = 0;
+        var skippedCount = 0;
         var errorCount = 0;
-        var today = DateTime.UtcNow.DayOfWeek;
+        var todayDate = DateTime.UtcNow.Date;
+        var todayDayOfWeek = DateTime.UtcNow.DayOfWeek;
 
         foreach (var child in children)
         {
+            var childName = child.User != null ? $"{child.User.FirstName} {child.User.LastName}" : child.Id.ToString();
+
             try
             {
-                // Check if child is eligible for allowance payment
-                var timingEligible = !child.LastAllowanceDate.HasValue ||
-                    (DateTime.UtcNow - child.LastAllowanceDate.Value).TotalDays >= 7;
+                // Check if child is eligible for allowance payment (compare dates only, not timestamps)
+                var lastPaymentDate = child.LastAllowanceDate?.Date;
+                var daysSinceLastPayment = lastPaymentDate.HasValue ? (todayDate - lastPaymentDate.Value).Days : int.MaxValue;
+                var timingEligible = daysSinceLastPayment >= 7;
 
                 // If AllowanceDay is set, also check if today matches
-                var dayEligible = !child.AllowanceDay.HasValue || child.AllowanceDay.Value == today;
+                var dayEligible = !child.AllowanceDay.HasValue || child.AllowanceDay.Value == todayDayOfWeek;
 
-                if (timingEligible && dayEligible)
+                if (!timingEligible)
                 {
-                    await PayWeeklyAllowanceAsync(child.Id);
-                    processedCount++;
+                    _logger.LogDebug(
+                        "Skipping {ChildName} ({ChildId}): only {Days} days since last payment on {LastPaymentDate}",
+                        childName, child.Id, daysSinceLastPayment, lastPaymentDate);
+                    skippedCount++;
+                    continue;
                 }
+
+                if (!dayEligible)
+                {
+                    _logger.LogDebug(
+                        "Skipping {ChildName} ({ChildId}): today is {Today} but AllowanceDay is {AllowanceDay}",
+                        childName, child.Id, todayDayOfWeek, child.AllowanceDay);
+                    skippedCount++;
+                    continue;
+                }
+
+                _logger.LogInformation(
+                    "Processing allowance for {ChildName} ({ChildId}): ${Amount}, last payment was {Days} days ago",
+                    childName, child.Id, child.WeeklyAllowance, daysSinceLastPayment == int.MaxValue ? "never" : daysSinceLastPayment.ToString());
+
+                await PayWeeklyAllowanceAsync(child.Id);
+                processedCount++;
             }
             catch (Exception ex)
             {
                 errorCount++;
-                _logger?.LogError(ex,
-                    "Failed to process allowance for child {ChildId}",
-                    child.Id);
+                _logger.LogError(ex,
+                    "Failed to process allowance for {ChildName} ({ChildId})",
+                    childName, child.Id);
                 // Continue processing other children even if one fails
             }
         }
 
-        _logger?.LogInformation(
-            "Processed {ProcessedCount} allowances with {ErrorCount} errors",
-            processedCount,
-            errorCount);
+        _logger.LogInformation(
+            "Allowance processing complete: {ProcessedCount} paid, {SkippedCount} skipped, {ErrorCount} errors",
+            processedCount, skippedCount, errorCount);
     }
 
     public async Task PauseAllowanceAsync(Guid childId, string? reason)
@@ -249,7 +284,7 @@ public class AllowanceService : IAllowanceService
             }
         }
 
-        _logger?.LogInformation(
+        _logger.LogInformation(
             "Paused allowance for child {ChildId}. Reason: {Reason}",
             childId,
             reason ?? "Not specified");
@@ -292,7 +327,7 @@ public class AllowanceService : IAllowanceService
             }
         }
 
-        _logger?.LogInformation(
+        _logger.LogInformation(
             "Resumed allowance for child {ChildId}",
             childId);
     }
@@ -322,7 +357,7 @@ public class AllowanceService : IAllowanceService
 
         await _context.SaveChangesAsync();
 
-        _logger?.LogInformation(
+        _logger.LogInformation(
             "Adjusted allowance for child {ChildId} from {OldAmount} to {NewAmount}. Reason: {Reason}",
             childId,
             oldAmount,

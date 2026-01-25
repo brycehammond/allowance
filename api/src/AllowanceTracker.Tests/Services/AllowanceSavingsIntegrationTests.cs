@@ -3,6 +3,7 @@ using AllowanceTracker.Models;
 using AllowanceTracker.Services;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -16,6 +17,7 @@ public class AllowanceSavingsIntegrationTests : IDisposable
 {
     private readonly AllowanceContext _context;
     private readonly Mock<ICurrentUserService> _mockCurrentUser;
+    private readonly Mock<ILogger<AllowanceService>> _mockLogger;
     private readonly ITransactionService _transactionService;
     private readonly ISavingsAccountService _savingsAccountService;
     private readonly IAllowanceService _allowanceService;
@@ -36,6 +38,9 @@ public class AllowanceSavingsIntegrationTests : IDisposable
         _mockCurrentUser = new Mock<ICurrentUserService>();
         _mockCurrentUser.Setup(x => x.UserId).Returns(_currentUserId);
 
+        // Setup mock logger
+        _mockLogger = new Mock<ILogger<AllowanceService>>();
+
         // Create REAL services for integration testing
         _transactionService = new TransactionService(_context, _mockCurrentUser.Object);
         _savingsAccountService = new SavingsAccountService(_context);
@@ -43,6 +48,7 @@ public class AllowanceSavingsIntegrationTests : IDisposable
             _context,
             _mockCurrentUser.Object,
             _transactionService,
+            _mockLogger.Object,
             _savingsAccountService);
     }
 
