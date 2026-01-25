@@ -403,11 +403,6 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-			isa = PBXGroup;
-			children = (
-			);
-			sourceTree = "<group>";
-		};
 		5BB5BCF3286ED1276B386F2D /* Tests */ = {
 			isa = PBXGroup;
 			children = (
