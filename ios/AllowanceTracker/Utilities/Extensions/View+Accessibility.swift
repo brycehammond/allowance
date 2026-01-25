@@ -232,6 +232,7 @@ enum AccessibilityIdentifier {
     static let aboutButton = "about_button"
     static let signOutButton = "sign_out_button"
     static let signOutConfirmButton = "sign_out_confirm_button"
+    static let deleteAccountButton = "delete_account_button"
 
     // Settings
     static let currentPasswordField = "current_password_field"

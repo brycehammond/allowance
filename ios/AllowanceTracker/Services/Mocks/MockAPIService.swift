@@ -441,6 +441,11 @@ final class MockAPIService: APIServiceProtocol, @unchecked Sendable {
         return PasswordMessageResponse(message: "Password reset successfully")
     }
 
+    func deleteAccount() async throws {
+        currentUser = nil
+        isLoggedIn = false
+    }
+
     // MARK: - Children
 
     func getChildren() async throws -> [Child] {

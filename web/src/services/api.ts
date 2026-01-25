@@ -241,6 +241,11 @@ export const authApi = {
     return response.data;
   },
 
+  deleteAccount: async (): Promise<{ message: string }> => {
+    const response = await apiClient.delete<{ message: string }>('/api/v1/auth/account');
+    return response.data;
+  },
+
   forgotPassword: async (email: string): Promise<{ message: string }> => {
     const response = await apiClient.post<{ message: string }>('/api/v1/auth/forgot-password', { email });
     return response.data;

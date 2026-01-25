@@ -475,6 +475,39 @@ final class AuthViewModel {
         }
     }
 
+    /// Delete current user's account
+    /// - Returns: True if successful, false otherwise
+    func deleteAccount() async -> Bool {
+        // Clear previous errors
+        errorMessage = nil
+
+        // Set loading state
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            try await apiService.deleteAccount()
+
+            // Clear all auth data from keychain
+            try? keychainService.clearAllAuthData()
+
+            // Clear state
+            viewingAsChild = nil
+            currentUser = nil
+            isAuthenticated = false
+            requiresBiometricAuth = false
+
+            return true
+
+        } catch let error as APIError {
+            errorMessage = error.localizedDescription
+            return false
+        } catch {
+            errorMessage = "Failed to delete account. Please try again."
+            return false
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Validate email format

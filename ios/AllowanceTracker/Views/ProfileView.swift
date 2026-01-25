@@ -8,6 +8,7 @@ struct ProfileView: View {
 
     @Environment(AuthViewModel.self) private var authViewModel
     @State private var showingLogoutConfirmation = false
+    @State private var showingDeleteAccountConfirmation = false
     @State private var showingAddChild = false
     @State private var showingInviteParent = false
 
@@ -98,6 +99,14 @@ struct ProfileView: View {
                         Label("Sign Out", systemImage: "arrow.right.square")
                     }
                     .accessibilityIdentifier(AccessibilityIdentifier.signOutButton)
+
+                    Button(role: .destructive) {
+                        showingDeleteAccountConfirmation = true
+                    } label: {
+                        Label("Delete Account", systemImage: "trash")
+                            .foregroundStyle(.red)
+                    }
+                    .accessibilityIdentifier(AccessibilityIdentifier.deleteAccountButton)
                 }
             }
         .navigationTitle("Profile")
@@ -114,6 +123,20 @@ struct ProfileView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure you want to sign out?")
+        }
+        .confirmationDialog(
+            "Delete Account?",
+            isPresented: $showingDeleteAccountConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Account", role: .destructive) {
+                Task {
+                    await authViewModel.deleteAccount()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete your account and all associated data. This action cannot be undone.")
         }
         .sheet(isPresented: $showingAddChild) {
             AddChildView()

@@ -529,6 +529,266 @@ public class AccountServiceTests : IDisposable
             Times.Never);
     }
 
+    [Fact]
+    public async Task DeleteAccount_WithValidUserId_DeletesUserAndReturnsSuccess()
+    {
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@test.com",
+            UserName = "test@test.com",
+            FirstName = "John",
+            LastName = "Doe",
+            Role = UserRole.Parent
+        };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        _userManagerMock
+            .Setup(x => x.FindByIdAsync(user.Id.ToString()))
+            .ReturnsAsync(user);
+
+        _userManagerMock
+            .Setup(x => x.DeleteAsync(user))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        var result = await _accountService.DeleteAccountAsync(user.Id);
+
+        // Assert
+        result.Succeeded.Should().BeTrue();
+        _userManagerMock.Verify(x => x.DeleteAsync(user), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAccount_WithNonexistentUserId_ReturnsFailure()
+    {
+        // Arrange
+        var nonExistentId = Guid.NewGuid();
+
+        _userManagerMock
+            .Setup(x => x.FindByIdAsync(nonExistentId.ToString()))
+            .ReturnsAsync((ApplicationUser?)null);
+
+        // Act
+        var result = await _accountService.DeleteAccountAsync(nonExistentId);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Description.Contains("User not found"));
+    }
+
+    [Fact]
+    public async Task DeleteAccountByEmail_WithValidEmail_DeletesUserAndReturnsSuccess()
+    {
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@test.com",
+            UserName = "test@test.com",
+            FirstName = "John",
+            LastName = "Doe",
+            Role = UserRole.Parent
+        };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        _userManagerMock
+            .Setup(x => x.FindByEmailAsync(user.Email))
+            .ReturnsAsync(user);
+
+        _userManagerMock
+            .Setup(x => x.DeleteAsync(user))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        var result = await _accountService.DeleteAccountByEmailAsync(user.Email);
+
+        // Assert
+        result.Succeeded.Should().BeTrue();
+        _userManagerMock.Verify(x => x.DeleteAsync(user), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAccountByEmail_WithNonexistentEmail_ReturnsFailure()
+    {
+        // Arrange
+        _userManagerMock
+            .Setup(x => x.FindByEmailAsync("nonexistent@test.com"))
+            .ReturnsAsync((ApplicationUser?)null);
+
+        // Act
+        var result = await _accountService.DeleteAccountByEmailAsync("nonexistent@test.com");
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Description.Contains("User not found"));
+    }
+
+    [Fact]
+    public async Task DeleteAccount_ChildWithProfile_DeletesChildProfileAndRelatedData()
+    {
+        // Arrange
+        var family = new Family
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test Family",
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Families.Add(family);
+
+        var childUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "child@test.com",
+            UserName = "child@test.com",
+            FirstName = "Alice",
+            LastName = "Smith",
+            Role = UserRole.Child,
+            FamilyId = family.Id
+        };
+        _context.Users.Add(childUser);
+
+        var childProfile = new Child
+        {
+            Id = Guid.NewGuid(),
+            UserId = childUser.Id,
+            FamilyId = family.Id,
+            WeeklyAllowance = 10m,
+            CurrentBalance = 50m,
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Children.Add(childProfile);
+
+        var transaction = new Transaction
+        {
+            Id = Guid.NewGuid(),
+            ChildId = childProfile.Id,
+            Amount = 10m,
+            Type = TransactionType.Credit,
+            Description = "Test",
+            BalanceAfter = 50m,
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Transactions.Add(transaction);
+
+        var wishListItem = new WishListItem
+        {
+            Id = Guid.NewGuid(),
+            ChildId = childProfile.Id,
+            Name = "Test Item",
+            Price = 25m,
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.WishListItems.Add(wishListItem);
+
+        await _context.SaveChangesAsync();
+
+        _userManagerMock
+            .Setup(x => x.FindByIdAsync(childUser.Id.ToString()))
+            .ReturnsAsync(childUser);
+
+        _userManagerMock
+            .Setup(x => x.DeleteAsync(childUser))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        var result = await _accountService.DeleteAccountAsync(childUser.Id);
+
+        // Assert
+        result.Succeeded.Should().BeTrue();
+
+        // Verify child-related data was deleted
+        var remainingTransactions = await _context.Transactions.Where(t => t.ChildId == childProfile.Id).ToListAsync();
+        remainingTransactions.Should().BeEmpty();
+
+        var remainingWishListItems = await _context.WishListItems.Where(w => w.ChildId == childProfile.Id).ToListAsync();
+        remainingWishListItems.Should().BeEmpty();
+
+        var remainingChildProfile = await _context.Children.FirstOrDefaultAsync(c => c.Id == childProfile.Id);
+        remainingChildProfile.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task DeleteAccount_FamilyOwner_DeletesEntireFamilyAndAllMembers()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var family = new Family
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test Family",
+            OwnerId = ownerId,
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Families.Add(family);
+
+        var ownerUser = new ApplicationUser
+        {
+            Id = ownerId,
+            Email = "owner@test.com",
+            UserName = "owner@test.com",
+            FirstName = "John",
+            LastName = "Doe",
+            Role = UserRole.Parent,
+            FamilyId = family.Id
+        };
+        _context.Users.Add(ownerUser);
+
+        var childUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "child@test.com",
+            UserName = "child@test.com",
+            FirstName = "Alice",
+            LastName = "Doe",
+            Role = UserRole.Child,
+            FamilyId = family.Id
+        };
+        _context.Users.Add(childUser);
+
+        var childProfile = new Child
+        {
+            Id = Guid.NewGuid(),
+            UserId = childUser.Id,
+            FamilyId = family.Id,
+            WeeklyAllowance = 10m,
+            CurrentBalance = 0m,
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Children.Add(childProfile);
+
+        await _context.SaveChangesAsync();
+
+        _userManagerMock
+            .Setup(x => x.FindByIdAsync(ownerUser.Id.ToString()))
+            .ReturnsAsync(ownerUser);
+
+        _userManagerMock
+            .Setup(x => x.FindByIdAsync(childUser.Id.ToString()))
+            .ReturnsAsync(childUser);
+
+        _userManagerMock
+            .Setup(x => x.DeleteAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        var result = await _accountService.DeleteAccountAsync(ownerUser.Id);
+
+        // Assert
+        result.Succeeded.Should().BeTrue();
+
+        // Verify family was deleted
+        var remainingFamily = await _context.Families.FirstOrDefaultAsync(f => f.Id == family.Id);
+        remainingFamily.Should().BeNull();
+
+        // Verify child profile was deleted
+        var remainingChildProfile = await _context.Children.FirstOrDefaultAsync(c => c.Id == childProfile.Id);
+        remainingChildProfile.Should().BeNull();
+    }
+
     public void Dispose()
     {
         _context.Database.EnsureDeleted();

@@ -11,6 +11,7 @@ import {
   DollarSign,
   Key,
   Bell,
+  Trash2,
 } from 'lucide-react';
 import { NotificationBell } from './notifications';
 
@@ -35,6 +36,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'Add Co-Parent', href: '/parent/add', icon: Users },
     { name: 'Notifications', href: '/notification-settings', icon: Bell },
     { name: 'Change Password', href: '/change-password', icon: Key },
+    { name: 'Delete Account', href: '/delete-account', icon: Trash2 },
   ];
 
   const isActivePath = (path: string) => {

@@ -187,6 +187,14 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         return try await performRequest(urlRequest)
     }
 
+    /// Delete current user's account
+    /// - Throws: APIError if request fails
+    func deleteAccount() async throws {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/auth/account")
+        let urlRequest = try await createAuthenticatedRequest(url: endpoint, method: "DELETE")
+        let _: EmptyResponse = try await performRequest(urlRequest)
+    }
+
     // MARK: - Children
 
     /// Get all children for the current family

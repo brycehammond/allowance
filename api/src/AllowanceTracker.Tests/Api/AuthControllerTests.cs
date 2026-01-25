@@ -314,6 +314,69 @@ public class AuthControllerTests : IDisposable
         _mockJwtService.Verify(x => x.GenerateToken(It.IsAny<ApplicationUser>()), Times.Once);
     }
 
+    [Fact]
+    public async Task DeleteAccount_WhenAuthenticated_ReturnsOkWithSuccessMessage()
+    {
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@test.com",
+            FirstName = "John",
+            LastName = "Doe",
+            Role = UserRole.Parent
+        };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(user);
+        _mockAccountService.Setup(x => x.DeleteAccountAsync(user.Id))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        var result = await _controller.DeleteAccount();
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task DeleteAccount_WhenNotAuthenticated_ReturnsUnauthorized()
+    {
+        // Arrange
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync((ApplicationUser?)null);
+
+        // Act
+        var result = await _controller.DeleteAccount();
+
+        // Assert
+        result.Should().BeOfType<UnauthorizedResult>();
+    }
+
+    [Fact]
+    public async Task DeleteAccount_WhenDeletionFails_ReturnsBadRequest()
+    {
+        // Arrange
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@test.com",
+            FirstName = "John",
+            LastName = "Doe",
+            Role = UserRole.Parent
+        };
+
+        _mockAccountService.Setup(x => x.GetCurrentUserAsync()).ReturnsAsync(user);
+        _mockAccountService.Setup(x => x.DeleteAccountAsync(user.Id))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Deletion failed" }));
+
+        // Act
+        var result = await _controller.DeleteAccount();
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().NotBeNull();
+    }
+
     public void Dispose()
     {
         _context.Database.EnsureDeleted();

@@ -8,6 +8,7 @@ import { AddChild } from './pages/AddChild';
 import { AddParent } from './pages/AddParent';
 import { ChildDetail } from './pages/ChildDetail';
 import { ChangePassword } from './pages/ChangePassword';
+import { DeleteAccount } from './pages/DeleteAccount';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { AcceptInvite } from './pages/AcceptInvite';
@@ -60,6 +61,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/delete-account"
+            element={
+              <ProtectedRoute>
+                <DeleteAccount />
               </ProtectedRoute>
             }
           />

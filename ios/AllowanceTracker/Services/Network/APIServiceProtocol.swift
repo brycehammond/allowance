@@ -10,6 +10,7 @@ protocol APIServiceProtocol {
     func changePassword(_ request: ChangePasswordRequest) async throws -> PasswordMessageResponse
     func forgotPassword(_ request: ForgotPasswordRequest) async throws -> PasswordMessageResponse
     func resetPassword(_ request: ResetPasswordRequest) async throws -> PasswordMessageResponse
+    func deleteAccount() async throws
 
     // MARK: - Children
     func getChildren() async throws -> [Child]
