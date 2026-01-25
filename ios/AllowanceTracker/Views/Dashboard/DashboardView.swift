@@ -224,7 +224,6 @@ struct ChildDetailView: View {
     enum ChildSection: String, CaseIterable, Identifiable {
         case transactions = "Transactions"
         case savings = "Savings"      // Parent only - prominent position
-        case badges = "Badges"
         case chores = "Chores"
         case goals = "Goals"
         case analytics = "Analytics"  // Moved to More section on iPhone
@@ -236,7 +235,6 @@ struct ChildDetailView: View {
             switch self {
             case .transactions: return "receipt"
             case .savings: return "banknote"
-            case .badges: return "medal"
             case .chores: return "checklist"
             case .goals: return "target"
             case .analytics: return "chart.line.uptrend.xyaxis"
@@ -367,8 +365,6 @@ struct ChildDetailView: View {
             )
         case .analytics:
             AnalyticsView(childId: child.id)
-        case .badges:
-            BadgesView(childId: child.id)
         case .chores:
             TasksView(childId: child.id, isParent: isParent)
         case .goals:
@@ -414,19 +410,12 @@ struct ChildDetailView: View {
                     .tag(1)
             }
 
-            // Badges tab
-            BadgesView(childId: child.id)
-                .tabItem {
-                    Label("Badges", systemImage: "medal")
-                }
-                .tag(2)
-
             // Chores tab
             TasksView(childId: child.id, isParent: isParent)
                 .tabItem {
                     Label("Chores", systemImage: "checklist")
                 }
-                .tag(3)
+                .tag(2)
 
             // Savings Goals tab
             SavingsGoalsView(
@@ -437,14 +426,14 @@ struct ChildDetailView: View {
                 .tabItem {
                     Label("Goals", systemImage: "target")
                 }
-                .tag(4)
+                .tag(3)
 
             // Analytics tab - moved to More section
             AnalyticsView(childId: child.id)
                 .tabItem {
                     Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
                 }
-                .tag(5)
+                .tag(4)
 
             // Settings tab (Parent only)
             if isParent {
@@ -452,7 +441,7 @@ struct ChildDetailView: View {
                     .tabItem {
                         Label("Settings", systemImage: "gearshape")
                     }
-                    .tag(6)
+                    .tag(5)
             }
         }
         .tint(DesignSystem.Colors.primary)
