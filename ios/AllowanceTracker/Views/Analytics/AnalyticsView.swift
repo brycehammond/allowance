@@ -285,7 +285,7 @@ struct AnalyticsView: View {
             ForEach(viewModel.topSpendingCategories) { category in
                 VStack(spacing: 4) {
                     HStack {
-                        Text(category.category)
+                        Text(category.category.splitPascalCase)
                             .font(.subheadline)
                             .fontWeight(.medium)
 

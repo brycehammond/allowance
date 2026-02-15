@@ -14,46 +14,56 @@ struct TransactionRowView: View {
 
             // Transaction details
             VStack(alignment: .leading, spacing: 4) {
-                Text(transaction.description)
-                    .font(.scalable(.body, weight: .medium))
-                    .accessibilityHidden()
+                // Description and amount on same row
+                HStack(alignment: .firstTextBaseline) {
+                    Text(transaction.description)
+                        .font(.scalable(.body, weight: .medium))
+                        .lineLimit(2)
+                        .accessibilityHidden()
 
+                    Spacer()
+
+                    Text(transaction.formattedAmount)
+                        .font(.scalable(.body, weight: .semibold))
+                        .fontDesign(.monospaced)
+                        .foregroundStyle(transaction.isCredit ? Color.green600 : Color.error)
+                        .fixedSize()
+                        .accessibilityHidden()
+                }
+
+                // Metadata row: category and balance
                 HStack(spacing: 8) {
-                    Text(transaction.category)
+                    Text(transaction.displayCategory)
                         .font(.scalable(.caption))
+                        .lineLimit(1)
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 3)
                         .background(Color.green600.opacity(0.1))
                         .foregroundStyle(Color.green600)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                         .accessibilityHidden()
 
-                    Text(transaction.createdByName)
+                    Spacer()
+
+                    Text("Bal: \(transaction.balanceAfter.currencyFormatted)")
                         .font(.scalable(.caption))
                         .foregroundStyle(.secondary)
+                        .fontDesign(.monospaced)
+                        .fixedSize()
                         .accessibilityHidden()
                 }
 
+                // Creator name
+                Text(transaction.createdByName)
+                    .font(.scalable(.caption))
+                    .lineLimit(1)
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden()
+
                 Text(transaction.formattedDate)
                     .font(.scalable(.caption2))
+                    .lineLimit(1)
                     .foregroundStyle(.secondary)
-                    .accessibilityHidden()
-            }
-
-            Spacer()
-
-            // Amount and balance
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(transaction.formattedAmount)
-                    .font(.scalable(.body, weight: .semibold))
-                    .fontDesign(.monospaced)
-                    .foregroundStyle(transaction.isCredit ? Color.green600 : Color.error)
-                    .accessibilityHidden()
-
-                Text("Balance: \(transaction.balanceAfter.currencyFormatted)")
-                    .font(.scalable(.caption2))
-                    .foregroundStyle(.secondary)
-                    .fontDesign(.monospaced)
                     .accessibilityHidden()
             }
         }

@@ -16,6 +16,10 @@ struct Transaction: Codable, Identifiable {
         type == .credit
     }
 
+    var displayCategory: String {
+        category.splitPascalCase
+    }
+
     var formattedAmount: String {
         let prefix = isCredit ? "+" : "-"
         return "\(prefix)\(amount.currencyFormatted)"

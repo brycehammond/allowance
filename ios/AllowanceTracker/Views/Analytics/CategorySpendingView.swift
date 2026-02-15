@@ -187,7 +187,7 @@ private struct SummaryCard: View {
                         .foregroundStyle(.secondary)
                     if let top = topCategory {
                         Label {
-                            Text(top.categoryName)
+                            Text(top.categoryName.splitPascalCase)
                                 .font(.caption)
                                 .fontWeight(.semibold)
                         } icon: {

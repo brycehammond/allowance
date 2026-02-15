@@ -61,3 +61,17 @@ extension Color {
 }
 
 // Note: init(hex:) is defined in DesignSystem.swift
+
+// MARK: - String Extensions
+
+extension String {
+    /// Splits a PascalCase string into separate words.
+    /// e.g. "OtherIncome" -> "Other Income"
+    var splitPascalCase: String {
+        replacingOccurrences(
+            of: "([a-z])([A-Z])",
+            with: "$1 $2",
+            options: .regularExpression
+        )
+    }
+}

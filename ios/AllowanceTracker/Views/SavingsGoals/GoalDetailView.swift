@@ -179,7 +179,7 @@ struct GoalDetailView: View {
             // Category and status
             HStack {
                 Label {
-                    Text(goal.categoryName)
+                    Text(goal.categoryName.splitPascalCase)
                 } icon: {
                     Text(goal.category.emoji)
                 }

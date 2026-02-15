@@ -28,9 +28,9 @@ struct CategorySpendingChart: View {
                 Chart(topSpending) { item in
                     BarMark(
                         x: .value("Amount", item.totalAmount.doubleValue),
-                        y: .value("Category", item.categoryName)
+                        y: .value("Category", item.categoryName.splitPascalCase)
                     )
-                    .foregroundStyle(by: .value("Category", item.categoryName))
+                    .foregroundStyle(by: .value("Category", item.categoryName.splitPascalCase))
                 }
                 .frame(height: CGFloat(topSpending.count * 40))
                 .chartLegend(.hidden)
@@ -70,7 +70,7 @@ private struct CategorySpendingRow: View {
 
             // Category name
             VStack(alignment: .leading, spacing: 2) {
-                Text(spending.categoryName)
+                Text(spending.categoryName.splitPascalCase)
                     .font(.subheadline)
                     .fontWeight(.medium)
 

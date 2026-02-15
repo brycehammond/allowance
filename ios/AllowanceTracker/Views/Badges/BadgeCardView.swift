@@ -193,7 +193,7 @@ struct BadgeDetailSheet: View {
                                 .background(rarityColor.opacity(0.15))
                                 .clipShape(Capsule())
 
-                            Text(badge.categoryName)
+                            Text(badge.categoryName.splitPascalCase)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .padding(.horizontal, 12)
