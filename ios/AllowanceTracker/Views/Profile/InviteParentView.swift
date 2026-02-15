@@ -149,7 +149,7 @@ struct PendingInviteRow: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.green500.opacity(0.15))
+                            .background(Color.green600.opacity(0.15))
                             .foregroundStyle(Color.green600)
                             .clipShape(Capsule())
                     }

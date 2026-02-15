@@ -89,7 +89,7 @@ struct ThankYouNotesView: View {
                     Label("\(viewModel.waitingCount) waiting", systemImage: "clock")
                         .foregroundStyle(.yellow)
                     Label("\(viewModel.draftCount) drafts", systemImage: "doc.text")
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.green600)
                 }
                 .font(.caption)
             }
@@ -143,8 +143,8 @@ struct ThankYouNotesView: View {
                             .font(.caption)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.blue.opacity(0.2))
-                            .foregroundStyle(.blue)
+                            .background(Color.green600.opacity(0.2))
+                            .foregroundStyle(Color.green600)
                             .clipShape(Capsule())
                     } else if pending.daysSinceReceived > 7 {
                         Label("Overdue", systemImage: "clock.badge.exclamationmark")
@@ -176,7 +176,7 @@ struct ThankYouNotesView: View {
                 HStack {
                     Text(pending.hasNote ? "Tap to edit your note" : "Tap to write a thank you note")
                         .font(.caption)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.green600)
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)
@@ -189,7 +189,7 @@ struct ThankYouNotesView: View {
             .shadow(radius: 2)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(pending.hasNote ? Color.blue.opacity(0.3) : Color.clear, lineWidth: 2)
+                    .stroke(pending.hasNote ? Color.green600.opacity(0.3) : Color.clear, lineWidth: 2)
             )
         }
         .buttonStyle(.plain)
@@ -277,7 +277,7 @@ private struct WriteThankYouNoteView: View {
                                 Task { await send() }
                             }
                             .disabled(viewModel.isProcessing)
-                            .tint(.green)
+                            .tint(Color.green600)
                         }
                     } else {
                         Button("Done") { dismiss() }

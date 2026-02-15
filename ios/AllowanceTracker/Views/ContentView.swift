@@ -53,7 +53,7 @@ struct LaunchScreenView: View {
         VStack(spacing: 16) {
             Image(systemName: "dollarsign.circle.fill")
                 .font(.system(size: 80))
-                .foregroundStyle(Color.green500)
+                .foregroundStyle(Color.green600)
 
             Text("Earn & Learn")
                 .font(.title)
@@ -77,7 +77,7 @@ struct DashboardPlaceholderView: View {
             VStack(spacing: 24) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 80))
-                    .foregroundStyle(Color.green500)
+                    .foregroundStyle(Color.green600)
 
                 Text("Welcome!")
                     .font(.largeTitle)

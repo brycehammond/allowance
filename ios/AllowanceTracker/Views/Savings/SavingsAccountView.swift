@@ -176,7 +176,7 @@ struct SavingsAccountView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color.green500)
+                    .background(Color.green600)
                     .clipShape(Capsule())
             }
             .buttonStyle(.plain)

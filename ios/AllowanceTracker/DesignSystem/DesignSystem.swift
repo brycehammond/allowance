@@ -2,7 +2,7 @@
 //  DesignSystem.swift
 //  AllowanceTracker
 //
-//  Design System - Muted Green Theme
+//  Design System - Green Theme (matches web app)
 //  Created: 2025
 //
 
@@ -14,14 +14,14 @@ import SwiftUI
 enum DesignSystem {
     /// Color palette
     enum Colors {
-        static let primary = Color(hex: "2da370")
-        static let primaryHover = Color(hex: "248c5f")
-        static let primaryActive = Color(hex: "1c6e4a")
+        static let primary = Color(hex: "16a34a")
+        static let primaryHover = Color(hex: "15803d")
+        static let primaryActive = Color(hex: "166534")
 
         static let secondary = Color(hex: "f59e0b")
         static let secondaryHover = Color(hex: "d97706")
 
-        static let success = Color(hex: "2da370")
+        static let success = Color(hex: "16a34a")
         static let warning = Color(hex: "f59e0b")
         static let error = Color(hex: "dc2626")
         static let info = Color(hex: "3b82f6")
@@ -44,17 +44,17 @@ extension Color {
         self.init(red: r, green: g, blue: b)
     }
 
-    // MARK: - Primary Green Palette
-    static let green50  = Color(hex: "f0f9f4")
-    static let green100 = Color(hex: "d1f0df")
-    static let green200 = Color(hex: "a3e1c0")
-    static let green300 = Color(hex: "72d0a0")
-    static let green400 = Color(hex: "4bb885")
-    static let green500 = Color(hex: "2da370")  // PRIMARY
-    static let green600 = Color(hex: "248c5f")
-    static let green700 = Color(hex: "1c6e4a")
-    static let green800 = Color(hex: "145537")
-    static let green900 = Color(hex: "0d3d27")
+    // MARK: - Primary Green Palette (matches web app)
+    static let green50  = Color(hex: "f0fdf7")
+    static let green100 = Color(hex: "dcfce9")
+    static let green200 = Color(hex: "bbf7d5")
+    static let green300 = Color(hex: "86efb4")
+    static let green400 = Color(hex: "4ade80")
+    static let green500 = Color(hex: "2da370")
+    static let green600 = Color(hex: "16a34a")  // PRIMARY (matches web)
+    static let green700 = Color(hex: "15803d")
+    static let green800 = Color(hex: "166534")
+    static let green900 = Color(hex: "14532d")
 
     // MARK: - Secondary Amber Palette
     static let amber50  = Color(hex: "fffbf0")
@@ -81,7 +81,7 @@ extension Color {
     static let gray900 = Color(hex: "111827")
 
     // MARK: - Semantic Colors
-    static let success = green500
+    static let success = green600
     static let successLight = green100
     static let successDark = green700
 
@@ -98,15 +98,15 @@ extension Color {
     static let infoDark = Color(hex: "1e40af")
 
     // MARK: - Semantic Aliases
-    static let primary = green500
-    static let primaryHover = green600
-    static let primaryActive = green700
+    static let primary = green600
+    static let primaryHover = green700
+    static let primaryActive = green800
 
     static let secondary = amber500
     static let secondaryHover = amber600
 
     // MARK: - Chart Colors
-    static let chart1 = green500
+    static let chart1 = green600
     static let chart2 = amber500
     static let chart3 = Color(hex: "3b82f6")
     static let chart4 = Color(hex: "8b5cf6")
@@ -181,7 +181,7 @@ struct PrimaryButtonStyle: ButtonStyle {
             .foregroundColor(.white)
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
-            .background(configuration.isPressed ? Color.green700 : Color.green500)
+            .background(configuration.isPressed ? Color.green700 : Color.green600)
             .cornerRadius(8)
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
     }
@@ -210,7 +210,7 @@ struct OutlineButtonStyle: ButtonStyle {
             .background(configuration.isPressed ? Color.green50 : Color.clear)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.green500, lineWidth: 2)
+                    .stroke(Color.green600, lineWidth: 2)
             )
     }
 }
@@ -314,7 +314,7 @@ struct DesignSystemPreview: View {
                         .font(.headlineMedium)
 
                     HStack(spacing: .spacing3) {
-                        ColorSwatch(color: .green500, name: "Primary")
+                        ColorSwatch(color: .green600, name: "Primary")
                         ColorSwatch(color: .amber500, name: "Secondary")
                         ColorSwatch(color: .gray500, name: "Neutral")
                     }

@@ -91,6 +91,7 @@ struct BudgetCardView: View {
                         .font(.caption)
                 }
                 .buttonStyle(.bordered)
+                .tint(Color.green600)
                 .controlSize(.small)
 
                 Button(role: .destructive, action: onDelete) {
@@ -122,7 +123,7 @@ struct Badge: View {
             .fontWeight(.medium)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color.green500.opacity(0.1))
+            .background(Color.green600.opacity(0.1))
             .foregroundStyle(Color.green600)
             .clipShape(RoundedRectangle(cornerRadius: 8))
     }

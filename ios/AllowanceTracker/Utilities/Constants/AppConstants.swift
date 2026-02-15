@@ -7,7 +7,7 @@ enum AppConstants {
 
     enum API {
         /// Base URL for production API
-        static let baseURL = "https://api.allowancetracker.com"
+        static let baseURL = Configuration.apiBaseURL.absoluteString
 
         /// API version
         static let version = "v1"
@@ -98,7 +98,7 @@ enum AppConstants {
         /// Enable analytics
         static let analytics = false
 
-        /// Enable SignalR real-time updates
+        /// Enable real-time updates
         static let realTimeUpdates = false
     }
 

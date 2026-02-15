@@ -152,7 +152,7 @@ struct BadgesView: View {
                     Text("\(viewModel.totalBadgesEarned)")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(Color.green500)
+                        .foregroundStyle(Color.green600)
                     Text("Badges Earned")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -177,7 +177,7 @@ struct BadgesView: View {
             if viewModel.totalBadgesAvailable > 0 {
                 VStack(spacing: 4) {
                     ProgressView(value: viewModel.overallProgress)
-                        .tint(Color.green500)
+                        .tint(Color.green600)
 
                     Text("\(viewModel.totalBadgesEarned) of \(viewModel.totalBadgesAvailable) badges unlocked")
                         .font(.caption2)
@@ -227,7 +227,7 @@ struct BadgesView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(isSelected ? Color.green500 : Color(.systemGray5))
+            .background(isSelected ? Color.green600 : Color(.systemGray5))
             .foregroundStyle(isSelected ? .white : .primary)
             .clipShape(Capsule())
         }
@@ -330,7 +330,7 @@ struct BadgesView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.headline)
-                .foregroundStyle(Color.green500)
+                .foregroundStyle(Color.green600)
                 .frame(width: 24)
 
             Text(text)

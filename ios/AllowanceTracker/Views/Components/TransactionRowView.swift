@@ -9,7 +9,7 @@ struct TransactionRowView: View {
             // Icon
             Image(systemName: transaction.isCredit ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .font(.title2)
-                .foregroundStyle(transaction.isCredit ? Color.green500 : Color.error)
+                .foregroundStyle(transaction.isCredit ? Color.green600 : Color.error)
                 .accessibilityHidden()
 
             // Transaction details
@@ -23,7 +23,7 @@ struct TransactionRowView: View {
                         .font(.scalable(.caption))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.green500.opacity(0.1))
+                        .background(Color.green600.opacity(0.1))
                         .foregroundStyle(Color.green600)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                         .accessibilityHidden()
@@ -47,7 +47,7 @@ struct TransactionRowView: View {
                 Text(transaction.formattedAmount)
                     .font(.scalable(.body, weight: .semibold))
                     .fontDesign(.monospaced)
-                    .foregroundStyle(transaction.isCredit ? Color.green500 : Color.error)
+                    .foregroundStyle(transaction.isCredit ? Color.green600 : Color.error)
                     .accessibilityHidden()
 
                 Text("Balance: \(transaction.balanceAfter.currencyFormatted)")

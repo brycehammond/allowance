@@ -69,7 +69,7 @@ struct LoginView: View {
         VStack(spacing: 12) {
             Image(systemName: "dollarsign.circle.fill")
                 .font(.system(size: 80))
-                .foregroundStyle(Color.green500)
+                .foregroundStyle(Color.green600)
                 .accessibilityHidden()
 
             Text("Earn & Learn")
@@ -137,7 +137,7 @@ struct LoginView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color.green500)
+            .background(Color.green600)
             .foregroundColor(.white)
             .cornerRadius(12)
         }
@@ -173,6 +173,7 @@ struct LoginView: View {
             }
             .font(.scalable(.subheadline))
         }
+        .tint(Color.green600)
         .disabled(viewModel.isLoading)
         .accessibilityLabel("Don't have an account? Sign up")
         .accessibilityHint("Double tap to create a new account")

@@ -285,7 +285,7 @@ struct AdaptiveLayout_Previews: PreviewProvider {
             AdaptiveGrid {
                 ForEach(0..<6) { i in
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.green500)
+                        .fill(Color.green600)
                         .frame(height: 100)
                         .overlay(Text("Card \(i + 1)").foregroundColor(.white))
                 }
@@ -298,7 +298,7 @@ struct AdaptiveLayout_Previews: PreviewProvider {
             AdaptiveGrid {
                 ForEach(0..<6) { i in
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.green500)
+                        .fill(Color.green600)
                         .frame(height: 100)
                         .overlay(Text("Card \(i + 1)").foregroundColor(.white))
                 }

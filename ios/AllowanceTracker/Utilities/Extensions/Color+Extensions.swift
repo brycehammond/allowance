@@ -5,7 +5,7 @@ extension Color {
     // MARK: - Brand Colors
 
     /// Primary brand color (muted green for money/stability)
-    static let brandPrimary = Color.green500
+    static let brandPrimary = Color.green600
 
     /// Secondary brand color (amber for achievements/savings)
     static let brandSecondary = Color.amber500
@@ -16,7 +16,7 @@ extension Color {
     // MARK: - Transaction Colors
 
     /// Color for credit/income transactions
-    static let transactionCredit = Color.green500
+    static let transactionCredit = Color.green600
 
     /// Color for debit/expense transactions
     static let transactionDebit = Color.error
@@ -51,7 +51,7 @@ extension Color {
     // MARK: - Currency
 
     /// Positive balance color
-    static let balancePositive = Color.green500
+    static let balancePositive = Color.green600
 
     /// Negative balance color
     static let balanceNegative = Color.error

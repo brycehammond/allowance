@@ -160,6 +160,7 @@ struct TransactionListView: View {
                             .fontWeight(.semibold)
                     }
                     .buttonStyle(.borderedProminent)
+                    .tint(Color.green600)
                     .controlSize(.small)
                 }
             }
@@ -196,7 +197,7 @@ struct TransactionListView: View {
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.green500)
+                        .background(Color.green600)
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }

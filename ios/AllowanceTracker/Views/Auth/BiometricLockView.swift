@@ -64,7 +64,7 @@ struct BiometricLockView: View {
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.green500)
+                .background(Color.green600)
                 .foregroundColor(.white)
                 .cornerRadius(12)
             }

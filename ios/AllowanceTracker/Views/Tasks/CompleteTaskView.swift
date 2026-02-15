@@ -20,7 +20,7 @@ struct CompleteTaskView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "checkmark.circle")
                         .font(.system(size: 48))
-                        .foregroundStyle(Color.green500)
+                        .foregroundStyle(Color.green600)
 
                     Text("Complete Task")
                         .font(.title2)
@@ -33,7 +33,7 @@ struct CompleteTaskView: View {
                     Text(task.formattedReward)
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundStyle(Color.green500)
+                        .foregroundStyle(Color.green600)
                 }
                 .padding(.top)
 
@@ -107,7 +107,7 @@ struct CompleteTaskView: View {
                             .padding()
                     }
                 }
-                .background(Color.green500)
+                .background(Color.green600)
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .disabled(viewModel.isProcessing)

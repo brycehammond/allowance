@@ -157,12 +157,12 @@ struct SavingsGoalsView: View {
                     Text("\(Int(viewModel.overallProgress))%")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(Color.green500)
+                        .foregroundStyle(Color.green600)
                 }
             }
 
             ProgressView(value: viewModel.overallProgress / 100)
-                .tint(Color.green500)
+                .tint(Color.green600)
         }
         .padding()
         .background(Color(.systemBackground))
@@ -194,7 +194,7 @@ struct SavingsGoalsView: View {
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.green500)
+                    .background(Color.green600)
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
@@ -244,7 +244,7 @@ struct GoalCard: View {
                         Text(goal.formattedCurrentAmount)
                             .font(.title3)
                             .fontWeight(.bold)
-                            .foregroundStyle(Color.green500)
+                            .foregroundStyle(Color.green600)
 
                         Text("of \(goal.formattedTargetAmount)")
                             .font(.subheadline)
@@ -334,14 +334,14 @@ struct GoalProgressBar: View {
 
                 // Progress
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.green500)
+                    .fill(Color.green600)
                     .frame(width: geometry.size.width * CGFloat(min(progress, 1.0)), height: 8)
 
                 // Milestone markers
                 ForEach(milestones) { milestone in
                     let position = CGFloat(milestone.percentComplete) / 100.0 * geometry.size.width
                     Circle()
-                        .fill(milestone.isAchieved ? Color.green500 : Color.gray.opacity(0.5))
+                        .fill(milestone.isAchieved ? Color.green600 : Color.gray.opacity(0.5))
                         .frame(width: 12, height: 12)
                         .offset(x: position - 6)
                 }

@@ -204,7 +204,7 @@ struct TasksView: View {
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.green500)
+                        .background(Color.green600)
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
@@ -263,7 +263,7 @@ struct TaskCard: View {
                 Text(task.formattedReward)
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundStyle(Color.green500)
+                    .foregroundStyle(Color.green600)
 
                 Spacer()
 
@@ -286,7 +286,7 @@ struct TaskCard: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Color.green500)
+                .tint(Color.green600)
 
                 if isParent {
                     Button(role: .destructive) {
@@ -327,7 +327,7 @@ struct PendingApprovalCard: View {
                 Text(completion.formattedReward)
                     .font(.subheadline)
                     .fontWeight(.bold)
-                    .foregroundStyle(Color.green500)
+                    .foregroundStyle(Color.green600)
             }
 
             Text("Completed: \(completion.formattedCompletedDate)")
@@ -363,7 +363,7 @@ struct PendingApprovalCard: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Color.green500)
+                .tint(Color.green600)
 
                 Button(role: .destructive) {
                     showingRejectDialog = true

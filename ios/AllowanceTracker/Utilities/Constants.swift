@@ -2,17 +2,13 @@ import Foundation
 
 enum Constants {
     enum API {
-        static let baseURL = URL(string: "http://localhost:5000")!
+        static let baseURL = Configuration.apiBaseURL
 
         #if DEBUG
         static let timeout: TimeInterval = 30
         #else
         static let timeout: TimeInterval = 15
         #endif
-    }
-
-    enum SignalR {
-        static let hubURL = URL(string: "http://localhost:5000/hubs/family")!
     }
 
     enum Keychain {

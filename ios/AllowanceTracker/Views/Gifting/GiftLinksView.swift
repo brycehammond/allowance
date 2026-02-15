@@ -166,9 +166,10 @@ struct GiftLinksView: View {
                     copiedLinkId = link.id
                 } label: {
                     Image(systemName: copiedLinkId == link.id ? "checkmark" : "doc.on.doc")
-                        .foregroundStyle(copiedLinkId == link.id ? .green : .blue)
+                        .foregroundStyle(copiedLinkId == link.id ? Color.green600 : Color.green600)
                 }
                 .buttonStyle(.bordered)
+                .tint(Color.green600)
             }
 
             if let description = link.description {

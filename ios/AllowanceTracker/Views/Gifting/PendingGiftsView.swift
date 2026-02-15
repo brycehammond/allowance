@@ -185,7 +185,7 @@ struct PendingGiftsView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.green)
+                    .tint(Color.green600)
 
                     Button(role: .destructive) {
                         giftToReject = gift

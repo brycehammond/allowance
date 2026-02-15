@@ -196,7 +196,7 @@ struct GoalDetailView: View {
                 HStack(alignment: .bottom) {
                     Text(goal.formattedCurrentAmount)
                         .font(.system(size: 36, weight: .bold))
-                        .foregroundStyle(Color.green500)
+                        .foregroundStyle(Color.green600)
 
                     Text("of \(goal.formattedTargetAmount)")
                         .font(.title3)
@@ -208,7 +208,7 @@ struct GoalDetailView: View {
 
                 // Progress bar
                 ProgressView(value: goal.progressFraction)
-                    .tint(Color.green500)
+                    .tint(Color.green600)
                     .scaleEffect(y: 2, anchor: .center)
 
                 HStack {
@@ -240,7 +240,7 @@ struct GoalDetailView: View {
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.green500)
+                .background(Color.green600)
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
@@ -277,7 +277,7 @@ struct GoalDetailView: View {
 
                     Text("Bonus: \(challenge.formattedBonusAmount)")
                         .font(.subheadline)
-                        .foregroundStyle(Color.green500)
+                        .foregroundStyle(Color.green600)
                 }
 
                 ProgressView(value: challenge.progressFraction)
@@ -386,7 +386,7 @@ struct GoalDetailView: View {
                     VStack(spacing: 4) {
                         ZStack {
                             Circle()
-                                .fill(milestone.isAchieved ? Color.green500 : Color.gray.opacity(0.3))
+                                .fill(milestone.isAchieved ? Color.green600 : Color.gray.opacity(0.3))
                                 .frame(width: 32, height: 32)
 
                             if milestone.isAchieved {
@@ -399,7 +399,7 @@ struct GoalDetailView: View {
 
                         Text("\(milestone.percentComplete)%")
                             .font(.caption2)
-                            .foregroundStyle(milestone.isAchieved ? Color.green500 : .secondary)
+                            .foregroundStyle(milestone.isAchieved ? Color.green600 : .secondary)
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -427,7 +427,7 @@ struct GoalDetailView: View {
                 ForEach(viewModel.contributions.prefix(5)) { contribution in
                     HStack {
                         Image(systemName: contribution.type.systemImage)
-                            .foregroundStyle(contribution.type.isPositive ? Color.green500 : .red)
+                            .foregroundStyle(contribution.type.isPositive ? Color.green600 : .red)
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(contribution.typeName)
@@ -443,7 +443,7 @@ struct GoalDetailView: View {
                         Text(contribution.formattedAmount)
                             .font(.subheadline)
                             .fontWeight(.semibold)
-                            .foregroundStyle(contribution.type.isPositive ? Color.green500 : .red)
+                            .foregroundStyle(contribution.type.isPositive ? Color.green600 : .red)
                     }
                     .padding(.vertical, 4)
                 }

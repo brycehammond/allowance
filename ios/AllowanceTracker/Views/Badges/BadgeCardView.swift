@@ -90,7 +90,7 @@ struct BadgeCardView: View {
             .shadow(color: rarityColor.opacity(0.3), radius: badge.rarity == .Legendary ? 8 : 2)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(badge.isDisplayed ? Color.green500 : Color.clear, lineWidth: 2)
+                    .stroke(badge.isDisplayed ? Color.green600 : Color.clear, lineWidth: 2)
             )
         }
         .buttonStyle(.plain)
