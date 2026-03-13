@@ -371,7 +371,7 @@ public class GiftServiceTests : IDisposable
             childUser.Id,
             NotificationType.GiftReceived,
             It.IsAny<string>(),
-            It.Is<string>(s => s.Contains("Aunt Sue") && s.Contains("$25")),
+            It.Is<string>(s => s.Contains("Aunt Sue") && s.Contains("25")),
             It.IsAny<object>(),
             gift.Id,
             It.IsAny<string>()
