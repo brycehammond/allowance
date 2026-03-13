@@ -8,6 +8,8 @@ on:
       - 'api/src/AllowanceTracker/Models/**'
       - 'api/src/AllowanceTracker/Data/**'
       - 'api/src/AllowanceTracker/Services/**'
+      - 'api/src/AllowanceTracker.Core/**'
+      - 'api/src/AllowanceTracker.Data/**'
       - '.github/workflows/function.yml'
   pull_request:
     branches: [main, develop]
@@ -16,9 +18,12 @@ on:
       - 'api/src/AllowanceTracker/Models/**'
       - 'api/src/AllowanceTracker/Data/**'
       - 'api/src/AllowanceTracker/Services/**'
+      - 'api/src/AllowanceTracker.Core/**'
+      - 'api/src/AllowanceTracker.Data/**'
 
 env:
   DOTNET_VERSION: '10.0.x'
+  AZURE_FUNCTIONAPP_NAME: 'allowance-function'
 
 jobs:
   build:
@@ -70,7 +75,6 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: 'Production'
-      url: 'https://${{ vars.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net'
 
     steps:
       - name: Download artifact
@@ -87,13 +91,11 @@ jobs:
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
         with:
-          app-name: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: ./publish/function
 
       - name: Verify deployment
-        run: |
-          echo "Function deployed to: https://${{ vars.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net"
-          sleep 15
+        run: echo "Function deployed successfully"
 
       - name: Logout from Azure
         run: az logout
