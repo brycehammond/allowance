@@ -135,18 +135,15 @@ struct DashboardView: View {
     /// List of children cards - uses adaptive grid on iPad
     private var childrenListView: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                // Welcome message
+            VStack(spacing: 20) {
+                // Greeting
                 if let user = authViewModel.currentUser {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Welcome, \(user.firstName)!")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(greeting), \(user.firstName)")
                             .font(.title2)
                             .fontWeight(.bold)
-
-                        Text(isRegularWidth
-                            ? "Select a child to view details"
-                            : "Tap a child to view details")
-                            .font(.subheadline)
+                        Text("Earn & Learn Parent")
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -154,8 +151,21 @@ struct DashboardView: View {
                     .padding(.top)
                 }
 
+                // Family Summary Card
+                familySummaryCard
+                    .adaptivePadding(.horizontal)
+
+                // Section header
+                HStack {
+                    Text("Kids' Accounts")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Spacer()
+                }
+                .adaptivePadding(.horizontal)
+
                 // Children cards - grid on iPad, list on iPhone
-                LazyVGrid(columns: gridColumns, spacing: 16) {
+                LazyVGrid(columns: gridColumns, spacing: 12) {
                     ForEach(viewModel.children) { child in
                         NavigationLink {
                             ChildDetailView(child: child)
@@ -169,6 +179,82 @@ struct DashboardView: View {
             }
             .padding(.bottom)
         }
+    }
+
+    /// Time-of-day greeting
+    private var greeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        if hour < 12 { return "Good morning" }
+        if hour < 17 { return "Good afternoon" }
+        return "Good evening"
+    }
+
+    /// Family summary card with totals and ratio bar
+    private var familySummaryCard: some View {
+        let totalBalance = viewModel.children.reduce(Decimal.zero) { $0 + $1.totalBalance }
+        let totalSpending = viewModel.children.reduce(Decimal.zero) { $0 + $1.currentBalance }
+        let totalSavings = viewModel.children.reduce(Decimal.zero) { $0 + $1.savingsBalance }
+        let savingsRatio = totalBalance > 0 ? CGFloat(truncating: (totalSavings / totalBalance) as NSDecimalNumber) : 0
+
+        return VStack(alignment: .leading, spacing: 12) {
+            Text("Family Total")
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+
+            Text(totalBalance.currencyFormatted)
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundStyle(DesignSystem.Colors.primary)
+
+            HStack(spacing: 16) {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(DesignSystem.Colors.primary)
+                        .frame(width: 8, height: 8)
+                    VStack(alignment: .leading) {
+                        Text("Spending")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text(totalSpending.currencyFormatted)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                    }
+                }
+
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Color.blue500)
+                        .frame(width: 8, height: 8)
+                    VStack(alignment: .leading) {
+                        Text("Savings")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text(totalSavings.currencyFormatted)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                    }
+                }
+            }
+
+            // Ratio bar
+            if totalBalance > 0 {
+                GeometryReader { geo in
+                    HStack(spacing: 0) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(DesignSystem.Colors.primary)
+                            .frame(width: max((1 - savingsRatio) * geo.size.width, 2))
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.blue500)
+                            .frame(width: max(savingsRatio * geo.size.width, 2))
+                    }
+                }
+                .frame(height: 6)
+                .clipShape(Capsule())
+            }
+        }
+        .card()
     }
 
     /// Empty state when no children exist - centered and constrained on iPad

@@ -12,7 +12,7 @@ struct ChildCardView: View {
                 // Avatar
                 ZStack {
                     Circle()
-                        .fill(DesignSystem.Colors.primary.opacity(0.15))
+                        .fill(DesignSystem.Colors.primary.opacity(0.12))
                         .frame(width: 44, height: 44)
                     Text(String(child.firstName.prefix(1)))
                         .font(.headline)
@@ -24,7 +24,7 @@ struct ChildCardView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(child.fullName)
                         .font(.scalable(.headline, weight: .semibold))
-                    Text("Weekly: \(child.weeklyAllowance.currencyFormatted)")
+                    Text("\(child.weeklyAllowance.currencyFormatted)/week")
                         .font(.scalable(.caption))
                         .foregroundStyle(.secondary)
                         .accessibilityHidden(true)
@@ -32,62 +32,83 @@ struct ChildCardView: View {
 
                 Spacer()
 
+                // Savings rate badge
+                if savingsRate > 0 {
+                    Text("Saving \(savingsRate)%")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(Color.blue500)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.blue50)
+                        .clipShape(Capsule())
+                        .accessibilityHidden(true)
+                }
+
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.gray300)
                     .accessibilityHidden(true)
             }
-
-            Divider()
-                .accessibilityHidden(true)
 
             // Total Balance
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Total Balance")
-                    .font(.scalable(.caption))
-                    .foregroundStyle(.secondary)
-                    .accessibilityHidden(true)
+            Text(child.formattedTotalBalance)
+                .font(.scalable(.title2, weight: .bold))
+                .fontDesign(.monospaced)
+                .foregroundStyle(totalBalanceColor)
+                .accessibilityHidden(true)
 
-                Text(child.formattedTotalBalance)
-                    .font(.scalable(.title2, weight: .bold))
-                    .fontDesign(.monospaced)
-                    .foregroundStyle(totalBalanceColor)
-                    .accessibilityHidden(true)
-            }
-
-            // Balance breakdown
+            // Balance breakdown with dots
             HStack(spacing: 16) {
-                // Spending balance
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(child.formattedBalance)
-                        .font(.scalable(.subheadline, weight: .semibold))
-                        .fontDesign(.monospaced)
-                        .foregroundStyle(.primary)
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(DesignSystem.Colors.primary)
+                        .frame(width: 7, height: 7)
                     Text("Spending")
                         .font(.scalable(.caption2))
                         .foregroundStyle(.secondary)
+                    Text(child.formattedBalance)
+                        .font(.scalable(.caption, weight: .medium))
                 }
                 .accessibilityHidden(true)
 
-                // Savings balance
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(child.formattedSavingsBalance)
-                        .font(.scalable(.subheadline, weight: .semibold))
-                        .fontDesign(.monospaced)
-                        .foregroundStyle(DesignSystem.Colors.primary)
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color.blue500)
+                        .frame(width: 7, height: 7)
                     Text("Savings")
                         .font(.scalable(.caption2))
                         .foregroundStyle(.secondary)
+                    Text(child.formattedSavingsBalance)
+                        .font(.scalable(.caption, weight: .medium))
                 }
                 .accessibilityHidden(true)
 
                 Spacer()
             }
+
+            // Ratio bar
+            if child.totalBalance > 0 {
+                GeometryReader { geo in
+                    HStack(spacing: 0) {
+                        let spendingWidth = max(CGFloat(truncating: (child.currentBalance / child.totalBalance) as NSDecimalNumber) * geo.size.width, 2)
+                        let savingsWidth = max(geo.size.width - spendingWidth, 2)
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(DesignSystem.Colors.primary)
+                            .frame(width: spendingWidth)
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.blue500)
+                            .frame(width: savingsWidth)
+                    }
+                }
+                .frame(height: 5)
+                .clipShape(Capsule())
+                .accessibilityHidden(true)
+            }
         }
         .padding()
         .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(radius: 2)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.06), radius: 4, y: 2)
         .contentShape(Rectangle())
         .accessibility(
             label: accessibilityLabel,
@@ -98,6 +119,12 @@ struct ChildCardView: View {
     }
 
     // MARK: - Computed Properties
+
+    /// Savings rate as a percentage
+    private var savingsRate: Int {
+        guard child.totalBalance > 0 else { return 0 }
+        return Int(truncating: (child.savingsBalance / child.totalBalance * 100) as NSDecimalNumber)
+    }
 
     /// Color based on total balance amount
     private var totalBalanceColor: Color {

@@ -21,10 +21,15 @@ enum DesignSystem {
         static let secondary = Color(hex: "f59e0b")
         static let secondaryHover = Color(hex: "d97706")
 
+        static let tertiary = Color(hex: "3b82f6")
+        static let tertiaryHover = Color(hex: "2563eb")
+
         static let success = Color(hex: "16a34a")
         static let warning = Color(hex: "f59e0b")
         static let error = Color(hex: "dc2626")
         static let info = Color(hex: "3b82f6")
+
+        static let warmBackground = Color(hex: "FDFCFB")
     }
 }
 
@@ -68,6 +73,18 @@ extension Color {
     static let amber800 = Color(hex: "92400e")
     static let amber900 = Color(hex: "78350f")
 
+    // MARK: - Tertiary Blue Palette
+    static let blue50  = Color(hex: "eff6ff")
+    static let blue100 = Color(hex: "dbeafe")
+    static let blue200 = Color(hex: "bfdbfe")
+    static let blue300 = Color(hex: "93c5fd")
+    static let blue400 = Color(hex: "60a5fa")
+    static let blue500 = Color(hex: "3b82f6")  // TERTIARY
+    static let blue600 = Color(hex: "2563eb")
+    static let blue700 = Color(hex: "1d4ed8")
+    static let blue800 = Color(hex: "1e40af")
+    static let blue900 = Color(hex: "1e3a8a")
+
     // MARK: - Neutral Grays
     static let gray50  = Color(hex: "f9fafb")
     static let gray100 = Color(hex: "f3f4f6")
@@ -104,6 +121,13 @@ extension Color {
 
     static let secondary = amber500
     static let secondaryHover = amber600
+
+    static let tertiary = blue500
+    static let tertiaryHover = blue600
+    static let tertiaryLight = blue50
+
+    // MARK: - Warm Background
+    static let warmBackground = Color(hex: "FDFCFB")
 
     // MARK: - Chart Colors
     static let chart1 = green600
@@ -177,12 +201,12 @@ extension CGFloat {
 struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
-            .font(.system(size: 14, weight: .medium))
+            .font(.system(size: 14, weight: .semibold))
             .foregroundColor(.white)
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.green700 : Color.green600)
-            .cornerRadius(8)
+            .cornerRadius(12)
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
     }
 }
@@ -190,12 +214,12 @@ struct PrimaryButtonStyle: ButtonStyle {
 struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
-            .font(.system(size: 14, weight: .medium))
+            .font(.system(size: 14, weight: .semibold))
             .foregroundColor(.white)
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.amber700 : Color.amber500)
-            .cornerRadius(8)
+            .cornerRadius(12)
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
     }
 }
@@ -203,27 +227,43 @@ struct SecondaryButtonStyle: ButtonStyle {
 struct OutlineButtonStyle: ButtonStyle {
     func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
-            .font(.system(size: 14, weight: .medium))
+            .font(.system(size: 14, weight: .semibold))
             .foregroundColor(Color.green600)
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.green50 : Color.clear)
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 12)
                     .stroke(Color.green600, lineWidth: 2)
             )
+    }
+}
+
+struct PillButtonStyle: ButtonStyle {
+    var color: Color = .green600
+    var pressedColor: Color = .green700
+
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundColor(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(configuration.isPressed ? pressedColor : color)
+            .cornerRadius(20)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
     }
 }
 
 struct DangerButtonStyle: ButtonStyle {
     func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
-            .font(.system(size: 14, weight: .medium))
+            .font(.system(size: 14, weight: .semibold))
             .foregroundColor(.white)
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.errorDark : Color.error)
-            .cornerRadius(8)
+            .cornerRadius(12)
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
     }
 }
@@ -236,7 +276,7 @@ struct GhostButtonStyle: ButtonStyle {
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
             .background(configuration.isPressed ? Color.gray100 : Color.clear)
-            .cornerRadius(8)
+            .cornerRadius(12)
     }
 }
 
@@ -249,7 +289,7 @@ struct CardModifier: ViewModifier {
         content
             .padding(.spacing6)
             .background(Color.white)
-            .cornerRadius(12)
+            .cornerRadius(16)
             .shadow(color: style.shadowColor, radius: style.shadowRadius, y: style.shadowY)
     }
 }

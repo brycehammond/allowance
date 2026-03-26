@@ -67,16 +67,22 @@ struct LoginView: View {
 
     private var logoSection: some View {
         VStack(spacing: 12) {
-            Image(systemName: "dollarsign.circle.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(Color.green600)
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.green600)
+                .frame(width: 64, height: 64)
+                .overlay(
+                    Image(systemName: "banknote.fill")
+                        .font(.system(size: 30))
+                        .foregroundStyle(.white)
+                )
+                .shadow(color: Color.green600.opacity(0.3), radius: 8, y: 4)
                 .accessibilityHidden()
 
             Text("Earn & Learn")
                 .font(.scalable(.title, weight: .bold))
                 .accessibleHeader("Earn & Learn")
 
-            Text("Track, Save, Learn")
+            Text("Teaching kids to save, spend & earn wisely")
                 .font(.scalable(.subheadline))
                 .foregroundStyle(.secondary)
                 .accessibilityHidden()
