@@ -542,89 +542,80 @@ struct ChildDetailView: View {
     }
 
     private var childHeaderView: some View {
-        VStack(spacing: 12) {
-            HStack(alignment: .center, spacing: 16) {
-                // Avatar
-                ZStack {
-                    Circle()
-                        .fill(DesignSystem.Colors.primary.opacity(0.15))
-                        .frame(width: 56, height: 56)
-                    Text(String(child.firstName.prefix(1)))
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(DesignSystem.Colors.primary)
-                }
-
-                // Name and allowance
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(child.fullName)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                    Text("Weekly: \(child.weeklyAllowance.currencyFormatted)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                // Total/Spending balance
-                VStack(alignment: .trailing, spacing: 4) {
-                    if shouldShowSavingsBalance {
-                        Text(child.formattedTotalBalance)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .fontDesign(.monospaced)
-                        Text("Total Balance")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text(child.formattedBalance)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .fontDesign(.monospaced)
-                        Text("Balance")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
+        VStack(spacing: 8) {
+            // Centered avatar
+            ZStack {
+                Circle()
+                    .fill(DesignSystem.Colors.primary.opacity(0.12))
+                    .frame(width: 72, height: 72)
+                Text(String(child.firstName.prefix(1)))
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundStyle(DesignSystem.Colors.primary)
             }
 
-            // Balance breakdown (only show when savings is visible)
+            // Name and allowance
+            Text(child.fullName)
+                .font(.headline)
+                .fontWeight(.bold)
+            Text("\(child.weeklyAllowance.currencyFormatted)/week")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            // Hero balance
             if shouldShowSavingsBalance {
-                HStack(spacing: 24) {
-                    Spacer()
+                Text(child.formattedTotalBalance)
+                    .font(.system(size: 34, weight: .bold, design: .monospaced))
+                    .foregroundStyle(DesignSystem.Colors.primary)
+                    .padding(.top, 4)
+            } else {
+                Text(child.formattedBalance)
+                    .font(.system(size: 34, weight: .bold, design: .monospaced))
+                    .foregroundStyle(DesignSystem.Colors.primary)
+                    .padding(.top, 4)
+            }
 
-                    // Spending balance
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text(child.formattedBalance)
-                            .font(.headline)
-                            .fontDesign(.monospaced)
+            // Spending / Savings pills
+            if shouldShowSavingsBalance {
+                HStack(spacing: 8) {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(DesignSystem.Colors.primary)
+                            .frame(width: 6, height: 6)
                         Text("Spending")
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundStyle(.secondary)
+                        Text(child.formattedBalance)
+                            .font(.caption)
+                            .fontWeight(.semibold)
                     }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.green50)
+                    .clipShape(Capsule())
 
-                    // Savings balance
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text(child.formattedSavingsBalance)
-                            .font(.headline)
-                            .fontDesign(.monospaced)
-                            .foregroundStyle(DesignSystem.Colors.primary)
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(Color.blue500)
+                            .frame(width: 6, height: 6)
                         Text("Savings")
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundStyle(.secondary)
+                        Text(child.formattedSavingsBalance)
+                            .font(.caption)
+                            .fontWeight(.semibold)
                     }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.blue50)
+                    .clipShape(Capsule())
                 }
+                .padding(.top, 2)
             }
         }
-        .padding()
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
         .background(Color(.systemBackground))
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundStyle(Color(.separator)),
-            alignment: .bottom
-        )
     }
 }
 
