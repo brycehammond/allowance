@@ -324,29 +324,17 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
           </label>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-colors ${
+              showAddForm ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-primary-600 text-white hover:bg-primary-700'
+            }`}
           >
-            {showAddForm ? (
-              <>
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Cancel
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                New Goal
-              </>
-            )}
+            {showAddForm ? 'Cancel' : '+ New Goal'}
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 p-4">
+        <div className="rounded-xl bg-red-50 p-3">
           <div className="text-sm text-red-800">{error}</div>
           <button onClick={() => setError('')} className="text-sm text-red-600 underline mt-1">
             Dismiss
@@ -356,7 +344,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
 
       {/* Add Goal Form */}
       {showAddForm && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-5">
           <h4 className="text-md font-medium text-gray-900 mb-4">New Savings Goal</h4>
           <form onSubmit={handleCreateGoal} className="space-y-4">
             {/* Basic fields - always visible */}
@@ -371,7 +359,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   placeholder="e.g., New bicycle"
                 />
               </div>
@@ -392,7 +380,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                     required
                     value={formData.targetAmount || ''}
                     onChange={(e) => setFormData({ ...formData, targetAmount: parseFloat(e.target.value) || 0 })}
-                    className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    className="block w-full pl-7 pr-12 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   />
                 </div>
               </div>
@@ -427,7 +415,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                       id="category"
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value as GoalCategory })}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                     >
                       {Object.entries(GoalCategoryEnum).map(([key, value]) => (
                         <option key={key} value={value}>
@@ -445,7 +433,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                       id="autoTransfer"
                       value={formData.autoTransferType || 'None'}
                       onChange={(e) => setFormData({ ...formData, autoTransferType: e.target.value as AutoTransferType })}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                     >
                       <option value="None">None</option>
                       <option value="FixedAmount">Fixed Amount</option>
@@ -471,7 +459,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                           onChange={(e) =>
                             setFormData({ ...formData, autoTransferAmount: parseFloat(e.target.value) || 0 })
                           }
-                          className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                          className="block w-full pl-7 pr-12 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                         />
                       </div>
                     </div>
@@ -493,7 +481,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                           onChange={(e) =>
                             setFormData({ ...formData, autoTransferPercentage: parseFloat(e.target.value) || 0 })
                           }
-                          className="block w-full pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                          className="block w-full pr-8 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                         />
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                           <span className="text-gray-500 sm:text-sm">%</span>
@@ -512,7 +500,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                     rows={2}
                     value={formData.description || ''}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                     placeholder="What are you saving for?"
                   />
                 </div>
@@ -544,7 +532,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
 
       {/* Goals List */}
       {goals.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+        <div className="text-center py-12 bg-white rounded-2xl shadow-sm">
           <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
@@ -620,7 +608,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                 </div>
 
                 {/* Amount Info */}
-                <div className="flex justify-between items-center mb-4 p-3 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center mb-4 p-3 bg-gray-50 rounded-xl">
                   <div>
                     <p className="text-sm text-gray-600">Saved</p>
                     <p className="text-xl font-bold text-primary-600">{formatCurrency(goal.currentAmount)}</p>
@@ -727,7 +715,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
       {/* Contribute Modal */}
       {showContributeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Add Money to Goal</h3>
             <div className="space-y-4">
               <div>
@@ -743,7 +731,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                     max={currentBalance}
                     value={contributeData.amount || ''}
                     onChange={(e) => setContributeData({ ...contributeData, amount: parseFloat(e.target.value) || 0 })}
-                    className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    className="block w-full pl-7 pr-12 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500">Available: {formatCurrency(currentBalance)}</p>
@@ -755,7 +743,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                   type="text"
                   value={contributeData.description || ''}
                   onChange={(e) => setContributeData({ ...contributeData, description: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   placeholder="e.g., Birthday money"
                 />
               </div>
@@ -783,7 +771,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
       {/* Matching Rule Modal */}
       {showMatchingModal && isParent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Set Up Parent Matching</h3>
             <p className="text-sm text-gray-600 mb-4">
               Match your child's contributions to encourage saving!
@@ -794,7 +782,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                 <select
                   value={matchingData.matchType}
                   onChange={(e) => setMatchingData({ ...matchingData, matchType: e.target.value as typeof MatchingType[keyof typeof MatchingType] })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 >
                   <option value="RatioMatch">Ratio Match (e.g., $1 for every $2)</option>
                   <option value="PercentageMatch">Percentage Match (e.g., 50%)</option>
@@ -813,7 +801,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                     max={matchingData.matchType === 'PercentageMatch' ? 100 : 10}
                     value={matchingData.matchRatio || ''}
                     onChange={(e) => setMatchingData({ ...matchingData, matchRatio: parseFloat(e.target.value) || 0 })}
-                    className="block w-full pr-16 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    className="block w-full pr-16 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                     <span className="text-gray-500 sm:text-sm">
@@ -842,7 +830,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                     onChange={(e) =>
                       setMatchingData({ ...matchingData, maxMatchAmount: parseFloat(e.target.value) || undefined })
                     }
-                    className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    className="block w-full pl-7 pr-12 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                     placeholder="No limit"
                   />
                 </div>
@@ -871,7 +859,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
       {/* Challenge Modal */}
       {showChallengeModal && isParent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Create Savings Challenge</h3>
             <p className="text-sm text-gray-600 mb-4">
               Set a target with a deadline and bonus reward!
@@ -891,7 +879,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                     onChange={(e) =>
                       setChallengeData({ ...challengeData, targetAmount: parseFloat(e.target.value) || 0 })
                     }
-                    className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    className="block w-full pl-7 pr-12 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   />
                 </div>
               </div>
@@ -903,7 +891,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                   value={challengeData.endDate}
                   min={new Date().toISOString().split('T')[0]}
                   onChange={(e) => setChallengeData({ ...challengeData, endDate: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 />
               </div>
 
@@ -921,7 +909,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                     onChange={(e) =>
                       setChallengeData({ ...challengeData, bonusAmount: parseFloat(e.target.value) || 0 })
                     }
-                    className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    className="block w-full pl-7 pr-12 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
@@ -952,7 +940,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
       {/* Goal Details Modal */}
       {selectedGoalDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">
@@ -982,7 +970,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
 
             <div className="space-y-4">
               {/* Progress */}
-              <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="p-4 bg-gray-50 rounded-xl">
                 <div className="flex justify-between mb-2">
                   <span className="text-2xl font-bold text-primary-600">
                     {formatCurrency(selectedGoalDetails.goal.currentAmount)}
@@ -1006,7 +994,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
 
               {/* Matching Rule Info */}
               {selectedGoalDetails.matching && (
-                <div className="p-4 bg-purple-50 rounded-lg">
+                <div className="p-4 bg-purple-50 rounded-xl">
                   <h4 className="font-medium text-purple-800 mb-2">💰 Parent Matching Active</h4>
                   <p className="text-sm text-purple-700">
                     {selectedGoalDetails.matching.matchType === 'RatioMatch'
@@ -1023,7 +1011,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
 
               {/* Challenge Info */}
               {selectedGoalDetails.challenge && (
-                <div className="p-4 bg-orange-50 rounded-lg">
+                <div className="p-4 bg-orange-50 rounded-xl">
                   <h4 className="font-medium text-orange-800 mb-2">🏆 Active Challenge</h4>
                   <p className="text-sm text-orange-700">
                     Save {formatCurrency(selectedGoalDetails.challenge.targetAmount)} by{' '}
@@ -1050,7 +1038,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
 
               {/* Auto-transfer Info */}
               {selectedGoalDetails.goal.autoTransferType !== 'None' && (
-                <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="p-4 bg-blue-50 rounded-xl">
                   <h4 className="font-medium text-blue-800 mb-1">🔄 Auto-transfer Enabled</h4>
                   <p className="text-sm text-blue-700">
                     {selectedGoalDetails.goal.autoTransferType === 'FixedAmount'

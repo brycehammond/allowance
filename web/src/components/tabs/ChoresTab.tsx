@@ -173,44 +173,32 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header with Add Task Button (Parents only) */}
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">Chores & Tasks</h3>
+        <h3 className="text-base font-semibold text-gray-900">Chores &amp; Tasks</h3>
         {isParent && (
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl transition-colors ${
+              showAddForm ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-primary-600 text-white hover:bg-primary-700'
+            }`}
           >
-            {showAddForm ? (
-              <>
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Cancel
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Add Task
-              </>
-            )}
+            {showAddForm ? 'Cancel' : '+ Add Chore'}
           </button>
         )}
       </div>
 
       {/* Error Display */}
       {error && (
-        <div className="rounded-md bg-red-50 p-4">
+        <div className="rounded-xl bg-red-50 p-3">
           <div className="text-sm text-red-800">{error}</div>
         </div>
       )}
 
       {/* Add Task Form (Parents only) */}
       {showAddForm && isParent && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-5">
           <h4 className="text-md font-medium text-gray-900 mb-4">New Task</h4>
           <form onSubmit={handleCreateTask} className="space-y-4">
             <div>
@@ -223,7 +211,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="e.g., Clean bedroom, Take out trash"
               />
             </div>
@@ -237,7 +225,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                 rows={2}
                 value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="Any additional details..."
               />
             </div>
@@ -258,7 +246,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                   required
                   value={formData.rewardAmount || ''}
                   onChange={(e) => setFormData({ ...formData, rewardAmount: parseFloat(e.target.value) || 0 })}
-                  className="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="block w-full pl-7 pr-12 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 />
               </div>
             </div>
@@ -291,7 +279,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                     id="recurrenceType"
                     value={formData.recurrenceType || 'Weekly'}
                     onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value as RecurrenceType })}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   >
                     <option value="Daily">Daily</option>
                     <option value="Weekly">Weekly</option>
@@ -308,7 +296,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                       id="recurrenceDay"
                       value={formData.recurrenceDay || 'Monday'}
                       onChange={(e) => setFormData({ ...formData, recurrenceDay: e.target.value as DayOfWeek })}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                     >
                       <option value="Sunday">Sunday</option>
                       <option value="Monday">Monday</option>
@@ -333,7 +321,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                       max="28"
                       value={formData.recurrenceDayOfMonth || 1}
                       onChange={(e) => setFormData({ ...formData, recurrenceDayOfMonth: parseInt(e.target.value) || 1 })}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                     />
                   </div>
                 )}
@@ -347,14 +335,14 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                   setShowAddForm(false);
                   setError('');
                 }}
-                className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                className="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50 transition-colors"
               >
                 {isSubmitting ? 'Creating...' : 'Create Task'}
               </button>
@@ -365,7 +353,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
 
       {/* Pending Approvals Section (Parents only) */}
       {isParent && pendingApprovals.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+        <div className="bg-secondary-50 rounded-2xl p-6">
           <h4 className="text-md font-medium text-yellow-800 mb-4 flex items-center">
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -374,7 +362,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
           </h4>
           <div className="space-y-4">
             {pendingApprovals.map((completion) => (
-              <div key={completion.id} className="bg-white rounded-lg p-4 border border-yellow-200">
+              <div key={completion.id} className="bg-white rounded-xl p-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <h5 className="font-medium text-gray-900">{completion.taskTitle}</h5>
@@ -404,7 +392,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                 <div className="flex space-x-2 mt-4">
                   <button
                     onClick={() => handleReviewCompletion(completion.id, true)}
-                    className="flex-1 px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    className="flex-1 px-3 py-2 border border-transparent text-sm font-medium rounded-xl text-white bg-primary-600 hover:bg-primary-700 transition-colors"
                   >
                     Approve
                   </button>
@@ -413,7 +401,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                       const reason = prompt('Rejection reason (optional):');
                       handleReviewCompletion(completion.id, false, reason || undefined);
                     }}
-                    className="flex-1 px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    className="flex-1 px-3 py-2 border border-red-300 text-sm font-medium rounded-xl text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
                   >
                     Reject
                   </button>
@@ -426,7 +414,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
 
       {/* Tasks List */}
       {tasks.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+        <div className="text-center py-12 bg-white rounded-2xl shadow-sm">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
             fill="none"
@@ -450,7 +438,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
           {tasks.map((task) => (
             <div
               key={task.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+              className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
             >
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
@@ -488,7 +476,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                   {!isParent && (
                     <button
                       onClick={() => setShowCompleteModal(task)}
-                      className="flex-1 px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      className="flex-1 px-3 py-2 border border-transparent text-sm font-medium rounded-xl text-white bg-primary-600 hover:bg-primary-700 transition-colors"
                     >
                       Mark Complete
                     </button>
@@ -497,13 +485,13 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                     <>
                       <button
                         onClick={() => setShowCompleteModal(task)}
-                        className="flex-1 px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                       >
                         Complete
                       </button>
                       <button
                         onClick={() => handleArchiveTask(task.id)}
-                        className="px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        className="px-3 py-2 border border-red-300 text-sm font-medium rounded-xl text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -526,7 +514,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
 
-            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div className="inline-block align-bottom bg-white rounded-2xl px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
               <div>
                 <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
                   <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -553,7 +541,7 @@ export const ChoresTab: React.FC<ChoresTabProps> = ({ childId }) => {
                     rows={2}
                     value={completionNotes}
                     onChange={(e) => setCompletionNotes(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 bg-gray-50 border-0 rounded-xl ring-1 ring-inset ring-gray-200 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                     placeholder="Any notes about completing this task..."
                   />
                 </div>

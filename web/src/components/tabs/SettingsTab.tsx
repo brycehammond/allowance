@@ -136,18 +136,18 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
   const exampleSpending = (parseFloat(weeklyAllowance) || 0) - exampleSavings;
 
   return (
-    <div className="bg-white shadow-sm rounded-lg p-6">
+    <div className="bg-white shadow-sm rounded-2xl p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-6">Allowance Settings</h3>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
+          <div className="rounded-xl bg-red-50 p-3">
             <div className="text-sm text-red-800">{error}</div>
           </div>
         )}
 
         {success && (
-          <div className="rounded-md bg-green-50 p-4">
+          <div className="rounded-xl bg-green-50 p-3">
             <div className="text-sm text-green-800">{success}</div>
           </div>
         )}
@@ -236,7 +236,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
 
         {/* Savings Configuration */}
         {savingsEnabled && (
-          <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+          <div className="bg-gray-50 rounded-xl p-4 space-y-4">
             {/* Transfer Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -320,7 +320,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
             )}
 
             {/* Preview */}
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="bg-white rounded-xl p-4 ring-1 ring-gray-100">
               <h4 className="text-sm font-medium text-gray-700 mb-3">Weekly Breakdown Preview</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -401,7 +401,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
             </button>
           </div>
           {allowDebt && (
-            <p className="mt-2 text-sm text-amber-600 bg-amber-50 rounded-md p-3">
+            <p className="mt-2 text-sm text-amber-600 bg-amber-50 rounded-xl p-3">
               When spending exceeds available funds, savings will be used first before going into debt.
             </p>
           )}
@@ -412,7 +412,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ childId, child, onUpda
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50 transition-colors disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
