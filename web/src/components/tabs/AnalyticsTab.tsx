@@ -1,18 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { analyticsApi } from '../../services/api';
+import { getCategoryInfo } from '../../utils/categoryEmoji';
 import {
   LineChart,
   Line,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import type {
@@ -21,12 +18,11 @@ import type {
   MonthlyComparison,
   CategoryBreakdown,
 } from '../../types';
+import { TrendingUp, TrendingDown, PiggyBank } from 'lucide-react';
 
 interface AnalyticsTabProps {
   childId: string;
 }
-
-const COLORS = ['#2da370', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ childId }) => {
   const [balanceHistory, setBalanceHistory] = useState<BalancePoint[]>([]);
@@ -41,15 +37,12 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ childId }) => {
     try {
       setIsLoading(true);
       setError('');
-
-      // Load all analytics data in parallel
       const [balance, income, monthly, category] = await Promise.all([
         analyticsApi.getBalanceHistory(childId, days),
         analyticsApi.getIncomeVsSpending(childId),
         analyticsApi.getMonthlyComparison(childId, 6),
         analyticsApi.getSpendingBreakdown(childId),
       ]);
-
       setBalanceHistory(balance);
       setIncomeSpending(income);
       setMonthlyComparison(monthly);
@@ -69,17 +62,11 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ childId }) => {
   }, [loadAnalytics]);
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   if (isLoading) {
@@ -92,276 +79,142 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ childId }) => {
 
   if (error) {
     return (
-      <div className="rounded-md bg-red-50 p-4">
+      <div className="rounded-xl bg-red-50 p-4">
         <div className="text-sm text-red-800">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">Analytics & Reports</h3>
-        <div className="flex items-center space-x-2">
-          <label htmlFor="days" className="text-sm text-gray-600">
-            Period:
-          </label>
-          <select
-            id="days"
-            value={days}
-            onChange={(e) => setDays(Number(e.target.value))}
-            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+    <div className="space-y-5">
+      {/* Period Selector */}
+      <div className="flex gap-2">
+        {[
+          { label: '30 Days', value: 30 },
+          { label: '60 Days', value: 60 },
+          { label: '90 Days', value: 90 },
+        ].map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => setDays(opt.value)}
+            className={`px-3.5 py-1.5 rounded-xl text-sm font-medium transition-colors ${
+              days === opt.value
+                ? 'bg-primary-600 text-white'
+                : 'bg-white text-gray-500 hover:bg-gray-50'
+            }`}
           >
-            <option value={7}>Last 7 Days</option>
-            <option value={30}>Last 30 Days</option>
-            <option value={90}>Last 90 Days</option>
-            <option value={365}>Last Year</option>
-          </select>
-        </div>
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       {/* Summary Cards */}
       {incomeSpending && (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-6 w-6 text-green-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Income</dt>
-                    <dd>
-                      <div className="text-lg font-medium text-gray-900">
-                        {formatCurrency(incomeSpending.totalIncome)}
-                      </div>
-                      <div className="text-sm text-gray-500">{incomeSpending.incomeTransactionCount} transactions</div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white rounded-2xl shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="w-4 h-4 text-primary-500" />
+              <span className="text-xs font-medium text-gray-400">Earned</span>
             </div>
+            <p className="text-xl font-bold text-gray-900 font-headline">
+              {formatCurrency(incomeSpending.totalIncome)}
+            </p>
           </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-6 w-6 text-red-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Spending</dt>
-                    <dd>
-                      <div className="text-lg font-medium text-gray-900">
-                        {formatCurrency(incomeSpending.totalSpending)}
-                      </div>
-                      <div className="text-sm text-gray-500">{incomeSpending.spendingTransactionCount} transactions</div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
+          <div className="bg-white rounded-2xl shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingDown className="w-4 h-4 text-secondary-400" />
+              <span className="text-xs font-medium text-gray-400">Spent</span>
             </div>
+            <p className="text-xl font-bold text-gray-900 font-headline">
+              {formatCurrency(incomeSpending.totalSpending)}
+            </p>
           </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-6 w-6 text-primary-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Net Savings</dt>
-                    <dd>
-                      <div className="text-lg font-medium text-gray-900">
-                        {formatCurrency(incomeSpending.netSavings)}
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
+          <div className="bg-white rounded-2xl shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <PiggyBank className="w-4 h-4 text-tertiary-500" />
+              <span className="text-xs font-medium text-gray-400">Saved</span>
             </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-6 w-6 text-secondary-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Savings Rate</dt>
-                    <dd>
-                      <div className="text-lg font-medium text-gray-900">
-                        {(incomeSpending.savingsRate * 100).toFixed(1)}%
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
+            <p className="text-xl font-bold text-gray-900 font-headline">
+              {formatCurrency(incomeSpending.netSavings)}
+            </p>
+            <p className="text-xs text-tertiary-600 font-medium mt-0.5">
+              {(incomeSpending.savingsRate * 100).toFixed(0)}% rate
+            </p>
           </div>
         </div>
       )}
 
       {/* Balance History Chart */}
       {balanceHistory.length > 0 && (
-        <div className="bg-white shadow rounded-lg p-4 sm:p-6">
-          <h4 className="text-md font-medium text-gray-900 mb-4">Balance History</h4>
-          <div className="h-[200px] sm:h-[300px]">
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+          <h4 className="text-sm font-semibold text-gray-900 mb-4">Balance Over Time</h4>
+          <div className="h-[200px] sm:h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={balanceHistory.map(p => ({
                 date: formatDate(p.date),
                 balance: p.balance,
               }))}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
                 <YAxis tickFormatter={(value) => `$${value}`} tick={{ fontSize: 11 }} width={50} />
                 <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                <Legend />
-                <Line type="monotone" dataKey="balance" stroke="#2da370" strokeWidth={2} name="Balance" />
+                <Line type="monotone" dataKey="balance" stroke="#16a34a" strokeWidth={2.5} dot={false} name="Balance" />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Monthly Comparison Chart */}
-        {monthlyComparison.length > 0 && (
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
-            <h4 className="text-md font-medium text-gray-900 mb-4">Monthly Comparison</h4>
-            <div className="h-[200px] sm:h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyComparison}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="monthName" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={50} />
-                  <YAxis tickFormatter={(value) => `$${value}`} tick={{ fontSize: 11 }} width={50} />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Legend />
-                  <Bar dataKey="income" fill="#2da370" name="Income" />
-                  <Bar dataKey="spending" fill="#ef4444" name="Spending" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
-
-        {/* Spending Breakdown Chart */}
-        {categoryBreakdown.length > 0 && (
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
-            <h4 className="text-md font-medium text-gray-900 mb-4">Spending by Category</h4>
-            <div className="h-[180px] sm:h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryBreakdown.map(cat => ({ ...cat, name: cat.category, value: cat.amount }))}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius="70%"
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {categoryBreakdown.map((_cat, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-4 space-y-2">
-              {categoryBreakdown.map((cat, index) => (
-                <div key={cat.category} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center">
-                    <div
-                      className="w-3 h-3 rounded-full mr-2 flex-shrink-0"
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    ></div>
-                    <span className="text-gray-700 truncate">{cat.category}</span>
+      {/* Category Breakdown */}
+      {categoryBreakdown.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+          <h4 className="text-sm font-semibold text-gray-900 mb-4">Where Money Goes</h4>
+          <div className="space-y-3">
+            {categoryBreakdown.map((cat) => {
+              const info = getCategoryInfo(cat.category);
+              return (
+                <div key={cat.category} className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg ${info.color} flex items-center justify-center text-sm flex-shrink-0`}>
+                    {info.emoji}
                   </div>
-                  <div className="text-gray-900 font-medium whitespace-nowrap ml-2">
-                    {formatCurrency(cat.amount)} ({cat.percentage.toFixed(1)}%)
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm text-gray-700 truncate">{cat.category.replace(/([A-Z])/g, ' $1').trim()}</span>
+                      <span className="text-sm font-medium text-gray-900 ml-2">{cat.percentage.toFixed(0)}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-primary-500 transition-all"
+                        style={{ width: `${cat.percentage}%` }}
+                      />
+                    </div>
                   </div>
+                  <span className="text-xs text-gray-400 flex-shrink-0 w-16 text-right">{formatCurrency(cat.amount)}</span>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Export Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => {
-            // CSV export will be implemented later
-            alert('CSV export coming soon!');
-          }}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        >
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          Export to CSV
-        </button>
-      </div>
+      {/* Monthly Comparison */}
+      {monthlyComparison.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+          <h4 className="text-sm font-semibold text-gray-900 mb-4">Monthly Comparison</h4>
+          <div className="h-[200px] sm:h-[260px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyComparison}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="monthName" tick={{ fontSize: 10 }} />
+                <YAxis tickFormatter={(value) => `$${value}`} tick={{ fontSize: 11 }} width={50} />
+                <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                <Bar dataKey="income" fill="#16a34a" name="Earned" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="spending" fill="#f59e0b" name="Spent" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
