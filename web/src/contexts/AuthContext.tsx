@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
+import axios from 'axios';
 import { authApi } from '../services/api';
-import type { User, LoginRequest, RegisterRequest, AuthResponse } from '../types';
+import type { User, LoginRequest, RegisterRequest, AuthResponse, ExternalLoginRequest } from '../types';
+
+interface ExternalLoginResult {
+  needsFamilyName: boolean;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -9,6 +14,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (credentials: LoginRequest | AuthResponse) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
+  externalLogin: (data: ExternalLoginRequest) => Promise<ExternalLoginResult>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -192,6 +198,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(user);
   };
 
+  const externalLogin = async (data: ExternalLoginRequest): Promise<ExternalLoginResult> => {
+    try {
+      const response = await authApi.externalLogin(data);
+      await login(response);
+      return { needsFamilyName: false };
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.status === 400) {
+        const errorData = err.response.data as { error?: { code?: string } };
+        if (errorData?.error?.code === 'FAMILY_NAME_REQUIRED') {
+          return { needsFamilyName: true };
+        }
+      }
+      throw err;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -205,6 +227,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     login,
     register,
+    externalLogin,
     logout,
     refreshUser,
   };

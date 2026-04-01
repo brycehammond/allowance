@@ -69,6 +69,16 @@ struct AuthResponse: Codable {
     }
 }
 
+// MARK: - External Auth DTOs
+
+struct ExternalLoginRequest: Codable {
+    let provider: String
+    let idToken: String
+    let familyName: String?
+    let firstName: String?
+    let lastName: String?
+}
+
 // MARK: - Password Management DTOs
 
 struct ChangePasswordRequest: Codable {

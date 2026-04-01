@@ -11,6 +11,7 @@ enum APIError: Error, Equatable {
     case invalidURL
     case invalidResponse
     case validationError(String)
+    case familyNameRequired
     case httpError(Int)
     case unknown
 
@@ -34,6 +35,8 @@ enum APIError: Error, Equatable {
             return "Invalid server response."
         case .validationError(let message):
             return message
+        case .familyNameRequired:
+            return "A family name is required to complete registration."
         case .httpError(let statusCode):
             return "HTTP error: \(statusCode)"
         case .unknown:

@@ -5,6 +5,7 @@ protocol APIServiceProtocol {
     // MARK: - Authentication
     func login(_ request: LoginRequest) async throws -> AuthResponse
     func register(_ request: RegisterRequest) async throws -> AuthResponse
+    func externalLogin(_ request: ExternalLoginRequest) async throws -> AuthResponse
     func logout() async throws
     func refreshToken() async throws -> AuthResponse
     func changePassword(_ request: ChangePasswordRequest) async throws -> PasswordMessageResponse

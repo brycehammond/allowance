@@ -1,3 +1,5 @@
+import AuthenticationServices
+import GoogleSignInSwift
 import SwiftUI
 
 @MainActor
@@ -10,6 +12,7 @@ struct LoginView: View {
     @State private var password = ""
     @State private var showRegister = false
     @State private var showForgotPassword = false
+    @State private var familyNameInput = ""
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     // MARK: - Computed Properties
@@ -32,6 +35,10 @@ struct LoginView: View {
 
                     // Login button
                     loginButton
+
+                    // Social sign-in divider and buttons
+                    socialSignInDivider
+                    socialSignInButtons
 
                     // Forgot password link
                     forgotPasswordLink
@@ -59,6 +66,25 @@ struct LoginView: View {
             .sheet(isPresented: $showForgotPassword) {
                 ForgotPasswordView()
                     .environment(viewModel)
+            }
+            .alert("Family Name Required", isPresented: Binding(
+                get: { viewModel.showFamilyNamePrompt },
+                set: { viewModel.showFamilyNamePrompt = $0 }
+            )) {
+                TextField("Family Name", text: $familyNameInput)
+                Button("Cancel", role: .cancel) {
+                    viewModel.showFamilyNamePrompt = false
+                    viewModel.pendingExternalLogin = nil
+                    familyNameInput = ""
+                }
+                Button("Continue") {
+                    Task {
+                        await viewModel.completePendingExternalLogin(familyName: familyNameInput)
+                        familyNameInput = ""
+                    }
+                }
+            } message: {
+                Text("Please enter a name for your family to complete registration.")
             }
         }
     }
@@ -145,6 +171,52 @@ struct LoginView: View {
         .accessibilityLabel(viewModel.isLoading ? "Signing in" : "Sign in")
         .accessibilityHint(viewModel.isLoading ? "Please wait while signing in" : "Double tap to sign in with your email and password")
         .accessibilityIdentifier(AccessibilityIdentifier.loginButton)
+    }
+
+    private var socialSignInDivider: some View {
+        HStack {
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(height: 1)
+
+            Text("or")
+                .font(.scalable(.subheadline))
+                .foregroundStyle(.secondary)
+
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(height: 1)
+        }
+    }
+
+    private var socialSignInButtons: some View {
+        VStack(spacing: 12) {
+            // Apple Sign In
+            AppleSignInButton { result in
+                switch result {
+                case .success(let authorization):
+                    Task {
+                        await viewModel.signInWithApple(authorization: authorization)
+                    }
+                case .failure(let error):
+                    if (error as NSError).code != ASAuthorizationError.canceled.rawValue {
+                        viewModel.errorMessage = "Apple Sign In failed. Please try again."
+                    }
+                }
+            }
+            .disabled(viewModel.isLoading)
+
+            // Google Sign In
+            GoogleSignInButton(scheme: .light, style: .wide, action: {
+                Task {
+                    await viewModel.signInWithGoogle()
+                }
+            })
+            .frame(height: 50)
+            .cornerRadius(12)
+            .disabled(viewModel.isLoading)
+            .accessibilityLabel("Sign in with Google")
+        }
     }
 
     private var forgotPasswordLink: some View {

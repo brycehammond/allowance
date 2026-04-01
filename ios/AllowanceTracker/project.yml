@@ -1,5 +1,10 @@
 name: AllowanceTracker
 
+packages:
+  GoogleSignIn-iOS:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: 8.0.0
+
 options:
   bundleIdPrefix: app.earnandlearn
   deploymentTarget:
@@ -39,6 +44,11 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 5L2J3MYB5N
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - package: GoogleSignIn-iOS
+        product: GoogleSignIn
+      - package: GoogleSignIn-iOS
+        product: GoogleSignInSwift
     entitlements:
       path: App/AllowanceTracker.entitlements
     scheme:

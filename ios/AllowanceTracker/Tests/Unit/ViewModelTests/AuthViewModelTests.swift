@@ -262,6 +262,7 @@ final class AuthViewModelTests: XCTestCase {
 class MockAPIService: APIServiceProtocol {
     var loginResult: Result<AuthResponse, APIError>?
     var registerResult: Result<AuthResponse, APIError>?
+    var externalLoginResult: Result<AuthResponse, APIError>?
     var changePasswordResult: Result<PasswordMessageResponse, APIError>?
     var forgotPasswordResult: Result<PasswordMessageResponse, APIError>?
     var resetPasswordResult: Result<PasswordMessageResponse, APIError>?
@@ -300,7 +301,26 @@ class MockAPIService: APIServiceProtocol {
         }
     }
 
+    func externalLogin(_ request: ExternalLoginRequest) async throws -> AuthResponse {
+        if shouldDelay {
+            try await Task.sleep(nanoseconds: 100_000_000) // 100ms
+        }
+
+        switch externalLoginResult {
+        case .success(let response):
+            return response
+        case .failure(let error):
+            throw error
+        case .none:
+            throw APIError.unknown
+        }
+    }
+
     func logout() async throws {
+        // Mock implementation - do nothing
+    }
+
+    func deleteAccount() async throws {
         // Mock implementation - do nothing
     }
 

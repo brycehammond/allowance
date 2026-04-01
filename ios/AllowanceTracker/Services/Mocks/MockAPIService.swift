@@ -329,6 +329,23 @@ final class MockAPIService: APIServiceProtocol, @unchecked Sendable {
         throw APIError.unauthorized
     }
 
+    func externalLogin(_ request: ExternalLoginRequest) async throws -> AuthResponse {
+        let response = AuthResponse(
+            userId: Self.testUserId,
+            email: "external@example.com",
+            firstName: request.firstName ?? "External",
+            lastName: request.lastName ?? "User",
+            role: "Parent",
+            familyId: Self.testFamilyId,
+            familyName: "Test Family",
+            token: "mock-jwt-token-external-\(UUID().uuidString)",
+            expiresAt: Date().addingTimeInterval(86400)
+        )
+        currentUser = response
+        isLoggedIn = true
+        return response
+    }
+
     func register(_ request: RegisterRequest) async throws -> AuthResponse {
         let response = AuthResponse(
             userId: UUID(),

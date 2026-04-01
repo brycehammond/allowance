@@ -34,6 +34,14 @@ export interface AuthResponse {
   expiresAt: string;
 }
 
+export interface ExternalLoginRequest {
+  provider: 'Google' | 'Apple';
+  idToken: string;
+  familyName?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
 // Child
 export type DayOfWeek = 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday';
 

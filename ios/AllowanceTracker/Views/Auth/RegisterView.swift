@@ -1,3 +1,5 @@
+import AuthenticationServices
+import GoogleSignInSwift
 import SwiftUI
 
 @MainActor
@@ -14,6 +16,7 @@ struct RegisterView: View {
     @State private var confirmPassword = ""
     @State private var firstName = ""
     @State private var lastName = ""
+    @State private var familyNameInput = ""
 
     // MARK: - Computed Properties
 
@@ -36,6 +39,10 @@ struct RegisterView: View {
                     // Register button
                     registerButton
 
+                    // Social sign-in divider and buttons
+                    socialSignInDivider
+                    socialSignInButtons
+
                     // Error message
                     if let errorMessage = viewModel.errorMessage {
                         errorSection(message: errorMessage)
@@ -55,6 +62,28 @@ struct RegisterView: View {
                     }
                     .disabled(viewModel.isLoading)
                 }
+            }
+            .alert("Family Name Required", isPresented: Binding(
+                get: { viewModel.showFamilyNamePrompt },
+                set: { viewModel.showFamilyNamePrompt = $0 }
+            )) {
+                TextField("Family Name", text: $familyNameInput)
+                Button("Cancel", role: .cancel) {
+                    viewModel.showFamilyNamePrompt = false
+                    viewModel.pendingExternalLogin = nil
+                    familyNameInput = ""
+                }
+                Button("Continue") {
+                    Task {
+                        await viewModel.completePendingExternalLogin(familyName: familyNameInput)
+                        if viewModel.isAuthenticated {
+                            familyNameInput = ""
+                            dismiss()
+                        }
+                    }
+                }
+            } message: {
+                Text("Please enter a name for your family to complete registration.")
             }
         }
     }
@@ -195,6 +224,58 @@ struct RegisterView: View {
         }
         .disabled(viewModel.isLoading || password != confirmPassword)
         .accessibilityIdentifier(AccessibilityIdentifier.registerSubmitButton)
+    }
+
+    private var socialSignInDivider: some View {
+        HStack {
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(height: 1)
+
+            Text("or")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(height: 1)
+        }
+    }
+
+    private var socialSignInButtons: some View {
+        VStack(spacing: 12) {
+            // Apple Sign In
+            AppleSignInButton { result in
+                switch result {
+                case .success(let authorization):
+                    Task {
+                        await viewModel.signInWithApple(authorization: authorization)
+                        if viewModel.isAuthenticated {
+                            dismiss()
+                        }
+                    }
+                case .failure(let error):
+                    if (error as NSError).code != ASAuthorizationError.canceled.rawValue {
+                        viewModel.errorMessage = "Apple Sign In failed. Please try again."
+                    }
+                }
+            }
+            .disabled(viewModel.isLoading)
+
+            // Google Sign In
+            GoogleSignInButton(scheme: .light, style: .wide, action: {
+                Task {
+                    await viewModel.signInWithGoogle()
+                    if viewModel.isAuthenticated {
+                        dismiss()
+                    }
+                }
+            })
+            .frame(height: 50)
+            .cornerRadius(12)
+            .disabled(viewModel.isLoading)
+            .accessibilityLabel("Sign in with Google")
+        }
     }
 
     private func errorSection(message: String) -> some View {

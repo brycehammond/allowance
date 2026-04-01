@@ -167,6 +167,8 @@ builder.Services.AddScoped<IAllowanceService, AllowanceService>();
 builder.Services.AddScoped<ISavingsAccountService, SavingsAccountService>();
 builder.Services.AddScoped<IFamilyService, FamilyService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IExternalTokenValidator, ExternalTokenValidator>();
+builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
 builder.Services.AddScoped<IChildManagementService, ChildManagementService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryBudgetService, CategoryBudgetService>();

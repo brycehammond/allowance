@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "@microsoft/signalr": "^10.0.0",
+    "@react-oauth/google": "^0.13.4",
     "axios": "^1.12.2",
     "lucide-react": "^0.545.0",
     "react": "^19.1.1",
+    "react-apple-signin-auth": "^1.1.2",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.4",
     "recharts": "^3.2.1"

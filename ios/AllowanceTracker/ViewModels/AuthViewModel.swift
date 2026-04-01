@@ -1,3 +1,4 @@
+import AuthenticationServices
 import Foundation
 import SwiftUI
 
@@ -12,6 +13,14 @@ final class AuthViewModel {
     var isAuthenticated = false
     private(set) var isLoading = false
     var errorMessage: String?
+
+    // MARK: - External Login State
+
+    /// Whether the family name prompt should be shown for new external login users
+    var showFamilyNamePrompt = false
+
+    /// Pending external login info when family name is required
+    var pendingExternalLogin: (provider: String, idToken: String, firstName: String?, lastName: String?)?
 
     // MARK: - Biometric Authentication
 
@@ -59,17 +68,20 @@ final class AuthViewModel {
     private let apiService: APIServiceProtocol
     private let keychainService: KeychainServiceProtocol
     private let biometricService: BiometricServiceProtocol
+    private let googleSignInService: GoogleSignInService
 
     // MARK: - Initialization
 
     init(
         apiService: APIServiceProtocol = ServiceProvider.apiService,
         keychainService: KeychainServiceProtocol = ServiceProvider.keychainService,
-        biometricService: BiometricServiceProtocol = BiometricService.shared
+        biometricService: BiometricServiceProtocol = BiometricService.shared,
+        googleSignInService: GoogleSignInService = GoogleSignInService()
     ) {
         self.apiService = apiService
         self.keychainService = keychainService
         self.biometricService = biometricService
+        self.googleSignInService = googleSignInService
     }
 
     // MARK: - Public Methods
@@ -209,6 +221,114 @@ final class AuthViewModel {
     /// Clear error message
     func clearError() {
         errorMessage = nil
+    }
+
+    // MARK: - External Login
+
+    /// Sign in with Apple using the authorization result
+    /// - Parameter authorization: The ASAuthorization result from Sign in with Apple
+    func signInWithApple(authorization: ASAuthorization) async {
+        errorMessage = nil
+
+        guard let appleCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let identityTokenData = appleCredential.identityToken,
+              let idToken = String(data: identityTokenData, encoding: .utf8) else {
+            errorMessage = "Failed to get Apple Sign In credentials."
+            return
+        }
+
+        let firstName = appleCredential.fullName?.givenName
+        let lastName = appleCredential.fullName?.familyName
+
+        await performExternalLogin(
+            provider: "Apple",
+            idToken: idToken,
+            firstName: firstName,
+            lastName: lastName,
+            familyName: nil
+        )
+    }
+
+    /// Sign in with Google via the Google Sign-In SDK
+    func signInWithGoogle() async {
+        errorMessage = nil
+        isLoading = true
+
+        do {
+            let result = try await googleSignInService.signIn()
+
+            await performExternalLogin(
+                provider: "Google",
+                idToken: result.idToken,
+                firstName: result.firstName,
+                lastName: result.lastName,
+                familyName: nil
+            )
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
+    }
+
+    /// Complete a pending external login by providing the required family name
+    /// - Parameter familyName: The family name to use for the new account
+    func completePendingExternalLogin(familyName: String) async {
+        guard let pending = pendingExternalLogin else { return }
+        errorMessage = nil
+
+        await performExternalLogin(
+            provider: pending.provider,
+            idToken: pending.idToken,
+            firstName: pending.firstName,
+            lastName: pending.lastName,
+            familyName: familyName
+        )
+
+        if isAuthenticated {
+            pendingExternalLogin = nil
+            showFamilyNamePrompt = false
+        }
+    }
+
+    /// Perform external login API call
+    private func performExternalLogin(
+        provider: String,
+        idToken: String,
+        firstName: String?,
+        lastName: String?,
+        familyName: String?
+    ) async {
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let request = ExternalLoginRequest(
+                provider: provider,
+                idToken: idToken,
+                familyName: familyName,
+                firstName: firstName,
+                lastName: lastName
+            )
+            let response = try await apiService.externalLogin(request)
+
+            // Save token expiration
+            try? keychainService.saveTokenExpiration(response.expiresAt)
+
+            // Update state on success
+            currentUser = response.user
+            isAuthenticated = true
+
+        } catch APIError.familyNameRequired {
+            // Cache pending login info and prompt for family name
+            pendingExternalLogin = (provider: provider, idToken: idToken, firstName: firstName, lastName: lastName)
+            showFamilyNamePrompt = true
+
+        } catch let error as APIError {
+            errorMessage = error.localizedDescription
+        } catch {
+            errorMessage = "An unexpected error occurred. Please try again."
+        }
     }
 
     // MARK: - Biometric Authentication

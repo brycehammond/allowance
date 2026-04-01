@@ -125,6 +125,26 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
         return response
     }
 
+    /// Authenticate via external provider (Google or Apple)
+    /// - Parameter request: External login details including provider and ID token
+    /// - Returns: Authentication response with user and token
+    /// - Throws: APIError.familyNameRequired if a family name is needed for a new user
+    func externalLogin(_ request: ExternalLoginRequest) async throws -> AuthResponse {
+        let endpoint = baseURL.appendingPathComponent("/api/v1/auth/external-login")
+
+        var urlRequest = URLRequest(url: endpoint)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try jsonEncoder.encode(request)
+
+        let response: AuthResponse = try await performRequest(urlRequest)
+
+        // Save token to keychain
+        try keychainService.saveToken(response.token)
+
+        return response
+    }
+
     /// Logout current user
     /// - Throws: APIError if logout fails
     func logout() async throws {
@@ -1189,6 +1209,16 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
     /// Empty response for DELETE requests
     private struct EmptyResponse: Codable {}
 
+    /// Structure for parsing API error responses
+    private struct APIErrorResponse: Codable {
+        let error: APIErrorDetail
+    }
+
+    private struct APIErrorDetail: Codable {
+        let code: String
+        let message: String
+    }
+
     /// Create an authenticated request with JWT token
     /// - Parameters:
     ///   - url: Request URL
@@ -1246,6 +1276,16 @@ final class APIService: APIServiceProtocol, @unchecked Sendable {
                     #endif
                     throw APIError.decodingError
                 }
+
+            case 400:
+                // Try to extract error code from response body
+                if let errorResponse = try? JSONDecoder().decode(APIErrorResponse.self, from: data) {
+                    if errorResponse.error.code == "FAMILY_NAME_REQUIRED" {
+                        throw APIError.familyNameRequired
+                    }
+                    throw APIError.validationError(errorResponse.error.message)
+                }
+                throw APIError.validationError("Invalid request.")
 
             case 401:
                 throw APIError.unauthorized

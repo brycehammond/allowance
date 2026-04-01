@@ -17,6 +17,7 @@ public class AuthController : ControllerBase
 {
     private readonly IAccountService _accountService;
     private readonly IJwtService _jwtService;
+    private readonly IExternalAuthService _externalAuthService;
     private readonly AllowanceContext _context;
     private readonly IWebHostEnvironment _environment;
     private readonly IConfiguration _configuration;
@@ -24,12 +25,14 @@ public class AuthController : ControllerBase
     public AuthController(
         IAccountService accountService,
         IJwtService jwtService,
+        IExternalAuthService externalAuthService,
         AllowanceContext context,
         IWebHostEnvironment environment,
         IConfiguration configuration)
     {
         _accountService = accountService;
         _jwtService = jwtService;
+        _externalAuthService = externalAuthService;
         _context = context;
         _environment = environment;
         _configuration = configuration;
@@ -327,6 +330,92 @@ public class AuthController : ControllerBase
             .FirstAsync(u => u.Email == dto.Email);
 
         // Get childId for child users
+        Guid? childId = user.Role == UserRole.Child ? user.ChildProfile?.Id : null;
+
+        var token = _jwtService.GenerateToken(user, childId);
+        var expiresAt = DateTime.UtcNow.AddDays(1);
+
+        return Ok(new AuthResponseDto(
+            user.Id,
+            user.Email!,
+            user.FirstName,
+            user.LastName,
+            user.Role.ToString(),
+            user.FamilyId,
+            user.Family?.Name,
+            token,
+            expiresAt));
+    }
+
+    /// <summary>
+    /// Authenticate via external provider (Google or Apple)
+    /// </summary>
+    /// <param name="dto">External login details including provider name and ID token</param>
+    /// <returns>Authentication response with JWT token</returns>
+    /// <response code="200">Login successful, returns user info and JWT token</response>
+    /// <response code="400">Family name required for new users, or other validation error</response>
+    /// <response code="401">Invalid or expired ID token</response>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/v1/auth/external-login
+    ///     {
+    ///         "provider": "Google",
+    ///         "idToken": "eyJhbGciOi...",
+    ///         "familyName": "Doe Family",
+    ///         "firstName": "John",
+    ///         "lastName": "Doe"
+    ///     }
+    ///
+    /// Supported providers: Google, Apple
+    ///
+    /// For new users, familyName is required. If omitted, returns 400 with code FAMILY_NAME_REQUIRED.
+    /// The client should then prompt for a family name and retry.
+    ///
+    /// For Apple Sign In, firstName and lastName should be included as Apple only provides
+    /// the user's name on the first authorization.
+    ///
+    /// If an account with the same email already exists, the external login is automatically
+    /// linked to the existing account.
+    /// </remarks>
+    [HttpPost("external-login")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthResponseDto>> ExternalLogin([FromBody] ExternalLoginDto dto)
+    {
+        var result = await _externalAuthService.ExternalLoginAsync(dto);
+
+        if (!result.Succeeded)
+        {
+            if (result.ErrorCode == "INVALID_TOKEN")
+            {
+                return Unauthorized(new
+                {
+                    error = new
+                    {
+                        code = result.ErrorCode,
+                        message = result.ErrorMessage
+                    }
+                });
+            }
+
+            return BadRequest(new
+            {
+                error = new
+                {
+                    code = result.ErrorCode,
+                    message = result.ErrorMessage
+                }
+            });
+        }
+
+        var user = await _context.Users
+            .Include(u => u.Family)
+            .Include(u => u.ChildProfile)
+            .FirstAsync(u => u.Id == result.User!.Id);
+
         Guid? childId = user.Role == UserRole.Child ? user.ChildProfile?.Id : null;
 
         var token = _jwtService.GenerateToken(user, childId);

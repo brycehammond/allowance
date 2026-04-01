@@ -19,6 +19,7 @@ public class AuthControllerTests : IDisposable
     private readonly AllowanceContext _context;
     private readonly Mock<IAccountService> _mockAccountService;
     private readonly Mock<IJwtService> _mockJwtService;
+    private readonly Mock<IExternalAuthService> _mockExternalAuthService;
     private readonly Mock<IWebHostEnvironment> _mockEnvironment;
     private readonly Mock<IConfiguration> _mockConfiguration;
     private readonly AuthController _controller;
@@ -33,10 +34,11 @@ public class AuthControllerTests : IDisposable
         _context = new AllowanceContext(options);
         _mockAccountService = new Mock<IAccountService>();
         _mockJwtService = new Mock<IJwtService>();
+        _mockExternalAuthService = new Mock<IExternalAuthService>();
         _mockEnvironment = new Mock<IWebHostEnvironment>();
         _mockEnvironment.Setup(e => e.EnvironmentName).Returns("Development");
         _mockConfiguration = new Mock<IConfiguration>();
-        _controller = new AuthController(_mockAccountService.Object, _mockJwtService.Object, _context, _mockEnvironment.Object, _mockConfiguration.Object);
+        _controller = new AuthController(_mockAccountService.Object, _mockJwtService.Object, _mockExternalAuthService.Object, _context, _mockEnvironment.Object, _mockConfiguration.Object);
     }
 
     [Fact]
@@ -375,6 +377,76 @@ public class AuthControllerTests : IDisposable
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
         badRequestResult.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task ExternalLogin_WithValidToken_ReturnsOkWithAuthResponse()
+    {
+        // Arrange
+        var dto = new ExternalLoginDto("Google", "valid-token");
+        var family = new Family { Id = Guid.NewGuid(), Name = "Test Family" };
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "google@test.com",
+            FirstName = "Google",
+            LastName = "User",
+            Role = UserRole.Parent,
+            FamilyId = family.Id,
+            Family = family
+        };
+
+        _mockExternalAuthService
+            .Setup(x => x.ExternalLoginAsync(dto))
+            .ReturnsAsync(ExternalLoginResult.Success(user));
+        _mockJwtService.Setup(x => x.GenerateToken(It.IsAny<ApplicationUser>(), null)).Returns("test-jwt-token");
+
+        _context.Users.Add(user);
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _controller.ExternalLogin(dto);
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var authResponse = okResult.Value.Should().BeOfType<AuthResponseDto>().Subject;
+        authResponse.Email.Should().Be("google@test.com");
+        authResponse.Token.Should().Be("test-jwt-token");
+    }
+
+    [Fact]
+    public async Task ExternalLogin_FamilyNameRequired_ReturnsBadRequest()
+    {
+        // Arrange
+        var dto = new ExternalLoginDto("Google", "valid-token");
+
+        _mockExternalAuthService
+            .Setup(x => x.ExternalLoginAsync(dto))
+            .ReturnsAsync(ExternalLoginResult.Failure("FAMILY_NAME_REQUIRED", "A family name is required"));
+
+        // Act
+        var result = await _controller.ExternalLogin(dto);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Fact]
+    public async Task ExternalLogin_InvalidToken_ReturnsUnauthorized()
+    {
+        // Arrange
+        var dto = new ExternalLoginDto("Google", "invalid-token");
+
+        _mockExternalAuthService
+            .Setup(x => x.ExternalLoginAsync(dto))
+            .ReturnsAsync(ExternalLoginResult.Failure("INVALID_TOKEN", "Token is invalid"));
+
+        // Act
+        var result = await _controller.ExternalLogin(dto);
+
+        // Assert
+        result.Result.Should().BeOfType<UnauthorizedObjectResult>();
     }
 
     public void Dispose()

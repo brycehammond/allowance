@@ -6,6 +6,7 @@ import {
   type LoginRequest,
   type RegisterRequest,
   type AuthResponse,
+  type ExternalLoginRequest,
   type Child,
   type CreateChildRequest,
   type UpdateChildSettingsRequest,
@@ -247,6 +248,11 @@ export const authApi = {
 
   refreshToken: async (): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/api/v1/auth/refresh');
+    return response.data;
+  },
+
+  externalLogin: async (data: ExternalLoginRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/api/v1/auth/external-login', data);
     return response.data;
   },
 };

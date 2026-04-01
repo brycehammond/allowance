@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { SocialSignInButtons } from '../components/SocialSignInButtons';
 import type { LoginRequest } from '../types';
 
 export const Login: React.FC = () => {
@@ -99,6 +100,11 @@ export const Login: React.FC = () => {
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
+
+          <SocialSignInButtons
+            onSuccess={() => navigate('/dashboard')}
+            onError={(message) => setError(message)}
+          />
 
           <div className="text-center space-y-2">
             <Link

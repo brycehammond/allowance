@@ -12,11 +12,16 @@ let package = Package(
             targets: ["AllowanceTracker"]
         )
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "8.0.0")
+    ],
     targets: [
         .target(
             name: "AllowanceTracker",
-            dependencies: [],
+            dependencies: [
+                .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
+                .product(name: "GoogleSignInSwift", package: "GoogleSignIn-iOS")
+            ],
             path: ".",
             exclude: [
                 "Tests",

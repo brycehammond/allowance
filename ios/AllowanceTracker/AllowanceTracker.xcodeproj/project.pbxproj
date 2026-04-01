@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0421DE8A7F3B9C5E1A6D04B2 /* AppleSignInButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C3F1E609D84B52EF3A1D07 /* AppleSignInButton.swift */; };
 		0538BA6FCB7475075266ED38 /* CategorySpendingChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45D1965078A6166B2675BA0 /* CategorySpendingChart.swift */; };
 		066C0230CF98F09DC59190CA /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B36C73C8311CE858218313 /* Configuration.swift */; };
 		06BE24FED9B62E323CE2EA21 /* APIServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65AA634A443476A6CC9A7536 /* APIServiceProtocol.swift */; };
@@ -141,6 +142,7 @@
 
 /* Begin PBXFileReference section */
 		008DAC706AD778A64C7E9301 /* UserModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModelTests.swift; sourceTree = "<group>"; };
+		A7C3F1E609D84B52EF3A1D07 /* AppleSignInButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInButton.swift; sourceTree = "<group>"; };
 		02F582FDE2583DFE20EC30A5 /* InviteParentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParentView.swift; sourceTree = "<group>"; };
 		05133AF9C8219FD90E565E45 /* ThankYouNotesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThankYouNotesViewModel.swift; sourceTree = "<group>"; };
 		068A8E9C3B125C83F4D800C7 /* AllowanceTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AllowanceTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -426,6 +428,7 @@
 		6B7169A15CD07534396A026C /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				A7C3F1E609D84B52EF3A1D07 /* AppleSignInButton.swift */,
 				B2E997F53871A4DBEA56288E /* BiometricLockView.swift */,
 				2386AC59CD77542D1D7DDA16 /* ChangePasswordView.swift */,
 				183103031CF1E4F14E054C56 /* ForgotPasswordView.swift */,
@@ -843,6 +846,7 @@
 				553D5CA9D207C4E210BC84E8 /* AddChildView.swift in Sources */,
 				330A2BC98A9A87C441D1285E /* AllowanceTrackerApp.swift in Sources */,
 				4C5639B480606C92AB00F5F8 /* AnalyticsModels.swift in Sources */,
+				0421DE8A7F3B9C5E1A6D04B2 /* AppleSignInButton.swift in Sources */,
 				6B3C953CC904A762FAB8D89F /* AnalyticsView.swift in Sources */,
 				C67D19D66BD650062539BB93 /* AnalyticsViewModel.swift in Sources */,
 				D78E31C6D62AD4D5A39AF166 /* AppConstants.swift in Sources */,
