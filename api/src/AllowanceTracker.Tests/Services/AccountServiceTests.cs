@@ -5,6 +5,7 @@ using AllowanceTracker.Services;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
@@ -12,6 +13,7 @@ namespace AllowanceTracker.Tests.Services;
 
 public class AccountServiceTests : IDisposable
 {
+    private readonly SqliteConnection _connection;
     private readonly AllowanceContext _context;
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly Mock<SignInManager<ApplicationUser>> _signInManagerMock;
@@ -21,12 +23,18 @@ public class AccountServiceTests : IDisposable
 
     public AccountServiceTests()
     {
+        // SQLite in-memory with FK enforcement on (EF Core's Sqlite provider issues
+        // PRAGMA foreign_keys = 1 per connection). Catches FK ordering bugs that the
+        // InMemory provider would silently accept.
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
         var options = new DbContextOptionsBuilder<AllowanceContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
+            .UseSqlite(_connection)
             .Options;
 
         _context = new AllowanceContext(options);
+        _context.Database.EnsureCreated();
 
         // Mock UserManager
         var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
@@ -51,6 +59,39 @@ public class AccountServiceTests : IDisposable
             _context,
             _httpContextAccessorMock.Object,
             _emailServiceMock.Object);
+    }
+
+    private async Task<(Family family, ApplicationUser owner)> SeedFamilyAsync(string familyName = "Seed Family")
+    {
+        // Mirrors the production pattern: insert user with null FamilyId, then Family
+        // (whose OwnerId now resolves), then patch User.FamilyId. Required because of the
+        // circular FK between AspNetUsers and Families.
+        var owner = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = $"owner-{Guid.NewGuid():N}@test.com",
+            UserName = $"owner-{Guid.NewGuid():N}@test.com",
+            FirstName = "Family",
+            LastName = "Owner",
+            Role = UserRole.Parent
+        };
+        _context.Users.Add(owner);
+        await _context.SaveChangesAsync();
+
+        var family = new Family
+        {
+            Id = Guid.NewGuid(),
+            Name = familyName,
+            OwnerId = owner.Id,
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        owner.FamilyId = family.Id;
+        await _context.SaveChangesAsync();
+
+        return (family, owner);
     }
 
     [Fact]
@@ -110,22 +151,16 @@ public class AccountServiceTests : IDisposable
         result.Succeeded.Should().BeFalse();
         result.Errors.Should().Contain(e => e.Description == "User creation failed");
 
-        // Note: Transaction rollback behavior cannot be tested with InMemory database
-        // In production with PostgreSQL, the transaction will properly roll back the family creation
+        // No Family should remain — the surrounding transaction must roll back when user
+        // creation fails (SQLite enforces FKs and supports transactions, so this is real).
+        (await _context.Families.AnyAsync()).Should().BeFalse();
     }
 
     [Fact]
     public async Task RegisterChild_AssociatesWithFamily()
     {
         // Arrange
-        var family = new Family
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Family",
-            CreatedAt = DateTime.UtcNow
-        };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync();
+        var (family, _) = await SeedFamilyAsync("Test Family");
 
         var dto = new RegisterChildDto("child@test.com", "Test123!", "Alice", "Smith", 10.00m);
 
@@ -247,14 +282,7 @@ public class AccountServiceTests : IDisposable
     public async Task RegisterAdditionalParent_AddsParentToExistingFamily()
     {
         // Arrange
-        var family = new Family
-        {
-            Id = Guid.NewGuid(),
-            Name = "Smith Family",
-            CreatedAt = DateTime.UtcNow
-        };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync();
+        var (family, _) = await SeedFamilyAsync("Smith Family");
 
         var dto = new RegisterAdditionalParentDto(
             "parent2@test.com",
@@ -307,14 +335,7 @@ public class AccountServiceTests : IDisposable
     public async Task RegisterAdditionalParent_WithFailedUserCreation_ReturnsFailure()
     {
         // Arrange
-        var family = new Family
-        {
-            Id = Guid.NewGuid(),
-            Name = "Smith Family",
-            CreatedAt = DateTime.UtcNow
-        };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync();
+        var (family, _) = await SeedFamilyAsync("Smith Family");
 
         var dto = new RegisterAdditionalParentDto(
             "parent2@test.com",
@@ -631,13 +652,7 @@ public class AccountServiceTests : IDisposable
     public async Task DeleteAccount_ChildWithProfile_DeletesChildProfileAndRelatedData()
     {
         // Arrange
-        var family = new Family
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Family",
-            CreatedAt = DateTime.UtcNow
-        };
-        _context.Families.Add(family);
+        var (family, owner) = await SeedFamilyAsync("Test Family");
 
         var childUser = new ApplicationUser
         {
@@ -670,6 +685,7 @@ public class AccountServiceTests : IDisposable
             Type = TransactionType.Credit,
             Description = "Test",
             BalanceAfter = 50m,
+            CreatedById = owner.Id,
             CreatedAt = DateTime.UtcNow
         };
         _context.Transactions.Add(transaction);
@@ -702,27 +718,7 @@ public class AccountServiceTests : IDisposable
     public async Task DeleteAccount_FamilyOwner_DeletesEntireFamilyAndAllMembers()
     {
         // Arrange
-        var ownerId = Guid.NewGuid();
-        var family = new Family
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Family",
-            OwnerId = ownerId,
-            CreatedAt = DateTime.UtcNow
-        };
-        _context.Families.Add(family);
-
-        var ownerUser = new ApplicationUser
-        {
-            Id = ownerId,
-            Email = "owner@test.com",
-            UserName = "owner@test.com",
-            FirstName = "John",
-            LastName = "Doe",
-            Role = UserRole.Parent,
-            FamilyId = family.Id
-        };
-        _context.Users.Add(ownerUser);
+        var (family, ownerUser) = await SeedFamilyAsync("Test Family");
 
         var childUser = new ApplicationUser
         {
@@ -778,7 +774,7 @@ public class AccountServiceTests : IDisposable
 
     public void Dispose()
     {
-        _context.Database.EnsureDeleted();
         _context.Dispose();
+        _connection.Dispose();
     }
 }

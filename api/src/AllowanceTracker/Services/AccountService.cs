@@ -268,58 +268,7 @@ public class AccountService : IAccountService
 
         try
         {
-            // If user is a child, delete child profile first
-            if (user.Role == UserRole.Child)
-            {
-                var childProfile = await _context.Children
-                    .FirstOrDefaultAsync(c => c.UserId == user.Id);
-
-                if (childProfile != null)
-                {
-                    // Delete all related child data (transactions, etc.)
-                    // Most should cascade, but be explicit for safety
-                    var transactions = await _context.Transactions
-                        .Where(t => t.ChildId == childProfile.Id)
-                        .ToListAsync();
-                    _context.Transactions.RemoveRange(transactions);
-
-                    var savingsTransactions = await _context.SavingsTransactions
-                        .Where(s => s.ChildId == childProfile.Id)
-                        .ToListAsync();
-                    _context.SavingsTransactions.RemoveRange(savingsTransactions);
-
-                    _context.Children.Remove(childProfile);
-                    await _context.SaveChangesAsync();
-                }
-            }
-
-            // If user is a parent and owns the family, delete the entire family
-            if (user.Role == UserRole.Parent && user.FamilyId.HasValue)
-            {
-                var family = await _context.Families
-                    .FirstOrDefaultAsync(f => f.Id == user.FamilyId.Value);
-
-                if (family != null && family.OwnerId == user.Id)
-                {
-                    // Delete all family members (children and other parents)
-                    var familyMembers = await _context.Users
-                        .Where(u => u.FamilyId == family.Id && u.Id != user.Id)
-                        .ToListAsync();
-
-                    foreach (var member in familyMembers)
-                    {
-                        // Recursively delete each member
-                        await DeleteUserAndRelatedDataAsync(member);
-                    }
-
-                    // Delete the family
-                    _context.Families.Remove(family);
-                    await _context.SaveChangesAsync();
-                }
-            }
-
-            // Delete the user
-            var result = await _userManager.DeleteAsync(user);
+            var result = await DeleteUserCoreAsync(user);
 
             if (result.Succeeded)
             {
@@ -337,5 +286,57 @@ public class AccountService : IAccountService
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    // Recursive worker; shares the outer transaction opened by DeleteUserAndRelatedDataAsync.
+    // EF Core forbids nested BeginTransactionAsync on the same connection.
+    private async Task<IdentityResult> DeleteUserCoreAsync(ApplicationUser user)
+    {
+        if (user.Role == UserRole.Child)
+        {
+            var childProfile = await _context.Children
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+            if (childProfile != null)
+            {
+                var transactions = await _context.Transactions
+                    .Where(t => t.ChildId == childProfile.Id)
+                    .ToListAsync();
+                _context.Transactions.RemoveRange(transactions);
+
+                var savingsTransactions = await _context.SavingsTransactions
+                    .Where(s => s.ChildId == childProfile.Id)
+                    .ToListAsync();
+                _context.SavingsTransactions.RemoveRange(savingsTransactions);
+
+                _context.Children.Remove(childProfile);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        if (user.Role == UserRole.Parent && user.FamilyId.HasValue)
+        {
+            var family = await _context.Families
+                .FirstOrDefaultAsync(f => f.Id == user.FamilyId.Value);
+
+            if (family != null && family.OwnerId == user.Id)
+            {
+                var familyMembers = await _context.Users
+                    .Where(u => u.FamilyId == family.Id && u.Id != user.Id)
+                    .ToListAsync();
+
+                foreach (var member in familyMembers)
+                {
+                    var memberResult = await DeleteUserCoreAsync(member);
+                    if (!memberResult.Succeeded)
+                        return memberResult;
+                }
+
+                _context.Families.Remove(family);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        return await _userManager.DeleteAsync(user);
     }
 }
