@@ -35,32 +35,39 @@ public class AccountService : IAccountService
 
         try
         {
-            // Create family
-            var family = new Family
-            {
-                Id = Guid.NewGuid(),
-                Name = dto.FamilyName,
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.Families.Add(family);
-            await _context.SaveChangesAsync();
+            // ApplicationUser.FamilyId → Family.Id and Family.OwnerId → ApplicationUser.Id
+            // form a circular FK. Insert the user without a FamilyId, then the Family
+            // (whose OwnerId now resolves), then patch the user's FamilyId.
+            var userId = Guid.NewGuid();
+            var familyId = Guid.NewGuid();
 
-            // Create parent user
             var user = new ApplicationUser
             {
-                Id = Guid.NewGuid(),
+                Id = userId,
                 Email = dto.Email,
                 UserName = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Role = UserRole.Parent,
-                FamilyId = family.Id
+                FamilyId = null
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
 
             if (result.Succeeded)
             {
+                _context.Families.Add(new Family
+                {
+                    Id = familyId,
+                    Name = dto.FamilyName,
+                    OwnerId = userId,
+                    CreatedAt = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync();
+
+                user.FamilyId = familyId;
+                await _userManager.UpdateAsync(user);
+
                 await transaction.CommitAsync();
             }
             else
