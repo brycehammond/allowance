@@ -34,20 +34,12 @@ public class AccountService : IAccountService
 
         try
         {
-            // Create parent user first (to get the user Id for OwnerId)
+            // ApplicationUser.FamilyId → Family.Id and Family.OwnerId → ApplicationUser.Id
+            // form a circular FK. Insert the user without a FamilyId, then the Family
+            // (whose OwnerId now resolves), then patch the user's FamilyId.
             var userId = Guid.NewGuid();
             var familyId = Guid.NewGuid();
 
-            // Create family with owner set to the new user
-            var family = new Family
-            {
-                Id = familyId,
-                Name = dto.FamilyName,
-                OwnerId = userId,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            // Create parent user
             var user = new ApplicationUser
             {
                 Id = userId,
@@ -56,16 +48,25 @@ public class AccountService : IAccountService
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Role = UserRole.Parent,
-                FamilyId = familyId
+                FamilyId = null
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
 
             if (result.Succeeded)
             {
-                // Add family after user is created to satisfy FK constraint
-                _context.Families.Add(family);
+                _context.Families.Add(new Family
+                {
+                    Id = familyId,
+                    Name = dto.FamilyName,
+                    OwnerId = userId,
+                    CreatedAt = DateTime.UtcNow
+                });
                 await _context.SaveChangesAsync();
+
+                user.FamilyId = familyId;
+                await _userManager.UpdateAsync(user);
+
                 await transaction.CommitAsync();
             }
             else
