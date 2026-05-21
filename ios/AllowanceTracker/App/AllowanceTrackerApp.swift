@@ -7,6 +7,7 @@ struct AllowanceTrackerApp: App {
     // MARK: - Properties
 
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
     @State private var authViewModel: AuthViewModel
 
     // MARK: - Initialization
@@ -38,6 +39,13 @@ struct AllowanceTrackerApp: App {
         WindowGroup {
             ContentView()
                 .environment(authViewModel)
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            // Refresh JWT every time the app returns to the foreground so an active user
+            // stays signed in indefinitely (sliding session).
+            if newPhase == .active {
+                Task { await authViewModel.applicationDidBecomeActive() }
+            }
         }
     }
 }

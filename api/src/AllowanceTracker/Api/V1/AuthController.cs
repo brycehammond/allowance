@@ -104,7 +104,7 @@ public class AuthController : ControllerBase
             .FirstAsync(u => u.Email == dto.Email);
 
         var token = _jwtService.GenerateToken(user);
-        var expiresAt = DateTime.UtcNow.AddDays(1);
+        var expiresAt = DateTime.UtcNow.Add(_jwtService.TokenLifetime);
 
         return CreatedAtAction(
             nameof(GetCurrentUser),
@@ -330,7 +330,7 @@ public class AuthController : ControllerBase
         Guid? childId = user.Role == UserRole.Child ? user.ChildProfile?.Id : null;
 
         var token = _jwtService.GenerateToken(user, childId);
-        var expiresAt = DateTime.UtcNow.AddDays(1);
+        var expiresAt = DateTime.UtcNow.Add(_jwtService.TokenLifetime);
 
         return Ok(new AuthResponseDto(
             user.Id,
@@ -395,7 +395,7 @@ public class AuthController : ControllerBase
         }
 
         var token = _jwtService.GenerateToken(user, childId);
-        var expiresAt = DateTime.UtcNow.AddDays(1);
+        var expiresAt = DateTime.UtcNow.Add(_jwtService.TokenLifetime);
 
         return Ok(new AuthResponseDto(
             user.Id,

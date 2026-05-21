@@ -8,4 +8,5 @@ public interface IJwtService
     string GenerateToken(ApplicationUser user, Guid? childId = null);
     bool ValidateToken(string token);
     ClaimsPrincipal? GetPrincipalFromToken(string token);
+    TimeSpan TokenLifetime { get; }
 }

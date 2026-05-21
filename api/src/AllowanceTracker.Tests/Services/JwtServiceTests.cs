@@ -100,7 +100,29 @@ public class JwtServiceTests
         var tokenHandler = new JwtSecurityTokenHandler();
         var jwtToken = tokenHandler.ReadJwtToken(token);
         jwtToken.ValidTo.Should().BeAfter(DateTime.UtcNow);
-        jwtToken.ValidTo.Should().BeCloseTo(DateTime.UtcNow.AddDays(1), TimeSpan.FromMinutes(1));
+        jwtToken.ValidTo.Should().BeCloseTo(DateTime.UtcNow.Add(_jwtService.TokenLifetime), TimeSpan.FromMinutes(1));
+    }
+
+    [Fact]
+    public void TokenLifetime_DefaultsTo30Days_WhenConfigMissing()
+    {
+        _jwtService.TokenLifetime.Should().Be(TimeSpan.FromDays(30));
+    }
+
+    [Fact]
+    public void TokenLifetime_RespectsConfigOverride()
+    {
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "Jwt:SecretKey", "this-is-a-test-secret-key-with-at-least-32-characters-for-hmac-sha256" },
+            { "Jwt:Issuer", "AllowanceTrackerTests" },
+            { "Jwt:Audience", "AllowanceTrackerTests" },
+            { "Jwt:ExpiryInDays", "7" }
+        });
+        var service = new JwtService(configBuilder.Build());
+
+        service.TokenLifetime.Should().Be(TimeSpan.FromDays(7));
     }
 
     [Fact]

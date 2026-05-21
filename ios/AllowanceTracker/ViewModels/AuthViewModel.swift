@@ -18,6 +18,10 @@ final class AuthViewModel {
     /// Whether biometric authentication is required before showing content
     var requiresBiometricAuth = false
 
+    /// Whether we should prompt the user to enable biometric auth (e.g., right after first login on a device
+    /// that supports Face ID / Touch ID but where the user hasn't enabled it yet).
+    var shouldOfferBiometricEnrollment = false
+
     /// Whether biometric authentication is enabled by the user
     var isBiometricEnabled: Bool {
         keychainService.isBiometricEnabled()
@@ -107,6 +111,7 @@ final class AuthViewModel {
             // Update state on success
             currentUser = response.user
             isAuthenticated = true
+            updateBiometricEnrollmentPrompt()
 
         } catch let error as APIError {
             errorMessage = error.localizedDescription
@@ -173,6 +178,7 @@ final class AuthViewModel {
             // Update state on success
             currentUser = response.user
             isAuthenticated = true
+            updateBiometricEnrollmentPrompt()
 
         } catch let error as APIError {
             errorMessage = error.localizedDescription
@@ -198,6 +204,7 @@ final class AuthViewModel {
             currentUser = nil
             isAuthenticated = false
             requiresBiometricAuth = false
+            shouldOfferBiometricEnrollment = false
 
         } catch let error as APIError {
             errorMessage = error.localizedDescription
@@ -223,19 +230,24 @@ final class AuthViewModel {
             return
         }
 
-        // Check if token is expiring soon (within 1 hour) and refresh it
-        if keychainService.isTokenExpiringSoon(withinMinutes: 60) {
-            await refreshTokenIfNeeded()
-        }
-
-        // If biometric is enabled, require authentication before showing content
+        // If biometric is enabled, require authentication before showing content.
+        // The refresh happens after the biometric prompt succeeds, inside restoreSession().
         if keychainService.isBiometricEnabled() && biometricService.isAvailable {
             requiresBiometricAuth = true
             isAuthenticated = false
         } else {
-            // No biometric required, try to restore session
+            // No biometric required, try to restore session (this also refreshes the token).
             await restoreSession()
         }
+    }
+
+    /// Called when the app moves to the foreground. Refreshes the JWT to keep the session sliding.
+    /// We refresh on every foreground transition (regardless of expiry window) so that any active
+    /// user gets an extended token, and only re-authenticate when the token is fully expired.
+    func applicationDidBecomeActive() async {
+        // Only refresh if we're already authenticated and not gated behind a biometric prompt.
+        guard isAuthenticated, keychainService.hasValidToken() else { return }
+        await silentlyRefreshToken()
     }
 
     /// Authenticate using Face ID or Touch ID
@@ -282,24 +294,31 @@ final class AuthViewModel {
         }
     }
 
-    /// Refresh the authentication token if it's expiring soon
+    /// Refresh the authentication token. Called eagerly on app launch and foreground transitions
+    /// to keep the user logged in as long as possible (sliding session). Silently no-ops on failure
+    /// so transient network errors don't sign the user out.
     func refreshTokenIfNeeded() async {
+        await silentlyRefreshToken()
+    }
+
+    // MARK: - Private Session Management
+
+    /// Refresh the JWT without surfacing errors. If refresh fails but we still have a non-expired
+    /// token in keychain, we keep the existing session — the next API call will surface a real auth
+    /// error if the token is truly bad.
+    private func silentlyRefreshToken() async {
         guard keychainService.hasValidToken() else { return }
-        guard keychainService.isTokenExpiringSoon(withinMinutes: 60) else { return }
 
         do {
             let response = try await apiService.refreshToken()
             try? keychainService.saveTokenExpiration(response.expiresAt)
             currentUser = response.user
         } catch {
-            // Token refresh failed - user will need to re-authenticate on next app launch
             #if DEBUG
-            print("Token refresh failed: \(error)")
+            print("Silent token refresh failed (keeping existing session): \(error)")
             #endif
         }
     }
-
-    // MARK: - Private Session Management
 
     /// Restore the session from stored token
     private func restoreSession() async {
@@ -314,11 +333,30 @@ final class AuthViewModel {
             try? keychainService.saveTokenExpiration(response.expiresAt)
             currentUser = response.user
             isAuthenticated = true
-        } catch {
-            // Token is invalid, clear auth state
+        } catch APIError.unauthorized {
+            // Token is genuinely invalid, clear auth state
             try? keychainService.clearAllAuthData()
             isAuthenticated = false
+        } catch {
+            // Likely a network blip — keep the user signed in with the existing token.
+            // We already validated hasValidToken() above, so the JWT is still usable.
+            isAuthenticated = true
+            #if DEBUG
+            print("Session refresh failed but keeping local session: \(error)")
+            #endif
         }
+    }
+
+    /// Sets the biometric enrollment prompt flag if the device supports biometrics but the user
+    /// hasn't enabled it yet. Called after a successful login or registration.
+    private func updateBiometricEnrollmentPrompt() {
+        shouldOfferBiometricEnrollment = biometricService.isAvailable
+            && !keychainService.isBiometricEnabled()
+    }
+
+    /// Dismiss the biometric enrollment prompt (the user either accepted or declined).
+    func dismissBiometricEnrollmentPrompt() {
+        shouldOfferBiometricEnrollment = false
     }
 
     // MARK: - Child View Mode Methods
@@ -496,6 +534,7 @@ final class AuthViewModel {
             currentUser = nil
             isAuthenticated = false
             requiresBiometricAuth = false
+            shouldOfferBiometricEnrollment = false
 
             return true
 

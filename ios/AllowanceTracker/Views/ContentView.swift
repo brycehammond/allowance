@@ -27,6 +27,24 @@ struct ContentView: View {
         }
         .animation(.easeInOut, value: authViewModel.isAuthenticated)
         .animation(.easeInOut, value: authViewModel.requiresBiometricAuth)
+        .confirmationDialog(
+            "Use \(authViewModel.biometricType.displayName) to sign in?",
+            isPresented: Binding(
+                get: { authViewModel.shouldOfferBiometricEnrollment && authViewModel.isAuthenticated },
+                set: { if !$0 { authViewModel.dismissBiometricEnrollmentPrompt() } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Enable \(authViewModel.biometricType.displayName)") {
+                authViewModel.setBiometricEnabled(true)
+                authViewModel.dismissBiometricEnrollmentPrompt()
+            }
+            Button("Not Now", role: .cancel) {
+                authViewModel.dismissBiometricEnrollmentPrompt()
+            }
+        } message: {
+            Text("Skip typing your password next time. You can change this later in Profile › Security.")
+        }
         .task {
             // Check authentication status on app launch
             // Use a timeout to ensure we don't get stuck loading

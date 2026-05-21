@@ -6,17 +6,43 @@ final class AuthViewModelTests: XCTestCase {
 
     var sut: AuthViewModel!
     var mockAPIService: MockAPIService!
+    var mockKeychain: AllowanceTracker.MockKeychainService!
+    var mockBiometrics: MockBiometricService!
 
     override func setUp() {
         super.setUp()
         mockAPIService = MockAPIService()
-        sut = AuthViewModel(apiService: mockAPIService)
+        mockKeychain = AllowanceTracker.MockKeychainService()
+        mockBiometrics = MockBiometricService()
+        sut = AuthViewModel(
+            apiService: mockAPIService,
+            keychainService: mockKeychain,
+            biometricService: mockBiometrics
+        )
     }
 
     override func tearDown() {
         sut = nil
         mockAPIService = nil
+        mockKeychain = nil
+        mockBiometrics = nil
         super.tearDown()
+    }
+
+    // MARK: - Helpers
+
+    private func makeAuthResponse(expiresIn seconds: TimeInterval = 86400) -> AuthResponse {
+        AuthResponse(
+            userId: UUID(),
+            email: "test@example.com",
+            firstName: "Test",
+            lastName: "User",
+            role: "Parent",
+            familyId: nil,
+            familyName: nil,
+            token: "valid-token",
+            expiresAt: Date().addingTimeInterval(seconds)
+        )
     }
 
     // MARK: - Login Tests
@@ -255,6 +281,134 @@ final class AuthViewModelTests: XCTestCase {
         XCTAssertNotNil(sut.errorMessage)
         XCTAssertEqual(sut.errorMessage, "Network connection failed. Please check your internet connection.")
     }
+
+    // MARK: - Biometric Enrollment Prompt
+
+    func testLogin_OffersBiometricEnrollment_WhenAvailableAndNotEnabled() async throws {
+        mockBiometrics.biometricType = .faceID
+        try mockKeychain.saveBiometricEnabled(false)
+        mockAPIService.loginResult = .success(makeAuthResponse())
+
+        await sut.login(email: "test@example.com", password: "password123")
+
+        XCTAssertTrue(sut.isAuthenticated)
+        XCTAssertTrue(sut.shouldOfferBiometricEnrollment)
+    }
+
+    func testLogin_DoesNotOfferBiometricEnrollment_WhenAlreadyEnabled() async throws {
+        mockBiometrics.biometricType = .faceID
+        try mockKeychain.saveBiometricEnabled(true)
+        mockAPIService.loginResult = .success(makeAuthResponse())
+
+        await sut.login(email: "test@example.com", password: "password123")
+
+        XCTAssertTrue(sut.isAuthenticated)
+        XCTAssertFalse(sut.shouldOfferBiometricEnrollment)
+    }
+
+    func testLogin_DoesNotOfferBiometricEnrollment_WhenUnavailable() async throws {
+        mockBiometrics.biometricType = .none
+        try mockKeychain.saveBiometricEnabled(false)
+        mockAPIService.loginResult = .success(makeAuthResponse())
+
+        await sut.login(email: "test@example.com", password: "password123")
+
+        XCTAssertTrue(sut.isAuthenticated)
+        XCTAssertFalse(sut.shouldOfferBiometricEnrollment)
+    }
+
+    func testDismissBiometricEnrollmentPrompt_ClearsFlag() async throws {
+        mockBiometrics.biometricType = .faceID
+        try mockKeychain.saveBiometricEnabled(false)
+        mockAPIService.loginResult = .success(makeAuthResponse())
+        await sut.login(email: "test@example.com", password: "password123")
+        XCTAssertTrue(sut.shouldOfferBiometricEnrollment)
+
+        sut.dismissBiometricEnrollmentPrompt()
+
+        XCTAssertFalse(sut.shouldOfferBiometricEnrollment)
+    }
+
+    func testLogout_ClearsBiometricEnrollmentFlag() async throws {
+        mockBiometrics.biometricType = .faceID
+        try mockKeychain.saveBiometricEnabled(false)
+        mockAPIService.loginResult = .success(makeAuthResponse())
+        await sut.login(email: "test@example.com", password: "password123")
+        XCTAssertTrue(sut.shouldOfferBiometricEnrollment)
+
+        await sut.logout()
+
+        XCTAssertFalse(sut.shouldOfferBiometricEnrollment)
+    }
+
+    // MARK: - Foreground Refresh (sliding session)
+
+    func testApplicationDidBecomeActive_RefreshesToken_WhenAuthenticated() async throws {
+        // Arrange: simulate an already-signed-in user with a valid token
+        try mockKeychain.saveToken("existing-token")
+        try mockKeychain.saveTokenExpiration(Date().addingTimeInterval(60 * 60 * 24))
+        let refreshedUserId = UUID()
+        let refreshed = AuthResponse(
+            userId: refreshedUserId,
+            email: "refreshed@example.com",
+            firstName: "Refreshed",
+            lastName: "User",
+            role: "Parent",
+            familyId: nil,
+            familyName: nil,
+            token: "refreshed-token",
+            expiresAt: Date().addingTimeInterval(60 * 60 * 24 * 30)
+        )
+        mockAPIService.refreshTokenResult = .success(refreshed)
+        mockAPIService.loginResult = .success(makeAuthResponse())
+        await sut.login(email: "test@example.com", password: "password123")
+        XCTAssertTrue(sut.isAuthenticated)
+        XCTAssertNotEqual(sut.currentUser?.id, refreshedUserId)
+
+        // Act
+        await sut.applicationDidBecomeActive()
+
+        // Assert: silentlyRefreshToken updated currentUser from the refresh response
+        XCTAssertEqual(sut.currentUser?.id, refreshedUserId)
+        XCTAssertEqual(sut.currentUser?.email, "refreshed@example.com")
+    }
+
+    func testApplicationDidBecomeActive_NoOp_WhenNotAuthenticated() async throws {
+        mockAPIService.refreshTokenResult = .failure(.networkError)
+
+        await sut.applicationDidBecomeActive()
+
+        // No crash, no state change
+        XCTAssertFalse(sut.isAuthenticated)
+    }
+
+    func testApplicationDidBecomeActive_SwallowsRefreshErrors() async throws {
+        try mockKeychain.saveToken("existing-token")
+        try mockKeychain.saveTokenExpiration(Date().addingTimeInterval(60 * 60 * 24))
+        mockAPIService.loginResult = .success(makeAuthResponse())
+        await sut.login(email: "test@example.com", password: "password123")
+        mockAPIService.refreshTokenResult = .failure(.networkError)
+
+        // Act: should not throw or sign out
+        await sut.applicationDidBecomeActive()
+
+        XCTAssertTrue(sut.isAuthenticated)
+    }
+}
+
+// MARK: - Mock Biometric Service
+
+final class MockBiometricService: BiometricServiceProtocol {
+    var biometricType: BiometricType = .faceID
+    var isAvailable: Bool { biometricType != .none }
+    var authenticateResult: Result<Bool, BiometricError> = .success(true)
+
+    func authenticate(reason: String) async throws -> Bool {
+        switch authenticateResult {
+        case .success(let value): return value
+        case .failure(let error): throw error
+        }
+    }
 }
 
 // MARK: - Mock API Service
@@ -348,6 +502,10 @@ class MockAPIService: APIServiceProtocol {
         case .none:
             return PasswordMessageResponse(message: "Password reset successful")
         }
+    }
+
+    func deleteAccount() async throws {
+        // Mock implementation - do nothing
     }
 
     func getChildren() async throws -> [Child] {

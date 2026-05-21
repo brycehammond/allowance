@@ -8,10 +8,13 @@ namespace AllowanceTracker.Services;
 
 public class JwtService : IJwtService
 {
+    private const int DefaultTokenLifetimeDays = 30;
+
     private readonly IConfiguration _configuration;
     private readonly string _secretKey;
     private readonly string _issuer;
     private readonly string _audience;
+    private readonly int _tokenLifetimeDays;
 
     public JwtService(IConfiguration configuration)
     {
@@ -19,7 +22,15 @@ public class JwtService : IJwtService
         _secretKey = _configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("JWT secret key not configured");
         _issuer = _configuration["Jwt:Issuer"] ?? "AllowanceTracker";
         _audience = _configuration["Jwt:Audience"] ?? "AllowanceTracker";
+        _tokenLifetimeDays = int.TryParse(_configuration["Jwt:ExpiryInDays"], out var days) && days > 0
+            ? days
+            : DefaultTokenLifetimeDays;
     }
+
+    /// <summary>
+    /// Lifetime of generated tokens. Combined with eager client-side refresh, this creates a sliding session.
+    /// </summary>
+    public TimeSpan TokenLifetime => TimeSpan.FromDays(_tokenLifetimeDays);
 
     public string GenerateToken(ApplicationUser user, Guid? childId = null)
     {
@@ -41,7 +52,7 @@ public class JwtService : IJwtService
             issuer: _issuer,
             audience: _audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(1),
+            expires: DateTime.UtcNow.Add(TokenLifetime),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
