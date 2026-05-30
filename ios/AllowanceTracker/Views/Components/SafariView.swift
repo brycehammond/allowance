@@ -17,3 +17,9 @@ struct SafariView: UIViewControllerRepresentable {
 
     func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
 }
+
+/// Wraps a `URL` so it can drive `.sheet(item:)` when presenting a `SafariView`.
+struct IdentifiableURL: Identifiable {
+    let url: URL
+    var id: String { url.absoluteString }
+}

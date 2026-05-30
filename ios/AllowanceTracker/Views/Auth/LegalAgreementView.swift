@@ -48,12 +48,6 @@ struct LegalAgreementView: View {
     }
 }
 
-/// Wraps a `URL` so it can drive `.sheet(item:)`.
-private struct IdentifiableURL: Identifiable {
-    let url: URL
-    var id: String { url.absoluteString }
-}
-
 // MARK: - Preview
 
 #Preview {

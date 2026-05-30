@@ -16,6 +16,7 @@ enum Constants {
     }
 
     enum Legal {
+        static let website = URL(string: "https://www.earnandlearn.app")!
         static let terms = URL(string: "https://www.earnandlearn.app/terms")!
         static let privacy = URL(string: "https://www.earnandlearn.app/privacy")!
     }

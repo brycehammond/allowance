@@ -222,6 +222,8 @@ struct AppearanceSettingsView: View {
 
 /// Placeholder for about view
 struct AboutView: View {
+    @State private var presentedURL: IdentifiableURL?
+
     var body: some View {
         Form {
             Section("App Information") {
@@ -235,20 +237,30 @@ struct AboutView: View {
             }
 
             Section("Support") {
-                Link(destination: URL(string: "https://earnandlearn.app")!) {
+                Button {
+                    presentedURL = IdentifiableURL(url: Constants.Legal.website)
+                } label: {
                     Label("Website", systemImage: "globe")
                 }
             }
 
             Section {
-                Link(destination: URL(string: "https://earnandlearn.app/privacy")!) {
+                Button {
+                    presentedURL = IdentifiableURL(url: Constants.Legal.privacy)
+                } label: {
                     Label("Privacy Policy", systemImage: "hand.raised.fill")
                 }
 
-                Link(destination: URL(string: "https://earnandlearn.app/terms")!) {
+                Button {
+                    presentedURL = IdentifiableURL(url: Constants.Legal.terms)
+                } label: {
                     Label("Terms of Service", systemImage: "doc.text.fill")
                 }
             }
+        }
+        .sheet(item: $presentedURL) { item in
+            SafariView(url: item.url)
+                .ignoresSafeArea()
         }
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
