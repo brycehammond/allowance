@@ -36,6 +36,9 @@ struct RegisterView: View {
                     // Register button
                     registerButton
 
+                    // Terms and Privacy links
+                    LegalAgreementView(introText: "By creating an account, you agree to our")
+
                     // Error message
                     if let errorMessage = viewModel.errorMessage {
                         errorSection(message: errorMessage)

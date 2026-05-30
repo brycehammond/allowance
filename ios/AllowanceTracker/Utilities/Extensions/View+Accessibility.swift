@@ -184,6 +184,10 @@ enum AccessibilityIdentifier {
     static let registerSubmitButton = "register_submit_button"
     static let registerCancelButton = "register_cancel_button"
 
+    // Legal links (Login & Registration)
+    static let legalTermsLink = "legal_terms_link"
+    static let legalPrivacyLink = "legal_privacy_link"
+
     // Dashboard
     static let childCard = "child_card_"
     static let addChildButton = "add_child_button"

@@ -15,6 +15,11 @@ enum Constants {
         static let tokenKey = "com.allowancetracker.jwt"
     }
 
+    enum Legal {
+        static let terms = URL(string: "https://www.earnandlearn.app/terms")!
+        static let privacy = URL(string: "https://www.earnandlearn.app/privacy")!
+    }
+
     enum DateFormat {
         static let iso8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
         static let display = "MMM d, yyyy"

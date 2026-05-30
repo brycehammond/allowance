@@ -16,7 +16,7 @@ export const Privacy: React.FC = () => {
 
         <div className="bg-white shadow rounded-lg p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-          <p className="text-sm text-gray-500 mb-8">Last updated: December 23, 2024</p>
+          <p className="text-sm text-gray-500 mb-8">Last updated: May 30, 2026</p>
 
           <div className="prose prose-gray max-w-none space-y-6">
             <section>
@@ -161,10 +161,10 @@ export const Privacy: React.FC = () => {
               <p className="text-gray-600 mt-3">
                 <strong>Email:</strong>{' '}
                 <a
-                  href="mailto:privacy@earnandlearn.app"
+                  href="mailto:bryce@fluidvisiondesign.com"
                   className="text-primary-600 hover:text-primary-500"
                 >
-                  privacy@earnandlearn.app
+                  bryce@fluidvisiondesign.com
                 </a>
               </p>
             </section>
