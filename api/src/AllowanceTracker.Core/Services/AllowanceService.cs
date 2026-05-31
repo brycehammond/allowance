@@ -36,10 +36,13 @@ public class AllowanceService : IAllowanceService
         if (child.WeeklyAllowance <= 0)
             throw new InvalidOperationException("Child has no weekly allowance configured");
 
-        // Check if allowance was already paid this week
+        // Check if allowance was already paid this week (compare calendar dates, not timestamps).
+        // The daily timer records LastAllowanceDate at the exact run instant, so a TotalDays
+        // comparison lands a few seconds short of 7.0 on the next scheduled payday and skips that
+        // week, causing allowances to be paid only every other week.
         if (child.LastAllowanceDate.HasValue)
         {
-            var daysSinceLastPayment = (DateTime.UtcNow - child.LastAllowanceDate.Value).TotalDays;
+            var daysSinceLastPayment = (DateTime.UtcNow.Date - child.LastAllowanceDate.Value.Date).Days;
             if (daysSinceLastPayment < 7)
                 throw new InvalidOperationException("Allowance already paid this week");
         }
@@ -107,9 +110,11 @@ public class AllowanceService : IAllowanceService
         {
             try
             {
-                // Check if child is eligible for allowance payment
+                // Check if child is eligible for allowance payment (compare calendar dates, not
+                // timestamps; a TotalDays comparison lands just short of 7.0 on the next scheduled
+                // payday and causes every-other-week payments).
                 var timingEligible = !child.LastAllowanceDate.HasValue ||
-                    (DateTime.UtcNow - child.LastAllowanceDate.Value).TotalDays >= 7;
+                    (DateTime.UtcNow.Date - child.LastAllowanceDate.Value.Date).Days >= 7;
 
                 // If AllowanceDay is set, also check if today matches
                 var dayEligible = !child.AllowanceDay.HasValue || child.AllowanceDay.Value == today;

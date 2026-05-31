@@ -149,6 +149,31 @@ public class AllowanceServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task PayAllowance_ExactlySevenCalendarDaysLater_PaysEvenWhenTimestampDeltaIsUnderSevenDays()
+    {
+        // Regression for the "every other week" bug. The daily timer stamps LastAllowanceDate at the
+        // exact run instant, and run start times jitter by a few seconds between days. Comparing full
+        // timestamps with (UtcNow - LastAllowanceDate).TotalDays >= 7 means that whenever the next
+        // scheduled payday fires fractionally earlier in the second than the prior payment, the
+        // elapsed span lands just under 7.0 and that week is skipped -- so payments lock into a
+        // biweekly cadence. Eligibility must compare calendar dates, not timestamps.
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        // Same calendar day, 7 days ago, but one second later => timestamp delta is just under 7.0
+        // days while the calendar-date difference is exactly 7. The buggy TotalDays check skipped
+        // this; the fixed date-based check pays it.
+        child.LastAllowanceDate = DateTime.UtcNow.AddDays(-7).AddSeconds(1);
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.PayWeeklyAllowanceAsync(child.Id);
+
+        // Assert - allowance is paid; the week is not skipped.
+        _mockTransactionService.Verify(
+            x => x.CreateTransactionAsync(It.IsAny<DTOs.CreateTransactionDto>()),
+            Times.Once);
+    }
+
+    [Fact]
     public async Task PayAllowance_WithinSameWeek_Fails()
     {
         // Arrange
