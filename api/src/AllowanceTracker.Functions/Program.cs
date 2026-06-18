@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 using AllowanceTracker.Data;
 using AllowanceTracker.Models;
 using AllowanceTracker.Services;
@@ -22,6 +24,18 @@ builder.ConfigureFunctionsWebApplication();
 builder.Services
     .AddApplicationInsightsTelemetryWorkerService()
     .ConfigureFunctionsApplicationInsights();
+
+// AddApplicationInsightsTelemetryWorkerService installs a default logging filter that only
+// forwards Warning-and-above to Application Insights. That suppressed Information-level traces --
+// including the weekly allowance run summary ("Processed N allowances") -- so the timer ran with
+// no visible telemetry beyond performance counters. Remove the rule so Information logs flow.
+builder.Services.Configure<LoggerFilterOptions>(options =>
+{
+    var defaultRule = options.Rules.FirstOrDefault(rule =>
+        rule.ProviderName == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
+    if (defaultRule is not null)
+        options.Rules.Remove(defaultRule);
+});
 
 // Add Entity Framework with SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
