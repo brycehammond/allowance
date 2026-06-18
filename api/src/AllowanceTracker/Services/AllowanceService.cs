@@ -50,27 +50,22 @@ public class AllowanceService : IAllowanceService
         if (child.AllowancePaused)
             throw new InvalidOperationException($"Allowance is currently paused{(string.IsNullOrEmpty(child.AllowancePausedReason) ? "" : $": {child.AllowancePausedReason}")}");
 
-        // Check if allowance was already paid this week (compare dates only, not timestamps)
-        if (child.LastAllowanceDate.HasValue)
+        // Determine eligibility and the date to record as the payment anchor. A fixed AllowanceDay
+        // no longer hard-blocks payment on other days: if a scheduled payday has passed unpaid
+        // (e.g. the daily timer missed a run), the child is caught up now and re-anchored to that
+        // scheduled day so the weekly cadence realigns to the intended weekday instead of drifting
+        // or skipping the week entirely. Dates are compared by calendar day, not timestamp.
+        var (eligible, anchor) = EvaluateAllowanceEligibility(child, DateTime.UtcNow);
+        if (!eligible)
         {
-            var lastPaymentDate = child.LastAllowanceDate.Value.Date;
-            var todayDate = DateTime.UtcNow.Date;
-            var daysSinceLastPayment = (todayDate - lastPaymentDate).Days;
-            if (daysSinceLastPayment < 7)
-            {
-                _logger.LogDebug(
-                    "Child {ChildId} not eligible: only {Days} days since last payment on {LastPaymentDate}",
-                    childId, daysSinceLastPayment, lastPaymentDate);
-                throw new InvalidOperationException("Allowance already paid this week");
-            }
-        }
+            // A brand-new child with a fixed day waits for that day before the first payment.
+            if (child.AllowanceDay.HasValue && !child.LastAllowanceDate.HasValue)
+                throw new InvalidOperationException($"Today is {DateTime.UtcNow.DayOfWeek}, but this child's allowance is scheduled for {child.AllowanceDay.Value}. This is not the scheduled allowance day.");
 
-        // If AllowanceDay is set, verify today matches the scheduled day
-        if (child.AllowanceDay.HasValue)
-        {
-            var today = DateTime.UtcNow.DayOfWeek;
-            if (today != child.AllowanceDay.Value)
-                throw new InvalidOperationException($"Today is {today}, but this child's allowance is scheduled for {child.AllowanceDay.Value}. This is not the scheduled allowance day.");
+            _logger.LogDebug(
+                "Child {ChildId} not eligible: last payment on {LastPaymentDate}",
+                childId, child.LastAllowanceDate?.Date);
+            throw new InvalidOperationException("Allowance already paid this week");
         }
 
         // Create transaction for allowance payment
@@ -124,8 +119,8 @@ public class AllowanceService : IAllowanceService
             }
         }
 
-        // Update last allowance date
-        child.LastAllowanceDate = DateTime.UtcNow;
+        // Update last allowance date (re-anchored to the scheduled payday when a fixed day is set).
+        child.LastAllowanceDate = anchor;
         await _context.SaveChangesAsync();
 
         // Send notification to the child
@@ -188,8 +183,6 @@ public class AllowanceService : IAllowanceService
         var processedCount = 0;
         var skippedCount = 0;
         var errorCount = 0;
-        var todayDate = DateTime.UtcNow.Date;
-        var todayDayOfWeek = DateTime.UtcNow.DayOfWeek;
 
         foreach (var child in children)
         {
@@ -197,35 +190,21 @@ public class AllowanceService : IAllowanceService
 
             try
             {
-                // Check if child is eligible for allowance payment (compare dates only, not timestamps)
-                var lastPaymentDate = child.LastAllowanceDate?.Date;
-                var daysSinceLastPayment = lastPaymentDate.HasValue ? (todayDate - lastPaymentDate.Value).Days : int.MaxValue;
-                var timingEligible = daysSinceLastPayment >= 7;
-
-                // If AllowanceDay is set, also check if today matches
-                var dayEligible = !child.AllowanceDay.HasValue || child.AllowanceDay.Value == todayDayOfWeek;
-
-                if (!timingEligible)
+                // Eligible when a scheduled payday is due (fixed day, including catch-up of a missed
+                // run) or the rolling 7-calendar-day window has elapsed. See EvaluateAllowanceEligibility.
+                var (eligible, _) = EvaluateAllowanceEligibility(child, DateTime.UtcNow);
+                if (!eligible)
                 {
                     _logger.LogDebug(
-                        "Skipping {ChildName} ({ChildId}): only {Days} days since last payment on {LastPaymentDate}",
-                        childName, child.Id, daysSinceLastPayment, lastPaymentDate);
-                    skippedCount++;
-                    continue;
-                }
-
-                if (!dayEligible)
-                {
-                    _logger.LogDebug(
-                        "Skipping {ChildName} ({ChildId}): today is {Today} but AllowanceDay is {AllowanceDay}",
-                        childName, child.Id, todayDayOfWeek, child.AllowanceDay);
+                        "Skipping {ChildName} ({ChildId}): not due yet (last payment on {LastPaymentDate}, AllowanceDay {AllowanceDay})",
+                        childName, child.Id, child.LastAllowanceDate?.Date, child.AllowanceDay);
                     skippedCount++;
                     continue;
                 }
 
                 _logger.LogInformation(
-                    "Processing allowance for {ChildName} ({ChildId}): ${Amount}, last payment was {Days} days ago",
-                    childName, child.Id, child.WeeklyAllowance, daysSinceLastPayment == int.MaxValue ? "never" : daysSinceLastPayment.ToString());
+                    "Processing allowance for {ChildName} ({ChildId}): ${Amount}",
+                    childName, child.Id, child.WeeklyAllowance);
 
                 await PayWeeklyAllowanceAsync(child.Id);
                 processedCount++;
@@ -386,5 +365,47 @@ public class AllowanceService : IAllowanceService
         ).ToListAsync();
 
         return adjustments;
+    }
+
+    /// <summary>
+    /// Determines whether a child is due an allowance and the date to record as the payment anchor.
+    /// </summary>
+    /// <remarks>
+    /// For a fixed <see cref="Child.AllowanceDay"/>, the child is due whenever a scheduled payday
+    /// (the most recent occurrence of that weekday on or before today) has passed that has not yet
+    /// been paid. This pays on the scheduled day in the normal case and catches up a missed run on
+    /// a later day, and the anchor is set to that scheduled payday so the cadence re-aligns to the
+    /// intended weekday rather than drifting. A first-ever payment still waits for the scheduled day.
+    /// Without a fixed day, a rolling 7-calendar-day window is used. All comparisons are by calendar
+    /// date, not timestamp, to avoid sub-second jitter skipping a week (the "every other week" bug).
+    /// </remarks>
+    internal static (bool Eligible, DateTime Anchor) EvaluateAllowanceEligibility(Child child, DateTime nowUtc)
+    {
+        var today = nowUtc.Date;
+
+        if (child.AllowanceDay is DayOfWeek day)
+        {
+            if (!child.LastAllowanceDate.HasValue)
+            {
+                // First payment must land on the scheduled day.
+                return (today.DayOfWeek == day, today);
+            }
+
+            var scheduledPayday = MostRecentOccurrence(today, day);
+            return (child.LastAllowanceDate.Value.Date < scheduledPayday, scheduledPayday);
+        }
+
+        // Rolling window: pay once at least 7 calendar days have elapsed.
+        var daysSince = child.LastAllowanceDate.HasValue
+            ? (today - child.LastAllowanceDate.Value.Date).Days
+            : int.MaxValue;
+        return (daysSince >= 7, nowUtc);
+    }
+
+    /// <summary>Returns the most recent date on or before <paramref name="today"/> whose weekday is <paramref name="day"/>.</summary>
+    private static DateTime MostRecentOccurrence(DateTime today, DayOfWeek day)
+    {
+        var diff = ((int)today.DayOfWeek - (int)day + 7) % 7;
+        return today.Date.AddDays(-diff);
     }
 }

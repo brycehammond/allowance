@@ -284,18 +284,44 @@ public class AllowanceServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task PayAllowance_WithAllowanceDay_OnWrongDay_Fails()
+    public async Task PayAllowance_WithAllowanceDay_OverduePastScheduledDay_CatchesUp()
     {
-        // Arrange - Create child with AllowanceDay set to different day
+        // A child whose scheduled allowance day already passed without payment (e.g. the daily
+        // timer missed a run) must be caught up on the next run rather than waiting a full extra
+        // week for the next matching weekday. The payment also re-anchors LastAllowanceDate to the
+        // missed scheduled day so the weekly cadence realigns to the intended weekday.
+        var yesterdayWeekday = (DayOfWeek)(((int)DateTime.UtcNow.DayOfWeek + 6) % 7);
         var child = await CreateTestChild(weeklyAllowance: 15.00m);
-        child.AllowanceDay = (DayOfWeek)(((int)DateTime.UtcNow.DayOfWeek + 1) % 7); // Different day
-        child.LastAllowanceDate = DateTime.UtcNow.AddDays(-8); // Last paid 8 days ago
+        child.AllowanceDay = yesterdayWeekday;                 // scheduled day was yesterday
+        child.LastAllowanceDate = DateTime.UtcNow.AddDays(-9); // missed last week's scheduled day
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.PayWeeklyAllowanceAsync(child.Id);
+
+        // Assert - paid, and re-anchored to yesterday's scheduled payday (not today).
+        _mockTransactionService.Verify(
+            x => x.CreateTransactionAsync(It.IsAny<DTOs.CreateTransactionDto>()),
+            Times.Once);
+        var updated = await _context.Children.FindAsync(child.Id);
+        updated!.LastAllowanceDate!.Value.Date.Should().Be(DateTime.UtcNow.Date.AddDays(-1));
+    }
+
+    [Fact]
+    public async Task PayAllowance_WithAllowanceDay_FirstTime_OnWrongDay_Waits()
+    {
+        // A brand-new child with a fixed allowance day should wait for that day before the first
+        // payment instead of being paid immediately on the wrong day. Catch-up only applies once a
+        // prior payment exists to anchor the schedule against.
+        var child = await CreateTestChild(weeklyAllowance: 15.00m);
+        child.AllowanceDay = (DayOfWeek)(((int)DateTime.UtcNow.DayOfWeek + 1) % 7); // tomorrow
+        child.LastAllowanceDate = null;                                             // never paid
         await _context.SaveChangesAsync();
 
         // Act
         var act = () => _allowanceService.PayWeeklyAllowanceAsync(child.Id);
 
-        // Assert - Should fail because today doesn't match AllowanceDay
+        // Assert - Should wait because the first payment must land on the scheduled day.
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("*not the scheduled allowance day*");
     }
@@ -358,17 +384,16 @@ public class AllowanceServiceTests : IDisposable
     {
         // Arrange
         var today = DateTime.UtcNow.DayOfWeek;
-        var tomorrow = (DayOfWeek)(((int)today + 1) % 7);
 
-        // Child 1: AllowanceDay is today, eligible
+        // Child 1: AllowanceDay is today and overdue, eligible
         var child1 = await CreateTestChild(weeklyAllowance: 10.00m, firstName: "Child1");
         child1.AllowanceDay = today;
         child1.LastAllowanceDate = DateTime.UtcNow.AddDays(-8);
 
-        // Child 2: AllowanceDay is tomorrow, not eligible
+        // Child 2: AllowanceDay is today but already paid for today's scheduled day, not eligible
         var child2 = await CreateTestChild(weeklyAllowance: 15.00m, firstName: "Child2");
-        child2.AllowanceDay = tomorrow;
-        child2.LastAllowanceDate = DateTime.UtcNow.AddDays(-8);
+        child2.AllowanceDay = today;
+        child2.LastAllowanceDate = DateTime.UtcNow.AddHours(-2); // already paid this scheduled day
 
         // Child 3: No AllowanceDay, eligible (rolling window)
         var child3 = await CreateTestChild(weeklyAllowance: 20.00m, firstName: "Child3");
@@ -380,10 +405,32 @@ public class AllowanceServiceTests : IDisposable
         // Act
         await _allowanceService.ProcessAllPendingAllowancesAsync();
 
-        // Assert - Should process child1 and child3, but not child2
+        // Assert - Should process child1 and child3, but not child2 (already paid this cycle)
         _mockTransactionService.Verify(
             x => x.CreateTransactionAsync(It.IsAny<DTOs.CreateTransactionDto>()),
             Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task ProcessAllPendingAllowances_CatchesUpChildOverduePastAllowanceDay()
+    {
+        // The sweep must catch up a child whose scheduled allowance day passed unpaid, even though
+        // today is not that weekday. This is the safeguard against a missed timer run leaving a
+        // fixed-day child unpaid for a whole extra week.
+        var yesterdayWeekday = (DayOfWeek)(((int)DateTime.UtcNow.DayOfWeek + 6) % 7);
+
+        var child = await CreateTestChild(weeklyAllowance: 12.00m, firstName: "Overdue");
+        child.AllowanceDay = yesterdayWeekday;
+        child.LastAllowanceDate = DateTime.UtcNow.AddDays(-9);
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _allowanceService.ProcessAllPendingAllowancesAsync();
+
+        // Assert - caught up despite today not matching the allowance day.
+        _mockTransactionService.Verify(
+            x => x.CreateTransactionAsync(It.IsAny<DTOs.CreateTransactionDto>()),
+            Times.Once);
     }
 
     // NEW: Allowance Pause/Resume Tests
